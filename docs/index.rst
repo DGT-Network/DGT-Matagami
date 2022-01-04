@@ -5,8 +5,7 @@
 
 Welcome to DGT's documentation!
 ===============================
-Attempting to get rtd to work.
-
+This is a demonstration.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
