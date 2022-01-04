@@ -6,6 +6,7 @@
 Welcome to DGT's documentation!
 ===============================
 This is a demonstration.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
