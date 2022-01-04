@@ -5,7 +5,7 @@
 
 Welcome to DGT's documentation!
 ===============================
-This is a demonstration. Testing push.
+DGT's offical documentation.
 
 .. toctree::
    :maxdepth: 2
