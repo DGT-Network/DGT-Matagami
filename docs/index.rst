@@ -5,6 +5,7 @@
 
 Welcome to DGT's documentation!
 ===============================
+This is a test.
 
 .. toctree::
    :maxdepth: 2
