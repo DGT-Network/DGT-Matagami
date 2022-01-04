@@ -5,7 +5,7 @@
 
 Welcome to DGT's documentation!
 ===============================
-This is a test. Another test.
+Attempting to get rtd to work.
 
 .. toctree::
    :maxdepth: 2
