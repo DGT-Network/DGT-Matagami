@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'DGT'
-copyright = '2022, Valery Khvatov'
+copyright = '2022, DGT Network Inc.'
 author = 'Valery Khvatov'
 
 # The full version, including alpha/beta/rc tags
