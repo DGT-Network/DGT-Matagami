@@ -5,6 +5,9 @@
 
 Welcome to DGT's documentation!
 ===============================
+
+.. image:: images/dgt_logo.png
+
 DGT's offical documentation.
 
 .. toctree::
