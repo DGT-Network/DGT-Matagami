@@ -1,0 +1,71 @@
+# Copyright 2017 DGT NETWORK INC 
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------------
+
+from threading import Lock
+from threading import RLock
+
+
+class Counter:
+    def __init__(self, initial_value=0):
+        self._value = initial_value
+        self._lock = Lock()
+
+    def get(self):
+        with self._lock:
+            return self._value
+
+    def get_and_inc(self, step=1):
+        with self._lock:
+            ret_value = self._value
+            self._value += step
+
+        return ret_value
+
+    def get_and_dec(self, step=1):
+        with self._lock:
+            ret_value = self._value
+            self._value -= step
+
+        return ret_value
+
+    def inc(self, step=1):
+        with self._lock:
+            self._value += step
+
+    def dec(self, step=1):
+        with self._lock:
+            self._value -= step
+class ConcurrentSet:
+    def __init__(self):
+        self._set = set()
+        self._lock = RLock()
+
+    def add(self, element):
+        with self._lock:
+            self._set.add(element)
+
+    def remove(self, element):
+        with self._lock:
+            self._set.remove(element)
+
+    def __contains__(self, element):
+        with self._lock:
+            return element in self._set
+
+    def __len__(self):
+        with self._lock:
+            return len(self._set)
+
+

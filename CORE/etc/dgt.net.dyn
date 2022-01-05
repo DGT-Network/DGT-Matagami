@@ -1,0 +1,16 @@
+{
+  "children": {
+    "AA.aa1": {
+      "delegate": true,
+      "genesis": true,
+      "name": "aa1",
+      "role": "leader",
+      "type": "peer"
+    }
+  },
+  "name": "Genesis",
+  "role": "genesis",
+  "type": "cluster",
+  "segment" : "AA",
+  "map" :  {}
+}
