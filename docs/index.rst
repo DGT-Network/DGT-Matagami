@@ -34,3 +34,21 @@ DGT's offical documentation.
    ARCHITECTURE/2.4_Token_Model
    ARCHITECTURE/2.5_F-BFT_Consensus
    ARCHITECTURE/2.6_DGT_API_and_Consumer_Apps
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 3. ADMINISTRATOR GUIDE
+
+   GUIDE/3.1_Setup_single_Node
+   GUIDE/3.2_Get_DGT_Metrics
+   GUIDE/3.3_Setup_topology
+   GUIDE/3.4_Security_and_SLA
+  
+.. toctree::
+   :maxdepth: 2
+   :caption: 4. COMMUNITY
+
+   COMMUNITY/4.1_DGT_Development_Contributing
+   COMMUNITY/4.2_Testing_and_Support
+   COMMUNITY/4.3_Code_of_Conduct
+  
