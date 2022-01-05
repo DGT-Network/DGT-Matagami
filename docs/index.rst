@@ -8,7 +8,9 @@ Welcome to DGT's documentation!
 
 .. image:: images/dgt_logo.png
 
-DGT's offical documentation.
+DGT's offical documentation. Please, visit `our website`_ to find more
+
+.. _our website: https://dgt.world/
 
 .. toctree::
    :maxdepth: 2
