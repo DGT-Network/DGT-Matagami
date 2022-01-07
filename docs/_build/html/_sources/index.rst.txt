@@ -3,12 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to DGT's documentation!
-===============================
-
 .. image:: images/dgt_logo.png
+====================================================
 
-DGT's offical documentation. Please, visit `our website`_ to find more
+DGT's Technical Whitepaper
+====================================================
+
+Overview of DGT Platform's Technology, Architecture and Administration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please, visit `our website`_ to find more
 
 .. _our website: https://dgt.world/
 
