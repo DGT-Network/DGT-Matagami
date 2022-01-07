@@ -1,0 +1,7 @@
+{
+  "public": ["tcp://validator-dgt-c1-1:8101","tcp://209.124.84.6:8101"],
+  "private": ["tcp://validator-dgt-c1-1:8101"],
+  "restapi": ["http://dgt-api:8108"],
+  "notary" : ["tcp://validator-dgt-c1-1:8101"],
+  "crypto" : "bitcoin"
+}

@@ -1,0 +1,40 @@
+version: '3.6'
+
+services:
+
+  dashboard-dgt:
+    build:
+      context: ..
+      dockerfile: dashboard/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=bgx
+    image: dashboard-dgt
+    environment:
+    - DGT_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/c1/dgt1:/project/peer  
+    container_name: dashboard-dgt
+    networks:
+    - network1
+    ports:
+      - "8003:8003"
+    # depends_on:
+    #   - validator 18.222.233.160
+    command: |
+      bash -c "
+        bin/protogen
+        cd dashboard
+        python3 setup.py clean --all
+        python3 setup.py build
+        dgt-dashboard -vv  --connect tcp://validator-dgt-c1-1:4104 --bind dashboard-dgt:8003 -cb ${CRYPTO_BACK} 
+      "
+    stop_signal: SIGKILL
+
+networks:
+  network1:
+     name: dgt1-network

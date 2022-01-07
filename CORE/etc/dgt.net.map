@@ -1,0 +1,51 @@
+{
+"c1" : {
+         "dgt1" : "AA.aa1",
+	 "dgt2" : "AA.aa2",
+	 "dgt3" : "AA.aa3",
+	 "dgt4" : "AA.aa4",
+	 "dgt5" : "AA.aa5",
+	 "dgt6" : "AA.aa6"
+       },
+"c2" : {                         
+	 "dgt1" : "AB.ab1",
+	 "dgt2" : "AB.ab2",
+	 "dgt3" : "AB.ab3",
+	 "dgt4" : "AB.ab4",
+	 "dgt5" : "AB.ab5",
+	 "dgt6" : "AB.ab6"         
+       },
+"c3" : {                                                 
+	 "dgt1" : "AC.ac1",
+	 "dgt2" : "AC.ac2",
+	 "dgt3" : "AC.ac3",
+	 "dgt4" : "AC.ac4",
+	 "dgt5" : "AC.ac5",
+	 "dgt6" : "AC.ac6"         				 
+       },                        
+"c4" : {                     
+	 "dgt1" : "AE.ae1",
+	 "dgt2" : "AE.ae2",
+	 "dgt3" : "AE.ae3",
+	 "dgt4" : "AE.ae4",
+	 "dgt5" : "AE.ae5",
+	 "dgt6" : "AE.ae6"     
+       },                    
+"c5" : {                     
+	 "dgt1" : "AD.ad1",
+	 "dgt2" : "AD.ad2",
+	 "dgt3" : "AD.ad3",
+	 "dgt4" : "AD.ad4",
+	 "dgt5" : "AD.ad5",
+	 "dgt6" : "AD.ad6"     
+       },                    
+"c6" : {                     
+	 "dgt1" : "BA.ba1",
+	 "dgt2" : "BA.ba2",
+	 "dgt3" : "BA.ba3",
+	 "dgt4" : "BA.ba4",
+	 "dgt5" : "BA.ba5",
+	 "dgt6" : "BA.ba6"     
+       },
+"static_map" :["c1.dgt1","c1.dgt2","c1.dgt3","c2.dgt1"]                    
+}			     

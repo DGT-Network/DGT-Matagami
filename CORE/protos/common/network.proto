@@ -1,0 +1,166 @@
+// Copyright 2019 NTRLab
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// -----------------------------------------------------------------------------
+
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "sawtooth.sdk.protobuf";
+option go_package = "network_pb2";
+
+// The disconnect message from a client to the server
+message DisconnectMessage {
+}
+
+// The registration request from a peer to the validator
+message PeerRegisterRequest {
+     enum RegisterMode{
+        REGISTER = 0;
+        SYNC     = 1;  // ask sync 
+    }
+    string endpoint = 1;
+    // The current version of the network protocol that is being used by the
+    // sender.  This version is an increasing value.
+    uint32 protocol_version = 2;
+    RegisterMode mode  = 3;
+    uint32       pid   = 4;  // peer instance ID
+    string component   = 5; // for dashboard
+    string extpoint    = 6; // ext endpoint  
+    string hid         = 7; // heads summary
+}
+
+// The unregistration request from a peer to the validator
+message PeerUnregisterRequest {
+}
+
+message GetPeersRequest {
+bytes  peer_id      = 1; // public key
+string endpoint     = 2; // my own net endpoint
+string cluster      = 3; // desire cluster or None <cluster name>[.<peer_name>] peer name for entering into SEED segment of net
+string KYC          = 4; // KYC or None
+string network      = 5; // network of peer
+string batch        = 6; // waiting batch result
+}
+
+message GetPeersResponse {
+    enum GetPeersStatus {
+        OK       = 0;
+	PENDING  = 1;
+	REDIRECT = 2;
+        DENIED   = 3;
+	JOINED   = 4;
+	DYNPEERS = 5;
+	NOSPACE  = 6; // can't add peer into topology
+	WAITING  = 7; // waiting tnx
+	PEERSTAT = 8; // dashboard info
+	NOT_VALID_CERT = 9;
+
+    }
+    GetPeersStatus status  = 1;
+    string         cluster = 2;
+    repeated string peer_endpoints = 3;
+}
+
+message PingRequest {
+}
+
+message PingResponse{
+}
+
+message GossipMessage {
+    enum ContentType{
+        CONTENT_TYPE_UNSET = 0;
+        BLOCK = 1;
+        BATCH = 2;
+	BATCHES = 3; // for DAG send all batches for new block - it will keep order of batches
+	ENDPOINTS = 4; // list of arbiters endpoint
+    }
+    bytes content = 1;
+    ContentType content_type = 2;
+    uint32 time_to_live = 3;
+    
+}
+
+// A response sent from the validator to the peer acknowledging message
+// receipt
+message NetworkAcknowledgement {
+    enum Status {
+        STATUS_UNSET = 0;
+        OK = 1;
+        ERROR = 2;
+    }
+
+    Status status = 1;
+    uint32 pid    = 2; // peer instance ID
+    bool   sync   = 3; // True if answered peer already make net sync
+    
+}
+
+message GossipBlockRequest {
+    // The id of the block that is being requested
+    string block_id = 1;
+
+    // A random string that provides uniqueness for requests with
+    // otherwise identical fields.
+    string nonce = 2;
+    uint32 time_to_live = 3;
+
+}
+
+message GossipBlockResponse {
+    // The block
+    bytes content = 1;
+    bool  nest    = 2; // nest or not set into responder
+}
+
+message GossipBatchResponse {
+    //The batch
+    bytes content = 1;
+}
+
+message GossipBatchByBatchIdRequest {
+    // The id of the batch that is being requested
+    string id = 1;
+
+    // A random string that provides uniqueness for requests with
+    // otherwise identical fields.
+    string nonce = 2;
+    uint32 time_to_live = 3;
+
+}
+
+message GossipBatchByTransactionIdRequest {
+    // The id's of the transaction that are in the batches requested
+    repeated string ids = 1;
+
+    // A random string that provides uniqueness for requests with
+    // otherwise identical fields.
+    string nonce = 2;
+    uint32 time_to_live = 3;
+
+}
+
+message GossipConsensusMessage {
+    bytes message = 1;
+    bytes sender_id = 2;
+    uint32 time_to_live = 3;
+}
+
+message EndpointItem {
+  bytes  peer_id = 1; // The unique id for this peer.
+  string endpoint = 2;
+}
+message EndpointList {
+  repeated   EndpointItem endpoints = 1; // list of endpoint
+}
+

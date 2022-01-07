@@ -1,0 +1,40 @@
+version: '3.6'
+
+services:
+
+  telebot-dgt:
+    build:
+      context: ..
+      dockerfile: telebot/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=bgx
+    image: telebot-dgt
+    environment:
+    - DGT_HOME=/project/peer
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/c1/dgt1:/project/peer
+    container_name: telebot-dgt
+    networks:
+    - network1
+    #ports:
+    #  - "8003:8003"
+    # depends_on:
+    #   - validator 18.222.233.160
+    command: |
+      bash -c "
+        bin/protogen
+        rm -f /project/peer/logs/bgt-bot*.log;
+        cd telebot
+        python3 setup.py clean --all
+        python3 setup.py build
+        dgt-telebot -vv  --connect tcp://validator-dgt-c1-1:4104 tcp://validator-dgt-c2-1:4204 
+      "
+    stop_signal: SIGKILL
+
+networks:
+  network1:
+     name: dgt1-network
