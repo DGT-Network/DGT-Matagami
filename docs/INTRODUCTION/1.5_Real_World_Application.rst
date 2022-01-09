@@ -17,10 +17,10 @@ DGT best supports solutions in which:
 These conditions form a list of the most preferred use cases.
 
 .. image:: ../images/table_2_01.PNG
-.. image:: ../images/table_2_02.png
-.. image:: ../images/table_2_03.png
-.. image:: ../images/table_2_04.png
-.. image:: ../images/table_2_05.png
+.. image:: ../images/table_2_02.PNG
+.. image:: ../images/table_2_03.PNG
+.. image:: ../images/table_2_04.PNG
+.. image:: ../images/table_2_05.PNG
 
 The application solutions presented above do not exhaust all the possibilities of implementing the platform. For each of the solutions, serious design is required, which would include: 
 

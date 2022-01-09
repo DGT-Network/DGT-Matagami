@@ -5,8 +5,8 @@
 
 DGT can be used in several ways, accounting for a wide range of goals and different business models. The main list of features and their brief descriptions are presented in the table below.
 
-.. image:: ../images/table_3_01.png
-.. image:: ../images/table_3_02.png
+.. image:: ../images/table_3_01.PNG
+.. image:: ../images/table_3_02.PNG
 
 When participating in the use or development of DGT, you should consider the following possibilities and limitations: 
 
@@ -19,7 +19,7 @@ When participating in the use or development of DGT, you should consider the fol
     •	We do not consider it possible for DGT to participate in such closed projects, which have the purpose to create fictitious value through the efforts of the open community, deception, or infringement of the rights of individuals or entire groups. For more information on our principles and values `see 4.3`_.
 
     .. _see 4.3: ../COMMUNITY/4.3_Code_of_Conduct.html
-    
+
     •	The product is still developing. You can get comprehensive advice on the scientific development and technological principles of the platform, which will allow you to customize your own business model. Our open roadmap is also covered in `1.7`_
 
     .. _1.7: 1.7_Technology_Roadmap.html
