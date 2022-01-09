@@ -32,7 +32,7 @@ The platform is designed to solve the following application objectives:
 
 •	design and development of a data network.
 
-The system is available under open licenses (Apache 2.0 for the kernel; AGPL for the tokenization system); has a build-in performance monitoring system and special gateways for working with external information systems (such as other blockchains and financial instruments, as well as Enterprise Stack/ERP).
+The system is available under open licenses (Apache 2.0 for the Core; AGPL for the tokenization system); has a build-in performance monitoring system and special gateways for working with external information systems (such as other blockchains and financial instruments, as well as Enterprise Stack/ERP).
 
 .. tip:: READ MORE: 
 

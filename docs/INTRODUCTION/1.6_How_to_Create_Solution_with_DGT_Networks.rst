@@ -23,3 +23,17 @@ When participating in the use or development of DGT, you should consider the fol
     •	The product is still developing. You can get comprehensive advice on the scientific development and technological principles of the platform, which will allow you to customize your own business model. Our open roadmap is also covered in `1.7`_
 
     .. _1.7: 1.7_Technology_Roadmap.html
+
+.. tip:: READ MORE: 
+
+    •	`DGT Partnership Program`_ [18] - a presentation of the partnership concept around the DGT Platform.
+
+    .. _DGT Partnership Program: https://dgt.world/coming-soon.html
+
+    •	`Apache 2.0 License`_ - source text for the license under which the DGT CORE is implemented.  
+
+    .. _Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
+
+    •	`AGPL 3 (GNU Affero General Public License)`_ - license used to implement the GARANASKA token system.  
+
+    .. _AGPL 3 (GNU Affero General Public License): https://www.gnu.org/licenses/agpl-3.0.en.html
