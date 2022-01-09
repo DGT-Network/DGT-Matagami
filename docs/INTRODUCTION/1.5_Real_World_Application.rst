@@ -16,7 +16,7 @@ DGT best supports solutions in which:
 
 These conditions form a list of the most preferred use cases.
 
-.. image:: ../images/table_2_01.png
+.. image:: ../images/table_2_01.PNG
 .. image:: ../images/table_2_02.png
 .. image:: ../images/table_2_03.png
 .. image:: ../images/table_2_04.png
