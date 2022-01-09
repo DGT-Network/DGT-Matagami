@@ -1,3 +1,14 @@
 
 1.1 Executive Summary
 ++++++++++++++++++++++
+
+The information below presents the DGT Platform in terms of technologies used, descriptions of administration and configuration methods, as well as capabilities for building business applications on the platform. This documentation is intended for technical professionals (solution architects, engi-neers) interested in using and evaluating the platform, as well as building applications and tools on top of it. 
+
+DGT is an open distributed platform for exchanging data between nodes that allows for the construction of decentralized systems and applications, that is, applications based on several interact-ing nodes, each of which is controlled by a different stakeholder. Such systems are also called block-chain technologies or Distributed Ledger Technologies (DLT). The system is based on the software of nodes, which interact over the Internet. Due to its distributed nature, such a network possesses all the main advantages of blockchain technology, as well as several additional features due to the unique process of interactions between nodes, i.e., instead of a peer-to-peer network, DGT forms a layered hierarchical system with arbitrary topology. Other features of the product include: 
+
+
+..READ MORE:
+
+•	DGT One Pager
+
+•	DGT About
