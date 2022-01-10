@@ -16,9 +16,9 @@ When participating in the use or development of DGT, you should consider the fol
 
         • 	The tokenization system called GARANASKA is implemented as a separate package with the AGPL 3.0 license. This license applies to programs running in an open network environment. You can receive the source code when interacting with DGT, even without using it directly. At the same time, the tokenization systems issued on the basis of GARANASKA should be made available as open-source software for use by the community. 
 
-    •	We do not consider it possible for DGT to participate in such closed projects, which have the purpose to create fictitious value through the efforts of the open community, deception, or infringement of the rights of individuals or entire groups. For more information on our principles and values `see 4.3`_.
+    •	We do not consider it possible for DGT to participate in such closed projects, which have the purpose to create fictitious value through the efforts of the open community, deception, or infringement of the rights of individuals or entire groups. For more information on our principles and values `see 4.4`_.
 
-    .. _see 4.3: ../COMMUNITY/4.3_Code_of_Conduct.html
+    .. _see 4.4: ../COMMUNITY/4.4_Code_of_Conduct.html
 
     •	The product is still developing. You can get comprehensive advice on the scientific development and technological principles of the platform, which will allow you to customize your own business model. Our open roadmap is also covered in `1.7`_
 

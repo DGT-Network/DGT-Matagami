@@ -53,7 +53,8 @@ Please, visit `our website`_ to find more
    :maxdepth: 2
    :caption: 4. COMMUNITY
 
-   COMMUNITY/4.1_DGT_Development_Contributing
-   COMMUNITY/4.2_Testing_and_Support
-   COMMUNITY/4.3_Code_of_Conduct
+   COMMUNITY/4.1_Development_Organization
+   COMMUNITY/4.2_DGT_Development_Contributing
+   COMMUNITY/4.3_Testing_and_Support
+   COMMUNITY/4.4_Code_of_Conduct
   
