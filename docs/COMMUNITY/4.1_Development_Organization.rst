@@ -26,8 +26,8 @@ The development of any distributed platform has several nuances associated with 
 
     •	If there are applied tasks (custom development) then possible upgrades of the main development line are discussed. 
 
-    •	All development is carried out under the Apache 2.0 and AGPL licenses, however, the formation of forks requires coordination with the team (`see 4.2`_).
+    •	All development is carried out under the Apache 2.0 and AGPL licenses, however, the formation of forks requires coordination with the team (`see 4.2.2`_).
 
     .. _see 1.7: ../INTRODUCTION/1.7_Technology_Roadmap.html
 
-    .. _see 4.2: 4.2_DGT_Development_Contributing.html
+    .. _see 4.2.2: 4.2_DGT_Development_Contributing.html#private-fork-and-pull-request

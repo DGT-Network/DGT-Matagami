@@ -2,11 +2,13 @@
 4.2 DGT Development Contributing
 +++++++++++++++++++++++++++++++++++++++++
 
-As presented in Section 1.6 `How to create Solution with DGT Networks`_, this project is publicly available and anyone interested can join it to add their own code, modify the solution for themselves, make changes, or correct errors. The core of the system - DGT CORE (`Github Repo`_) is implemented under the Apache 2.0 license, while the GARANASKA tokenization subsystem is under the AGPL v3.0 license. 
+As presented in Section 1.6 `How to create Solution with DGT Networks`_, this project is publicly available and anyone interested can join it to add their own code, modify the solution for themselves, make changes, or correct errors. The core of the system - DGT CORE (`Github Repo`_) is implemented under the Apache 2.0 license, while the GARANASKA tokenization subsystem (`Github Repo_`_)is under the AGPL v3.0 license. 
 
 .. _How to create Solution with DGT Networks: ../INTRODUCTION/1.6_How_to_Create_Solution_with_DGT_Networks.html
 
 .. _Github Repo: https://github.com/DGT-Network/DGT-Matagami/tree/master/CORE
+
+.. _Github Repo_: https://github.com/DGT-Network/DGT-GARANASKA
 
 4.2.1	Development role models
 =========================================
