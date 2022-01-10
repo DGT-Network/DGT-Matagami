@@ -27,8 +27,7 @@ Please, visit `our website`_ to find more
    INTRODUCTION/1.5_Real_World_Application
    INTRODUCTION/1.6_How_to_Create_Solution_with_DGT_Networks
    INTRODUCTION/1.7_Technology_Roadmap
-   INTRODUCTION/1.8_Participating_in_Platform_Development
-   INTRODUCTION/1.9_Acknowledgements
+   INTRODUCTION/1.8_Acknowledgements
 
 .. toctree::
    :maxdepth: 2

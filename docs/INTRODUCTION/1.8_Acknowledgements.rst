@@ -1,0 +1,41 @@
+
+1.8 Acknowledgements
+++++++++++++++++++++
+
+The development of a comprehensive platform in the field of distributed computing is impossible without the efforts of a team, without the contribution of businessmen, scientists, and developers. DGT Network is grateful to the people who have contributed to the development of the product at different stages:
+
+    •	*Konstantin Zakharov and Igor Mishaniou* - ensured the release of one of the first versions of the platform under the BGX brand.
+
+    •	*Alexander Bogdanov, Alexey Uteshev, Alexander Degtyarev (St. Petersburg State University)* - for their scientific contributions and support for DGT's R&D processes.
+
+    •	*Nikolay Mikhailovsky, Anton Malkov from NTR Development* - for their contributions to the development of the Mississauga and Kawartha versions. 
+
+    •	*Stas Parsov* for the development of the platform's architecture and the implementation of its critical modules. 
+
+    •	*Phong Nguyen (Titan Software)* - for contributing to the development of the DGT's wallet concept and implementing several platform applications.
+
+    •	*Forest Barbieri* - for contributing to the formation of the business strategy
+
+    •	*Valery and Alexander Khvatov* - for the formation of the platform and its positioning. 
+
+The project uses a set of third-party software, also distributed under an open-source license. Without such software, the project would be too complex for a limited team to implement and would not be able to cover so much functionality. Below is a list of the main components that were used in the project, but developed outside of it: 
+
+    •	*Hyperledger Sawtooth (HSWT)* is one of the core projects, the results of which are partially used in the DGT's project. Many HSWT solutions are still present in the project's code, which allows it to stay modular, highly performative, and flexible. Even though HSWT does not offer a definitive solution to business problems, it is an excellent framework upon which several commercial and open-source solutions have been developed. The DGT Platform maintains limited HSWT compatibility for the use of modules such as transaction families and Ethereum integration. 
+
+    •	*ZeroMQ (ZMQ)* is a high-performance asynchronous messaging library focused on distributed and parallel computing. ZMQ maintains networking between platform nodes, network components within the node itself, and guarantees message delivery and message queuing. 
+
+    •	*OpenSSL* is a basic cryptographic library that provides hash computation, digital signatures, component-based encryption, and certificate issuance. 
+
+    •	*WolfSSL* is an optional SSL / TLS library providing quantum-resistance cryptography (QRC). Although the use of the library is not part of the main core configuration, DGT is looking towards expanding cryptographic capabilities by using this library. 
+
+    •	*RedisGraph* is a GPU for supporting matrix operations over DAG-chain and is recommended for using SPATIAL-capabilities of DGT's storage. 
+
+    •	*LMDB* is a NoSQL database organizing key-value storage and compatible with BerkeleyDB. It is used on the platform to store the registry (state). 
+
+DGT is also considering the possibility of closer integration with products developed by the Hyperledger Foundation: 
+
+•	Hyperledger Aries - transfer and storage of verified accounts
+•	Hyperledger Ursa - an updated crypto library
+•	Hyperledger Transact - a standard interface for executing smart contracts
+•	Hyperledger Cactus - a cross-blockchain integration tool
+•	Hyperledger Indy - management of decentralized IDs (DID)

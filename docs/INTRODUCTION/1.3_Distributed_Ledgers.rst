@@ -81,6 +81,7 @@ Blockchain currently represents a trillion-dollar industry with a wide technolog
 
 
 Distributed ledgers are the central object of blockchain platforms and is a distributed database that is maintained by a consensus. It has the following properties: 
+
 •	Distributed. Accessing data for reading and writing is done by an indefinite number of participants in a potentially undercooked environment. 
 
 •	Immutable. Such a database is of a historical nature, in which, cryptographic functions ensure that is impossible to imperceptibly change previously entered records. 
