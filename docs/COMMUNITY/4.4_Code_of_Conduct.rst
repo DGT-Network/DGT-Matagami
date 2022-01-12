@@ -1,0 +1,17 @@
+
+4.4	Code of Conduct
+++++++++++++++++++++++++
+
+Although DGT is not part of the `Hyperledger Foundation`_, we support the Hyperledger CoC code. We also consider it necessary to highlight the following additional questions:
+
+•	The DGT product is not in direct competition with any other blockchain project. We are developing our own architecture that has advantages for some business tasks. We welcome the general development of technology and advocate for the unification of developers and enthusiasts in any constructive format. 
+
+•	We guarantee attention and respect for any opinion within the community and avoid any discrimination. We do not tolerate any humiliation, intimidation based on personal characteristics, nationality, gender.
+
+•	We stand for an open economy, against any monopolization or artificial restrictions. We believe that the digital world can be fair and safe, including safe for private data. Our platform is one of the ways to express this attitude. 
+
+•	We are intolerant to the attempts of authoritarian states to use software to control the lives of their citizens and not only avoid seeking, but actively condemn the use of free products, like DGT, in systems aimed at supressing freedom. 
+
+•	We are committed to a constructive discussion of digitalization problems. We believe that any blockchain project should be implemented in accordance with IT industry standards, provide the necessary transparency, and stay away from speculative statements and dubious projects. 
+
+.. _Hyperledger Foundation: https://wiki.hyperledger.org/display/HYP/Hyperledger+Code+of+Conduct

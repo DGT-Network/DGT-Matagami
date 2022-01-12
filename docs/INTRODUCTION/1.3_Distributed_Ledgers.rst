@@ -1,3 +1,113 @@
 
 1.3 Distributed Ledgers
 +++++++++++++++++++++++
+
+DLT (Distributed Ledger Technology) operates with two basic concepts:
+
+•	*Distributed computing* - which assumes that data storage and processing is performed simultaneously by several servers (nodes) located in different geographic coordinates, with possibly different software configurations and different security levels.
+
+•	*Decentralization* - assumes nodes have different owners (organizations or individuals). There can be conflicts of interest between these owners, so that data can be intentionally or accidentally tampered with by one of the parties. 
+
+
+Systems can be distributed and decentralized simultaneously, only distributed, or only decentralized, as well as even have different degrees of distribution and decentralization. Since the late 1990s, the most significant architectural concepts of large information systems have been based on centralized approaches, in which a single super-server provided the business logic and data to the many relatively simple clients (the flat client model). The digital revolution, resulting from the exponentially growing connectedness of the world, has changed the ways in which we organize data and computing. Today, the transition to a new generation of systems is dictated by the following objective factors: 
+
+•	Globalization, which leads to the unification of businesses around the world, increased competition, and the emergence of extremely dynamic structures that require a fundamentally different approach to the organization of economic activity;
+
+•	Significant growth in data volumes with a simultaneous drop in quality. This leads to the absence of data monopolies even within such global organizations as Google, Facebook, or Amazon. On the other hand, the issues of data quality, security of personal data, and the speed of decision-making are becoming increasingly critical; 
+
+•	The virtualization of everyday life, the emergence of business platforms that deform traditional business patterns, eliminate intermediaries and shape marketplaces for suppliers and consumers, while reducing intermediary functions to algorithms and software solutions (Uber, Amazon, Netflix). 
+
+
+Distributed and decentralized architecture is better at reflecting the modern world's business-models, such as ecosystems, consortiums, and associations (horizontal integration), as well as supply chains and logistics (vertical integration). Meanwhile, such systems are much more complex, and several problems must be solved: 
+
+•	creating synchronized and consistent data storages across multiple nodes;
+
+•	building networks of nodes that are resistant to temporary outages, failure of individual nodes, or even malicious behaviour of individual system components (for example, if a node or a group of nodes is captured by hackers);
+
+•	providing the necessary performance for systems in which there is a significant redundancy of computing power, the work of which on the network can significantly slow down the system compared to a centralized architecture; 
+
+•	building an effective economic model that allows for the equitable distribution of network maintenance costs between the nodes, as well as realizes benefits due to the network effect. 
+
+The solution to these problems was first proposed by Satoshi Nakamoto in 2009 for Bitcoin electronic money, a solution called blockchain technology. The main solutions and concepts offered by this technology are as follows:
+
+•	The network is supported by various participants, each of which owns a node that stores its own copy of the data (Ledger), synchronized with other copies through a special protocol for finding nodes (for example, the **Gossip protocol**). 
+
+•	Data is stored in a special structure (**Ledger**), which can be portrayed as a chain of blocks, each of which is linked to the next one through cryptographic functions (which store the hash of the previous block). The blocks themselves also use special structures that are interconnected through cryptographic functions (Merkle trees). This allows for the creation of a data structure that is immutable after creation and is robust against fraudulent and accidental changes. The only uncontrolled element of this structure is the first block, also called the Genesis-block.
+
+•	As part of the cooperation, participants exchange messages called transactions. The essence of transactions within the Bitcoin network is a change in the account balance of any one individual participant due to a transfer or receipt of a certain amount (data) of bitcoins (although transactions may have other meanings as well). 
+
+•	The insertion of new data is carried out by individual participants, also called **miners**, competing for the fastest creation of the “correct” block (that is, a block subject to certain conditions). The mechanism for adding data to the network is called the consensus mechanism. For the Bitcoin network, the mechanism is the Proof-of-Work (PoW), though in other networks, as well as in DGT, other consensus mechanisms are used. Miners support the network by deploying nodes for which they receive a reward that can later be exchanged into real (fiat) money. Regular users simply generate transactions by receiving or transferring digital currency (such as Bitcoin).
+
+•	The consensus mechanism eliminates the problems of re-insertion of data (double spending), insertion of incorrect data (distortion or data substitution), and data loss. Three levels of consensus mechanisms are often distinguished: 
+
+    +	CFT - Crash Fault Tolerance, which is the protection of the network from unintentional failures, or failure of one or more nodes.
+
+    +	BFT - Byzantine Fault Tolerance, which is the protection against malicious attacks, when the attacker uses special data corruption techniques based on his knowledge of possible system vulnerabilities. Such attacks include, for example, double spending attacks, 51% attacks (hijacking more than 51% of the nodes and altering – corrupting the ledger registry by the “majority” of the nodes), and some others. 
+
+    +	Data Confidential / Data Trust - which is the protection of private data, keys, and the formation of mechanisms for checking the information coming to the network from external sources (off-chain, Oracles).
+
+•	Transactions, as well as other operations, such as forming a new block or adding it to the network are signed digitally using asymmetric cryptography (for example, on elliptic curves – ECDSA). Within the framework of this approach, to work with the network each participant must have at least a pair of keys (a private and a public key), which together make it possible to establish ownership and authorship of operations. In networks like Bitcoin, the ownership of keys is confidential information (anyone can generate any number of key pairs), which makes the participants anonymous even when the transactions themselves are open and public. There are developments (for example, Zcash, Quorum) that use the ZKP (Zero-Knowledge-Proof) mechanism to facilitate completely private transactions. Asymmetric cryptography of the ECDSA is also considered vulnerable to quantum computers, so special cryptography methods are currently being developed and implemented to be resistant to decryption attempts (those that receive a private key from a known public key). 
+
+•	To build application systems based on blockchain (the so-called Second Layer), mechanisms are used to execute small immutable programs (smart contracts) within the network, as well as secondary tokens are created (secondary cryptocurrency). These tokens can reflect the value of applied solutions (security tokens similar to equity or cryptocurrency, utility tokens similar to arcade tokens, non-fundible tokens (NFT) reflecting digital objects); 
+
+•	Crypto exchanges play a significant role in the blockchain infrastructure. These can be centralized or decentralized (DEX) and allow exchanging one cryptocurrency for another (swap), buying cryptocurrency and secondary tokens for fiat money and performing other currency transactions. Such exchanges are nodes of a special type that allow their own processing on top of the blockchain network and often even outside of it. 
+
+•	Management of tokens, digital assets, and cryptocurrency is carried out using special agents-wallets that allow transfers. Moreover, with the help of additional services, these wallets can allow exchanges for other cryptocurrencies and fiat money, storage of information pertaining to digital objects (NFT) and management of private and public user keys.
+
+•	Special solutions support stores / marketplaces for secondary tokens (this is especially relevant to NFT, with solutions like `OpenSea`_). These allow for the sale of either fully digital objects or digital twins of objects in the physical world. 
+
+.. _OpenSea:  https://opensea.io/
+
+
+Blockchain currently represents a trillion-dollar industry with a wide technological landscape. To understand the informational component of the proposed solutions, it is important to avoid the following myths and misconceptions that are common in relation to the blockchain: 
+
+    •	**BLOCKCHAIN IS DISTRIBUTED LEDGER TECHNOLOGY (DLT)**. Even though “blockchain” has become a household name for the entire industry today, the class of DLT solutions is much broader and encompasses several solutions that are not limited to the management of data packed into blocks. 
+
+    •	**BLOCKCHAIN IS ABOUT CRYPTOCURRENCY**. Blockchain is not limited to Bitcoin, Ethereum, and cryptocurrencies. There may be a blockchain without tokens and native cryptocurrency (this is especially true for private blockchains, while public networks should most likely possess some equivalent for the value that they help process).
+
+    •	**BLOCKCHAIN IS JUST A NEW TYPE OF DATABASE**. Blockchain, although it is basically a distributed database, is not limited to the task of storing data. Such tasks as edge computing, smart contracts, and tokenization require a significant number of computational components in the supplied solutions. 
+
+    •	**BLOCKCHAIN = DECENTRALIZATION**. Blockchain does not guarantee the decentralized nature of the network since such solutions like CBDCs (digital currency of central banks) use private / centralized blockchain solutions. 
+
+    •	**BLOCKCHAIN IS ALWAYS SAFE**. Blockchain is not a security panacea. While data immutability is one of the characteristics of the proposed data architecture, all or part of the ledger can be rewritten by a node majority. Terminal solutions (for example, wallets) also have a significant vulnerability, for instance, private keys are stolen quite often. A certain threat is also posed by the development of quantum computers, since with certain types of cryptography (such as ECDSA) they can restore a private key from a known public key and seize control over an account. 
+
+    •	**BLOCKCHAIN IS AN ANONYMOUS NETWORK**. The blockchain of public networks does keep the ownership of the public key anonymous, although such ownership can be detected through data leaks. At the same time, the transactions themselves (from which account / public key and how much was transferred) is open information, which may be unacceptable for some application cases. Moreover, the absence of a link between a public key and a specific node, organization, or person may be considered as a weakness of classical blockchain solutions in such cases, as for example, applications to preserve reputations or trade art objects.
+
+    •	**BLOCKCHAIN IS A SELF-SUFFICIENT TECHNOLOGY**. Although blockchain is considered in some publications as the Internet of the next generation, the technology itself provides only the network cooperation of participants. The best solutions for real-business problems cannot be implemented without the aid of other digital technologies, such as Artificial Intelligence, Internet of Things, Augmented Reality, etc. 
+
+    •	**BLOCKCHAIN ALWAYS STORES DATA IN A CHAIN OF BLOCKS**. Given the caveat about the class of DGT solutions, we can say that other solutions can be used as a storage structure. For example, graph databases, such as DAG – Directed Acyclic Graph. 
+
+    •	**BLOCKHAIN SOLUTIONS ARE PEERING NETWORKS**. Although most solutions are based on peer-to-peer networks, in which all nodes are equal, the network topology can be more complex. DGT uses a hierarchal topology. 
+
+
+Distributed ledgers are the central object of blockchain platforms and is a distributed database that is maintained by a consensus. It has the following properties: 
+
+•	Distributed. Accessing data for reading and writing is done by an indefinite number of participants in a potentially undercooked environment. 
+
+•	Immutable. Such a database is of a historical nature, in which, cryptographic functions ensure that is impossible to imperceptibly change previously entered records. 
+
+•	Secure. In the context of the distributed ledger, a digital signature is needed for any transaction. In a broader sense, security is provided by a dedicated consensus mechanism and authorization system. 
+
+.. tip:: READ MORE: 
+
+    •	`DGT. The Blockchain Handbook`_ [4] - a description of the blockchain technology prepared by DGT specialists.
+
+    .. _DGT. The Blockchain Handbook: https://dgt.world/docs/DGT_BLOCKCHAIN_ABC.pdf
+
+    •	`Blockchain Technology Overview`_ [5] - a fundamental description of blockchain technology from NIST USA.  
+
+    .. _Blockchain Technology Overview: https://nvlpubs.nist.gov/nistpubs/ir/2018/nist.ir.8202.pdf
+
+    •	ITU (Telecommunication Standardization Sector) Working Group Materials: `Terms and Definitions`_ [6], `DLT Overview, concepts, ecosystem`_ [7], `DLT Use Cases`_ [8]
+
+    .. _Terms and Definitions: https://www.itu.int/en/ITU-T/focusgroups/dlt/Documents/d11.pdf
+
+    .. _DLT Overview, concepts, ecosystem: https://www.itu.int/en/ITU-T/focusgroups/dlt/Documents/d12.pdf
+
+    .. _DLT Use Cases: https://www.itu.int/en/ITU-T/focusgroups/dlt/Documents/d21.pdf
+
+    •	ISO 23257 [9] `Blockchain and distributed ledger technologies — Reference architecture`_
+
+    .. _Blockchain and distributed ledger technologies — Reference architecture: https://www.iso.org/standard/75093.html
+
+

@@ -1,0 +1,27 @@
+
+4.3	Testing and Support
++++++++++++++++++++++++++++++++
+
+Testing and project support is one of the priorities of DGT Networks. The following quality assurance policies are welcomed in the community:
+
+•	Any written code should be accompanied by the creation of an automated text that should be granular enough to test specific functionality. 
+
+•	To track errors, we use a bug tracking system, which can be accessed by any project participant (`see 4.2.1`_). For this, you need to contact `partnership@dgt.world`_. 
+
+•	The project code is in the GitHub repository and is open for audit. We are ready to answer any additional questions and consider your suggestions. 
+
+•	Any software (especially the more complex and distributed one) contains errors and shortcomings, the identification of which depends on the duration of testing (MTBF). 
+
+•	The performance of distributed solutions is highly dependent on the use case. The number of processed transactions, scalability, the impact on the latency of an individual node is determined by a combination of factors. We believe that thanks to F-BFT, we are developing a high-performance network, open for collaboration on system testing, following the recommended framework Hyperledger Caliper. 
+
+•	The quality of our architecture is based on measurable metrics for scalability, flexibility, modularity, etc. 
+
+•	We support a probabilistic approach to identifying information security risks. Ever since the Mississauga version, DGT has a built-in Byzantine attack testing system capable of identifying distributed system-specific vulnerabilities. 
+
+•	DGT pays significant attention to compliance with the requirements for the protection of privacy. For this purpose, its own k-anonymity control library is used. Another important aspect that we consider when developing projects is compliance with regulatory requirements and protection of intellectual property. 
+
+Community members will be happy to hear any request for details on the issues described and are ready to provide the necessary clarifications and demonstrations. 
+
+ .. _partnership@dgt.world: partnership@dgt.world
+
+ .. _see 4.2.1: 4.2_DGT_Development_Contributing.html#development-role-models

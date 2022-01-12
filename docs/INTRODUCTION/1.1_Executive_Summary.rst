@@ -1,3 +1,47 @@
 
 1.1 Executive Summary
 ++++++++++++++++++++++
+
+The information below presents the DGT Platform in terms of technologies used, descriptions of administration and configuration methods, as well as capabilities for building business applications on the platform. This documentation is intended for technical professionals (solution architects, engi-neers) interested in using and evaluating the platform, as well as building applications and tools on top of it. 
+
+DGT is an open distributed platform for exchanging data between nodes that allows for the construction of decentralized systems and applications, that is, applications based on several interacting nodes, each of which is controlled by a different stakeholder. Such systems are also called block-chain technologies or Distributed Ledger Technologies (DLT). The system is based on the software of nodes, which interact over the Internet. Due to its distributed nature, such a network possesses all the main advantages of blockchain technology, as well as several additional features due to the unique process of interactions between nodes, i.e., instead of a peer-to-peer network, DGT forms a layered hierarchical system with arbitrary topology. Other features of the product include: 
+
+•	the use of the F-BFT consensus, which guarantees resistance to Byzantine attacks, high transaction speeds, data integrity and an exceptional degree of security; 
+
+•	the hybrid nature of the network, which allows the simultaneous coexistence of open and closed segments with overlapping security borders; 
+
+•	a decentralized identification system that meets modern W3C standards; 
+
+•	built-in native DEC cryptocurrency, which allows to distribute the computing value of the platform infrastructure between the participants in the data exchange; 
+
+•	a subsystem for managing digital objects, which makes the platform an ideal tool for tokenization, building digital twins, etc.;
+
+•	high-quality and safe data processing; a subsystem for monitoring data quality and security, with consideration of a risk-based approach. 
+
+The platform is designed to solve the following application objectives:
+
+•	building complex ecosystems of the B2B2C / B2B2B types (vertical and horizontal integration of markets); 
+
+•	tokenization of assets and the implementation of decentralized financial instruments (Defi, commodity); 
+
+•	green energy (Carbon Credit Marketplace);
+
+•	support for decentralized marketplaces;
+
+•	digital currency creation for central banks (CBDCs);
+
+•	design and development of a data network.
+
+The system is available under open licenses (Apache 2.0 for the Core; AGPL for the tokenization system); has a build-in performance monitoring system and special gateways for working with external information systems (such as other blockchains and financial instruments, as well as Enterprise Stack/ERP).
+
+.. tip:: READ MORE: 
+
+    •	`DGT One Pager`_ [1] - a short text about the platform, which presents the information about it in the most concise format.
+
+    .. _DGT One Pager: https://dgt.world/docs/DGT_OnePager.pdf
+
+    •	`DGT About`_ [2] - a detailed presentation describing the capabilities of the platform.  
+
+    .. _DGT About: https://dgt.world/docs/DGT_About.pdf
+
+

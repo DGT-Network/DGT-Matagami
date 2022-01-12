@@ -1,3 +1,51 @@
 
 1.4 The DGT Features
 ++++++++++++++++++++
+
+DGT is positioned as a platform for distributed and decentralized computing: 
+
+    •	**Distributed computing** refers to the ability to process information in different logical system components simultaneously and asynchronously. 
+
+    •	**Decentralized computing** refers to the difference in the management of nodes (each node is managed by an independent organization). The overall behaviour of a node (its availability, level of confidentiality, economic priorities) reflect the interests of the node’s owner. 
+
+FEATURES OF THE SOLUTION:
+
+    •	DGT is called a **platform** in the sense that the system processes data regardless of a specific application task. Solving a specific task requires setting up a family of transactions, as well as an add-on of the application client part. 
+
+    •	The main functionality of the network is to facilitate the **exchange of information between nodes**, which are also called **transactions**. Such transactions are checked for correctness and compliance with the specific conditions, after which they are added to the general register – the DAG-chain.
+
+    •	The initial version of DGT is a fork of the **Hyperledger Sawtooth framework**. This implies the inheritance of the basic architectural solutions of the base layer, the use of common technological components (such as Zero-MQ) after Sawtooth and limited backward compatibility.
+
+    •	The DGT functions as a **node-to-node** network. In fact, DGT software is the **software of a typical Node** that facilitates the interaction with other nodes, data verification, and insertion of new data into storage (registry) also called DAG or State.
+
+    •	Each node consists of a set of services, some of which are mandatory (for example, those responsible for the cryptography and DAG storage), while others are optional (for example, the monitoring Dashboard). A node represents a virtual supercomputer that is one whole from the point of view of the network; the components of which form its own inter-network and may be located on different servers. 
+
+    •	DGT aims to support **consortium-based networks**. This means that connecting a node to the network is possible when certain conditions are fulfilled (**“anchor security”**). In the simplest of conditions, this could refer to checking whether a node is present in a list (having a certificate), but could also refer to verifying a sufficient balance of cryptocurrency on an external network (say, Ethereum) and verifying the certificate. The different implementations of the anchor mechanism affect the level of openness for the network. It can range from fully open (public) to fully closed (private). Anchor security settings differ for different configuration options of the network (see 1.6).
+
+    •	Nodes are organized into groups, also called federations or **clusters**. Initial interaction is carried out through the links from the nodes to the one selected node in the cluster - the **Leader**. The Leader collects transaction verification data from each node. These checks are called **“votes”**. If the number of votes has exceeded a certain predetermined threshold (either a simple majority or 2/3 +1 of the number of voting nodes for PBFT), then a transaction is considered as approved in a cluster and awaits **arbitration** that is performed outside the cluster (additional verification). 
+
+    •	Nodes interact inside the cluster over dedicated channels, also called **permalinks**.
+
+    •	Following Sawtooth, DGT is a multi-transactional system in which multiple transaction families can be reversed. Each family is processed by a separate transaction processor. The families of transactions complement the technology of smart contracts, and also allow for establishing boundaries for the availability of different transaction types across different segments of the network. 
+
+    •	The registry is a **distributed database** (storage) that stores only checked records, linked by links to previous records. Such a registry is immutable (you cannot “pull out” or change an entry without changing the entire registry). Records (transactions) in the registry are grouped by blocks and simultaneously in the form of a graphic DAG structure, where separate branches represent storages dedicated for various transaction types.
+
+    •	Clusters of nodes are part of a larger division of the network - the segments. These can be of two types: public and private. In a separate network, only one public segment is possible, where the joining nodes can freely interact with other nodes of the segment. A network can have several private segments, the main differentiator of which from the public one is the controlled topology (network structure and the possibility of joining the segment). See more details at H-Net Architecture 2.2.
+
+    •	Nodes can have different roles: **Validator** (a node involved in the validation of transactions), Leader (the current validator that ensures the interaction of validators in the cluster), **Arbiter** (a node responsible for the validation of transactions outside the cluster), **Notary** (carries the Oracle service and responsible for interacting with the external physical world), **Gateway** (responsible for interacting with external crypto-networks, such as payment networks or other blockchains like Ethereum). 
+
+    •	A separate component of the solution is the GARANASKA tokenization subsystem, which is responsible for its own native crypto-currency DEC, as well as for the issuance and support of secondary tokens. 
+
+The technological capabilities presented form a flexible technical solution suitable for a wide range of applications (`see 1.5`_). The hierarchical nature of the network, the difference in the roles of nodes and the network's modular network make it the optimal solution for the tasks of integration and construction of ecosystems. 
+
+.. _see 1.5: 1.5_Real_World_Application.html
+
+.. tip:: READ MORE: 
+
+    •	`DGT Technical Deep Dive`_ [10] - a visual representation of the architecture and technological stack of the platform.
+
+    .. _DGT Technical Deep Dive: https://dgt.world/docs/DGT_TECHNOLOGY.pdf
+
+    •	`DGT.GARANASKA`_ [11] - a presentation of the DGT Platform's tokenization system.  
+
+    .. _DGT.GARANASKA: https://dgt.world/docs/DGT_GARANASKA_TOKENIZATION.pdf

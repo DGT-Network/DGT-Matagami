@@ -3,12 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to DGT's documentation!
-===============================
-
 .. image:: images/dgt_logo.png
+====================================================
 
-DGT's offical documentation. Please, visit `our website`_ to find more
+DGT's Technical Whitepaper
+====================================================
+
+Overview of DGT Platform's Technology, Architecture and Administration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please, visit `our website`_ to find more
 
 .. _our website: https://dgt.world/
 
@@ -23,8 +27,7 @@ DGT's offical documentation. Please, visit `our website`_ to find more
    INTRODUCTION/1.5_Real_World_Application
    INTRODUCTION/1.6_How_to_Create_Solution_with_DGT_Networks
    INTRODUCTION/1.7_Technology_Roadmap
-   INTRODUCTION/1.8_Participating_in_Platform_Development
-   INTRODUCTION/1.9_Acknowledgements
+   INTRODUCTION/1.8_Acknowledgements
 
 .. toctree::
    :maxdepth: 2
@@ -50,7 +53,8 @@ DGT's offical documentation. Please, visit `our website`_ to find more
    :maxdepth: 2
    :caption: 4. COMMUNITY
 
-   COMMUNITY/4.1_DGT_Development_Contributing
-   COMMUNITY/4.2_Testing_and_Support
-   COMMUNITY/4.3_Code_of_Conduct
+   COMMUNITY/4.1_Development_Organization
+   COMMUNITY/4.2_DGT_Development_Contributing
+   COMMUNITY/4.3_Testing_and_Support
+   COMMUNITY/4.4_Code_of_Conduct
   
