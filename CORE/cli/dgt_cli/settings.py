@@ -66,7 +66,7 @@ def add_settings_parser(subparsers, parent_parser):
         '--url',
         type=str,
         help="identify the URL of a validator's REST API",
-        default='http://localhost:8008')
+        default='http://api-dgt-c1-1:8108')
 
     list_parser.add_argument(
         '--filter',

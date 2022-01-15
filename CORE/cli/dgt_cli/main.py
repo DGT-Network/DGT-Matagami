@@ -101,7 +101,7 @@ def create_parent_parser(prog_name):
     parent_parser.add_argument(
         '-V', '--version',
         action='version',
-        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth) version {}')
+        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth-DGT) version {}')
         .format(version),
         help='display version information')
 
@@ -112,7 +112,7 @@ def create_parser(prog_name):
     parent_parser = create_parent_parser(prog_name)
 
     parser = argparse.ArgumentParser(
-        description='Provides subcommands to configure, manage, and use Sawtooth components.',parents=[parent_parser],
+        description='Provides subcommands to configure, manage, and use Dgt components.',parents=[parent_parser],
         )
 
     subparsers = parser.add_subparsers(title='subcommands', dest='command')

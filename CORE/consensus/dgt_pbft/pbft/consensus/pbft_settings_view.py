@@ -39,12 +39,12 @@ class PbftSettingsView:
     _BLOCK_TIMEOUT_ = 6.5
     _MAX_BRANCH_ = 6
     _MAX_FEDER_PEER_ = 6
-    BLOCK_TIMEOUT = 'bgx.consensus.block_timeout'
-    LEADER_SHIFT = 'bgx.fbft.leader_shift'
-    MAX_FEDER_PEER = 'bgx.fbft.max_feder_peer'
-    PBFT_FULL    = 'bgx.consensus.pbft.full'
-    MAX_BRANCH = 'bgx.dag.max_branch'
-    DAG_STEP = 'bgx.dag.step'
+    BLOCK_TIMEOUT = 'dgt.consensus.block_timeout'
+    LEADER_SHIFT = 'dgt.fbft.leader_shift'
+    MAX_FEDER_PEER = 'dgt.fbft.max_feder_peer'
+    PBFT_FULL    = 'dgt.consensus.pbft.full'
+    MAX_BRANCH = 'dgt.dag.max_branch'
+    DAG_STEP = 'dgt.dag.step'
     DGT_CRYPTO = DGT_CRYPTO_NM
     DGT_CRYPTO_ALG = DGT_CRYPTO_ALG_NM
 
@@ -128,7 +128,7 @@ class PbftSettingsView:
         """
         if self._max_log_size is None:
             self._max_log_size = self._get_config_setting(
-                    name='bgx.consensus.pbft.max_log_size',
+                    name='dgt.consensus.pbft.max_log_size',
                     value_type=int,
                     default_value=PbftSettingsView._MAX_LOG_SIZE_,
                     validate_function=lambda value: value >= 0)
@@ -141,7 +141,7 @@ class PbftSettingsView:
         """
         if self._block_duration is None:
             self._block_duration = self._get_config_setting(
-                    name='bgx.consensus.pbft.block_duration',
+                    name='dgt.consensus.pbft.block_duration',
                     value_type=int,
                     default_value=PbftSettingsView._BLOCK_DURATION_,
                     validate_function=lambda value: value >= 0)
@@ -155,7 +155,7 @@ class PbftSettingsView:
         """
         if self._checkpoint_period is None:
             self._block_duration = self._get_config_setting(
-                    name='bgx.consensus.pbft.checkpoint_period',
+                    name='dgt.consensus.pbft.checkpoint_period',
                     value_type=int,
                     default_value=PbftSettingsView._CHECKPOINT_PERIOD_,
                     validate_function=lambda value: value >= 0)
@@ -169,7 +169,7 @@ class PbftSettingsView:
         """
         if self._view_change_timeout is None:
             self._view_change_timeout = self._get_config_setting(
-                    name='bgx.consensus.pbft.view_change_timeout',
+                    name='dgt.consensus.pbft.view_change_timeout',
                     value_type=int,
                     default_value=PbftSettingsView._VIEW_CHANGE_TIMEOUT_,
                     validate_function=lambda value: value >= 0)
@@ -195,7 +195,7 @@ class PbftSettingsView:
         """
         if self._node is None:
             self._node = self._get_config_setting(
-                    name='bgx.consensus.pbft.node',
+                    name='dgt.consensus.pbft.node',
                     value_type=str,
                     default_value=PbftSettingsView._NODE_,
                     validate_function=lambda value: value)
@@ -270,7 +270,7 @@ class PbftSettingsView:
     def dag_step(self):
         if PbftSettingsView.DAG_STEP not in self._params :
             self._params[PbftSettingsView.DAG_STEP] = self._get_config_setting(
-                    name='bgx.dag.step',
+                    name='dgt.dag.step',
                     value_type=int,
                     default_value=PbftSettingsView._DAG_STEP_,
                     validate_function=lambda value: value)
@@ -331,14 +331,14 @@ class PbftSettingsView:
     def send_batches(self):
         if self._send_batches is None:
             val = self._get_config_setting(
-                    name='bgx.publisher.send_batches',
+                    name='dgt.publisher.send_batches',
                     value_type=int,
                     default_value=1,
                     validate_function=lambda value: value==0 or value==1)
             self._send_batches = bool(val)
 
         return self._send_batches
-    # bgx.consensus.block_timeout
+    # dgt.consensus.block_timeout
     @property
     def block_timeout(self):
         if PbftSettingsView.BLOCK_TIMEOUT not in self._params :

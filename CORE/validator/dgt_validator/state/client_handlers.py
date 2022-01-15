@@ -677,6 +677,7 @@ class BatchStatusRequest(_ClientRequestHandler):
         else:
             statuses_dict = self._batch_tracker.get_statuses(request.batch_ids)
             statuses = _format_batch_statuses(statuses_dict, request.batch_ids, self._batch_tracker)
+            LOGGER.debug(f"BatchStatusRequest: statuses={statuses}")
 
         if not statuses:
             return self._status.NO_RESOURCE

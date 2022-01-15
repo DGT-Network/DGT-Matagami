@@ -744,7 +744,7 @@ class BlockPublisher(object):
         if self._topology is None:
             self.get_topology_info()
             # publisher mode 
-            self._send_batches = int(self._settings_cache.get_setting('bgx.publisher.send_batches',main_head.state_root_hash,default_value=1))
+            self._send_batches = int(self._settings_cache.get_setting('dgt.publisher.send_batches',main_head.state_root_hash,default_value=1))
         
         LOGGER.debug("BUILD CANDIDATE_BLOCK for BRANCH=%s:%s main=%s STATE=%s~%s",chain_head.block_num,bid[:8],main_head.block_num,main_head.state_root_hash[:10],chain_head.state_root_hash[:10])
 
@@ -767,7 +767,7 @@ class BlockPublisher(object):
         LOGGER.debug("BlockPublisher: BUILD CANDIDATE_BLOCK BRANCH=%s:%s consensus_module=(%s) ask_candidate=%s",chain_head.block_num,bid[:8],consensus_name,self._engine_ask_candidate)
         # using chain_head so so we can use the setting_cache
         max_batches = int(self._settings_cache.get_setting(
-            'bgx.publisher.max_batches_per_block',
+            'dgt.publisher.max_batches_per_block',
             main_head.state_root_hash,# for DAG  chain_head.state_root_hash,
             default_value=_MAX_BATCHES_))
         

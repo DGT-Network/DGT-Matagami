@@ -32,12 +32,12 @@ from dgt_settings.protobuf.settings_pb2 import SettingCandidate
 from dgt_settings.protobuf.settings_pb2 import SettingCandidates
 from dgt_settings.protobuf.settings_pb2 import SettingTopology
 from dgt_settings.protobuf.setting_pb2 import Setting
-from dgt_validator.gossip.fbft_topology import PeerSync,PeerRole,PeerAtr,FbftTopology,BGX_NESTS_NAME,DGT_PING_COUNTER,DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,TOPO_MAP
+from dgt_validator.gossip.fbft_topology import PeerSync,PeerRole,PeerAtr,FbftTopology,DGT_NESTS_NAME,DGT_PING_COUNTER,DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,TOPO_MAP
 
 LOGGER = logging.getLogger(__name__)
 # DGT_PING_COUNTER - could do not all peers
-# allow to set BGX_NESTS_NAME without restriction - for doing nests
-NO_RESTRICTIONS_PARAMS = [BGX_NESTS_NAME]
+# allow to set DGT_NESTS_NAME without restriction - for doing nests
+NO_RESTRICTIONS_PARAMS = [DGT_NESTS_NAME]
 # The config namespace is special: it is not derived from a hash.
 SETTINGS_NAMESPACE = '000000'
 
