@@ -1,5 +1,5 @@
 
-4.4	Code of Conduct
+5.4	Code of Conduct
 ++++++++++++++++++++++++
 
 Although DGT is not part of the `Hyperledger Foundation`_, we support the Hyperledger CoC code. We also consider it necessary to highlight the following additional questions:

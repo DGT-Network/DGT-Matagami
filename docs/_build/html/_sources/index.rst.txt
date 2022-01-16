@@ -4,6 +4,7 @@
    contain the root `toctree` directive.
 
 .. image:: images/dgt_logo.png
+
 ====================================================
 
 DGT's Technical Whitepaper
@@ -44,17 +45,26 @@ Please, visit `our website`_ to find more
    :maxdepth: 2
    :caption: 3. ADMINISTRATOR GUIDE
 
-   GUIDE/3.1_Setup_single_Node
-   GUIDE/3.2_Get_DGT_Metrics
-   GUIDE/3.3_Setup_topology
-   GUIDE/3.4_Security_and_SLA
-  
+   ADMIN_GUIDE/3.1_Setup_single_Node
+   ADMIN_GUIDE/3.2_Setup_Private_Network
+   ADMIN_GUIDE/3.3_Attach_Node_to_Existing_Network
+   ADMIN_GUIDE/3.4_DGT_CLI_and_Base_Transaction_Families
+   ADMIN_GUIDE/3.5_Setup_Clusters_and_Networks
+
 .. toctree::
    :maxdepth: 2
-   :caption: 4. COMMUNITY
+   :caption: 4. DEVELOPER GUIDE
 
-   COMMUNITY/4.1_Development_Organization
-   COMMUNITY/4.2_DGT_Development_Contributing
-   COMMUNITY/4.3_Testing_and_Support
-   COMMUNITY/4.4_Code_of_Conduct
+   DEV_GUIDE/4.1_REST_API
+   DEV_GUIDE/4.2_SDK_Development
+   DEV_GUIDE/4.3_Core_Development
+   DEV_GUIDE/4.4_DGT_Client_Development
+.. toctree::
+   :maxdepth: 2
+   :caption: 5. COMMUNITY
+
+   COMMUNITY/5.1_Development_Organization
+   COMMUNITY/5.2_DGT_Development_Contributing
+   COMMUNITY/5.3_Testing_and_Support
+   COMMUNITY/5.4_Code_of_Conduct
   
