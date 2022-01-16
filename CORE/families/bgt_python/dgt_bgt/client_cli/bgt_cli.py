@@ -147,7 +147,8 @@ def add_set_parser(subparsers, parent_parser):
     parser.add_argument(
         '--url',
         type=str,
-        help='specify URL of REST API')
+        help='specify URL of REST API',
+        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
@@ -191,7 +192,8 @@ def add_inc_parser(subparsers, parent_parser):
     parser.add_argument(
         '--url',
         type=str,
-        help='specify URL of REST API')
+        help='specify URL of REST API',
+        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
@@ -235,7 +237,8 @@ def add_dec_parser(subparsers, parent_parser):
     parser.add_argument(
         '--url',
         type=str,
-        help='specify URL of REST API')
+        help='specify URL of REST API',
+        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
@@ -276,7 +279,8 @@ def add_trans_parser(subparsers, parent_parser):
     parser.add_argument(
         '--url',
         type=str,
-        help='specify URL of REST API')
+        help='specify URL of REST API',
+        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
@@ -321,7 +325,8 @@ def add_show_parser(subparsers, parent_parser):
     parser.add_argument(
         '--url',
         type=str,
-        help='specify URL of REST API')
+        help='specify URL of REST API',
+        default='http://api-dgt-c1-1:8108')
 
 
 def do_show(args):
@@ -345,7 +350,8 @@ def add_list_parser(subparsers, parent_parser):
     parser.add_argument(
         '--url',
         type=str,
-        help='specify URL of REST API')
+        help='specify URL of REST API',
+        default='http://api-dgt-c1-1:8108')
 
 
 def do_list(args):

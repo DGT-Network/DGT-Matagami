@@ -525,7 +525,7 @@ class ConsensusChainHeadGetHandler(ConsensusServiceHandler):
             response.block.payload = block_header.consensus
         except TooManyBranch:
             response.status = consensus_pb2.ConsensusChainHeadGetResponse.TOO_MANY_BRANCH
-            # change bgx.publisher.max_batches_per_block after nests were made
+            # change dgt.publisher.max_batches_per_block after nests were made
             self._proxy.reset_max_batches_per_block()
         except UnknownBlock:
             response.status = consensus_pb2.ConsensusChainHeadGetResponse.NO_CHAIN_HEAD

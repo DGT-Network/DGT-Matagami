@@ -93,7 +93,7 @@ def create_parent_parser(prog_name):
     parent_parser.add_argument(
         '-V', '--version',
         action='version',
-        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth) version {}')
+        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth-DGT) version {}')
         .format(version),
         help='display version information')
 
@@ -135,7 +135,7 @@ def add_set_parser(subparsers, parent_parser):
         '--user',                       
         type=str,
         default="/project/peer/keys/validator.priv",                       
-        help='specify User private key')       
+        help='specify User private key for signing certificate')       
 
 
     parser.add_argument(
@@ -225,7 +225,7 @@ def add_upd_parser(subparsers, parent_parser):
     parser.add_argument(                            
         '-cb', '--crypto_back',                     
         type=str,                                   
-        help='Specify a crypto back',               
+        help='Specify a crypto back openssl/bitcoin',               
         default='bitcoin')
     parser.add_argument(                                   
         '--before',                                       
@@ -254,7 +254,7 @@ def add_show_parser(subparsers, parent_parser):
         'show',
         parents=[parent_parser],
         description=message,
-        help='Displays the specified x509 certificate')
+        help='Display the specified by user public key x509 certificate')
 
     parser.add_argument(
         'name',
@@ -302,7 +302,7 @@ def add_list_parser(subparsers, parent_parser):
         'list',
         parents=[parent_parser],
         description=message,
-        help='Displays all bgt values')
+        help='Displays all X509 certificates')
 
     parser.add_argument(
         '--url',
@@ -318,7 +318,7 @@ def add_list_parser(subparsers, parent_parser):
     parser.add_argument(                   
         '-cb', '--crypto_back',            
         type=str,                          
-        help='Specify a crypto back',      
+        help='Specify a crypto back openssl/bitcoin',      
         default='bitcoin')                 
 
 

@@ -1122,7 +1122,7 @@ class RouteHandler:
         """Confirms a header_signature is 128 hex characters, raising an
         ApiError if not.
         """
-        if not re.fullmatch('[0-9a-f]{128}', resource_id):
+        if not re.fullmatch('[0-9a-f]{,148}', resource_id): #'[0-9a-f]{128}'
             raise errors.InvalidResourceId(resource_id)
 
     @staticmethod

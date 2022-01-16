@@ -88,11 +88,11 @@ class BlockPublisher(BlockPublisherInterface):
 
         settings_view = SettingsView(state_view)
         self._min_wait_time = settings_view.get_setting(
-            "bgx.consensus.min_wait_time", self._min_wait_time, int)
+            "dgt.consensus.min_wait_time", self._min_wait_time, int)
         self._max_wait_time = settings_view.get_setting(
-            "bgx.consensus.max_wait_time", self._max_wait_time, int)
+            "dgt.consensus.max_wait_time", self._max_wait_time, int)
         self._valid_block_publishers = settings_view.get_setting(
-            "bgx.consensus.valid_block_publishers",
+            "dgt.consensus.valid_block_publishers",
             self._valid_block_publishers,
             list)
 

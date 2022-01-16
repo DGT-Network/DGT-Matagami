@@ -24,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 def _load_default_cli_config():
     return {
-        'url': 'http://localhost:8008'
+        'url': 'http://api-dgt-c1-1:8108'
     }
 
 

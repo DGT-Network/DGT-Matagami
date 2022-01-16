@@ -26,7 +26,7 @@ from dgt_cli.exceptions import CliException
 
 class RestClient:
     def __init__(self, base_url=None, user=None):
-        self._base_url = base_url or 'http://localhost:8008'
+        self._base_url = base_url or 'http://api-dgt-c1-1:8108'
 
         if user:
             b64_string = b64encode(user.encode()).decode()

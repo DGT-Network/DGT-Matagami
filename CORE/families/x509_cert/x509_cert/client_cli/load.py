@@ -114,7 +114,7 @@ def add_load_parser(subparsers, parent_parser):
         '-U', '--url',
         type=str,
         help='url for the REST API',
-        default='http://localhost:8008')
+        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--auth-user',

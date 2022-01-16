@@ -101,8 +101,8 @@ class ConsensusFactory(object):
         settings_view = SettingsView(state_view)
 
         default_consensus = 'genesis' if block_id == NULL_BLOCK_IDENTIFIER else 'devmode'  
-        consensus_module_name = settings_view.get_setting('bgx.consensus.algorithm', default_value=default_consensus)
-        consensus_version = settings_view.get_setting('bgx.consensus.version', default_value='0.1')
+        consensus_module_name = settings_view.get_setting('dgt.consensus.algorithm', default_value=default_consensus)
+        consensus_version = settings_view.get_setting('dgt.consensus.version', default_value='0.1')
         LOGGER.debug("ConsensusFactory::try_configured_consensus_module consensus_module_name=%s ver=%s",consensus_module_name,consensus_version)
         try:
             mod = ConsensusFactory.get_consensus_module(consensus_module_name)
@@ -126,6 +126,6 @@ class ConsensusFactory(object):
         settings_view = SettingsView(state_view)
 
         default_consensus = 'genesis' if block_id == NULL_BLOCK_IDENTIFIER else 'devmode'  
-        consensus_module_name = settings_view.get_setting('bgx.consensus.algorithm', default_value=default_consensus)
+        consensus_module_name = settings_view.get_setting('dgt.consensus.algorithm', default_value=default_consensus)
         LOGGER.debug("ConsensusFactory::get_configured_consensus_module consensus_module_name=%s",consensus_module_name)
         return ConsensusFactory.get_consensus_module(consensus_module_name)

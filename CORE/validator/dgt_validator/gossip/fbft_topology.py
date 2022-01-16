@@ -23,12 +23,12 @@ from collections.abc import MutableMapping
 from enum import Enum
 
 LOGGER = logging.getLogger(__name__)
-OLD_TOPOLOGY_SET_NM = 'bgx.consensus.pbft.nodes'
+OLD_TOPOLOGY_SET_NM = 'dgt.consensus.pbft.nodes'
 DGT_TOPOLOGY_SET_NM = 'dgt.consensus.pbft.nodes'
 TOPOLOGY_SET_NM = DGT_TOPOLOGY_SET_NM
 DGT_TOPOLOGY_MAP_NM = 'dgt.topology.map'
 DGT_TOPOLOGY_NEST_NM = 'dgt.topology.nest'
-BGX_NESTS_NAME  = 'bgx.dag.nests'
+DGT_NESTS_NAME  = 'dgt.dag.nests'
 DGT_PING_COUNTER  = 'dgt.ping.counter'
 TOPOLOGY_GENESIS_HEX = b'Genesis'.hex()
 TOPO_GENESIS =  'Genesis'

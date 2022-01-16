@@ -161,7 +161,7 @@ class PbftBlockPublisher(BlockPublisherInterface):
         public_key_hash = hashlib.sha256(block_header.signer_public_key.encode()).hexdigest()
         nonce = SignupInfo.block_id_to_nonce(block_header.previous_block_id)
 
-        setting = 'bgx.consensus.pbft.max_log_size'
+        setting = 'dgt.consensus.pbft.max_log_size'
         if False:
             # try to set pbft params
             

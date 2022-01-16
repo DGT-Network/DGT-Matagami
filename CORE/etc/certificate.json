@@ -4,5 +4,7 @@
     "LOCALITY_NAME"           : "Tomsk", 
     "ORGANIZATION_NAME"       : "Home" ,
     "COMMON_NAME"             : "Dgt", 
-    "DNS_NAME"                : "dgt.network" 
+    "DNS_NAME"                : "dgt.network", 
+    "EMAIL_ADDRESS"           : "dgt@dgt.network",
+    "PSEUDONYM"               : "dgt"
 }

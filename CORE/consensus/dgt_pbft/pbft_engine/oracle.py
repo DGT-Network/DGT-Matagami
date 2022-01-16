@@ -59,7 +59,7 @@ try:
 except TypeError:
     import dgt_validator.protobuf.transaction_pb2 as txn_pb
 
-from dgt_validator.gossip.fbft_topology import PeerSync,PeerRole,PeerAtr,FbftTopology,BGX_NESTS_NAME,TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM
+from dgt_validator.gossip.fbft_topology import PeerSync,PeerRole,PeerAtr,FbftTopology,DGT_NESTS_NAME,TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM
 
 import hashlib
 import random
@@ -304,7 +304,7 @@ class PbftOracle:
         
         if True:
             # try to set pbft params
-            setting = BGX_NESTS_NAME
+            setting = DGT_NESTS_NAME
 
             proposal = SettingProposal(
                  setting=setting,
