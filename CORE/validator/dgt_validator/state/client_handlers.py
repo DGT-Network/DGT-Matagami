@@ -18,6 +18,7 @@
 
 import abc
 import logging
+import traceback
 from time import time
 import itertools
 from functools import cmp_to_key
@@ -95,7 +96,7 @@ class _ClientRequestHandler(Handler, metaclass=abc.ABCMeta):
         self._response_type = response_type
         self._status = response_proto
 
-        self._id_regex = re.compile('[0-9a-f]{128}')
+        self._id_regex = re.compile('[0-9a-f]{,148}') # re.compile('[0-9a-f]{128}
         self._state_root_regex = re.compile('[0-9a-f]{64}')
         self._namespace_regex = re.compile('^([0-9a-f]{2}){0,35}$')
 
@@ -113,6 +114,7 @@ class _ClientRequestHandler(Handler, metaclass=abc.ABCMeta):
             HandlerResult: result to be sent in response back to client
         """
         try:
+            LOGGER.info(f'HANDLE: message_content={message_content}')
             request = self._request_proto()
             request.ParseFromString(message_content)
         except DecodeError:
@@ -652,8 +654,7 @@ class BatchSubmitFinisher(_ClientRequestHandler):
     def _respond(self, request):
         for batch in request.batches:
             if batch.trace:
-                LOGGER.debug("TRACE %s: %s", batch.header_signature,
-                             self.__class__.__name__)
+                LOGGER.debug("TRACE %s: %s", batch.header_signature,self.__class__.__name__)
 
         return self._status.OK
 
@@ -675,6 +676,7 @@ class BatchStatusRequest(_ClientRequestHandler):
                 request.batch_ids,
                 request.timeout)
         else:
+            LOGGER.debug(f"BatchStatusRequest: ask={request.batch_ids}")
             statuses_dict = self._batch_tracker.get_statuses(request.batch_ids)
             statuses = _format_batch_statuses(statuses_dict, request.batch_ids, self._batch_tracker)
             LOGGER.debug(f"BatchStatusRequest: statuses={statuses}")
@@ -1008,9 +1010,12 @@ class BatchGetRequest(_ClientRequestHandler):
         self._validate_ids([request.batch_id])
 
         try:
+            LOGGER.debug(f"BatchGetRequest: batch_id={request.batch_id}")
             batch = self._block_store.get_batch(request.batch_id)
+            #raise ValueError
         except ValueError as e:
-            LOGGER.debug(e)
+            #tb = traceback.format_exc()
+            LOGGER.debug(f"BatchGetRequest err={e}")
             return self._status.NO_RESOURCE
 
         return self._wrap_response(batch=batch)

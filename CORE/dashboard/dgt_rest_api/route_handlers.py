@@ -749,6 +749,7 @@ class RouteHandler:
     async def run_statuses(self,request):
         """
         get  tx families
+        3046022100fc1ab35598253f9b36a1ff81db1f27c6b1c5111af19f1b09b4477c35cae4a1d3022100b8092b2b1c6ccdc846f14eeebdb89a7f0a87f26926791dbb58d749f2d3c83f83
         """
         #endpoint = request.url.query.get('endpoint', None) 
         #if endpoint is not None:
@@ -1230,7 +1231,7 @@ class RouteHandler:
         """Confirms a header_signature is 128 hex characters, raising an
         ApiError if not.
         """
-        if not re.fullmatch('[0-9a-f]{128}', resource_id):
+        if not re.fullmatch('[0-9a-f]{,148}', resource_id):  # '[0-9a-f]{128}'
             raise errors.InvalidResourceId(resource_id)
 
     @staticmethod

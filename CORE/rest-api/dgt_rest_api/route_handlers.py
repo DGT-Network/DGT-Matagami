@@ -443,8 +443,9 @@ class RouteHandler:
         error_traps = [error_handlers.BatchNotFoundTrap]
 
         batch_id = request.match_info.get('batch_id', '')
+        LOGGER.debug(f'fetch_batch batch_id={batch_id}')
         self._validate_id(batch_id)
-
+        LOGGER.debug(f'fetch_batch _query_validator ..')
         response = await self._query_validator(
             Message.CLIENT_BATCH_GET_REQUEST,
             client_batch_pb2.ClientBatchGetResponse,
@@ -701,9 +702,9 @@ class RouteHandler:
             metadata=self._get_metadata(request, response))
 
 
-    async def _query_validator(self, request_type, response_proto,
-                               payload, error_traps=None):
-        """Sends a request to the validator and parses the response.
+    async def _query_validator(self, request_type, response_proto,payload, error_traps=None):
+        """
+        Sends a request to the validator and parses the response.
         """
         LOGGER.debug('Sending %s request to validator',self._get_type_name(request_type))
 
@@ -711,8 +712,7 @@ class RouteHandler:
         response = await self._send_request(request_type, payload_bytes)
         content = self._parse_response(response_proto, response)
 
-        LOGGER.debug(
-            'Received %s response from validator with status %s',
+        LOGGER.debug('Received %s response from validator with status %s',
             self._get_type_name(response.message_type),
             self._get_status_name(response_proto, content.status))
 
@@ -1134,9 +1134,14 @@ class RouteHandler:
     @staticmethod
     def _validate_id(resource_id):
         """Confirms a header_signature is 128 hex characters, raising an
-        ApiError if not.
+        ApiError if not. 
+        openssl
+        3045022100b79236d5329cd195e3d7cde7b232efd5a4641bb8a544da851cdf13f520788b1e022055a6ced8d6a2f583a21de592e1b1723c78ef6096ca92d277adf48b7cfb47c7c5
+        3044022020b5c1e3c42e3bdd57f318dd5342160d27545b3d2eaadce57d2e0b98632245d702200e081cef2fd1e816806e9e459137678dc7979150868ed7ebf29e7f87d5c87e8f
+        bitcoin
+        601b7dfd07f0a795ca0fa93ccc599b7ccd06fdd550d951ae89f7bad9365316b851ef1371ffbccd2776f5025326347067a993b30b792a8583f0c961a1f10ba883
         """
-        if not re.fullmatch('[0-9a-f]{128}', resource_id):
+        if not re.fullmatch('[0-9a-f]{,148}', resource_id): # for bitcoin re.fullmatch('[0-9a-f]{128}'
             raise errors.InvalidResourceId(resource_id)
 
     @staticmethod
