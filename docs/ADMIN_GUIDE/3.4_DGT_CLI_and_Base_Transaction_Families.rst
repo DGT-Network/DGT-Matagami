@@ -1,3 +1,15 @@
 
 3.4	DGT CLI and Base Transaction Families
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Each node has a CLI (Command Line Interface) service as a component. To run the CLI, you need to access the bash shell inside the container:
+
+    .. code-block:: python 
+
+        docker exec -it shell-dgt-c1-1 bash
+
+Inside, it is possible to enter commands regarding the node's status and the testing families of transactions. Different families of commands may have some differences in options; here is a general view based on the dgt transaction family: 
+
+    .. image:: ../images/figure_08.png
+     :align: center
+
