@@ -63,9 +63,9 @@ Basic steps to get started:
 
     •	Download the selected virtual machine image. Be sure that this is an authentic image - verify the checksum and compare it with the value in the table above. To get the checksum: 
 
-        • 	For the Windows operating system: open the command line interface (Press <Windows R>, type `cmd`  and press <Enter>), use the cd command to navigate to the folder where the file was downloaded and type the command *certutil -hashfile <file> MD5*, where <file> is replaced by the name of the archive loaded. The screen should display the checksum, which is what you need to compare to the value in the table above. 
+        • 	For the Windows operating system: open the command line interface (Press <*Windows R*>, type ``cmd``  and press <*Enter*>), use the ``cd`` command to navigate to the folder where the file was downloaded and type the command ``certutil -hashfile <file> MD5``, where <file> is replaced by the name of the archive loaded. The screen should display the checksum, which is what you need to compare to the value in the table above. 
 
-        • 	For the Linux operating system: use the <cd> command to navigate to the download folder, type *md5sum <file>* to obtain the checksum, and compare the value to the data in the table. 
+        • 	For the Linux operating system: use the <cd> command to navigate to the download folder, type ``md5sum <file>`` to obtain the checksum, and compare the value to the data in the table. 
 
     •	Expand the archive into a separate folder by using the archiver. Inside it, you will find virtual machine files - the configuration file and the virtual hard disk file. Open the file and edit the network interfaces by using a virtual machine manager (VirtualBox or VMWare). For more details, see `VirtualBox.Virtual Networking`_ and `VMWare Virtual Networking Concepts`_.
 
@@ -78,4 +78,181 @@ Basic steps to get started:
 
 The information presented here and below is focused on installing the Ubuntu operating system and then downloading the DGT source files from GitHub. In case of other parameters, use the necessary clarifications or get advice from `partnership@dgt.world`_
 
+    •	Download an operating system image, such as `Ubuntu 20.04.3`_.
 
+    •	Prepare the server for booting or create a stub for the virtual machine (see the manual for VirtualBox or VMWare). Check the minimum system requirements - `see 3.1.1.1`_. 
+
+    •	Install the operating system using the proper user guide. For example, the official guide is recommended for Ubuntu. Enter the required credentials [#credentials]_, e.g. ``login: dgt, password: matagami2022``.
+
+    •	For the Linux system, install additionally: 
+
+        • 	Open SSH (read `more here`_)
+        • 	Midnight Commander (optional, `see here`_)
+        • 	Python 3.9 (see `here`_)
+
+.. _Ubuntu 20.04.3: https://releases.ubuntu.com/20.04.3/ubuntu-20.04.3-live-server-amd64.iso?_ga=2.252072585.1036147928.1641525928-1577823777.1641525928
+.. _more here: https://linuxize.com/post/how-to-enable-ssh-on-ubuntu-20-04/
+.. _see here: https://installati.one/ubuntu/20.04/mc/
+.. _here: https://linuxize.com/post/how-to-install-python-3-9-on-ubuntu-20-04/
+
+3.1.1.5	Docker Installation
+-------------------------------------
+Whether you are downloading files directly from GitHub or using prepared installation files, the most convenient way to assemble the node is to use Docker, a deployment automation and container management software. The following is a sequence of steps to install the Docker container management tool for the Docker operating system. 
+
+    •	Update: ``sudo apt update`` 
+
+    •	Install auxiliary utilities: 
+
+        • 	*apt-transport-https* — activates the transfer of files and data through https. 
+        • 	*ca-certificates* — enables verification of security certificates.
+        • 	*curl* — utility for accessing web resources.
+        • 	*software-properties-common* — activates the ability to use scripts to manage software
+            
+            .. code-block:: python
+
+                sudo apt install apt-transport-https ca-certificates curl software-properties-common        
+
+    •	Add a GPG key to operate with the official Docker repository:
+    
+        .. code-block:: python
+
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -       
+
+    •	Add the Docker repository into the local list of repositories:
+
+        .. code-block:: python    
+
+            sudo add-apt-repository "deb [arch=amd64] 
+            https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    
+    •	Re-update the data on operating system's packages:
+
+        .. code-block:: python
+
+            sudo apt update
+
+    •	Install the Docker package itself:
+
+        .. code-block:: python
+
+            sudo apt install docker-ce -y
+
+    •	Initialize the Docker daemon and add it to startup:
+
+        .. code-block:: python    
+
+            sudo systemctl start docker
+            sudo systemctl enable docker
+
+More information is available in the `official Docker guide`_
+
+.. _official Docker guide: https://docs.docker.com/engine/install/ubuntu/
+
+3.1.1.6	Setup Docker Compose
+-----------------------------------------
+
+.. Warning::
+    It is not recommended to use a version of Docker Compose other than 1.21.1 for this version of DGT
+
+Docker Compose is a tool for describing and running multi-container Docker applications. The tool allows users to start, execute, communicate, and close containers with a single command. 
+
+    •	We download the Docker Compose assembly directly from the GitHub repository with the required versions and options: 
+
+        •	-L allows redirects if the file is moved. 
+        • 	-o modifies the file name to make it easier to run and specifies the directory to save. 
+
+        .. code-block:: python 
+
+            sudo curl -L 
+            "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+        Installation options:
+
+        •	Specify a different version, for example, “1.28.6” instead of “1.23.1”
+        •	Install from repository: ``sudo apt-get install docker-compose`` 
+
+    •	After the download is complete, you will need to add execution rights to the downloaded binary file:
+
+        .. code-block:: python 
+
+            sudo chmod +x /usr/local/bin/docker-compose
+
+    •	We check the correctness of the Docker Compose operations:
+
+        .. code-block:: python 
+
+            sudo docker-compose -version
+
+
+3.1.1.7	Post-Installation actions
+------------------------------------------
+
+To support the workability of bath-files, we configure rights and groups:
+
+    •	Create a Docker group:
+
+        .. code-block:: python 
+
+            sudo groupadd docker
+
+    •	Add the current user to the created group:
+
+        .. code-block:: python 
+
+            sudo usermod -aG docker $USER
+
+    •	Activate changes in the group:
+
+        .. code-block:: python 
+
+            newgrp docker
+
+    •	We check the ability to run Docker commands for the current user (without sudo):
+
+        .. code-block:: python 
+
+            docker run hello-world
+
+    •	In case of running Docker commands before adding a user to a group (which is what happens, if we take the checks into account), an error occurs with incorrect rights to the ``~/.docker/.``  directory.    
+
+       .. code-block:: python 
+
+            Warning: Error loading config file: 
+            /home/user/.docker/config.json - stat /home/user/.docker/config.json: permission denied
+
+    To fix this, we will use the following commands:
+
+         .. code-block:: python 
+
+            sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
+            $ sudo chmod g+rwx "$HOME/.docker" -R
+
+    •	Check again: ``docker run hello-world``.
+
+3.1.1.8	Last checkup
+----------------------------------
+
+Before proceeding with the installation of the DGT Node, check that you have completed the necessary preparatory steps and that the system requirements are met:
+
+.. image:: ../images/table_6_04.PNG
+
+.. tip:: READ MORE: 
+
+    •   `DGT Technical Deep Dive`_ [10] - a visual representation of the architecture and technology stack of the platform.
+    •	`Ubutu Tutorials. The Linux command line for beginners`_ - a guide to using the basic commands for the Linux OS family.
+    •	`Licenses and Standards`_ [21] - clarifications of licenses for open source software from the Open Source Initiative (OSI)
+    •	`Docker Engine Official Guide`_ - a guide to setting up containerization tools
+
+    .. _DGT Technical Deep Dive: https://dgt.world/docs/DGT_TECHNOLOGY.pdf
+    .. _Ubutu Tutorials. The Linux command line for beginners: https://ubuntu.com/tutorials/command-line-for-beginners#1-overview
+    .. _Licenses and Standards: https://opensource.org/licenses
+    .. _Docker Engine Official Guide: https://docs.docker.com/engine/
+
+
+.. rubric:: Footnotes
+
+.. [#credentials] It is recommend that you use your own settings for the account and follow known guides when creating them, such as `NIST Password Guidelines`_,  `ENISA Basic Security practice`_ or `Canada Best Practices for Passphrases and Passwords (ITSAP.30.032)`_
+
+.. _NIST Password Guidelines: https://pages.nist.gov/800-63-3/sp800-63-3.html
+.. _ENISA Basic Security practice: https://www.enisa.europa.eu/media/news-items/basic-security-practices-regarding-passwords-and-online-identities
+.. _Canada Best Practices for Passphrases and Passwords (ITSAP.30.032): https://www.cyber.gc.ca/sites/default/files/publications/ITSAP.30.32%20-en.pdf
