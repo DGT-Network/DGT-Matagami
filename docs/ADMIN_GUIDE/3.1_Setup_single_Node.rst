@@ -249,6 +249,93 @@ Before proceeding with the installation of the DGT Node, check that you have com
     .. _Docker Engine Official Guide: https://docs.docker.com/engine/
 
 
+3.1.2	Setup DGT Single Node
+=======================================
+
+This given installation process describes the necessary steps to deploy a single node. The description is for the CORE configuration, but can be adapted to work with other versions. 
+
+.. _see 1.7: ../INTRODUCTION/1.7_Technology_Roadmap.html
+.. _several repositories on GitHub: https://github.com/DGT-Network
+
+    •	First, you need to obtain the system's source code from GitHub. DGT has `several repositories on GitHub`_, each of which corresponds to a certain version of the platform - `see 1.7`_. Please use the last version. This description is provided for the Matagami version in its CORE configuration. To start working, we clone the GitHub repository:
+
+    .. code-block:: python 
+
+        git clone https://github.com/DGT-Network/DGT-Matagami
+
+    As a result of execution, the DGT Matagami/CORE directory is created on the user's home folder (HOME/DGT), from which the server image is built.
+
+    •	Go to the appropriate folder and make sure the files are there:
+
+    .. code-block:: python 
+
+        cd DGT/DGT-Matagami
+        cd CORE
+
+    •	We carry out the initial assembly of the node using Docker Compose. Run the assembly (rise) command from the directory in which the assembly is placed (DGT/DGT-Matagami/CORE):
+
+    .. code-block:: python 
+
+        bash upDgtCluster.sh  -G -SC -CB openssl 1 1 
+
+    Here
+        -	-G - flag, indicating the need to create a genesis block
+        -	-SC - flag indicating that transactions need to be signed by nodes
+        -	-CB openssl - the selected type of cryptography (should be consistent with the network that the node belongs to): options are - openssl or bitcoin
+        -	1 1 - cluster number and node number in the cluster; for a single node we set “1 1”. Te mapping of the number to a variant notation using segments and clusters is reflected in the dgt.net.map file. 
+
+    The assembly process is quite long, accompanied by the installation of additional packages. A typical output is shown in the figure below:
+
+    .. image:: ../images/figure_01.png
+       :align: center
+
+3.1.3	Dashboard setup
+=================================
+
+.. _http://192.168.1.53:8003/: http://192.168.1.53:8003/
+
+A “Dashboard” is a special node component that allows you to execute individual node commands, as well as monitor the network. The service is located inside a separate container and may not be available for this node. It is installed separately. 
+
+    The server is installed from the directory into which dgt is loaded with the command:
+
+    .. code-block:: python 
+
+       bash upDgtDashboard.sh -CB openssl
+
+   In case of successful installation, DASHBOARD becomes available for the node's IP:
+
+    ``http://[NODE_IP]:8003/``, for example, `http://192.168.1.53:8003/`_. In response to loading, the browser (Dashboard) displays a panel with main sections presenting information about the network:
+
+   •	Network - presents basic information about the node and the overall topology
+   •	Nodes - detailed information on the network topology, node roles, and existing dependencies
+   •	Transactions - information on processed transactions
+   •	Ledger - a representation of the DAG graph (related packages).
+   •	Batches - information on transaction batches
+   •	Dev - additional developer tools, including creating test transactions
+
+    .. image:: ../images/figure_02.png
+       :align: center
+
+3.1.4	Nodes Port Configuration
+========================================
+
+As a result of installing the node in given containers, several services are launched, the ports of which are presented in the table below. Open ports can be checked with the ``sudo ss -ltn`` command. 
+
+    .. image:: ../images/figure_03.png
+       :align: center
+
+.. image:: ../images/table_6_05.PNG
+    :align: center
+
+
+3.1.5	Single Node Checkup Procedures
+=========================================
+
+3.1.5.1	BGT-based CLI tests
+------------------------------------
+
+BGT is a test transaction family that supports abstract tokens within the network. Accessing BGT is possible in various ways, including using the command line interface - CLI. To use the CLI, you need to call bash inside the container. 
+
 .. rubric:: Footnotes
 
 .. [#credentials] It is recommend that you use your own settings for the account and follow known guides when creating them, such as `NIST Password Guidelines`_,  `ENISA Basic Security practice`_ or `Canada Best Practices for Passphrases and Passwords (ITSAP.30.032)`_
