@@ -13,3 +13,19 @@ Inside, it is possible to enter commands regarding the node's status and the tes
     .. image:: ../images/figure_08.png
      :align: center
 
+.. list-table:: Title
+   :widths: 10 25 25 40
+   :header-rows: 1
+
+   * - #
+     - Command
+     - Description
+     - Example
+   * - 1
+     - dgt Family
+     - A set of commands that provide basic information about the node and 
+     - its environment, as well as a way to access the most important common functions.
+   * - Row 2, column 1
+     - Row 2, column 2
+     - Row 2, column 3
+     - Row 2, column 4

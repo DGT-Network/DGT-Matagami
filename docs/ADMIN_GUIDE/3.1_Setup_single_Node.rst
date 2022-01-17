@@ -321,7 +321,7 @@ A “Dashboard” is a special node component that allows you to execute individ
 
 As a result of installing the node in given containers, several services are launched, the ports of which are presented in the table below. Open ports can be checked with the ``sudo ss -ltn`` command. 
 
-    .. image:: ../images/table_6_05.png
+    .. image:: ../images/table_6_05.PNG
        :align: center
 
 3.1.5	Single Node Checkup Procedures
@@ -393,7 +393,7 @@ Each node is equipped with an API server that, in the basic configuration, respo
 
 .. _see 3.1.4: 3.1_Setup_single_Node.html#nodes-port-configuration
 
- .. image:: ../images/table_6_06.png
+ .. image:: ../images/table_6_06.PNG
        :align: center
 
 .. _see 2.3: ../ARCHITECTURE/2.3_DGT_Transactions.html
@@ -435,14 +435,14 @@ If successful, the command should return a result similar to the one shown in th
 
 The standard node comes with a built-in dashboard, which can make health checks much easier. This component is optional and must be run separately - `see 3.1.3`_. Make sure that you have completed the necessary preparatory steps. 
 
-    .. image:: ../images/table_6_07.png
+    .. image:: ../images/table_6_07.PNG
        :align: center
 
 To conduct the testing itself, open your browser and follow these steps:
 
 •	Go to the Dashboard by typing ``http://[NODE_IP]:8003/`` in the address bar. For instance, http://192.168.1.53:8003/. If the service is operational and the network configuration is correct, the main Dashboard page will load: 
 
-    .. image:: ../images/table_6_08.png
+    .. image:: ../images/table_6_08.PNG
      :align: center
 
 •	For further testing, go to the Dev/Batch Creator tab. The presented functionality allows you to create test transactions. Select the following options: 
@@ -455,7 +455,7 @@ To conduct the testing itself, open your browser and follow these steps:
 
 The name of the wallet and the BGT amount can be specified arbitrarily. Execute the transaction (Execute) and if successful, the results of the transaction will be similar to those shown below:
 
-    .. image:: ../images/table_6_09.png
+    .. image:: ../images/table_6_09.PNG
      :align: center
 
 
