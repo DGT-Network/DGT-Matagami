@@ -1,12 +1,12 @@
 
-4.3	Testing and Support
+5.3	Testing and Support
 +++++++++++++++++++++++++++++++
 
 Testing and project support is one of the priorities of DGT Networks. The following quality assurance policies are welcomed in the community:
 
 •	Any written code should be accompanied by the creation of an automated text that should be granular enough to test specific functionality. 
 
-•	To track errors, we use a bug tracking system, which can be accessed by any project participant (`see 4.2.1`_). For this, you need to contact `partnership@dgt.world`_. 
+•	To track errors, we use a bug tracking system, which can be accessed by any project participant (`see 5.2.1`_). For this, you need to contact `partnership@dgt.world`_. 
 
 •	The project code is in the GitHub repository and is open for audit. We are ready to answer any additional questions and consider your suggestions. 
 
@@ -24,4 +24,4 @@ Community members will be happy to hear any request for details on the issues de
 
  .. _partnership@dgt.world: partnership@dgt.world
 
- .. _see 4.2.1: 4.2_DGT_Development_Contributing.html#development-role-models
+ .. _see 5.2.1: 5.2_DGT_Development_Contributing.html#development-role-models

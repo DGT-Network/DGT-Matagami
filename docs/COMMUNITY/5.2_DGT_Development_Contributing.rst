@@ -1,5 +1,5 @@
 
-4.2 DGT Development Contributing
+5.2 DGT Development Contributing
 +++++++++++++++++++++++++++++++++++++++++
 
 As presented in Section 1.6 `How to create Solution with DGT Networks`_, this project is publicly available and anyone interested can join it to add their own code, modify the solution for themselves, make changes, or correct errors. The core of the system - DGT CORE (`Github Repo`_) is implemented under the Apache 2.0 license, while the GARANASKA tokenization subsystem (`Github Repo_`_)is under the AGPL v3.0 license. 
@@ -10,14 +10,14 @@ As presented in Section 1.6 `How to create Solution with DGT Networks`_, this pr
 
 .. _Github Repo_: https://github.com/DGT-Network/DGT-GARANASKA
 
-4.2.1	Development role models
+5.2.1	Development role models
 =========================================
 
 Following the tradition of free software, we can distinguish four basic roles, presented in the table below. 
 
 .. image:: ../images/table_5.PNG
 
-4.2.2	Private Fork and Pull Request
+5.2.2	Private Fork and Pull Request
 =========================================
 
 The main project of each version has a main GitHub branch called the “Master” or “Main”. When changes are made, an additional branch is created. The consolidation of results is done using the “Pull Request” (PR) procedure. The core procedure looks as follows: 
@@ -34,7 +34,7 @@ The main project of each version has a main GitHub branch called the “Master�
 
     .. _partnership@dgt.world: partnership@dgt.world
 
-4.2.3	Code Review
+5.2.3	Code Review
 =====================================
 
 The Code Review (CR) process allows partners and the community to ensure the quality of the code and that the necessary version can be formed. The CR process is aimed towards the following questions / checks: 
@@ -59,7 +59,7 @@ The following possibilities are available for the implementation of CR:
 
     •	Contacting the community via Slack with suggestions. 
 
-4.2.4	Repository Owners
+5.2.4	Repository Owners
 ===================================
 
 In case of significant contributions or opportunities for regular work, you can join the project as one of the repository owners (GitHub Maintainers). Such repository owners:
@@ -72,7 +72,7 @@ In case of significant contributions or opportunities for regular work, you can 
 
 •	Make decisions about the merging of branches and the readiness of the version for release. 
 
-4.2.5	Build process
+5.2.5	Build process
 ================================
 
 The build process prepares the version for release and forms an adequate repository. The features of the process are as follows:
@@ -85,7 +85,7 @@ The build process prepares the version for release and forms an adequate reposit
 
 •	Submitted must be available to maintainers immediately after uploading for immediate action in the case of a failed build. 
 
-4.2.6	General coding rules
+5.2.6	General coding rules
 =========================================
 
 •	Developers should strive to create idiomatic code in the language they use, in accordance with official conventions and styling. 
@@ -96,6 +96,6 @@ The build process prepares the version for release and forms an adequate reposit
 
 •	Within the team, there should be a healthy working relationship, including respect for the difference in time zones, and active interaction across all channels, including video conferences. There should be no shameful questions and each member of the team has the right to their own opinion and are guaranteed to receive respect for their work. 
 
-•	DGT Networks will support all possible knowledge bases – Wiki, chat, design docs, …
+•	DGT Networks will support all possible knowledge bases - Wiki, chat, design docs, …
 
 •	Each of the participants can freely refer to the contribution they made to the project within their professional profiles, LinkedIn, resume, etc. 

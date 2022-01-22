@@ -1,0 +1,402 @@
+
+3.4	DGT CLI and Base Transaction Families
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Each node has a CLI (Command Line Interface) service as a component. To run the CLI, you need to access the bash shell inside the container:
+
+    .. code-block:: python 
+
+        docker exec -it shell-dgt-c1-1 bash
+
+Inside, it is possible to enter commands regarding the node's status and the testing families of transactions. Different families of commands may have some differences in options; here is a general view based on the dgt transaction family: 
+
+    .. image:: ../images/figure_08.png
+     :align: center
+
+
++------+-------------------+-------------------+-------------------+
+| #    | Command           | Description       | Example           |
++======+===================+===================+===================+
+| 1    | dgt Family        | A set of commands |                   |
+|      |                   | that provide      |                   |
+|      |                   | basic information |                   |
+|      |                   |                   |                   |
+|      |                   | about the node    |                   |
+|      |                   | and its           |                   |
+|      |                   | environment, as   |                   |
+|      |                   | well as a         |                   |
+|      |                   |                   |                   |
+|      |                   | way to access the |                   |
+|      |                   | most important    |                   |
+|      |                   | common functions. |                   |
++------+-------------------+-------------------+-------------------+
+| 1.1  | dgt settings list | Displays a list   | dgt settings list |
+|      |                   | of settings for   | --url             |
+|      |                   | the node and      | http://           |
+|      |                   | current network.  | api-dgt-c1-1:8108 |
+|      |                   |                   |                   |
+|      |                   | Since multiple    |                   |
+|      |                   | nodes can be      |                   |
+|      |                   | running in a      |                   |
+|      |                   | container, a      |                   |
+|      |                   | clarification in  |                   |
+|      |                   | the form of a url |                   |
+|      |                   | flag is needed    |                   |
++------+-------------------+-------------------+-------------------+
+| 1.2  | dgt batch list    | Displays a list   | dgt batch list    |
+|      |                   | of transaction    | -url              |
+|      |                   | batches:          | http://           |
+|      |                   | BATCH_ID, the     | api-dgt-c1-1:8108 |
+|      |                   | number of         |                   |
+|      |                   | transactions in a | dgt batch list    |
+|      |                   | batch and         | -url              |
+|      |                   | signatures.       | http://           |
+|      |                   |                   | api-dgt-c1-1:8108 |
+|      |                   | Information can   | -F > 1.csv        |
+|      |                   | be exported to a  |                   |
+|      |                   | file with the -F  |                   |
+|      |                   | option and output |                   |
+|      |                   | redirection       |                   |
++------+-------------------+-------------------+-------------------+
+| 1.3  | dgt batch status  | Status of the     | dgt batch status  |
+|      |                   | given batch with  | 3                 |
+|      |                   | BATCH_ID shown    | 044022052d2468ef… |
+|      |                   | (obtained, for    |                   |
+|      |                   | example, from the | --url             |
+|      |                   | dgt batch list    | http://           |
+|      |                   | command)          | api-dgt-c1-1:8108 |
++------+-------------------+-------------------+-------------------+
+| 1.4  | dgt batch submit  | The command sends | dgt batch submit  |
+|      |                   | one or several    | --url             |
+|      |                   | batches to the    | http://           |
+|      |                   | validator.        | api-dgt-c1-1:8108 |
+|      |                   |                   | -f FILENAME       |
+|      |                   | A batch is a      |                   |
+|      |                   | binary file,      |                   |
+|      |                   | coded in          |                   |
+|      |                   | BatchList         |                   |
+|      |                   | protobuf,         |                   |
+|      |                   | represented by a  |                   |
+|      |                   | FILENAME file.    |                   |
++------+-------------------+-------------------+-------------------+
+| 1.5  | dgt block list    | Output of packed  | dgt block list    |
+|      |                   | blocks as a list  |                   |
+|      |                   | in NUM format:    | --url             |
+|      |                   | BLOCK_ID; BATS;   | http://           |
+|      |                   | TXNS; SIGNER      | api-dgt-c1-1:8108 |
++------+-------------------+-------------------+-------------------+
+| 1.6  | dgt block show    | Shows the         | dgt block show    |
+|      |                   | contents of a     | 102678a34f…       |
+|      |                   | block, displayed  |                   |
+|      |                   | on command        | --url             |
+|      |                   |                   | http://           |
+|      |                   | dgt block show    | api-dgt-c1-1:8108 |
+|      |                   | [-h] [--url URL]  |                   |
+|      |                   | block_id          |                   |
++------+-------------------+-------------------+-------------------+
+| 1.7  | dgt keygen        | Key pair          | dgt keygen NEWKEY |
+|      |                   | generation        |                   |
+|      |                   | (private and      | creates           |
+|      |                   | public).          | NEWKEY.priv and   |
+|      |                   |                   | NEWKEY.pub in the |
+|      |                   | As a result,      | /root/.dgt/keys/  |
+|      |                   | files are created | catalogue by      |
+|      |                   | in the specified  | default           |
+|      |                   | directory:        |                   |
+|      |                   |                   |                   |
+|      |                   | <key_dir          |                   |
+|      |                   | >/<key_name>.priv |                   |
+|      |                   | and               |                   |
+|      |                   | <key_di           |                   |
+|      |                   | r>/<key_name>.pub |                   |
+|      |                   |                   |                   |
+|      |                   | Command format:   |                   |
+|      |                   | dgt keygen [-h]   |                   |
+|      |                   | [--key-dir        |                   |
+|      |                   | KEY_DIR]          |                   |
+|      |                   | [--force] [-q]    |                   |
+|      |                   | [key_name]        |                   |
+|      |                   |                   |                   |
+|      |                   | -q - don't        |                   |
+|      |                   | display output    |                   |
+|      |                   |                   |                   |
+|      |                   | --key-dir KEY_DIR |                   |
+|      |                   | - directory where |                   |
+|      |                   | keys are          |                   |
+|      |                   | generated         |                   |
+|      |                   |                   |                   |
+|      |                   | --force - files   |                   |
+|      |                   | are overwritten   |                   |
++------+-------------------+-------------------+-------------------+
+| 1.8  | dgt peer list     | List of addresses | dgt peer list     |
+|      |                   | of connected      |                   |
+|      |                   | validators. If    | --url             |
+|      |                   | there are no      | http://           |
+|      |                   | connected nodes,  | api-dgt-c1-1:8108 |
+|      |                   | an empty string   |                   |
+|      |                   | is displayed.     |                   |
++------+-------------------+-------------------+-------------------+
+| 1.9  | dgt state list    | Printing entries  | dgt state list    |
+|      |                   | in the registry,  |                   |
+|      |                   | returns the       | --url             |
+|      |                   | corresponding     | http://           |
+|      |                   | addresses in the  | api-dgt-c1-1:8108 |
+|      |                   | format ADDRESS;   |                   |
+|      |                   | SIZE;DATA         |                   |
++------+-------------------+-------------------+-------------------+
+| 1.10 | dgt state show    | The command       | dgt state show    |
+|      |                   | outputs a         |                   |
+|      |                   | specific registry | --url             |
+|      |                   | entry for the     | http://           |
+|      |                   | given address:    | api-dgt-c1-1:8108 |
+|      |                   |                   | 00000034c         |
+|      |                   | dgt state list    | 8768f9d68b36c758… |
+|      |                   | [-h] [--url URL   |                   |
+|      |                   | [-F               |                   |
+|      |                   | {csv,js           |                   |
+|      |                   | on,yaml,default}] |                   |
+|      |                   | [--head HEAD]     |                   |
+|      |                   | [subtree]         |                   |
+|      |                   |                   |                   |
+|      |                   | Here:             |                   |
+|      |                   |                   |                   |
+|      |                   | -  address -      |                   |
+|      |                   |       address in  |                   |
+|      |                   |       DAG;        |                   |
+|      |                   |                   |                   |
+|      |                   | -  --head HEAD    |                   |
+|      |                   |       specify the |                   |
+|      |                   |       id of the   |                   |
+|      |                   |       block to    |                   |
+|      |                   |       set as the  |                   |
+|      |                   |       chain head  |                   |
++------+-------------------+-------------------+-------------------+
+| 1.11 | dgt transaction   | Returns a list of | dgt transaction   |
+|      | list              | transactions for  | list              |
+|      |                   | the given node.   |                   |
+|      |                   |                   | --url             |
+|      |                   | Command format:   | http://           |
+|      |                   |                   | api-dgt-c1-1:8108 |
+|      |                   | transaction list  |                   |
+|      |                   | [-h] [--url URL]  |                   |
+|      |                   | [-u               |                   |
+|      |                   | USE               |                   |
+|      |                   | RNAME[:PASSWORD]] |                   |
+|      |                   | [-F               |                   |
+|      |                   | {csv,js           |                   |
+|      |                   | on,yaml,default}] |                   |
+|      |                   |                   |                   |
+|      |                   | Default           |                   |
+|      |                   | information       |                   |
+|      |                   | output:           |                   |
+|      |                   | Transaction_ID;   |                   |
+|      |                   | Family;           |                   |
+|      |                   | Vers,Size;Payload |                   |
++------+-------------------+-------------------+-------------------+
+| 1.12 | dgt transaction   | Displays          | dgt transaction   |
+|      | show              | information about | list              |
+|      |                   | a specific        |                   |
+|      |                   | transaction,      | --url             |
+|      |                   | requires          | http://           |
+|      |                   | TRANSACTION_ID:   | api-dgt-c1-1:8108 |
+|      |                   |                   | 023567df4e2345…   |
+|      |                   | dgt transaction   |                   |
+|      |                   | show [-h] [--url  |                   |
+|      |                   | URL] [-k KEY] [-F |                   |
+|      |                   | {yaml,json}]      |                   |
+|      |                   | transaction_id    |                   |
+|      |                   |                   |                   |
+|      |                   | --url URL         |                   |
+|      |                   | identify the URL  |                   |
+|      |                   | of the            |                   |
+|      |                   | validator's REST  |                   |
+|      |                   | API               |                   |
+|      |                   |                   |                   |
+|      |                   | -k KEY, --key KEY |                   |
+|      |                   | displays a single |                   |
+|      |                   | property from the |                   |
+|      |                   | block or header   |                   |
++------+-------------------+-------------------+-------------------+
+| 1.13 | dgt dag show      | dag integrity     | dgt dag show      |
+|      | integrity         | check.            | integrity -url    |
+|      |                   |                   | http://           |
+|      |                   | dgt dag show      | api-dgt-c1-1:8108 |
+|      |                   | integrity -url    |                   |
+|      |                   | URL               |                   |
++------+-------------------+-------------------+-------------------+
+| 1.14 | dgt dag show val  | List of vertices  | dgt dag show val  |
+|      |                   | to join           | --url             |
+|      |                   |                   | http://           |
+|      |                   | dgt dag show val  | api-dgt-c1-1:8108 |
+|      |                   | -url URL          |                   |
++------+-------------------+-------------------+-------------------+
+| 2    | xcert Family      | Management of     |                   |
+|      |                   | node              |                   |
+|      |                   | certificates.     |                   |
+|      |                   |                   |                   |
+|      |                   | Several scenarios |                   |
+|      |                   | for joining a     |                   |
+|      |                   | node to the       |                   |
+|      |                   | network may       |                   |
+|      |                   | require the       |                   |
+|      |                   | creation of a     |                   |
+|      |                   | relevant          |                   |
+|      |                   | certificate.      |                   |
++------+-------------------+-------------------+-------------------+
+| 2.1  | xcert set         | Creation of a new | xcert set         |
+|      |                   | certificate:      | /                 |
+|      |                   |                   | project/bgx/etc/c |
+|      |                   | -  Edit the       | ertificate.jsomcn |
+|      |                   |       P           | --user            |
+|      |                   | ROJECT-FOLDER/etc | /root/.d          |
+|      |                   | /certificate.json | gt/keys/root.priv |
+|      |                   |       file        |                   |
+|      |                   |                   |                   |
+|      |                   | -  Generate a     |                   |
+|      |                   |       certificate |                   |
+|      |                   |       with the    |                   |
+|      |                   |       command:    |                   |
+|      |                   |                   |                   |
+|      |                   | xcert --user USER |                   |
+|      |                   | --url URL         |                   |
+|      |                   | --keyfile KEYFILE |                   |
+|      |                   | --wait [WAIT]     |                   |
+|      |                   | --before BEFORE   |                   |
+|      |                   | --after AFTER -cb |                   |
+|      |                   | CRYPTO_BACK,      |                   |
+|      |                   | here:             |                   |
++------+-------------------+-------------------+-------------------+
+| 2.2  | xcert list        | Output of         |                   |
+|      |                   | previously        |                   |
+|      |                   | generated         |                   |
+|      |                   | certificates.     |                   |
+|      |                   |                   |                   |
+|      |                   | Command format:   |                   |
+|      |                   |                   |                   |
+|      |                   | xcert list --url  |                   |
+|      |                   | URL --keyfile     |                   |
+|      |                   | KEYFILE --cb      |                   |
+|      |                   | CRYPTO_BACK       |                   |
++------+-------------------+-------------------+-------------------+
+| 2.3  | xcert show        | Prints the        | /project/bgx/etc  |
+|      |                   | specified         | /certificate.json |
+|      |                   | certificate to    | --user            |
+|      |                   | the screen.       | /root/.d          |
+|      |                   | Format:           | gt/keys/root.priv |
+|      |                   |                   |                   |
+|      |                   | xcert show name   |                   |
++------+-------------------+-------------------+-------------------+
+| 2.4  | xcert upd         | Certificate       | xcert upd         |
+|      |                   | renewal,          | /project/bgx/etc  |
+|      |                   | specified in the  | /certificate.json |
+|      |                   | format:           | --url             |
+|      |                   |                   | http://           |
+|      |                   | xcert upd VALUE   | api-dgt-c1-1:8108 |
+|      |                   | --url URL         | --keyfile         |
+|      |                   | --keyfile KEYFILE | /root/.d          |
+|      |                   | --before          | gt/keys/root.priv |
+|      |                   | BEFOREDAYS        | --before 245      |
+|      |                   | --after AFTERDAYS | -after 164        |
+|      |                   |                   |                   |
+|      |                   | Here:             |                   |
+|      |                   |                   |                   |
+|      |                   | VALUE - link to   |                   |
+|      |                   | the JSON - file   |                   |
+|      |                   | with parameters;  |                   |
+|      |                   |                   |                   |
+|      |                   | --url - node URL  |                   |
+|      |                   |                   |                   |
+|      |                   | --keyfile - link  |                   |
+|      |                   | to a certificate  |                   |
+|      |                   | with a private    |                   |
+|      |                   | key               |                   |
+|      |                   |                   |                   |
+|      |                   | --before - the    |                   |
+|      |                   | number of days    |                   |
+|      |                   | before today's    |                   |
+|      |                   | date that allow   |                   |
+|      |                   | the certificate   |                   |
+|      |                   | to be considered  |                   |
+|      |                   | valid             |                   |
+|      |                   |                   |                   |
+|      |                   | --after - the     |                   |
+|      |                   | link to the       |                   |
+|      |                   | number of days    |                   |
+|      |                   | after, which      |                   |
+|      |                   | allow the         |                   |
+|      |                   | certificate to be |                   |
+|      |                   | considered valid  |                   |
++------+-------------------+-------------------+-------------------+
+| 3    | dgtset            | Topology          |                   |
+|      |                   | transaction       |                   |
+|      |                   | family            |                   |
++------+-------------------+-------------------+-------------------+
+| 3.1  | dgtset genesis    |                   |                   |
++------+-------------------+-------------------+-------------------+
+| 3.2  | dgt proposal      |                   |                   |
++------+-------------------+-------------------+-------------------+
+| 3.3  | dgt topology      | Displays the      | dgtset topology   |
+|      |                   | current topology: | list -url         |
+|      |                   | dgtset topology   | http://           |
+|      |                   | list -url URL     | api-dgt-c1-1:8108 |
++------+-------------------+-------------------+-------------------+
+| 4    | bgt Family        | Test family of    |                   |
+|      |                   | transactions;     |                   |
+|      |                   | provides the      |                   |
+|      |                   | creation of       |                   |
+|      |                   | wallets and the   |                   |
+|      |                   | transfer of       |                   |
+|      |                   | abstract bgt      |                   |
+|      |                   | tokens to them    |                   |
++------+-------------------+-------------------+-------------------+
+| 4.1  | bgt set           | Creation of a new | bgt set WAL1 1000 |
+|      |                   | wallet with a     | -url              |
+|      |                   | command format    | http://           |
+|      |                   | of:               | api-dgt-c1-1:8108 |
+|      |                   |                   |                   |
+|      |                   | bgt set name      |                   |
+|      |                   | value -url URL    |                   |
+|      |                   | -keyfile KEYFILE  |                   |
+|      |                   | -wait [WAIT]      |                   |
++------+-------------------+-------------------+-------------------+
+| 4.2  | bgt inc           | Increasing the    | bgt inc WAL1 50   |
+|      |                   | volume of tokens  | -url              |
+|      |                   | in the wallet:    | http://           |
+|      |                   |                   | api-dgt-c1-1:8108 |
+|      |                   | bgt inc name      |                   |
+|      |                   | value --url URL   |                   |
+|      |                   | --keyfile KEYFILE |                   |
+|      |                   | -wait [WAIT]      |                   |
++------+-------------------+-------------------+-------------------+
+| 4.3  | bgt dec           | Reducing the      | bgt dec WAL1 50   |
+|      |                   | number of tokens  | -url              |
+|      |                   | in the wallet:    | http://           |
+|      |                   |                   | api-dgt-c1-1:8108 |
+|      |                   | bgt inc name      |                   |
+|      |                   | value --url URL   |                   |
+|      |                   | --keyfile KEYFILE |                   |
+|      |                   | -wait [WAIT]      |                   |
++------+-------------------+-------------------+-------------------+
+| 4.4  | bgt trans         | Transferring      | bgt trans WAL1 50 |
+|      |                   | tokens from       | WAL2 -url         |
+|      |                   | wallet to wallet: | http://           |
+|      |                   |                   | api-dgt-c1-1:8108 |
+|      |                   | bgt trans name    |                   |
+|      |                   | value to --url    |                   |
+|      |                   | URL --keyfile     |                   |
+|      |                   | KEYFILE --wait    |                   |
+|      |                   | [WAIT]            |                   |
++------+-------------------+-------------------+-------------------+
+| 4.5  | bgt show          | Shows the value   | bgt show --url    |
+|      |                   | of BGT Tokens for | http://           |
+|      |                   | a given wallet:   | api-dgt-c1-1:8108 |
+|      |                   | bgt show --url    |                   |
+|      |                   | URL               |                   |
++------+-------------------+-------------------+-------------------+
+| 4.6  | bgt list          | Displays all      | bgt list --url    |
+|      |                   | available         | http://           |
+|      |                   | wallets.          | api-dgt-c1-1:8108 |
+|      |                   |                   |                   |
+|      |                   | bgt list --url    |                   |
+|      |                   | URL               |                   |
++------+-------------------+-------------------+-------------------+
