@@ -31,7 +31,7 @@ from dgt_cli.network_command.peers import add_peers_parser
 from dgt_cli.network_command.peers import do_peers
 
 
-DISTRIBUTION_NAME = 'bgxnet'
+DISTRIBUTION_NAME = 'dgtnet'
 
 
 def create_parser(prog_name):

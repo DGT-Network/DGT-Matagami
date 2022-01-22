@@ -26,7 +26,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: settings-tp-${PNM}:${ISOLATION_ID}
     networks: 
     - network1
@@ -34,6 +34,7 @@ services:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -58,12 +59,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: bgt-tp-python-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     networks:
     - network1
     volumes:
@@ -91,12 +93,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: stuff-tp-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     networks:
     - network1
     volumes:
@@ -124,12 +127,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: xcert-tp-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     networks:
     - network1
     volumes:
@@ -158,7 +162,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: shell-${PNM}:${ISOLATION_ID}
     networks:
     - network1
@@ -166,6 +170,7 @@ services:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -188,7 +193,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: validator-${PNM}:${ISOLATION_ID}
     networks:
     - network1
@@ -200,6 +205,7 @@ services:
     - NETWORK=${NETWORK}
     - PCONTROL=${PCONTROL}
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -247,12 +253,13 @@ services:
         - http_proxy   
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: rest-api-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -283,7 +290,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: pbft-${PNM}:${ISOLATION_ID}
     networks:
     - network1
@@ -291,13 +298,14 @@ services:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
     container_name: pbft-${PNM}-${C}-${N}
     depends_on:
       - validator-dgt
-    #  - bgx-registry
+    #  - dgt-registry
     command: |
       bash -c "
         cd consensus/dgt_pbft;

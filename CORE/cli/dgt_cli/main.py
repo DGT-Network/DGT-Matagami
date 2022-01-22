@@ -50,7 +50,7 @@ from dgt_cli.head import do_dag
 from dgt_cli.cli_config import load_cli_config
 
 
-DISTRIBUTION_NAME = 'bgx-cli'
+DISTRIBUTION_NAME = 'dgt-cli'
 
 
 def create_console_handler(verbose_level):

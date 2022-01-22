@@ -37,7 +37,7 @@ setup(
     version=subprocess.check_output(
         ['../../bin/get_version']).decode('utf-8').strip(),
     description='DGT PBFT Consensus Engine',
-    author='Hyperledger Sawtooth-bgx',
+    author='Hyperledger Sawtooth-dgt',
     url='https://github.com/hyperledger/sawtooth-core',
     packages=find_packages(),
     install_requires=[

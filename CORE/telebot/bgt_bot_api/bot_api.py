@@ -38,7 +38,7 @@ from dgt_validator.database.lmdb_nolock_database import LMDBNoLockDatabase
 
 from bgt_bot_api.messaging import Connection
 #from sawtooth_rest_api.route_handlers import RouteHandler
-#BGX handlers
+#DGT handlers
 #from bgt_bot_api.bgx_handlers import BgxRouteHandler
 from bgt_bot_api.bot_handlers import Tbot
 from bgt_bot_api.bgx_handlers import BgxTeleBot

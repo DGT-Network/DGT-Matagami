@@ -31,7 +31,7 @@ from dgt_cli.admin_command.node import add_node_parser
 from dgt_cli.admin_command.node import do_node
 
 
-DISTRIBUTION_NAME = 'bgxadm'
+DISTRIBUTION_NAME = 'dgtadm'
 
 
 def create_parser(prog_name):

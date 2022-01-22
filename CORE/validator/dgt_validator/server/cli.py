@@ -137,7 +137,7 @@ def parse_args(args):
     parser.add_argument(
         '-V', '--version',
         action='version',
-        version=(DISTRIBUTION_NAME + ' (Hyperledger Bgx Sawtooth) version {}')
+        version=(DISTRIBUTION_NAME + ' (Hyperledger DGT Sawtooth) version {}')
         .format(version),
         help='display version information')
 
@@ -356,7 +356,7 @@ def main(args=None):
             registry=registry,
             reporting_interval=10,
             database=validator_config.opentsdb_db,
-            prefix="bgx_validator",
+            prefix="dgt_validator",
             port=db_port,
             protocol=proto,
             server=db_server,

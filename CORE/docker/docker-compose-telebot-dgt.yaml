@@ -10,10 +10,11 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: telebot-dgt
     environment:
     - DGT_HOME=/project/peer
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/c1/dgt1:/project/peer

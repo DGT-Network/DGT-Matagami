@@ -1313,7 +1313,7 @@ class PbftEngine(Engine):
                 LOGGER.debug("Waiting position into topology for=%s (Dynamic mode)\n",self._validator_id)
                 self._is_sync = False
             else:
-                LOGGER.debug("Undefined place into topology for=%s (Update bgx/etc/bgx_val.conf)", self._validator_id)
+                LOGGER.debug("Undefined place into topology for=%s (Update dgt/etc/dgt_val.conf)", self._validator_id)
             LOGGER.debug("Genesis=%s(%s) Node=%s arbiters=%s",self._genesis,self._genesis_node[:8],self._validator_id[:8],self.arbiters_info)
         else:
             LOGGER.debug("Genesis=%s(%s) Node=%s %s in cluster=%s nodes=%s arbiters=%s(%s)",self._genesis,self._genesis_node[:8],self._validator_id[:8],self.own_type,self._cluster_name,[key[:8] for key in self._cluster.keys()],

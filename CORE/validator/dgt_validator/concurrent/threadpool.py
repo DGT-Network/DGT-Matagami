@@ -29,7 +29,7 @@ LOGGER = logging.getLogger(__name__)
 class InstrumentedThreadPoolExecutor(ThreadPoolExecutor):
     def __init__(self, max_workers=None, name='', trace=None,metrics_registry=None):
         if trace is None:
-            self._trace = 'BGX_TRACE_LOGGING' in os.environ
+            self._trace = 'DGT_TRACE_LOGGING' in os.environ
         else:
             self._trace = trace
 

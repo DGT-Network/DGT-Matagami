@@ -34,7 +34,7 @@ from dgt_settings.processor.config.settings import load_toml_settings_config
 from dgt_settings.processor.config.settings import merge_settings_config
 
 
-DISTRIBUTION_NAME = 'bgx-settings'
+DISTRIBUTION_NAME = 'dgt-settings'
 
 
 def create_console_handler(verbose_level):

@@ -23,7 +23,7 @@ from collections.abc import MutableMapping
 from enum import Enum
 
 LOGGER = logging.getLogger(__name__)
-OLD_TOPOLOGY_SET_NM = 'dgt.consensus.pbft.nodes'
+
 DGT_TOPOLOGY_SET_NM = 'dgt.consensus.pbft.nodes'
 TOPOLOGY_SET_NM = DGT_TOPOLOGY_SET_NM
 DGT_TOPOLOGY_MAP_NM = 'dgt.topology.map'
@@ -526,7 +526,7 @@ class FbftTopology(object):
         if PeerAtr.cluster in ppeer:
             return False,"Peer {}.{} already cluster owner".format(cname,pname)
 
-        try: # {'name': 'Bgx2', 'type': 'cluster'}
+        try: # {'name': 'Dgt2', 'type': 'cluster'}
             ncluster = json.loads(clist.replace("'",'"'))
         except ValueError as e:
             return False,'Invalid json: '+ str(e)

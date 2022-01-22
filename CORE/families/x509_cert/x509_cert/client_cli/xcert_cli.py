@@ -44,7 +44,8 @@ DISTRIBUTION_NAME = 'x509-cert'
 
 DEFAULT_URL = 'http://127.0.0.1:8008'
 
-
+DGT_TOP = os.environ.get('DGT_TOP')
+XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
     formatter = ColoredFormatter(
@@ -141,7 +142,7 @@ def add_set_parser(subparsers, parent_parser):
     parser.add_argument(
         'value',
         type=str,
-        default="/project/bgx/etc/certificate.json",
+        default=XCERT_PROTO_FILE,
         help='xcert atributes JSON')
 
     parser.add_argument(
@@ -197,7 +198,7 @@ def add_upd_parser(subparsers, parent_parser):
     parser.add_argument(
         'value',
         type=str,
-        default="/project/bgx/etc/certificate.json",
+        default=XCERT_PROTO_FILE,
         help='specify xcert atributes to update')
     parser.add_argument(
         '--user',

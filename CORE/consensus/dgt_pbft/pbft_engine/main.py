@@ -71,7 +71,7 @@ def parse_args(args):
     parser.add_argument(
         '-V', '--version',
         action='version',
-        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth-bgx) version {}')
+        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth-DGT) version {}')
         .format(version),
         help='print version information')
 
@@ -104,9 +104,9 @@ def main(args=None):
         arg_config = create_pbft_config(opts)
         pbft_config = load_pbft_config(arg_config)
 
-        log_config = get_log_config('bgx-pbft-engine-log-config.toml')
+        log_config = get_log_config('dgt-pbft-engine-log-config.toml')
         if log_config is None:
-            log_config = get_log_config('bgx-pbft-engine-log-config.yaml')
+            log_config = get_log_config('dgt-pbft-engine-log-config.yaml')
 
         if log_config is not None:
             log_configuration(log_config=log_config)
