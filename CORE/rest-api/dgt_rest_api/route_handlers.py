@@ -31,23 +31,6 @@ import dgt_rest_api.exceptions as errors
 from dgt_rest_api import error_handlers
 from dgt_rest_api.messaging import DisconnectError
 from dgt_rest_api.messaging import SendBackoffTimeoutError
-"""
-from dgt_rest_api.protobuf.validator_pb2 import Message
-from dgt_rest_api.protobuf import client_transaction_pb2
-from dgt_rest_api.protobuf import client_list_control_pb2
-from dgt_rest_api.protobuf import client_batch_submit_pb2
-from dgt_rest_api.protobuf import client_state_pb2
-from dgt_rest_api.protobuf import client_block_pb2
-from dgt_rest_api.protobuf import client_batch_pb2
-from dgt_rest_api.protobuf import client_receipt_pb2
-from dgt_rest_api.protobuf import client_peers_pb2
-from dgt_rest_api.protobuf import client_status_pb2
-from dgt_rest_api.protobuf.block_pb2 import BlockHeader
-from dgt_rest_api.protobuf.batch_pb2 import BatchList
-from dgt_rest_api.protobuf.batch_pb2 import BatchHeader
-from dgt_rest_api.protobuf.transaction_pb2 import TransactionHeader
-from dgt_rest_api.protobuf import client_heads_pb2,client_topology_pb2
-"""
 from dgt_sdk.protobuf.validator_pb2 import Message
 from dgt_sdk.protobuf import client_transaction_pb2
 from dgt_sdk.protobuf import client_list_control_pb2
@@ -65,10 +48,25 @@ from dgt_sdk.protobuf.batch_pb2 import BatchHeader
 from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 from dgt_sdk.protobuf import client_heads_pb2,client_topology_pb2
 # pylint: disable=too-many-lines
+from dgt_bgt.client_cli.bgt_client import _token_info as bgt_token_info
 
 DEFAULT_TIMEOUT = 300
 LOGGER = logging.getLogger(__name__)
 MALICIOUS_LIST = {'ok' : ClientPeersGetRequest.OK,'ma' : ClientPeersGetRequest.MALICIOUS,'ma1' : ClientPeersGetRequest.MALICIOUS1,'ma2' : ClientPeersGetRequest.MALICIOUS2 }
+
+TX_FAMILIES = {
+    'bgt': {'commands' :{'set':['wallet','amount'],'inc':['wallet','amount'],'dec':['wallet','amount'],'trans':['wallet','amount','to'],'show':['wallet']}}
+    }
+RUN_STATUSES = {
+      "id": "23102b0fcf11e6d6ed0476e08c76dd6ec0a83cf3dba3d77256ede90d048a3545242459efab08627bf622d2da2f1434e48a2e54561df1ada5ba1cc99c02f5c666",
+      "invalid_transactions": [
+        {
+          "id": "5195cd20aa4141605f0172f28b95d041b750d2bc4da5061fda9043089062e75e1020a4cfee46c87e9c09eb6c6be1754502595ae9e0e8790162ff1588148a8f15",
+          "message": "Verb is \"dec\", but result would be less than 0"
+        }
+      ],
+      "status": "INVALID"
+    }
 
 class CounterWrapper():
     def __init__(self, counter=None):
@@ -139,6 +137,17 @@ class RouteHandler:
             self._post_batches_error = CounterWrapper()
             self._post_batches_total_time = TimerWrapper()
             self._post_batches_validator_time = TimerWrapper()
+
+    async def tx_families(self,request):                                                       
+        """                                                                                    
+        get  tx families                                                                       
+        """                                                                                    
+        LOGGER.debug('Request tx_families endpoint=%s',request)                                
+        return self._wrap_response(                                                            
+            request,                                                                           
+            data=TX_FAMILIES                                                                   
+            )                                                                                  
+                                                                                               
 
     async def submit_batches(self, request):
         """Accepts a binary encoded BatchList and submits it to the validator.

@@ -75,6 +75,10 @@ from smart_bgt.processor.utils import FAMILY_NAME as SMART_BGX_FAMILY
 from smart_bgt.processor.utils import FAMILY_VER as SMART_BGX_VER
 from smart_bgt.processor.utils import SMART_BGT_META,SMART_BGT_CREATOR_KEY,SMART_BGT_PRESENT_AMOUNT
 from smart_bgt.processor.utils import make_smart_bgt_address
+# bgt families                                                                               
+from dgt_bgt.client_cli.generate import BgtPayload,create_bgt_transaction,loads_bgt_token    
+from dgt_bgt.processor.handler import make_bgt_address 
+                                      
 import time
 LOGGER = logging.getLogger(__name__)
 
@@ -193,6 +197,70 @@ class BgxRouteHandler(RouteHandler):
             LOGGER.debug('BgxRouteHandler: Cant get state FOR=%s',address)
             return None
         return result
+
+    async def run_transaction(self, request):                                                                                                      
+        """                                                                                                                                        
+        make transfer from wallet to wallet                                                                                                        
+        """                                                                                                                                        
+        family = request.url.query.get('family', None)                                                                                             
+        if family == 'bgt' :                                                                                                                       
+            cmd = request.url.query.get('cmd', None)                                                                                               
+            arg1 = request.url.query.get('wallet', None)                                                                                           
+            if cmd == 'show':                                                                                                                      
+                address = make_bgt_address(arg1)                                                                                                   
+                error_traps = [error_handlers.InvalidAddressTrap,error_handlers.StateNotFoundTrap]                                                 
+                response = await self._query_validator(                                                                                            
+                    Message.CLIENT_STATE_GET_REQUEST,                                                                                              
+                    client_state_pb2.ClientStateGetResponse,                                                                                       
+                    client_state_pb2.ClientStateGetRequest(                                                                                        
+                        state_root='',                                                                                                             
+                        address=address),                                                                                                          
+                    error_traps)                                                                                                                   
+                LOGGER.debug('run_transaction: BGT show=%s (%s)!',arg1,response)                                                                   
+                if response['status'] == 'OK':                                                                                                     
+                    bgt = loads_bgt_token(response['value'],arg1)                                                                                  
+                    LOGGER.debug('run_transaction: BGT[%s]=%s!',arg1,bgt)                                                                          
+                else:                                                                                                                              
+                    bgt = response['value']                                                                                                        
+                return self._wrap_response(                                                                                                        
+                    request,                                                                                                                       
+                    data=bgt,                                                                                                                      
+                    metadata=self._get_metadata(request, response))                                                                                
+                                                                                                                                                   
+                                                                                                                                                   
+                                                                                                                                                   
+            arg2 = request.url.query.get('amount', None)                                                                                           
+            arg3 = request.url.query.get('to', None)                                                                                               
+            LOGGER.debug('run_transaction family=%s cmd=%s(%s,%s) query=%s!!!',family,cmd,arg1,arg2,request.url.query)                             
+            transaction = create_bgt_transaction(verb=cmd,name=arg1,value=int(arg2),signer=self._signer,to=arg3)                                   
+            batch = self._create_batch([transaction])                                                                                              
+            batch_id = batch.header_signature                                                                                                      
+        else:                                                                                                                                      
+            # undefined families                                                                                                                   
+            batch_id = None                                                                                                                        
+            link = ''                                                                                                                              
+                                                                                                                                                   
+        if batch_id is not None:                                                                                                                   
+            error_traps = [error_handlers.BatchInvalidTrap,error_handlers.BatchQueueFullTrap]                                                      
+            validator_query = client_batch_submit_pb2.ClientBatchSubmitRequest(batches=[batch])                                                    
+            LOGGER.debug('run_transaction send batch_id=%s',batch_id)                                                                              
+                                                                                                                                                   
+            with self._post_batches_validator_time.time():                                                                                         
+                await self._query_validator(                                                                                                       
+                    Message.CLIENT_BATCH_SUBMIT_REQUEST,                                                                                           
+                    client_batch_submit_pb2.ClientBatchSubmitResponse,                                                                             
+                    validator_query,                                                                                                               
+                    error_traps)                                                                                                                   
+            link = self._build_url(request, path='/batch_statuses', id=batch_id)                                                                   
+        return self._wrap_response(                                                                                                                
+            request,                                                                                                                               
+            data=None,                                                                                                                             
+            metadata={                                                                                                                             
+              'link': link,                                                                                                                        
+            }                                                                                                                                      
+            )                                                                                                                                      
+
+
 
     def _get_token(self,wallet,key):
         def coin(token):

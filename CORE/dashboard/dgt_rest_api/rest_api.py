@@ -43,7 +43,7 @@ from dgt_rest_api.config import RestApiConfig
 
 
 LOGGER = logging.getLogger(__name__)
-DISTRIBUTION_NAME = 'sawtooth-rest-api'
+DISTRIBUTION_NAME = 'dgt-rest-api'
 
 
 def parse_args(args):

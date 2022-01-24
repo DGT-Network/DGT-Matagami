@@ -742,7 +742,7 @@ class RouteHandler:
             request,
             data=None,
             metadata={
-              'link': "http://bgx-api-2:8009/batch_statuses?id=851262082dac8d49103d1ed7a8426f1ec933e4c09f4067f5c6f3b8443fd8c2236355f9d2a465c304798f532f5de134259625b15399e0299812ae36994330c312",
+              'link': "http://dgt-api-2:8009/batch_statuses?id=851262082dac8d49103d1ed7a8426f1ec933e4c09f4067f5c6f3b8443fd8c2236355f9d2a465c304798f532f5de134259625b15399e0299812ae36994330c312",
             }
             )
 
