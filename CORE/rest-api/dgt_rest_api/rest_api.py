@@ -35,7 +35,7 @@ from dgt_sdk.processor.config import get_config_dir
 from dgt_rest_api.messaging import Connection
 #from dgt_rest_api.route_handlers import RouteHandler
 #DGT handlers
-from dgt_rest_api.bgx_handlers import BgxRouteHandler
+from dgt_rest_api.bgx_handlers import DgtRouteHandler
 from dgt_rest_api.state_delta_subscription_handler import StateDeltaSubscriberHandler
 from dgt_rest_api.config import load_default_rest_api_config
 from dgt_rest_api.config import load_toml_rest_api_config
@@ -110,7 +110,7 @@ def start_rest_api(host, port, connection, timeout, registry,
     app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    handler = BgxRouteHandler(loop, connection, timeout, registry)
+    handler = DgtRouteHandler(loop, connection, timeout, registry)
     LOGGER.info('Creating handlers for validator at %s', connection.url)
 
     app.router.add_post('/batches', handler.submit_batches)

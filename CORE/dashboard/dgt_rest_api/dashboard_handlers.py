@@ -134,7 +134,7 @@ class DashboardRouteHandler(RouteHandler):
         """
         make transaction
         """
-        LOGGER.debug('BgxRouteHandler: _create_transaction make Transaction')
+        LOGGER.debug('DgtRouteHandler: _create_transaction make Transaction')
         txn_header = TransactionHeader(
             signer_public_key=self._signer.get_public_key().as_hex(),
             family_name=family,
