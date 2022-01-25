@@ -36,8 +36,14 @@ from dgt_bgt.processor.handler import make_bgt_address
 
 LOGGER = logging.getLogger(__name__)
 
-def loads_bgt_token(data,name):
-    value = cbor.loads(base64.b64decode(data))[name]
+def loads_bgt_token(data,name=None):
+    decoded = cbor.loads(base64.b64decode(data))
+    if name is not None:
+        value = decoded[name]
+    else:
+        for key,data in decoded.items():
+            name,value = key,data
+            break 
     token = BgtTokenInfo()
     token.ParseFromString(value)
     LOGGER.debug("BGT:%s %s=%s",name,token.group_code,token.decimals)

@@ -38,6 +38,8 @@ FAMILY_NAME = 'bgt'
 
 BGT_ADDRESS_PREFIX = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
 
+def make_bgt_prefix():
+    return hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
 
 def make_bgt_address(name):
     return BGT_ADDRESS_PREFIX + hashlib.sha512(name.encode('utf-8')).hexdigest()[-64:]

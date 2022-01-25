@@ -77,7 +77,7 @@ from smart_bgt.processor.utils import SMART_BGT_META,SMART_BGT_CREATOR_KEY,SMART
 from smart_bgt.processor.utils import make_smart_bgt_address
 # bgt families                                                                               
 from dgt_bgt.client_cli.generate import BgtPayload,create_bgt_transaction,loads_bgt_token    
-from dgt_bgt.processor.handler import make_bgt_address 
+from dgt_bgt.processor.handler import make_bgt_address, make_bgt_prefix 
                                       
 import time
 LOGGER = logging.getLogger(__name__)
@@ -226,8 +226,39 @@ class DgtRouteHandler(RouteHandler):
                     request,                                                                                                                       
                     data=bgt,                                                                                                                      
                     metadata=self._get_metadata(request, response))                                                                                
-                                                                                                                                                   
-                                                                                                                                                   
+            elif  cmd == 'list' :
+                paging_controls = self._get_paging_controls(request)                           
+                # for DAG ask head of chain for getting merkle root is incorrect way           
+                # FIXME - add special method for asking real merkle root                       
+                head, root = await self._head_to_root(request.url.query.get('head', None))     
+                LOGGER.debug('LIST_STATE STATE=%s',root[:10])                                  
+                                                                                               
+                validator_query = client_state_pb2.ClientStateListRequest(                     
+                    state_root='',
+                    address=make_bgt_prefix(),                            
+                    sorting=self._get_sorting_message(request, "default"),                     
+                    paging=self._make_paging_message(paging_controls))                         
+                                                                                               
+                response = await self._query_validator(                                        
+                    Message.CLIENT_STATE_LIST_REQUEST,                                         
+                    client_state_pb2.ClientStateListResponse,                                  
+                    validator_query)                                                           
+                 
+                if response['status'] == 'OK':
+                    decoded = []
+                    for entry in response['entries']:
+                        bgt = loads_bgt_token(entry["data"])      
+                        LOGGER.debug(f'BGT LIST DATA={bgt}')
+                        decoded.append(bgt)
+                    response['entries'] = decoded
+
+                return self._wrap_paginated_response(                                          
+                    request=request,                                                           
+                    response=response,                                                         
+                    controls=paging_controls,                                                  
+                    data=response.get('entries', []),                                          
+                    head=head)                                                                 
+
                                                                                                                                                    
             arg2 = request.url.query.get('amount', None)                                                                                           
             arg3 = request.url.query.get('to', None)                                                                                               
