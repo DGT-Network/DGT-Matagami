@@ -1,0 +1,21 @@
+{
+"c1" : {
+         "dgt1" : "AA.aa1",
+	 "dgt2" : "AA.aa2",
+	 "dgt3" : "AA.aa3",
+	 "dgt4" : "AA.aa4"
+       },
+"c2" : {                         
+	 "dgt1" : "AB.ab1",
+	 "dgt2" : "AB.ab2",
+	 "dgt3" : "AB.ab3",
+	 "dgt4" : "AB.ab4"
+       },
+"c3" : {                                                 
+	 "dgt1" : "AC.ac1",
+	 "dgt2" : "AC.ac2",
+	 "dgt3" : "AC.ac3",
+	 "dgt4" : "AC.ac4"
+       },                        
+"static_map" :["c1.dgt1","c1.dgt2","c1.dgt3","c1.dgt4","c2.dgt1","c3.dgt1"]                    
+}			     
