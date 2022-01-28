@@ -693,6 +693,28 @@ class RouteHandler:
             data=json.loads(topology),
             metadata=self._get_metadata(request, response))
 
+    async def fetch_dag_graph(self, request):                                   
+        """Fetches the dag graph from the validator.                            
+        Request:                                                               
+                                                                               
+        Response:                                                              
+            data: GV                                    
+            link: The link to this exact query                                 
+        """ 
+        format = request.match_info.get('format', '.gv')                                                                   
+        #LOGGER.debug('Request fetch_topology ')                               
+        response = await self._query_validator(                                
+            Message.CLIENT_GRAPH_GET_REQUEST,                               
+            client_heads_pb2.DagGraphGetResponse,                     
+            client_heads_pb2.DagGraphGetRequest(format=format))                    
+        #graph = base64.b64decode(response['graph'])                      
+        #LOGGER.debug('Request fetch_dag_graph=%s',graph) 
+        return web.Response(                 
+            status=200,                   
+            content_type='text', 
+            text=response['graph']
+            )             
+
 
     async def fetch_status(self, request):
         '''Fetches information pertaining to the valiator's status.'''

@@ -534,11 +534,12 @@ class BlockStore(MutableMapping):
         LOGGER.debug("check_integrity num=%s spent=%s DONE\n",num,spent)
         return bad_block
 
-    def get_graph(self):
+    def get_graph(self,format=None):
         bad_block = ['save']
         LOGGER.debug("get_graph DONE\n")
         fed_colour = ['white','yellow','green','blue','grey','red','darkcyan','teal']
-        gv = open('DAG.gv', 'w')
+        dag_fnm = 'DAG.gv'
+        gv = open(dag_fnm, 'w')
         gv.write("digraph DAG {\n")
         #gv.write('node [style="filled", fillcolor="yellow", fontcolor="black", margin="0.01"]')
         prev = None
@@ -574,6 +575,14 @@ class BlockStore(MutableMapping):
         gv.write('"{}" [fillcolor="red",shape="circle"];\n'.format(prev))         
         gv.write("}\n")
         gv.close()
+        with open(dag_fnm,"r") as dfile:                                                                  
+            try:                                                                                            
+                gv_data =  dfile.read()                                                                 
+                return gv_data                                                                                 
+            except Exception as ex:                                                                         
+
+                return "digraph DAG"                                                                                 
+
 
     @property
     def chain_heads(self):

@@ -32,3 +32,17 @@ message ClientHeadsGetResponse {
     Status status = 1;
     repeated string heads = 2;
 }
+
+message DagGraphGetRequest{   
+ string format = 1;       
+}                                       
+					
+message DagGraphGetResponse {        
+    enum Status {                       
+	STATUS_UNSET = 0;               
+	OK = 1;                         
+	ERROR = 2;                      
+    }                                   
+    Status status = 1;                  
+    string graph  = 2;          
+}                                       

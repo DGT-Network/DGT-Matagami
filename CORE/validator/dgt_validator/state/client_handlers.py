@@ -1166,6 +1166,23 @@ class HeadsGetRequest(_ClientRequestHandler):
             heads = self._block_store.get_chain_heads()
         
         return self._wrap_response(heads=heads)
+                                                                     
+class DagGraphGetRequest(_ClientRequestHandler):                        
+    def __init__(self, block_store):                 
+        super().__init__(                                            
+            client_heads_pb2.DagGraphGetRequest,                  
+            client_heads_pb2.DagGraphGetResponse,                 
+            validator_pb2.Message.CLIENT_GRAPH_GET_RESPONSE,         
+            block_store=block_store                                  
+        )                                                            
+                                                                     
+    def _respond(self, request):                                     
+        format = request.format                                    
+        graph = self._block_store.get_graph(format=format)                    
+        return self._wrap_response(graph=graph)
+
+
+
 
 class CandidatesGetRequest(_ClientRequestHandler):
     def __init__(self, block_publisher):

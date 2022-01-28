@@ -124,6 +124,8 @@ message Message {
 	// peers control
 	CLIENT_PEERS_CONTROL_REQUEST = 135;
         CLIENT_PEERS_CONTROL_RESPONSE = 136;
+	CLIENT_GRAPH_GET_REQUEST      = 137;    
+	CLIENT_GRAPH_GET_RESPONSE     = 138;   
 
         // Message types for events
         CLIENT_EVENTS_SUBSCRIBE_REQUEST = 500;

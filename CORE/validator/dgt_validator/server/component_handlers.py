@@ -238,6 +238,13 @@ def add(
         client_handlers.HeadsGetRequest(block_store,block_publisher),
         thread_pool)
 
+    dispatcher.add_handler(                                              
+        validator_pb2.Message.CLIENT_GRAPH_GET_REQUEST,                  
+        client_handlers.DagGraphGetRequest(block_store),    
+        thread_pool)                                                     
+                                                                         
+
+
     # get topology 
     dispatcher.add_handler(
         validator_pb2.Message.CLIENT_TOPOLOGY_GET_REQUEST,
