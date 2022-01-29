@@ -83,7 +83,7 @@ MAXIMUM_STATIC_RETRY_FREQUENCY = 3600
 MAXIMUM_STATIC_RETRIES = 24
 
 TIME_TO_LIVE = 3
-TIME_TO_LIVE_NM       = "dgt.gossip.time_to_live"
+TIME_TO_LIVE_NM       = "dgt.net.time_to_live"
 MAX_PUBLIC_CLUSTER_NM = 'dgt.fbft.max_public_cluster'
 AUTO_CLUSTER_NM       = 'dgt.fbft.auto_cluster'
 MAX_FEDER_PEER_NM     = 'dgt.fbft.max_feder_peer'
