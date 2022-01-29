@@ -1,7 +1,7 @@
 {
   "name":"metrics",
   "type":"influxdb",
-  "url":"http://bgx-stats-influxdb:8086",
+  "url":"http://stats-influxdb-dgt:8086",
   "access":"proxy",
   "database":"metrics",
   "basicauth":false
