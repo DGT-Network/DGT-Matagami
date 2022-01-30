@@ -1,4 +1,4 @@
-# Copyright 2019 NTRLab
+# Copyright 2019 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ FROM influxdb
 #RUN apt-get update &&  apt-get install -y   bash 
 #    rm -rf /var/lib/apt/lists/*
 
-#COPY bgx/docker/grafana/dashboards /etc/grafana/dashboards
-#COPY bgx/docker/grafana/datasources /etc/grafana/datasources
-#COPY bgx/docker/grafana/grafana.ini /etc/grafana
+#COPY docker/grafana/dashboards /etc/grafana/dashboards
+#COPY docker/grafana/datasources /etc/grafana/datasources
+#COPY docker/grafana/grafana.ini /etc/grafana
 
 #WORKDIR /app
-#COPY bgx/docker/grafana/grafana_entrypoint.sh ./
+#COPY docker/grafana/grafana_entrypoint.sh ./
 #RUN chmod u+x grafana_entrypoint.sh
 
 #ENTRYPOINT ["/app/grafana_entrypoint.sh"]
