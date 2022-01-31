@@ -239,7 +239,7 @@ services:
             --bind network:tcp://eth0:${NET} \
             --bind consensus:tcp://eth0:${CONS} \
             --max_dag_branch 6 --scheduler parallel ${SIGNED} --peering ${PEERING} ${SEEDS} --maximum-peer-connectivity 70 \
-            --opentsdb-url-off http://stats-influxdb-${PNM}:8086 --opentsdb-db metrics --opentsdb-username lrdata --opentsdb-password pwlrdata
+            ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
       "
     stop_signal: SIGTERM
     #stop_grace_period: 600ms
@@ -277,7 +277,7 @@ services:
         dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/rest-api*.log*;
         python3 setup.py clean --all
         python3 setup.py build
-        dgt-rest-api -vv --connect tcp://validator-${PNM}-${C}-${N}:${COMP} --bind api-${PNM}-${C}-${N}:${API} --opentsdb-url-off http://stats-influxdb-${PNM}:8086 --opentsdb-db metrics --opentsdb-username lrdata --opentsdb-password pwlrdata
+        dgt-rest-api -vv --connect tcp://validator-${PNM}-${C}-${N}:${COMP} --bind api-${PNM}-${C}-${N}:${API} ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
       "
     stop_signal: SIGKILL
 

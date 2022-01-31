@@ -17,6 +17,9 @@ services:
       - INFLUXDB_DB=metrics
       - INFLUXDB_ADMIN_USER=admin
       - INFLUXDB_ADMIN_PASSWORD=pwadmin
+      - INFLUXDB_USER=lrdata          
+      - INFLUXDB_USER_PASSWORD=pwlrdata
+      - INFLUXD_LOG_LEVEL=debug 
   grafana:
     build:
       context: ..

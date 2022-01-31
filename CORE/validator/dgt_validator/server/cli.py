@@ -344,7 +344,7 @@ def main(args=None):
     wrapped_registry = None
     metrics_reporter = None
     if validator_config.opentsdb_url:
-        LOGGER.info("Adding METRICS reporter: url=%s, db=%s",validator_config.opentsdb_url,validator_config.opentsdb_db)
+        LOGGER.info("Adding METRICS reporter: url=%s, db=%s login=%s/%s",validator_config.opentsdb_url,validator_config.opentsdb_db,validator_config.opentsdb_username,validator_config.opentsdb_password)
 
         url = urlparse(validator_config.opentsdb_url)
         proto, db_server, db_port, = url.scheme, url.hostname, url.port
