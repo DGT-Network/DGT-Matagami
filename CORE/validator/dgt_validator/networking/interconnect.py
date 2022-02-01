@@ -765,7 +765,7 @@ class Interconnect(object):
     @property
     def extpoint(self): 
         # for starting into local docker network
-        return self._public_extpoint if self.single else self._public_endpoint
+        return self._public_extpoint #if self.single else self._public_endpoint
 
     @property
     def network(self):
