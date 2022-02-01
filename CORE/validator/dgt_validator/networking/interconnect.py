@@ -719,22 +719,30 @@ class Interconnect(object):
     def set_network_mode(self,public_endpoint):
         self._network = os.environ.get('NETWORK')
         self._single = (os.environ.get('SINGLE') == 'Y')
+        endhost = os.environ.get('ENDHOST')
         self._public_endpoint = public_endpoint
-        LOGGER.debug("Interconnect: SINGLE=%s NETWORK=%s",self._single,self._network)
-        conn = http.client.HTTPConnection(ASK_MY_IP,timeout=8)
-        LOGGER.debug(f"Interconnect: REQUEST {ASK_MY_IP}")
-        conn.request("GET", ASK_MY_IP_PATH)
-        #LOGGER.debug(f"Interconnect: GET RESPONSE")
-        res = conn.getresponse()
-        LOGGER.debug(f"Interconnect: {ASK_MY_IP} status={res.status} reason={res.reason}")
-        if res.status == 200:
+        LOGGER.debug(f"Interconnect: SINGLE={self._single} NETWORK={self._network} ENDHOST=({endhost})")
+        if endhost == '':
+            conn = http.client.HTTPConnection(ASK_MY_IP,timeout=8)
+            LOGGER.debug(f"Interconnect: REQUEST {ASK_MY_IP}")
+            conn.request("GET", ASK_MY_IP_PATH)
+            #LOGGER.debug(f"Interconnect: GET RESPONSE")
+            res = conn.getresponse()
+            LOGGER.debug(f"Interconnect: {ASK_MY_IP} status={res.status} reason={res.reason}")
+            ip_status = res.status
+        else:
+            ip_status = -1
+
+        url = urlparse(public_endpoint)
+        url_scheme = url.scheme
+        url_port = url.port
+        if ip_status == 200:
             my_ip = res.read()
             self._my_ip = my_ip.decode('utf-8')
-            url = urlparse(public_endpoint)
-            self._public_extpoint = "{}://{}:{}".format(url.scheme,self._my_ip,url.port)
+            self._public_extpoint = "{}://{}:{}".format(url_scheme,self._my_ip,url_port)
         else:
             # in local docker net
-            self._public_extpoint = public_endpoint
+            self._public_extpoint = public_endpoint if endhost == '' else f"{url_scheme}://{endhost}:{url_port}"
         
         LOGGER.debug("Interconnect: MY EXTPOINT='%s' local_endpoint=%s\n",self._public_extpoint,public_endpoint)
 

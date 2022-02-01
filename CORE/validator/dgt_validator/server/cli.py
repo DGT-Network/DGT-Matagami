@@ -344,6 +344,7 @@ def main(args=None):
     wrapped_registry = None
     metrics_reporter = None
     if validator_config.opentsdb_url:
+        # FN6CBJFNNRvq8Ags5so1h5ZyBBMRjmG18L1cGoOOdPJ5Q3AUL6LSyEZDmZElJ0aDPyIkJxPfrbZp1-TGYEIbJA==
         LOGGER.info("Adding METRICS reporter: url=%s, db=%s login=%s/%s",validator_config.opentsdb_url,validator_config.opentsdb_db,validator_config.opentsdb_username,validator_config.opentsdb_password)
 
         url = urlparse(validator_config.opentsdb_url)
@@ -363,6 +364,7 @@ def main(args=None):
             username=validator_config.opentsdb_username,
             password=validator_config.opentsdb_password)
         metrics_reporter.start()
+
     LOGGER.info(f"SIGNED {validator_config.signed_consensus} opts={opts.signed_consensus}")
     validator = Validator(
         bind_network,

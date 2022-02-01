@@ -38,9 +38,9 @@ export METRIC='-off'
 export SIGNED=""
 export SIGNED_="--signed_consensus"
 export INFLUXDB="--opentsdb-url-off"
-export DBHOST="stats-influxdb-dgt"
-export DBUSER="lrdata"
-export DBPASS="pwlrdata"
+export DBHOST="stats-influxdb-dgt"  
+export DBUSER="lrdata"              
+export DBPASS="pwlrdata"            
 export PNM="dgt"
 export CRYPTO_BACK="bitcoin"
 declare -A segments=(
@@ -60,6 +60,7 @@ case "$1" in
 shift;export PEERING='dynamic';export SEEDS="--seeds $1";echo "--seed $1"
 ;;
 -P) shift; export ENDPORT=$1 ;;
+-H) shift; export ENDHOST=$1 ;;
 -CB) shift; export CRYPTO_BACK=$1 ;;
 -IDB) export INFLUXDB="--opentsdb-url";echo "SAVE metrics mode." ;;
 -N) shift; export NETWORK=$1 ;;
