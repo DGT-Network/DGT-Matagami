@@ -854,7 +854,7 @@ To verify that a single node installation works correctly, please use the follow
 |   |                       | of transactions:      |              |
 |   |                       | «curl -v              |              |
 |   |                       | http://[NODE_IP]:     |              |
-|   |                       |   8108/transactions». |              |
+|   |                       | 8108/transactions».   |              |
 |   |                       |                       |              |
 |   |                       | This command displays |              |
 |   |                       | a list of             |              |

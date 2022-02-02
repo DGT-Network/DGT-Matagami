@@ -71,7 +71,7 @@ The call receives a particular batch, including its structure, transactions, and
 = =============== ====== ======================== =========
 # Query Parameter Type   Description              Required?
 = =============== ====== ======================== =========
-1 batch_id        string Index or block header ID 
+1 batch_id        string Index or block header ID   YES
 = =============== ====== ======================== =========
 
 Executing can return the following codes:
@@ -170,7 +170,7 @@ If a timeout is specified as a parameter, then the APIs will wait for a response
 +---+-----------------+---------+---------------------+-----------+
 | # | Query Parameter | Type    | Description         | Required? |
 +===+=================+=========+=====================+===========+
-| 1 | id              | string  | Single package ID   |           |
+| 1 | id              | string  | Single package ID   | YES       |
 |   |                 |         | or comma delimited  |           |
 |   |                 |         | list                |           |
 +---+-----------------+---------+---------------------+-----------+
@@ -199,7 +199,7 @@ Example:
 
  .. code-block:: python
 
-   curl -v http://192.168.1.53:8108/batch_statuses?id=30450220479b7225cc435bd90357ddfd212cd733ec80b3b0c331073403211b8ab55ad05e022100ea8c4112ffbbf1402f3a51b9feb3974d5cba1250c088c36705f550bfec510c9e
+    curl -v http://192.168.1.53:8108/batch_statuses?id=30450220479b7225cc435bd90357ddfd212cd733ec80b3b0c331073403211b8ab55ad05e022100ea8c4112ffbbf1402f3a51b9feb3974d5cba1250c088c36705f550bfec510c9e
 
 4.1.1.5	[POST] Get batch statuses via JSON
 -----------------------------------------------
@@ -293,7 +293,7 @@ Example:
 
 .. code-block:: python
 
-   curl -v http://192.168.1.53:8108/state?limit=100&address=00000034c8768f9d68b36cda2f073e06f78938e3b0c44298fc
+    curl -v http://192.168.1.53:8108/state?limit=100&address=00000034c8768f9d68b36cda2f073e06f78938e3b0c44298fc
 
 4.1.2.2	[GET] Get the definite leaf from the current state
 ---------------------------------------------------------------
@@ -307,7 +307,7 @@ This query is used to get a specific list of a Merkle tree at the given Radix ad
 = =============== ====== ==================== =========
 # Query Parameter Type   Description          Required?
 = =============== ====== ==================== =========
-1 address         string List's Radix-address 
+1 address         string List's Radix-address   YES
 2 head            string Block index or ID    
 = =============== ====== ==================== =========
 
@@ -391,7 +391,7 @@ Example:
 
 .. code-block:: python
 
-  curl -v http://192.168.1.53:8108/blocks?start=0x0000000000000000&limit=100&reverse
+    curl -v http://192.168.1.53:8108/blocks?start=0x0000000000000000&limit=100&reverse
 
 4.1.3.2	[GET] Get the specific block
 ---------------------------------------------
@@ -405,7 +405,7 @@ This call is for getting a specific block. Call options:
 = =============== ====== ============================ =========
 # Query Parameter Type   Description                  Required?
 = =============== ====== ============================ =========
-1 block_id        string Index or ID of a given block 
+1 block_id        string Index or ID of a given block    YES
 = =============== ====== ============================ =========
 
 Executing the query can return the following codes:
@@ -486,23 +486,23 @@ Executing the query can return the following codes:
 
 Example:
 
-.. code-block:: python
-
-   curl -v http://192.168.1.53:8108/transactions?limit=1000
+ .. code-block:: python
+ 
+     curl -v http://192.168.1.53:8108/transactions?limit=1000
 
 4.1.4.2	[GET] Get a specific transaction
 -------------------------------------------------
 
-.. code-block:: python
+ .. code-block:: python
 
-   GET /transactions/{transaction_id}
+    GET /transactions/{transaction_id}
 
 This method returns information on a specific transaction.
 
 = =============== ====== ================================== =========
 # Query Parameter Type   Description                        Required?
 = =============== ====== ================================== =========
-1 transaction_id  string Index or ID of a given transaction 
+1 transaction_id  string Index or ID of a given transaction    YES
 = =============== ====== ================================== =========
 
 Executing the query can return the following codes:
@@ -544,7 +544,7 @@ This method returns receipts for one or more transactions:
 +---+-----------------+--------+---------------------+-----------+
 | # | Query Parameter | Type   | Description         | Required? |
 +===+=================+========+=====================+===========+
-| 1 | id              | string | Index or ID of the  |           |
+| 1 | id              | string | Index or ID of the  |   YES     |
 |   |                 |        | transaction for     |           |
 |   |                 |        | which the receipt   |           |
 |   |                 |        | is generated        |           |
@@ -642,6 +642,541 @@ Executing the query can return the following codes:
 
 Example:
 
+   .. code-block:: python
+
+      curl -v http://192.168.1.53:8108/status
+
+
+4.1.8	Topology
+===============================
+
 .. code-block:: python
 
- curl -v http://192.168.1.53:8108/status
+      /topology
+
+This call outputs the topology data for a specific cluster, including a predefined static configuration - seed bundle. Active nodes get the status:  
+
+.. code-block:: python
+
+      “node_state: true”
+
+The call also gives information about the current leader in each cluster, arbitrators and other useful information (see topology settings `3.7.1`_).
+
+.. _3.7.1: ../ADMIN_GUIDE/3.7_Adjust_DGT_Settings.html#dgt-topology
+
+When executing queries, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach the   |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+   .. code-block:: python
+
+      curl -v http://192.168.1.29:8108/topology
+
+4.1.9	Run BGT
+===========================
+
+4.1.9.1	Run endpoint overview
+-----------------------------------
+
+This endpoint creates broadcast commands for internal transactions, primarily for the BGT family.
+
+⚠ The use of the Run endpoint offers a truncated transaction functionality that uses a random key generated by the API-component for signing. Such transactions can only be used for testing. 
+
+The executed commands act asynchronously, returning a check immediately, after which you can find out their real status using the command: 
+
+   .. code-block:: python
+
+      http://[NODE_URL]:8108/ batch_statuses?family=bgt&id=[BATCH_ID]
+
+For example, 
+
+   .. code-block:: python
+
+      curl "http://127.0.0.1:8108/batch_statuses? family=bgt&id=304402204f847ae1e38621ab3f4847804c1d634a3db5d754a....51d9a&url=tcp://validator-dgt-c1-1:8101"
+
+
+4.1.9.2	BGT SET WALLET
+------------------------------
+
+ .. code-block:: python
+
+      /run?family=bgt&url=URL&cmd=set&wallet=WALLET_NAME&amount=TOKEN_NUMBERS
+
+The command is used to create a wallet and transfer an initial amount to it.
+
++---+-----------------+---------+---------------------+-----------+
+| # | Query Parameter | Type    | Description         | Required? |
++===+=================+=========+=====================+===========+
+| 1 | family          | string  | Specifies the value |  YES      |
+|   |                 |         | of the default      |           |
+|   |                 |         | transaction family  |           |
+|   |                 |         | (bgt)               |           |
++---+-----------------+---------+---------------------+-----------+
+| 2 | url             | string  | Indicator of a      |           |
+|   |                 |         | specific node and   |           |
+|   |                 |         | port (in case of a  |           |
+|   |                 |         | virtual cluster,    |           |
+|   |                 |         | several virtual     |           |
+|   |                 |         | servers can be      |           |
+|   |                 |         | deployed on one     |           |
+|   |                 |         | physical server).   |           |
+|   |                 |         |                     |           |
+|   |                 |         | The url must be     |           |
+|   |                 |         | encoded in          |           |
+|   |                 |         | accordance with     |           |
+|   |                 |         | `RFC                |           |
+|   |                 |         | 3986 <https://data  |           |
+|   |                 |         | tracker.ietf.org/do |           |
+|   |                 |         | c/html/rfc3986>`__. |           |
+|   |                 |         |                     |           |
+|   |                 |         | The JavaScript      |           |
+|   |                 |         | encodeURI or        |           |
+|   |                 |         | `                   |           |
+|   |                 |         | url-encode-decode < |           |
+|   |                 |         | https://www.url-enc |           |
+|   |                 |         | ode-decode.com/>`__ |           |
+|   |                 |         | service.            |           |
++---+-----------------+---------+---------------------+-----------+
+| 3 | cmd             | string  | Defines a command;  |    YES    |
+|   |                 |         | for this            |           |
+|   |                 |         | application “set”   |           |
++---+-----------------+---------+---------------------+-----------+
+| 4 | wallet          | string  | The string name of  |    YES    |
+|   |                 |         | the new wallet      |           |
+|   |                 |         | WALLET_NAME, for    |           |
+|   |                 |         | example «WALLET1»   |           |
+|   |                 |         | or                  |           |
+|   |                 |         | «edf0145630d12356». |           |
+|   |                 |         |                     |           |
+|   |                 |         | The value must be   |           |
+|   |                 |         | unique and is used  |           |
+|   |                 |         | in further commands |           |
+|   |                 |         | as reference.       |           |
++---+-----------------+---------+---------------------+-----------+
+| 5 | amount          | integer | The starting amount |           |
+|   |                 |         | initiated on the    |           |
+|   |                 |         | wallet cannot be    |           |
+|   |                 |         | negative            |           |
++---+-----------------+---------+---------------------+-----------+
+
+When executing queries, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach       |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+.. code-block:: python
+
+      curl -v curl "http://191.168.1.166:8108/run?family=bgt&url=tcp%3A%2F%2Fvalidator-dgt-c1-1%3A8101&cmd=dec&wallet=TESTWALLET&amount=1111"
+
+4.1.9.3	BGT SHOW
+----------------------
+
+.. code-block:: python
+
+      /run?family=bgt&cmd=show&wallet=[WALLET_NAME]
+
+The command is used to reflect the amount placed in the wallet. 
+
++---+-----------------+--------+---------------------+-----------+
+| # | Query Parameter | Type   | Description         | Required? |
++===+=================+========+=====================+===========+
+| 1 | family          | string | Specifies the value |    YES    |
+|   |                 |        | of the default      |           |
+|   |                 |        | transaction family  |           |
+|   |                 |        | (bgt)               |           |
++---+-----------------+--------+---------------------+-----------+
+| 2 | url             | string | Indicator of a      |           |
+|   |                 |        | specific node and   |           |
+|   |                 |        | port (in case of a  |           |
+|   |                 |        | virtual cluster,    |           |
+|   |                 |        | several virtual     |           |
+|   |                 |        | servers can be      |           |
+|   |                 |        | deployed on one     |           |
+|   |                 |        | physical server).   |           |
+|   |                 |        |                     |           |
+|   |                 |        | The url must be     |           |
+|   |                 |        | encoded in          |           |
+|   |                 |        | accordance with     |           |
+|   |                 |        | `RFC                |           |
+|   |                 |        | 3986 <https://data  |           |
+|   |                 |        | tracker.ietf.org/do |           |
+|   |                 |        | c/html/rfc3986>`__. |           |
+|   |                 |        |                     |           |
+|   |                 |        | The JavaScript      |           |
+|   |                 |        | encodeURI or        |           |
+|   |                 |        | `                   |           |
+|   |                 |        | url-encode-decode < |           |
+|   |                 |        | https://www.url-enc |           |
+|   |                 |        | ode-decode.com/>`__ |           |
+|   |                 |        | service.            |           |
++---+-----------------+--------+---------------------+-----------+
+| 3 | cmd             | string | Defines a command;  |   YES     |
+|   |                 |        | for this            |           |
+|   |                 |        | application “show”  |           |
++---+-----------------+--------+---------------------+-----------+
+| 4 | wallet          | string | The string name of  |    YES    |
+|   |                 |        | the new wallet      |           |
+|   |                 |        | WALLET_NAME, for    |           |
+|   |                 |        | example «WALLET1»   |           |
+|   |                 |        | or                  |           |
+|   |                 |        | «edf0145630d12356». |           |
+|   |                 |        |                     |           |
+|   |                 |        | The value must be   |           |
+|   |                 |        | unique and is used  |           |
+|   |                 |        | in further commands |           |
+|   |                 |        | as reference.       |           |
++---+-----------------+--------+---------------------+-----------+
+
+When executing queries, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach       |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+.. code-block:: python
+
+      curl "http://192.168.1.166:8108/run?family=bgt&cmd=show&wallet=TESTWALLET"
+
+4.1.9.4	BGT DEC
+------------------------
+
+.. code-block:: python
+
+      /run?family=bgt&cmd=dec&wallet=[WALLET_NAME]&amount=[BGT_TOKENS]
+
+This command decreases the number of tokens in a wallet by a given amount.
+
++---+-----------------+---------+---------------------+-----------+
+| # | Query Parameter | Type    | Description         | Required? |
++===+=================+=========+=====================+===========+
+| 1 | family          | string  | Specifies the value |   YES     |
+|   |                 |         | of the default      |           |
+|   |                 |         | transaction family  |           |
+|   |                 |         | (bgt)               |           |
++---+-----------------+---------+---------------------+-----------+
+| 2 | url             | string  | Indicator of a      |           |
+|   |                 |         | specific node and   |           |
+|   |                 |         | port (in case of a  |           |
+|   |                 |         | virtual cluster,    |           |
+|   |                 |         | several virtual     |           |
+|   |                 |         | servers can be      |           |
+|   |                 |         | deployed on one     |           |
+|   |                 |         | physical server).   |           |
+|   |                 |         |                     |           |
+|   |                 |         | The url must be     |           |
+|   |                 |         | encoded in          |           |
+|   |                 |         | accordance with     |           |
+|   |                 |         | `RFC                |           |
+|   |                 |         | 3986 <https://data  |           |
+|   |                 |         | tracker.ietf.org/do |           |
+|   |                 |         | c/html/rfc3986>`__. |           |
+|   |                 |         |                     |           |
+|   |                 |         | The JavaScript      |           |
+|   |                 |         | encodeURI or        |           |
+|   |                 |         | `                   |           |
+|   |                 |         | url-encode-decode < |           |
+|   |                 |         | https://www.url-enc |           |
+|   |                 |         | ode-decode.com/>`__ |           |
+|   |                 |         | service.            |           |
++---+-----------------+---------+---------------------+-----------+
+| 3 | cmd             | string  | Defines the         |    YES    |
+|   |                 |         | command; for this   |           |
+|   |                 |         | application it's    |           |
+|   |                 |         | “dec”               |           |
++---+-----------------+---------+---------------------+-----------+
+| 4 | wallet          | string  | The string name of  |    YES    |
+|   |                 |         | the new wallet      |           |
+|   |                 |         | WALLET_NAME, for    |           |
+|   |                 |         | example «WALLET1»   |           |
+|   |                 |         | or                  |           |
+|   |                 |         | «edf0145630d12356». |           |
+|   |                 |         |                     |           |
+|   |                 |         | The value must be   |           |
+|   |                 |         | unique and is used  |           |
+|   |                 |         | in further commands |           |
+|   |                 |         | as reference        |           |
++---+-----------------+---------+---------------------+-----------+
+| 5 | amount          | integer | The number of       |           |
+|   |                 |         | tokens by which the |           |
+|   |                 |         | wallet balance is   |           |
+|   |                 |         | decreased           |           |
++---+-----------------+---------+---------------------+-----------+
+
+When the query is executed, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach       |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+.. code-block:: python
+
+      curl "http://191.168.1.166:8108/run?family=bgt&url=tcp%3A%2F%2Fvalidator-dgt-c1-1%3A8101&cmd=dec&wallet=TESTWALLET&amount=100"
+
+4.1.9.5	BGT INC
+--------------------------
+
+.. code-block:: python
+
+     /run?family=bgt&cmd=dec&wallet=[WALLET_NAME]&amount=[BGT_TOKENS]
+
+This command increases the number of tokens in a wallet by a given amount.
+
++---+-----------------+---------+---------------------+-----------+
+| # | Query Parameter | Type    | Description         | Required? |
++===+=================+=========+=====================+===========+
+| 1 | family          | string  | Specifies the value |   YES     |
+|   |                 |         | of the default      |           |
+|   |                 |         | transaction family  |           |
+|   |                 |         | (bgt)               |           |
++---+-----------------+---------+---------------------+-----------+
+| 2 | url             | string  | Indicator of a      |           |
+|   |                 |         | specific node and   |           |
+|   |                 |         | port (in case of a  |           |
+|   |                 |         | virtual cluster,    |           |
+|   |                 |         | several virtual     |           |
+|   |                 |         | servers can be      |           |
+|   |                 |         | deployed on one     |           |
+|   |                 |         | physical server).   |           |
+|   |                 |         |                     |           |
+|   |                 |         | The url must be     |           |
+|   |                 |         | encoded in          |           |
+|   |                 |         | accordance with     |           |
+|   |                 |         | `RFC                |           |
+|   |                 |         | 3986 <https://data  |           |
+|   |                 |         | tracker.ietf.org/do |           |
+|   |                 |         | c/html/rfc3986>`__. |           |
+|   |                 |         |                     |           |
+|   |                 |         | The JavaScript      |           |
+|   |                 |         | encodeURI or        |           |
+|   |                 |         | `                   |           |
+|   |                 |         | url-encode-decode < |           |
+|   |                 |         | https://www.url-enc |           |
+|   |                 |         | ode-decode.com/>`__ |           |
+|   |                 |         | service.            |           |
++---+-----------------+---------+---------------------+-----------+
+| 3 | cmd             | string  | Defines the         |    YES    |
+|   |                 |         | command; for this   |           |
+|   |                 |         | application         |           |
+|   |                 |         | it's“inc”           |           |
++---+-----------------+---------+---------------------+-----------+
+| 4 | wallet          | string  | The string name of  |    YES    |
+|   |                 |         | the new wallet      |           |
+|   |                 |         | WALLET_NAME, for    |           |
+|   |                 |         | example «WALLET1»   |           |
+|   |                 |         | or                  |           |
+|   |                 |         | «edf0145630d12356». |           |
+|   |                 |         |                     |           |
+|   |                 |         | The value must be   |           |
+|   |                 |         | unique and is used  |           |
+|   |                 |         | in further commands |           |
+|   |                 |         | as reference        |           |
++---+-----------------+---------+---------------------+-----------+
+| 5 | amount          | integer | The number of       |           |
+|   |                 |         | tokens by which the |           |
+|   |                 |         | wallet balance is   |           |
+|   |                 |         | increased           |           |
++---+-----------------+---------+---------------------+-----------+
+
+When the query is executed, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach       |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+.. code-block:: python
+
+     curl "http://192.168.1.166:8108/run?family=bgt&url=tcp%3A%2F%2Fvalidator-dgt-c1-1%3A8101&cmd=inc&wallet=TESTWALLET&amount=100"
+
+4.1.9.6	BGT TRANS
+-------------------
+
+.. code-block:: python
+
+     /run?family=bgt&cmd=trans&wallet=[WALLET_NAME]&amount=[BGT_TOKENS]&to=[WALLET_TO]
+
+This command transfers tokens from one wallet to another.
+
++---+-----------------+---------+---------------------+-----------+
+| # | Query Parameter | Type    | Description         | Required? |
++===+=================+=========+=====================+===========+
+| 1 | family          | string  | Specifies the value |    YES    |
+|   |                 |         | of the default      |           |
+|   |                 |         | transaction family  |           |
+|   |                 |         | (bgt)               |           |
++---+-----------------+---------+---------------------+-----------+
+| 2 | url             | string  | Indicator of a      |           |
+|   |                 |         | specific node and   |           |
+|   |                 |         | port (in case of a  |           |
+|   |                 |         | virtual cluster,    |           |
+|   |                 |         | several virtual     |           |
+|   |                 |         | servers can be      |           |
+|   |                 |         | deployed on one     |           |
+|   |                 |         | physical server).   |           |
+|   |                 |         |                     |           |
+|   |                 |         | The url must be     |           |
+|   |                 |         | encoded in          |           |
+|   |                 |         | accordance with     |           |
+|   |                 |         | `RFC                |           |
+|   |                 |         | 3986 <https://data  |           |
+|   |                 |         | tracker.ietf.org/do |           |
+|   |                 |         | c/html/rfc3986>`__. |           |
+|   |                 |         |                     |           |
+|   |                 |         | The JavaScript      |           |
+|   |                 |         | encodeURI or        |           |
+|   |                 |         | `                   |           |
+|   |                 |         | url-encode-decode < |           |
+|   |                 |         | https://www.url-enc |           |
+|   |                 |         | ode-decode.com/>`__ |           |
+|   |                 |         | service.            |           |
++---+-----------------+---------+---------------------+-----------+
+| 3 | cmd             | string  | Defines the         |    YES    |
+|   |                 |         | command; for this   |           |
+|   |                 |         | application         |           |
+|   |                 |         | it's“inc”           |           |
++---+-----------------+---------+---------------------+-----------+
+| 4 | wallet          | string  | The string name of  |    YES    |
+|   |                 |         | the new wallet      |           |
+|   |                 |         | WALLET_NAME, for    |           |
+|   |                 |         | example «WALLET1»   |           |
+|   |                 |         | or                  |           |
+|   |                 |         | «edf0145630d12356». |           |
+|   |                 |         |                     |           |
+|   |                 |         | The value must be   |           |
+|   |                 |         | unique and is used  |           |
+|   |                 |         | in further commands |           |
+|   |                 |         | as reference        |           |
++---+-----------------+---------+---------------------+-----------+
+| 5 | amount          | integer | The number of       |           |
+|   |                 |         | tokens being        |           |
+|   |                 |         | transferred.        |           |
++---+-----------------+---------+---------------------+-----------+
+| 6 | to              | string  | The wallet          |           |
+|   |                 |         | receiving the       |           |
+|   |                 |         | tokens, such as     |           |
+|   |                 |         | “WALLET2”           |           |
++---+-----------------+---------+---------------------+-----------+
+
+When the query is executed, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach       |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+.. code-block:: python
+
+     curl "http://192.168.1.81:8003/run?family=bgt&url=tcp%3A%2F%2Fvalidator-dgt-c1-1%3A8101&cmd=trans&wallet=WAL1&amount=1&to=WAL2"
+
+4.1.9.7	BGT LIST
+---------------------
+
+.. code-block:: python
+
+      /run?family=bgt&cmd=list
+
+
+
+4.1.10	Graph
+=========================
+
+.. code-block:: python
+
+         /graph
+
+This call allows you to unload the current transaction graph (DAG) in dot format for further analysis and presentation. Converting a graph to a drawing can be done in the form of a sequence of commands (provided that dot is installed): 
+
+.. code-block:: python
+
+      curl "http://[NODE_IP]:8108/graph" > DAG.gv
+      dot -Tpng DAG.gv > dag.png 
+
+Example:
+
+.. code-block:: python
+
+      curl "192.168.1.243:8108/graph"
+
+.. image:: ../images/figure_17.png
+     :align: center      
+
+.

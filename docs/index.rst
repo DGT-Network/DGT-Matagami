@@ -60,9 +60,10 @@ Please, visit `our website`_ to find more
    :caption: 4. DEVELOPER GUIDE
 
    DEV_GUIDE/4.1_REST_API
-   DEV_GUIDE/4.2_SDK_Development
-   DEV_GUIDE/4.3_Core_Development
-   DEV_GUIDE/4.4_DGT_Client_Development
+   DEV_GUIDE/4.2_Transaction_Processing
+   DEV_GUIDE/4.3_SDK_Development
+   DEV_GUIDE/4.4_Core_Development
+   DEV_GUIDE/4.5_DGT_Client_Development
 .. toctree::
    :maxdepth: 2
    :caption: 5. COMMUNITY
