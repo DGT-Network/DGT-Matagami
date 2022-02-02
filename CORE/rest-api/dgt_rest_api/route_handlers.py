@@ -128,6 +128,7 @@ class RouteHandler:
         self._connection = connection
         self._timeout = timeout
         if metrics_registry:
+            LOGGER.debug('USE  metrics_registry')
             self._post_batches_count = CounterWrapper(
                 metrics_registry.counter('post_batches_count'))
             self._post_batches_error = CounterWrapper(
@@ -166,7 +167,7 @@ class RouteHandler:
         """
         timer_ctx = self._post_batches_total_time.time()
         self._post_batches_count.inc()
-
+        LOGGER.debug('submit_batches..')
         # Parse request
         if request.headers['Content-Type'] != 'application/octet-stream':
             LOGGER.debug(

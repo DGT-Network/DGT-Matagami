@@ -36,21 +36,7 @@ import dgt_rest_api.exceptions as errors
 from dgt_rest_api import error_handlers
 from dgt_rest_api.messaging import DisconnectError
 from dgt_rest_api.messaging import SendBackoffTimeoutError
-"""
-from dgt_rest_api.protobuf.validator_pb2 import Message
-from dgt_rest_api.protobuf import client_transaction_pb2
-from dgt_rest_api.protobuf import client_list_control_pb2
-from dgt_rest_api.protobuf import client_batch_submit_pb2
-from dgt_rest_api.protobuf import client_state_pb2
-from dgt_rest_api.protobuf import client_block_pb2
-from dgt_rest_api.protobuf import client_batch_pb2
-from dgt_rest_api.protobuf import client_receipt_pb2
-from dgt_rest_api.protobuf import client_peers_pb2
-from dgt_rest_api.protobuf import client_status_pb2
-from dgt_rest_api.protobuf.block_pb2 import BlockHeader
-from dgt_rest_api.protobuf.batch_pb2 import Batch,BatchHeader,BatchList
-from dgt_rest_api.protobuf.transaction_pb2 import Transaction,TransactionHeader
-"""
+
 from dgt_sdk.protobuf.validator_pb2 import Message
 from dgt_sdk.protobuf import client_transaction_pb2
 from dgt_sdk.protobuf import client_list_control_pb2
