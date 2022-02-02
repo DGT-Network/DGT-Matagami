@@ -710,6 +710,10 @@ The name of the wallet and the BGT amount can be specified arbitrarily. Execute 
     .. image:: ../images/table_6_09.PNG
      :align: center
 
+•	Experiment with other DGT commands by creating wallets, transferring tokens to them, and ensuring the operations are correct (for a complete list of DGT operations, `see 4.1`_).
+
+.. _see 4.1: ../DEV_GUIDE/4.1_REST_API.html
+
 3.2.5.4	Unified single node check
 -------------------------------------
 
