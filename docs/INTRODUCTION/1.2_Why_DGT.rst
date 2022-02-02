@@ -4,8 +4,8 @@
 
 There are currently several active blockchain networks, each of which has its own characteristics. For example, the Bitcoin network is designed exclusively for supporting its eponymous cryptocur-rency, Ethereum allows for the execution of smart contracts and distributed computing, while Hyperledger Fabric allows for the implementation of private blockchain projects. The DGT Platform aims to create hybrid networks that support complex ecosystems, which vary in their security borders and are aimed towards tokenizing digital objects. These business objectives are supported by many technical characteristics, which are summarized in the table below. 
 
-.. image:: ../images/dlt.png
-    :align: center
+    .. image:: ../images/dlt.png
+      :align: center
 
 As shown above, the key distinctions of the DGT Platform are as follows:
 

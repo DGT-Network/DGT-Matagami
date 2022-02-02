@@ -1,5 +1,5 @@
 
-3.4	DGT CLI and Base Transaction Families
+3.6	DGT CLI and Base Transaction Families
 +++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Each node has a CLI (Command Line Interface) service as a component. To run the CLI, you need to access the bash shell inside the container:
@@ -13,22 +13,19 @@ Inside, it is possible to enter commands regarding the node's status and the tes
     .. image:: ../images/figure_08.png
      :align: center
 
-
 +------+-------------------+-------------------+-------------------+
 | #    | Command           | Description       | Example           |
 +======+===================+===================+===================+
 | 1    | dgt Family        | A set of commands |                   |
 |      |                   | that provide      |                   |
 |      |                   | basic information |                   |
-|      |                   |                   |                   |
 |      |                   | about the node    |                   |
 |      |                   | and its           |                   |
 |      |                   | environment, as   |                   |
-|      |                   | well as a         |                   |
-|      |                   |                   |                   |
-|      |                   | way to access the |                   |
-|      |                   | most important    |                   |
-|      |                   | common functions. |                   |
+|      |                   | well as a way to  |                   |
+|      |                   | access the most   |                   |
+|      |                   | important common  |                   |
+|      |                   | functions.        |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.1  | dgt settings list | Displays a list   | dgt settings list |
 |      |                   | of settings for   | --url             |
@@ -44,12 +41,12 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | flag is needed    |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.2  | dgt batch list    | Displays a list   | dgt batch list    |
-|      |                   | of transaction    | -url              |
+|      |                   | of transaction    | –url              |
 |      |                   | batches:          | http://           |
 |      |                   | BATCH_ID, the     | api-dgt-c1-1:8108 |
 |      |                   | number of         |                   |
 |      |                   | transactions in a | dgt batch list    |
-|      |                   | batch and         | -url              |
+|      |                   | batch and         | –url              |
 |      |                   | signatures.       | http://           |
 |      |                   |                   | api-dgt-c1-1:8108 |
 |      |                   | Information can   | -F > 1.csv        |
@@ -80,10 +77,11 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | FILENAME file.    |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.5  | dgt block list    | Output of packed  | dgt block list    |
-|      |                   | blocks as a list  |                   |
-|      |                   | in NUM format:    | --url             |
-|      |                   | BLOCK_ID; BATS;   | http://           |
-|      |                   | TXNS; SIGNER      | api-dgt-c1-1:8108 |
+|      |                   | blocks as a list  | --url             |
+|      |                   | in NUM format:    | http://           |
+|      |                   |                   | api-dgt-c1-1:8108 |
+|      |                   | BLOCK_ID; BATS;   |                   |
+|      |                   | TXNS; SIGNER      |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.6  | dgt block show    | Shows the         | dgt block show    |
 |      |                   | contents of a     | 102678a34f…       |
@@ -97,12 +95,11 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 | 1.7  | dgt keygen        | Key pair          | dgt keygen NEWKEY |
 |      |                   | generation        |                   |
 |      |                   | (private and      | creates           |
-|      |                   | public).          | NEWKEY.priv and   |
-|      |                   |                   | NEWKEY.pub in the |
-|      |                   | As a result,      | /root/.dgt/keys/  |
-|      |                   | files are created | catalogue by      |
-|      |                   | in the specified  | default           |
-|      |                   | directory:        |                   |
+|      |                   | public). As a     | NEWKEY.priv and   |
+|      |                   | result, files are | NEWKEY.pub in the |
+|      |                   | created in the    | /root/.dgt/keys/  |
+|      |                   | specified         | catalogue by      |
+|      |                   | directory:        | default           |
 |      |                   |                   |                   |
 |      |                   | <key_dir          |                   |
 |      |                   | >/<key_name>.priv |                   |
@@ -117,15 +114,15 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | [--force] [-q]    |                   |
 |      |                   | [key_name]        |                   |
 |      |                   |                   |                   |
-|      |                   | -q - don't        |                   |
+|      |                   | -q – don’t        |                   |
 |      |                   | display output    |                   |
 |      |                   |                   |                   |
 |      |                   | --key-dir KEY_DIR |                   |
-|      |                   | - directory where |                   |
+|      |                   | – directory where |                   |
 |      |                   | keys are          |                   |
 |      |                   | generated         |                   |
 |      |                   |                   |                   |
-|      |                   | --force - files   |                   |
+|      |                   | --force – files   |                   |
 |      |                   | are overwritten   |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.8  | dgt peer list     | List of addresses | dgt peer list     |
@@ -151,33 +148,29 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | given address:    | api-dgt-c1-1:8108 |
 |      |                   |                   | 00000034c         |
 |      |                   | dgt state list    | 8768f9d68b36c758… |
-|      |                   | [-h] [--url URL   |                   |
-|      |                   | [-F               |                   |
+|      |                   | [-h] [--url       |                   |
+|      |                   | URL[-F            |                   |
 |      |                   | {csv,js           |                   |
 |      |                   | on,yaml,default}] |                   |
-|      |                   | [--head HEAD]     |                   |
-|      |                   | [subtree]         |                   |
+|      |                   | [--head           |                   |
+|      |                   | HEAD][subtree]    |                   |
 |      |                   |                   |                   |
 |      |                   | Here:             |                   |
 |      |                   |                   |                   |
-|      |                   | -  address -      |                   |
-|      |                   |       address in  |                   |
-|      |                   |       DAG;        |                   |
+|      |                   | address – address |                   |
+|      |                   | in DAG;           |                   |
 |      |                   |                   |                   |
-|      |                   | -  --head HEAD    |                   |
-|      |                   |       specify the |                   |
-|      |                   |       id of the   |                   |
-|      |                   |       block to    |                   |
-|      |                   |       set as the  |                   |
-|      |                   |       chain head  |                   |
+|      |                   | --head HEAD -     |                   |
+|      |                   | specify the id of |                   |
+|      |                   | the block to set  |                   |
+|      |                   | as the chain head |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.11 | dgt transaction   | Returns a list of | dgt transaction   |
 |      | list              | transactions for  | list              |
 |      |                   | the given node.   |                   |
-|      |                   |                   | --url             |
-|      |                   | Command format:   | http://           |
-|      |                   |                   | api-dgt-c1-1:8108 |
-|      |                   | transaction list  |                   |
+|      |                   | Command format:   | --url             |
+|      |                   |                   | http://           |
+|      |                   | transaction list  | api-dgt-c1-1:8108 |
 |      |                   | [-h] [--url URL]  |                   |
 |      |                   | [-u               |                   |
 |      |                   | USE               |                   |
@@ -218,22 +211,35 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | block or header   |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.13 | dgt dag show      | dag integrity     | dgt dag show      |
-|      | integrity         | check.            | integrity -url    |
+|      | integrity         | check.            | integrity –url    |
 |      |                   |                   | http://           |
 |      |                   | dgt dag show      | api-dgt-c1-1:8108 |
-|      |                   | integrity -url    |                   |
+|      |                   | integrity –url    |                   |
 |      |                   | URL               |                   |
 +------+-------------------+-------------------+-------------------+
 | 1.14 | dgt dag show val  | List of vertices  | dgt dag show val  |
 |      |                   | to join           | --url             |
 |      |                   |                   | http://           |
 |      |                   | dgt dag show val  | api-dgt-c1-1:8108 |
-|      |                   | -url URL          |                   |
+|      |                   | –url URL          |                   |
+|      |                   |                   |                   |
+|      |                   | The number of the |                   |
+|      |                   | block:            |                   |
+|      |                   |                   |                   |
+|      |                   | the block’s ID    |                   |
+|      |                   | fragment (leaves  |                   |
+|      |                   | for new blocks to |                   |
+|      |                   | join).            |                   |
+|      |                   |                   |                   |
+|      |                   | For example,      |                   |
+|      |                   |                   |                   |
+|      |                   | 0:30450221        |                   |
+|      |                   |                   |                   |
+|      |                   | 112:30440220      |                   |
 +------+-------------------+-------------------+-------------------+
 | 2    | xcert Family      | Management of     |                   |
 |      |                   | node              |                   |
 |      |                   | certificates.     |                   |
-|      |                   |                   |                   |
 |      |                   | Several scenarios |                   |
 |      |                   | for joining a     |                   |
 |      |                   | node to the       |                   |
@@ -245,32 +251,30 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 +------+-------------------+-------------------+-------------------+
 | 2.1  | xcert set         | Creation of a new | xcert set         |
 |      |                   | certificate:      | /                 |
-|      |                   |                   | project/bgx/etc/c |
-|      |                   | -  Edit the       | ertificate.jsomcn |
-|      |                   |       P           | --user            |
+|      |                   |                   | project/dgt/etc/c |
+|      |                   | Edit the          | ertificate.jsomcn |
+|      |                   | P                 | --user            |
 |      |                   | ROJECT-FOLDER/etc | /root/.d          |
 |      |                   | /certificate.json | gt/keys/root.priv |
-|      |                   |       file        |                   |
+|      |                   | file              |                   |
 |      |                   |                   |                   |
-|      |                   | -  Generate a     |                   |
-|      |                   |       certificate |                   |
-|      |                   |       with the    |                   |
-|      |                   |       command:    |                   |
+|      |                   | Generate a        |                   |
+|      |                   | certificate with  |                   |
+|      |                   | the command:      |                   |
 |      |                   |                   |                   |
 |      |                   | xcert --user USER |                   |
 |      |                   | --url URL         |                   |
 |      |                   | --keyfile KEYFILE |                   |
 |      |                   | --wait [WAIT]     |                   |
 |      |                   | --before BEFORE   |                   |
-|      |                   | --after AFTER -cb |                   |
+|      |                   | --after AFTER –cb |                   |
 |      |                   | CRYPTO_BACK,      |                   |
 |      |                   | here:             |                   |
 +------+-------------------+-------------------+-------------------+
-| 2.2  | xcert list        | Output of         |                   |
+| 2.2  | xcert list        | Output of         | xcert list        |
 |      |                   | previously        |                   |
 |      |                   | generated         |                   |
 |      |                   | certificates.     |                   |
-|      |                   |                   |                   |
 |      |                   | Command format:   |                   |
 |      |                   |                   |                   |
 |      |                   | xcert list --url  |                   |
@@ -278,13 +282,20 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | KEYFILE --cb      |                   |
 |      |                   | CRYPTO_BACK       |                   |
 +------+-------------------+-------------------+-------------------+
-| 2.3  | xcert show        | Prints the        | /project/bgx/etc  |
-|      |                   | specified         | /certificate.json |
-|      |                   | certificate to    | --user            |
-|      |                   | the screen.       | /root/.d          |
-|      |                   | Format:           | gt/keys/root.priv |
+| 2.3  | xcert show        | Prints the        | xcert show        |
+|      |                   | specified         | 3056              |
+|      |                   | certificate to    | 301006072a8648ce3 |
+|      |                   | the screen.       | ...               |
+|      |                   | Format:           | cabfe613909       |
+|      |                   |                   | acb6c5791cbfebd0e |
+|      |                   | xcert show name   | f5b8630fa6c9b3182 |
 |      |                   |                   |                   |
-|      |                   | xcert show name   |                   |
+|      |                   | The public key is |                   |
+|      |                   | used as the name  |                   |
+|      |                   | (also accessible  |                   |
+|      |                   | in the output of  |                   |
+|      |                   | the xcert list    |                   |
+|      |                   | command)          |                   |
 +------+-------------------+-------------------+-------------------+
 | 2.4  | xcert upd         | Certificate       | xcert upd         |
 |      |                   | renewal,          | /project/bgx/etc  |
@@ -296,30 +307,30 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | --keyfile KEYFILE | /root/.d          |
 |      |                   | --before          | gt/keys/root.priv |
 |      |                   | BEFOREDAYS        | --before 245      |
-|      |                   | --after AFTERDAYS | -after 164        |
+|      |                   | --after AFTERDAYS | –after 164        |
 |      |                   |                   |                   |
 |      |                   | Here:             |                   |
 |      |                   |                   |                   |
-|      |                   | VALUE - link to   |                   |
-|      |                   | the JSON - file   |                   |
+|      |                   | VALUE – link to   |                   |
+|      |                   | the JSON – file   |                   |
 |      |                   | with parameters;  |                   |
 |      |                   |                   |                   |
-|      |                   | --url - node URL  |                   |
+|      |                   | --url – node URL  |                   |
 |      |                   |                   |                   |
-|      |                   | --keyfile - link  |                   |
+|      |                   | --keyfile – link  |                   |
 |      |                   | to a certificate  |                   |
 |      |                   | with a private    |                   |
 |      |                   | key               |                   |
 |      |                   |                   |                   |
-|      |                   | --before - the    |                   |
+|      |                   | --before – the    |                   |
 |      |                   | number of days    |                   |
-|      |                   | before today's    |                   |
+|      |                   | before today’s    |                   |
 |      |                   | date that allow   |                   |
 |      |                   | the certificate   |                   |
 |      |                   | to be considered  |                   |
 |      |                   | valid             |                   |
 |      |                   |                   |                   |
-|      |                   | --after - the     |                   |
+|      |                   | --after – the     |                   |
 |      |                   | link to the       |                   |
 |      |                   | number of days    |                   |
 |      |                   | after, which      |                   |
@@ -331,14 +342,44 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | transaction       |                   |
 |      |                   | family            |                   |
 +------+-------------------+-------------------+-------------------+
-| 3.1  | dgtset genesis    |                   |                   |
+| 3.1  | dgtset genesis    | Performed         | ⚠ NOT RECOMMENDED |
+|      |                   | automatically     | FOR USE OUTSIDE   |
+|      |                   | when launching a  | OF DEVELOPMENT    |
+|      |                   | node with a -G    |                   |
+|      |                   | parameter, does   |                   |
+|      |                   | not require       |                   |
+|      |                   | repetition        |                   |
 +------+-------------------+-------------------+-------------------+
-| 3.2  | dgt proposal      |                   |                   |
+| 3.2  | dgt proposal      | This command is   | ⚠ NOT RECOMMENDED |
+|      |                   | used only when    | FOR USE OUTSIDE   |
+|      |                   | launching a node  | OF DEVELOPMENT    |
+|      |                   | and creates a     |                   |
+|      |                   | command file      |                   |
+|      |                   | (batch) for       |                   |
+|      |                   | recording the     |                   |
+|      |                   | genesis block –   |                   |
+|      |                   | including the     |                   |
+|      |                   | topology          |                   |
 +------+-------------------+-------------------+-------------------+
 | 3.3  | dgt topology      | Displays the      | dgtset topology   |
-|      |                   | current topology: | list -url         |
+|      |                   | current topology: | list –url         |
 |      |                   | dgtset topology   | http://           |
-|      |                   | list -url URL     | api-dgt-c1-1:8108 |
+|      |                   | list –url URL     | api-dgt-c1-1:8108 |
+|      |                   |                   |                   |
+|      |                   | The statistic     |                   |
+|      |                   | topology is given |                   |
+|      |                   | in the            |                   |
+|      |                   | CORE/e            |                   |
+|      |                   | tc/dgt.net.static |                   |
+|      |                   | file. It is       |                   |
+|      |                   | loaded into the   |                   |
+|      |                   | genesis block     |                   |
+|      |                   | during the        |                   |
+|      |                   | network           |                   |
+|      |                   | initialization    |                   |
+|      |                   | and is modified   |                   |
+|      |                   | by topology       |                   |
+|      |                   | commands          |                   |
 +------+-------------------+-------------------+-------------------+
 | 4    | bgt Family        | Test family of    |                   |
 |      |                   | transactions;     |                   |
@@ -350,35 +391,35 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | tokens to them    |                   |
 +------+-------------------+-------------------+-------------------+
 | 4.1  | bgt set           | Creation of a new | bgt set WAL1 1000 |
-|      |                   | wallet with a     | -url              |
+|      |                   | wallet with a     | –url              |
 |      |                   | command format    | http://           |
 |      |                   | of:               | api-dgt-c1-1:8108 |
 |      |                   |                   |                   |
 |      |                   | bgt set name      |                   |
-|      |                   | value -url URL    |                   |
-|      |                   | -keyfile KEYFILE  |                   |
-|      |                   | -wait [WAIT]      |                   |
+|      |                   | value –url URL    |                   |
+|      |                   | –keyfile KEYFILE  |                   |
+|      |                   | –wait [WAIT]      |                   |
 +------+-------------------+-------------------+-------------------+
 | 4.2  | bgt inc           | Increasing the    | bgt inc WAL1 50   |
-|      |                   | volume of tokens  | -url              |
+|      |                   | volume of tokens  | –url              |
 |      |                   | in the wallet:    | http://           |
 |      |                   |                   | api-dgt-c1-1:8108 |
 |      |                   | bgt inc name      |                   |
 |      |                   | value --url URL   |                   |
 |      |                   | --keyfile KEYFILE |                   |
-|      |                   | -wait [WAIT]      |                   |
+|      |                   | –wait [WAIT]      |                   |
 +------+-------------------+-------------------+-------------------+
 | 4.3  | bgt dec           | Reducing the      | bgt dec WAL1 50   |
-|      |                   | number of tokens  | -url              |
+|      |                   | number of tokens  | –url              |
 |      |                   | in the wallet:    | http://           |
 |      |                   |                   | api-dgt-c1-1:8108 |
 |      |                   | bgt inc name      |                   |
 |      |                   | value --url URL   |                   |
 |      |                   | --keyfile KEYFILE |                   |
-|      |                   | -wait [WAIT]      |                   |
+|      |                   | –wait [WAIT]      |                   |
 +------+-------------------+-------------------+-------------------+
 | 4.4  | bgt trans         | Transferring      | bgt trans WAL1 50 |
-|      |                   | tokens from       | WAL2 -url         |
+|      |                   | tokens from       | WAL2 –url         |
 |      |                   | wallet to wallet: | http://           |
 |      |                   |                   | api-dgt-c1-1:8108 |
 |      |                   | bgt trans name    |                   |
@@ -400,3 +441,7 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | bgt list --url    |                   |
 |      |                   | URL               |                   |
 +------+-------------------+-------------------+-------------------+
+
+
+
+
