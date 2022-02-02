@@ -1,5 +1,5 @@
 
-3.4	DGT CLI and Base Transaction Families
+3.6	DGT CLI and Base Transaction Families
 +++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Each node has a CLI (Command Line Interface) service as a component. To run the CLI, you need to access the bash shell inside the container:

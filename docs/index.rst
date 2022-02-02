@@ -40,16 +40,20 @@ Please, visit `our website`_ to find more
    ARCHITECTURE/2.4_Token_Model
    ARCHITECTURE/2.5_F-BFT_Consensus
    ARCHITECTURE/2.6_DGT_API_and_Consumer_Apps
+   ARCHITECTURE/2.7_Technology_Stack
 
 .. toctree::
    :maxdepth: 2
    :caption: 3. ADMINISTRATOR GUIDE
 
-   ADMIN_GUIDE/3.1_Setup_single_Node
-   ADMIN_GUIDE/3.2_Setup_Private_Network
-   ADMIN_GUIDE/3.3_Attach_Node_to_Existing_Network
-   ADMIN_GUIDE/3.4_DGT_CLI_and_Base_Transaction_Families
-   ADMIN_GUIDE/3.5_Setup_Clusters_and_Networks
+   ADMIN_GUIDE/3.1_DGT_Environment
+   ADMIN_GUIDE/3.2_Setup_single_Node
+   ADMIN_GUIDE/3.3_Setup_Private_Public_Network
+   ADMIN_GUIDE/3.4_Attach_Node_to_Existing_Network
+   ADMIN_GUIDE/3.5_Manage_the_Dashboard
+   ADMIN_GUIDE/3.6_DGT_CLI_and_Base_Transaction_Families
+   ADMIN_GUIDE/3.7_Adjust_DGT_Settings
+   ADMIN_GUIDE/3.8_DGT_Maintenance
 
 .. toctree::
    :maxdepth: 2
