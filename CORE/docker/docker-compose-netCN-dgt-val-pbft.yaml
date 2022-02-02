@@ -1,4 +1,4 @@
-# Copyright NTRLab 2019
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: settings-tp-${PNM}:${ISOLATION_ID}
     networks: 
     - network1
@@ -34,6 +34,7 @@ services:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -58,12 +59,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: bgt-tp-python-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     networks:
     - network1
     volumes:
@@ -91,12 +93,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: stuff-tp-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     networks:
     - network1
     volumes:
@@ -124,12 +127,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: xcert-tp-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     networks:
     - network1
     volumes:
@@ -158,7 +162,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: shell-${PNM}:${ISOLATION_ID}
     networks:
     - network1
@@ -166,6 +170,7 @@ services:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -188,7 +193,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: validator-${PNM}:${ISOLATION_ID}
     networks:
     - network1
@@ -197,9 +202,11 @@ services:
     - PEER_HOME=/project/peer
     - ENDPOINTS=${ENDPOINTS}
     - SINGLE=${SINGLE}
+    - ENDHOST=${ENDHOST}
     - NETWORK=${NETWORK}
     - PCONTROL=${PCONTROL}
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -233,7 +240,7 @@ services:
             --bind network:tcp://eth0:${NET} \
             --bind consensus:tcp://eth0:${CONS} \
             --max_dag_branch 6 --scheduler parallel ${SIGNED} --peering ${PEERING} ${SEEDS} --maximum-peer-connectivity 70 \
-            --opentsdb-url-off http://stats-influxdb-${PNM}:8086 --opentsdb-db metrics --opentsdb-username lrdata --opentsdb-password pwlrdata
+            ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
       "
     stop_signal: SIGTERM
     #stop_grace_period: 600ms
@@ -247,12 +254,13 @@ services:
         - http_proxy   
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: rest-api-${PNM}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
@@ -270,7 +278,7 @@ services:
         dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/rest-api*.log*;
         python3 setup.py clean --all
         python3 setup.py build
-        dgt-rest-api -vv --connect tcp://validator-${PNM}-${C}-${N}:${COMP} --bind api-${PNM}-${C}-${N}:${API} --opentsdb-url-off http://bgx-stats-influxdb:8086 --opentsdb-db metrics --opentsdb-username lrdata --opentsdb-password pwlrdata
+        dgt-rest-api -vv --connect tcp://validator-${PNM}-${C}-${N}:${COMP} --bind api-${PNM}-${C}-${N}:${API} ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
       "
     stop_signal: SIGKILL
 
@@ -283,7 +291,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - DGT_TOP=bgx
+        - DGT_TOP=${DGT_TOP}
     image: pbft-${PNM}:${ISOLATION_ID}
     networks:
     - network1
@@ -291,13 +299,14 @@ services:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
     container_name: pbft-${PNM}-${C}-${N}
     depends_on:
       - validator-dgt
-    #  - bgx-registry
+    #  - dgt-registry
     command: |
       bash -c "
         cd consensus/dgt_pbft;

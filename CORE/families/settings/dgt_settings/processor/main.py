@@ -1,4 +1,4 @@
-# Copyright 2017 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2017 DGT NETWORK INC © Stanislav Parsov © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ from dgt_settings.processor.config.settings import load_toml_settings_config
 from dgt_settings.processor.config.settings import merge_settings_config
 
 
-DISTRIBUTION_NAME = 'bgx-settings'
+DISTRIBUTION_NAME = 'dgt-settings'
 
 
 def create_console_handler(verbose_level):

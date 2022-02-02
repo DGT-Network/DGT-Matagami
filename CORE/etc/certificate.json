@@ -1,10 +1,13 @@
 {
-    "COUNTRY_NAME"            : "RU",      
-    "STATE_OR_PROVINCE_NAME"  : "Tomsk region", 
-    "LOCALITY_NAME"           : "Tomsk", 
-    "ORGANIZATION_NAME"       : "Home" ,
-    "COMMON_NAME"             : "Dgt", 
-    "DNS_NAME"                : "dgt.network", 
-    "EMAIL_ADDRESS"           : "dgt@dgt.network",
-    "PSEUDONYM"               : "dgt"
+    "COUNTRY_NAME"              : "CA",      
+    "STATE_OR_PROVINCE_NAME"    : "ONTARIO", 
+    "LOCALITY_NAME"             : "BARRIE", 
+    "ORGANIZATION_NAME"         : "YOUR ORGANIZATION NAME" ,
+    "COMMON_NAME"               : "NODE SAMPLE", 
+    "DNS_NAME"                  : "dgt.world", 
+    "EMAIL_ADDRESS"             : "adminmail@mail.com",
+    "PSEUDONYM"                 : "dgt00000000000000000",
+    "JURISDICTION_COUNTRY_NAME" : "CA",
+    "BUSINESS_CATEGORY"         : "YOUR BUSINESS CATEGORY",
+    "USER_ID"                   : "000000000000000001"
 }

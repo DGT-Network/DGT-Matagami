@@ -1,4 +1,4 @@
-# Copyright 2018 DGT NETWORK INC 
+# Copyright 2018 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ FAMILY_NAME = 'bgt'
 
 BGT_ADDRESS_PREFIX = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
 
+def make_bgt_prefix():
+    return hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
 
 def make_bgt_address(name):
     return BGT_ADDRESS_PREFIX + hashlib.sha512(name.encode('utf-8')).hexdigest()[-64:]

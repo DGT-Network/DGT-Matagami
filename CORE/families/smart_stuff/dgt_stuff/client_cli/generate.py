@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2016 Intel Corporation
+# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

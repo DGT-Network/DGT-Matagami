@@ -1,4 +1,4 @@
-# Copyright 2020 DGT NETWORK INC 
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ from dgt_cli.head import do_dag
 from dgt_cli.cli_config import load_cli_config
 
 
-DISTRIBUTION_NAME = 'bgx-cli'
+DISTRIBUTION_NAME = 'dgt-cli'
 
 
 def create_console_handler(verbose_level):

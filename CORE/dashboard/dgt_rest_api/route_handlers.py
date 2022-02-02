@@ -1,4 +1,4 @@
-# Copyright DGT NETWORK INC  2019
+# Copyright DGT NETWORK INC © Stanislav Parsov  2019
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -742,7 +742,7 @@ class RouteHandler:
             request,
             data=None,
             metadata={
-              'link': "http://bgx-api-2:8009/batch_statuses?id=851262082dac8d49103d1ed7a8426f1ec933e4c09f4067f5c6f3b8443fd8c2236355f9d2a465c304798f532f5de134259625b15399e0299812ae36994330c312",
+              'link': "http://dgt-api-2:8009/batch_statuses?id=851262082dac8d49103d1ed7a8426f1ec933e4c09f4067f5c6f3b8443fd8c2236355f9d2a465c304798f532f5de134259625b15399e0299812ae36994330c312",
             }
             )
 

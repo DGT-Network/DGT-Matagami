@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=_b('\n\025sawtooth.sdk.protobufP\001Z\rvalidator_pb2'),
-  serialized_pb=_b('\n dgt_sdk/protobuf/validator.proto\")\n\x0bMessageList\x12\x1a\n\x08messages\x18\x01 \x03(\x0b\x32\x08.Message\"\xf5!\n\x07Message\x12*\n\x0cmessage_type\x18\x01 \x01(\x0e\x32\x14.Message.MessageType\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\x0c\"\x94!\n\x0bMessageType\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\x17\n\x13TP_REGISTER_REQUEST\x10\x01\x12\x18\n\x14TP_REGISTER_RESPONSE\x10\x02\x12\x19\n\x15TP_UNREGISTER_REQUEST\x10\x03\x12\x1a\n\x16TP_UNREGISTER_RESPONSE\x10\x04\x12\x16\n\x12TP_PROCESS_REQUEST\x10\x05\x12\x17\n\x13TP_PROCESS_RESPONSE\x10\x06\x12\x18\n\x14TP_STATE_GET_REQUEST\x10\x07\x12\x19\n\x15TP_STATE_GET_RESPONSE\x10\x08\x12\x18\n\x14TP_STATE_SET_REQUEST\x10\t\x12\x19\n\x15TP_STATE_SET_RESPONSE\x10\n\x12\x1b\n\x17TP_STATE_DELETE_REQUEST\x10\x0b\x12\x1c\n\x18TP_STATE_DELETE_RESPONSE\x10\x0c\x12\x1f\n\x1bTP_RECEIPT_ADD_DATA_REQUEST\x10\r\x12 \n\x1cTP_RECEIPT_ADD_DATA_RESPONSE\x10\x0e\x12\x18\n\x14TP_EVENT_ADD_REQUEST\x10\x0f\x12\x19\n\x15TP_EVENT_ADD_RESPONSE\x10\x10\x12\x1f\n\x1b\x43LIENT_BATCH_SUBMIT_REQUEST\x10\x64\x12 \n\x1c\x43LIENT_BATCH_SUBMIT_RESPONSE\x10\x65\x12\x1d\n\x19\x43LIENT_BLOCK_LIST_REQUEST\x10\x66\x12\x1e\n\x1a\x43LIENT_BLOCK_LIST_RESPONSE\x10g\x12\"\n\x1e\x43LIENT_BLOCK_GET_BY_ID_REQUEST\x10h\x12\x1d\n\x19\x43LIENT_BLOCK_GET_RESPONSE\x10i\x12\x1d\n\x19\x43LIENT_BATCH_LIST_REQUEST\x10j\x12\x1e\n\x1a\x43LIENT_BATCH_LIST_RESPONSE\x10k\x12\x1c\n\x18\x43LIENT_BATCH_GET_REQUEST\x10l\x12\x1d\n\x19\x43LIENT_BATCH_GET_RESPONSE\x10m\x12#\n\x1f\x43LIENT_TRANSACTION_LIST_REQUEST\x10n\x12$\n CLIENT_TRANSACTION_LIST_RESPONSE\x10o\x12\"\n\x1e\x43LIENT_TRANSACTION_GET_REQUEST\x10p\x12#\n\x1f\x43LIENT_TRANSACTION_GET_RESPONSE\x10q\x12 \n\x1c\x43LIENT_STATE_CURRENT_REQUEST\x10r\x12!\n\x1d\x43LIENT_STATE_CURRENT_RESPONSE\x10s\x12\x1d\n\x19\x43LIENT_STATE_LIST_REQUEST\x10t\x12\x1e\n\x1a\x43LIENT_STATE_LIST_RESPONSE\x10u\x12\x1c\n\x18\x43LIENT_STATE_GET_REQUEST\x10v\x12\x1d\n\x19\x43LIENT_STATE_GET_RESPONSE\x10w\x12\x1f\n\x1b\x43LIENT_BATCH_STATUS_REQUEST\x10x\x12 \n\x1c\x43LIENT_BATCH_STATUS_RESPONSE\x10y\x12\x1e\n\x1a\x43LIENT_RECEIPT_GET_REQUEST\x10z\x12\x1f\n\x1b\x43LIENT_RECEIPT_GET_RESPONSE\x10{\x12#\n\x1f\x43LIENT_BLOCK_GET_BY_NUM_REQUEST\x10|\x12\x1c\n\x18\x43LIENT_PEERS_GET_REQUEST\x10}\x12\x1d\n\x19\x43LIENT_PEERS_GET_RESPONSE\x10~\x12.\n*CLIENT_BLOCK_GET_BY_TRANSACTION_ID_REQUEST\x10\x7f\x12)\n$CLIENT_BLOCK_GET_BY_BATCH_ID_REQUEST\x10\x80\x01\x12\x1e\n\x19\x43LIENT_STATUS_GET_REQUEST\x10\x81\x01\x12\x1f\n\x1a\x43LIENT_STATUS_GET_RESPONSE\x10\x82\x01\x12\x1d\n\x18\x43LIENT_HEADS_GET_REQUEST\x10\x83\x01\x12\x1e\n\x19\x43LIENT_HEADS_GET_RESPONSE\x10\x84\x01\x12 \n\x1b\x43LIENT_TOPOLOGY_GET_REQUEST\x10\x85\x01\x12!\n\x1c\x43LIENT_TOPOLOGY_GET_RESPONSE\x10\x86\x01\x12!\n\x1c\x43LIENT_PEERS_CONTROL_REQUEST\x10\x87\x01\x12\"\n\x1d\x43LIENT_PEERS_CONTROL_RESPONSE\x10\x88\x01\x12$\n\x1f\x43LIENT_EVENTS_SUBSCRIBE_REQUEST\x10\xf4\x03\x12%\n CLIENT_EVENTS_SUBSCRIBE_RESPONSE\x10\xf5\x03\x12&\n!CLIENT_EVENTS_UNSUBSCRIBE_REQUEST\x10\xf6\x03\x12\'\n\"CLIENT_EVENTS_UNSUBSCRIBE_RESPONSE\x10\xf7\x03\x12\x12\n\rCLIENT_EVENTS\x10\xf8\x03\x12\x1e\n\x19\x43LIENT_EVENTS_GET_REQUEST\x10\xf9\x03\x12\x1f\n\x1a\x43LIENT_EVENTS_GET_RESPONSE\x10\xfa\x03\x12\x13\n\x0eGOSSIP_MESSAGE\x10\xc8\x01\x12\x14\n\x0fGOSSIP_REGISTER\x10\xc9\x01\x12\x16\n\x11GOSSIP_UNREGISTER\x10\xca\x01\x12\x19\n\x14GOSSIP_BLOCK_REQUEST\x10\xcd\x01\x12\x1a\n\x15GOSSIP_BLOCK_RESPONSE\x10\xce\x01\x12%\n GOSSIP_BATCH_BY_BATCH_ID_REQUEST\x10\xcf\x01\x12+\n&GOSSIP_BATCH_BY_TRANSACTION_ID_REQUEST\x10\xd0\x01\x12\x1a\n\x15GOSSIP_BATCH_RESPONSE\x10\xd1\x01\x12\x1d\n\x18GOSSIP_GET_PEERS_REQUEST\x10\xd2\x01\x12\x1e\n\x19GOSSIP_GET_PEERS_RESPONSE\x10\xd3\x01\x12\x1d\n\x18GOSSIP_CONSENSUS_MESSAGE\x10\xd4\x01\x12\x10\n\x0bNETWORK_ACK\x10\xac\x02\x12\x14\n\x0fNETWORK_CONNECT\x10\xad\x02\x12\x17\n\x12NETWORK_DISCONNECT\x10\xae\x02\x12&\n!AUTHORIZATION_CONNECTION_RESPONSE\x10\xd8\x04\x12\x1c\n\x17\x41UTHORIZATION_VIOLATION\x10\xd9\x04\x12 \n\x1b\x41UTHORIZATION_TRUST_REQUEST\x10\xda\x04\x12!\n\x1c\x41UTHORIZATION_TRUST_RESPONSE\x10\xdb\x04\x12$\n\x1f\x41UTHORIZATION_CHALLENGE_REQUEST\x10\xdc\x04\x12%\n AUTHORIZATION_CHALLENGE_RESPONSE\x10\xdd\x04\x12#\n\x1e\x41UTHORIZATION_CHALLENGE_SUBMIT\x10\xde\x04\x12#\n\x1e\x41UTHORIZATION_CHALLENGE_RESULT\x10\xdf\x04\x12\x11\n\x0cPING_REQUEST\x10\xbc\x05\x12\x12\n\rPING_RESPONSE\x10\xbd\x05\x12\x1f\n\x1a\x43ONSENSUS_REGISTER_REQUEST\x10\xa0\x06\x12 \n\x1b\x43ONSENSUS_REGISTER_RESPONSE\x10\xa1\x06\x12\x1e\n\x19\x43ONSENSUS_SEND_TO_REQUEST\x10\xa2\x06\x12\x1f\n\x1a\x43ONSENSUS_SEND_TO_RESPONSE\x10\xa3\x06\x12 \n\x1b\x43ONSENSUS_BROADCAST_REQUEST\x10\xa4\x06\x12!\n\x1c\x43ONSENSUS_BROADCAST_RESPONSE\x10\xa5\x06\x12\'\n\"CONSENSUS_INITIALIZE_BLOCK_REQUEST\x10\xa6\x06\x12(\n#CONSENSUS_INITIALIZE_BLOCK_RESPONSE\x10\xa7\x06\x12%\n CONSENSUS_FINALIZE_BLOCK_REQUEST\x10\xa8\x06\x12&\n!CONSENSUS_FINALIZE_BLOCK_RESPONSE\x10\xa9\x06\x12&\n!CONSENSUS_SUMMARIZE_BLOCK_REQUEST\x10\xbc\x06\x12\'\n\"CONSENSUS_SUMMARIZE_BLOCK_RESPONSE\x10\xbd\x06\x12#\n\x1e\x43ONSENSUS_CANCEL_BLOCK_REQUEST\x10\xaa\x06\x12$\n\x1f\x43ONSENSUS_CANCEL_BLOCK_RESPONSE\x10\xab\x06\x12#\n\x1e\x43ONSENSUS_CHECK_BLOCKS_REQUEST\x10\xac\x06\x12$\n\x1f\x43ONSENSUS_CHECK_BLOCKS_RESPONSE\x10\xad\x06\x12#\n\x1e\x43ONSENSUS_COMMIT_BLOCK_REQUEST\x10\xae\x06\x12$\n\x1f\x43ONSENSUS_COMMIT_BLOCK_RESPONSE\x10\xaf\x06\x12#\n\x1e\x43ONSENSUS_IGNORE_BLOCK_REQUEST\x10\xb0\x06\x12$\n\x1f\x43ONSENSUS_IGNORE_BLOCK_RESPONSE\x10\xb1\x06\x12!\n\x1c\x43ONSENSUS_FAIL_BLOCK_REQUEST\x10\xb2\x06\x12\"\n\x1d\x43ONSENSUS_FAIL_BLOCK_RESPONSE\x10\xb3\x06\x12#\n\x1e\x43ONSENSUS_SETTINGS_GET_REQUEST\x10\xb4\x06\x12$\n\x1f\x43ONSENSUS_SETTINGS_GET_RESPONSE\x10\xb5\x06\x12 \n\x1b\x43ONSENSUS_STATE_GET_REQUEST\x10\xb6\x06\x12!\n\x1c\x43ONSENSUS_STATE_GET_RESPONSE\x10\xb7\x06\x12!\n\x1c\x43ONSENSUS_BLOCKS_GET_REQUEST\x10\xb8\x06\x12\"\n\x1d\x43ONSENSUS_BLOCKS_GET_RESPONSE\x10\xb9\x06\x12%\n CONSENSUS_CHAIN_HEAD_GET_REQUEST\x10\xba\x06\x12&\n!CONSENSUS_CHAIN_HEAD_GET_RESPONSE\x10\xbb\x06\x12(\n#CONSENSUS_BROADCAST_ARBITER_REQUEST\x10\xbe\x06\x12)\n$CONSENSUS_BROADCAST_ARBITER_RESPONSE\x10\xbf\x06\x12(\n#CONSENSUS_BROADCAST_CLUSTER_REQUEST\x10\xc0\x06\x12)\n$CONSENSUS_BROADCAST_CLUSTER_RESPONSE\x10\xc1\x06\x12$\n\x1f\x43ONSENSUS_NOTIFY_PEER_CONNECTED\x10\x84\x07\x12\'\n\"CONSENSUS_NOTIFY_PEER_DISCONNECTED\x10\x85\x07\x12\"\n\x1d\x43ONSENSUS_NOTIFY_PEER_MESSAGE\x10\x86\x07\x12\x1f\n\x1a\x43ONSENSUS_NOTIFY_BLOCK_NEW\x10\x87\x07\x12!\n\x1c\x43ONSENSUS_NOTIFY_BLOCK_VALID\x10\x88\x07\x12#\n\x1e\x43ONSENSUS_NOTIFY_BLOCK_INVALID\x10\x89\x07\x12\"\n\x1d\x43ONSENSUS_NOTIFY_BLOCK_COMMIT\x10\x8a\x07\x12\x19\n\x14\x43ONSENSUS_NOTIFY_ACK\x10\xe7\x07\x42(\n\x15sawtooth.sdk.protobufP\x01Z\rvalidator_pb2b\x06proto3')
+  serialized_pb=_b('\n dgt_sdk/protobuf/validator.proto\")\n\x0bMessageList\x12\x1a\n\x08messages\x18\x01 \x03(\x0b\x32\x08.Message\"\xb4\"\n\x07Message\x12*\n\x0cmessage_type\x18\x01 \x01(\x0e\x32\x14.Message.MessageType\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\x0c\"\xd3!\n\x0bMessageType\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\x17\n\x13TP_REGISTER_REQUEST\x10\x01\x12\x18\n\x14TP_REGISTER_RESPONSE\x10\x02\x12\x19\n\x15TP_UNREGISTER_REQUEST\x10\x03\x12\x1a\n\x16TP_UNREGISTER_RESPONSE\x10\x04\x12\x16\n\x12TP_PROCESS_REQUEST\x10\x05\x12\x17\n\x13TP_PROCESS_RESPONSE\x10\x06\x12\x18\n\x14TP_STATE_GET_REQUEST\x10\x07\x12\x19\n\x15TP_STATE_GET_RESPONSE\x10\x08\x12\x18\n\x14TP_STATE_SET_REQUEST\x10\t\x12\x19\n\x15TP_STATE_SET_RESPONSE\x10\n\x12\x1b\n\x17TP_STATE_DELETE_REQUEST\x10\x0b\x12\x1c\n\x18TP_STATE_DELETE_RESPONSE\x10\x0c\x12\x1f\n\x1bTP_RECEIPT_ADD_DATA_REQUEST\x10\r\x12 \n\x1cTP_RECEIPT_ADD_DATA_RESPONSE\x10\x0e\x12\x18\n\x14TP_EVENT_ADD_REQUEST\x10\x0f\x12\x19\n\x15TP_EVENT_ADD_RESPONSE\x10\x10\x12\x1f\n\x1b\x43LIENT_BATCH_SUBMIT_REQUEST\x10\x64\x12 \n\x1c\x43LIENT_BATCH_SUBMIT_RESPONSE\x10\x65\x12\x1d\n\x19\x43LIENT_BLOCK_LIST_REQUEST\x10\x66\x12\x1e\n\x1a\x43LIENT_BLOCK_LIST_RESPONSE\x10g\x12\"\n\x1e\x43LIENT_BLOCK_GET_BY_ID_REQUEST\x10h\x12\x1d\n\x19\x43LIENT_BLOCK_GET_RESPONSE\x10i\x12\x1d\n\x19\x43LIENT_BATCH_LIST_REQUEST\x10j\x12\x1e\n\x1a\x43LIENT_BATCH_LIST_RESPONSE\x10k\x12\x1c\n\x18\x43LIENT_BATCH_GET_REQUEST\x10l\x12\x1d\n\x19\x43LIENT_BATCH_GET_RESPONSE\x10m\x12#\n\x1f\x43LIENT_TRANSACTION_LIST_REQUEST\x10n\x12$\n CLIENT_TRANSACTION_LIST_RESPONSE\x10o\x12\"\n\x1e\x43LIENT_TRANSACTION_GET_REQUEST\x10p\x12#\n\x1f\x43LIENT_TRANSACTION_GET_RESPONSE\x10q\x12 \n\x1c\x43LIENT_STATE_CURRENT_REQUEST\x10r\x12!\n\x1d\x43LIENT_STATE_CURRENT_RESPONSE\x10s\x12\x1d\n\x19\x43LIENT_STATE_LIST_REQUEST\x10t\x12\x1e\n\x1a\x43LIENT_STATE_LIST_RESPONSE\x10u\x12\x1c\n\x18\x43LIENT_STATE_GET_REQUEST\x10v\x12\x1d\n\x19\x43LIENT_STATE_GET_RESPONSE\x10w\x12\x1f\n\x1b\x43LIENT_BATCH_STATUS_REQUEST\x10x\x12 \n\x1c\x43LIENT_BATCH_STATUS_RESPONSE\x10y\x12\x1e\n\x1a\x43LIENT_RECEIPT_GET_REQUEST\x10z\x12\x1f\n\x1b\x43LIENT_RECEIPT_GET_RESPONSE\x10{\x12#\n\x1f\x43LIENT_BLOCK_GET_BY_NUM_REQUEST\x10|\x12\x1c\n\x18\x43LIENT_PEERS_GET_REQUEST\x10}\x12\x1d\n\x19\x43LIENT_PEERS_GET_RESPONSE\x10~\x12.\n*CLIENT_BLOCK_GET_BY_TRANSACTION_ID_REQUEST\x10\x7f\x12)\n$CLIENT_BLOCK_GET_BY_BATCH_ID_REQUEST\x10\x80\x01\x12\x1e\n\x19\x43LIENT_STATUS_GET_REQUEST\x10\x81\x01\x12\x1f\n\x1a\x43LIENT_STATUS_GET_RESPONSE\x10\x82\x01\x12\x1d\n\x18\x43LIENT_HEADS_GET_REQUEST\x10\x83\x01\x12\x1e\n\x19\x43LIENT_HEADS_GET_RESPONSE\x10\x84\x01\x12 \n\x1b\x43LIENT_TOPOLOGY_GET_REQUEST\x10\x85\x01\x12!\n\x1c\x43LIENT_TOPOLOGY_GET_RESPONSE\x10\x86\x01\x12!\n\x1c\x43LIENT_PEERS_CONTROL_REQUEST\x10\x87\x01\x12\"\n\x1d\x43LIENT_PEERS_CONTROL_RESPONSE\x10\x88\x01\x12\x1d\n\x18\x43LIENT_GRAPH_GET_REQUEST\x10\x89\x01\x12\x1e\n\x19\x43LIENT_GRAPH_GET_RESPONSE\x10\x8a\x01\x12$\n\x1f\x43LIENT_EVENTS_SUBSCRIBE_REQUEST\x10\xf4\x03\x12%\n CLIENT_EVENTS_SUBSCRIBE_RESPONSE\x10\xf5\x03\x12&\n!CLIENT_EVENTS_UNSUBSCRIBE_REQUEST\x10\xf6\x03\x12\'\n\"CLIENT_EVENTS_UNSUBSCRIBE_RESPONSE\x10\xf7\x03\x12\x12\n\rCLIENT_EVENTS\x10\xf8\x03\x12\x1e\n\x19\x43LIENT_EVENTS_GET_REQUEST\x10\xf9\x03\x12\x1f\n\x1a\x43LIENT_EVENTS_GET_RESPONSE\x10\xfa\x03\x12\x13\n\x0eGOSSIP_MESSAGE\x10\xc8\x01\x12\x14\n\x0fGOSSIP_REGISTER\x10\xc9\x01\x12\x16\n\x11GOSSIP_UNREGISTER\x10\xca\x01\x12\x19\n\x14GOSSIP_BLOCK_REQUEST\x10\xcd\x01\x12\x1a\n\x15GOSSIP_BLOCK_RESPONSE\x10\xce\x01\x12%\n GOSSIP_BATCH_BY_BATCH_ID_REQUEST\x10\xcf\x01\x12+\n&GOSSIP_BATCH_BY_TRANSACTION_ID_REQUEST\x10\xd0\x01\x12\x1a\n\x15GOSSIP_BATCH_RESPONSE\x10\xd1\x01\x12\x1d\n\x18GOSSIP_GET_PEERS_REQUEST\x10\xd2\x01\x12\x1e\n\x19GOSSIP_GET_PEERS_RESPONSE\x10\xd3\x01\x12\x1d\n\x18GOSSIP_CONSENSUS_MESSAGE\x10\xd4\x01\x12\x10\n\x0bNETWORK_ACK\x10\xac\x02\x12\x14\n\x0fNETWORK_CONNECT\x10\xad\x02\x12\x17\n\x12NETWORK_DISCONNECT\x10\xae\x02\x12&\n!AUTHORIZATION_CONNECTION_RESPONSE\x10\xd8\x04\x12\x1c\n\x17\x41UTHORIZATION_VIOLATION\x10\xd9\x04\x12 \n\x1b\x41UTHORIZATION_TRUST_REQUEST\x10\xda\x04\x12!\n\x1c\x41UTHORIZATION_TRUST_RESPONSE\x10\xdb\x04\x12$\n\x1f\x41UTHORIZATION_CHALLENGE_REQUEST\x10\xdc\x04\x12%\n AUTHORIZATION_CHALLENGE_RESPONSE\x10\xdd\x04\x12#\n\x1e\x41UTHORIZATION_CHALLENGE_SUBMIT\x10\xde\x04\x12#\n\x1e\x41UTHORIZATION_CHALLENGE_RESULT\x10\xdf\x04\x12\x11\n\x0cPING_REQUEST\x10\xbc\x05\x12\x12\n\rPING_RESPONSE\x10\xbd\x05\x12\x1f\n\x1a\x43ONSENSUS_REGISTER_REQUEST\x10\xa0\x06\x12 \n\x1b\x43ONSENSUS_REGISTER_RESPONSE\x10\xa1\x06\x12\x1e\n\x19\x43ONSENSUS_SEND_TO_REQUEST\x10\xa2\x06\x12\x1f\n\x1a\x43ONSENSUS_SEND_TO_RESPONSE\x10\xa3\x06\x12 \n\x1b\x43ONSENSUS_BROADCAST_REQUEST\x10\xa4\x06\x12!\n\x1c\x43ONSENSUS_BROADCAST_RESPONSE\x10\xa5\x06\x12\'\n\"CONSENSUS_INITIALIZE_BLOCK_REQUEST\x10\xa6\x06\x12(\n#CONSENSUS_INITIALIZE_BLOCK_RESPONSE\x10\xa7\x06\x12%\n CONSENSUS_FINALIZE_BLOCK_REQUEST\x10\xa8\x06\x12&\n!CONSENSUS_FINALIZE_BLOCK_RESPONSE\x10\xa9\x06\x12&\n!CONSENSUS_SUMMARIZE_BLOCK_REQUEST\x10\xbc\x06\x12\'\n\"CONSENSUS_SUMMARIZE_BLOCK_RESPONSE\x10\xbd\x06\x12#\n\x1e\x43ONSENSUS_CANCEL_BLOCK_REQUEST\x10\xaa\x06\x12$\n\x1f\x43ONSENSUS_CANCEL_BLOCK_RESPONSE\x10\xab\x06\x12#\n\x1e\x43ONSENSUS_CHECK_BLOCKS_REQUEST\x10\xac\x06\x12$\n\x1f\x43ONSENSUS_CHECK_BLOCKS_RESPONSE\x10\xad\x06\x12#\n\x1e\x43ONSENSUS_COMMIT_BLOCK_REQUEST\x10\xae\x06\x12$\n\x1f\x43ONSENSUS_COMMIT_BLOCK_RESPONSE\x10\xaf\x06\x12#\n\x1e\x43ONSENSUS_IGNORE_BLOCK_REQUEST\x10\xb0\x06\x12$\n\x1f\x43ONSENSUS_IGNORE_BLOCK_RESPONSE\x10\xb1\x06\x12!\n\x1c\x43ONSENSUS_FAIL_BLOCK_REQUEST\x10\xb2\x06\x12\"\n\x1d\x43ONSENSUS_FAIL_BLOCK_RESPONSE\x10\xb3\x06\x12#\n\x1e\x43ONSENSUS_SETTINGS_GET_REQUEST\x10\xb4\x06\x12$\n\x1f\x43ONSENSUS_SETTINGS_GET_RESPONSE\x10\xb5\x06\x12 \n\x1b\x43ONSENSUS_STATE_GET_REQUEST\x10\xb6\x06\x12!\n\x1c\x43ONSENSUS_STATE_GET_RESPONSE\x10\xb7\x06\x12!\n\x1c\x43ONSENSUS_BLOCKS_GET_REQUEST\x10\xb8\x06\x12\"\n\x1d\x43ONSENSUS_BLOCKS_GET_RESPONSE\x10\xb9\x06\x12%\n CONSENSUS_CHAIN_HEAD_GET_REQUEST\x10\xba\x06\x12&\n!CONSENSUS_CHAIN_HEAD_GET_RESPONSE\x10\xbb\x06\x12(\n#CONSENSUS_BROADCAST_ARBITER_REQUEST\x10\xbe\x06\x12)\n$CONSENSUS_BROADCAST_ARBITER_RESPONSE\x10\xbf\x06\x12(\n#CONSENSUS_BROADCAST_CLUSTER_REQUEST\x10\xc0\x06\x12)\n$CONSENSUS_BROADCAST_CLUSTER_RESPONSE\x10\xc1\x06\x12$\n\x1f\x43ONSENSUS_NOTIFY_PEER_CONNECTED\x10\x84\x07\x12\'\n\"CONSENSUS_NOTIFY_PEER_DISCONNECTED\x10\x85\x07\x12\"\n\x1d\x43ONSENSUS_NOTIFY_PEER_MESSAGE\x10\x86\x07\x12\x1f\n\x1a\x43ONSENSUS_NOTIFY_BLOCK_NEW\x10\x87\x07\x12!\n\x1c\x43ONSENSUS_NOTIFY_BLOCK_VALID\x10\x88\x07\x12#\n\x1e\x43ONSENSUS_NOTIFY_BLOCK_INVALID\x10\x89\x07\x12\"\n\x1d\x43ONSENSUS_NOTIFY_BLOCK_COMMIT\x10\x8a\x07\x12\x19\n\x14\x43ONSENSUS_NOTIFY_ACK\x10\xe7\x07\x42(\n\x15sawtooth.sdk.protobufP\x01Z\rvalidator_pb2b\x06proto3')
 )
 
 
@@ -247,302 +247,310 @@ _MESSAGE_MESSAGETYPE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS_SUBSCRIBE_REQUEST', index=54, number=500,
+      name='CLIENT_GRAPH_GET_REQUEST', index=54, number=137,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS_SUBSCRIBE_RESPONSE', index=55, number=501,
+      name='CLIENT_GRAPH_GET_RESPONSE', index=55, number=138,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS_UNSUBSCRIBE_REQUEST', index=56, number=502,
+      name='CLIENT_EVENTS_SUBSCRIBE_REQUEST', index=56, number=500,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS_UNSUBSCRIBE_RESPONSE', index=57, number=503,
+      name='CLIENT_EVENTS_SUBSCRIBE_RESPONSE', index=57, number=501,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS', index=58, number=504,
+      name='CLIENT_EVENTS_UNSUBSCRIBE_REQUEST', index=58, number=502,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS_GET_REQUEST', index=59, number=505,
+      name='CLIENT_EVENTS_UNSUBSCRIBE_RESPONSE', index=59, number=503,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_EVENTS_GET_RESPONSE', index=60, number=506,
+      name='CLIENT_EVENTS', index=60, number=504,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_MESSAGE', index=61, number=200,
+      name='CLIENT_EVENTS_GET_REQUEST', index=61, number=505,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_REGISTER', index=62, number=201,
+      name='CLIENT_EVENTS_GET_RESPONSE', index=62, number=506,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_UNREGISTER', index=63, number=202,
+      name='GOSSIP_MESSAGE', index=63, number=200,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_BLOCK_REQUEST', index=64, number=205,
+      name='GOSSIP_REGISTER', index=64, number=201,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_BLOCK_RESPONSE', index=65, number=206,
+      name='GOSSIP_UNREGISTER', index=65, number=202,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_BATCH_BY_BATCH_ID_REQUEST', index=66, number=207,
+      name='GOSSIP_BLOCK_REQUEST', index=66, number=205,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_BATCH_BY_TRANSACTION_ID_REQUEST', index=67, number=208,
+      name='GOSSIP_BLOCK_RESPONSE', index=67, number=206,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_BATCH_RESPONSE', index=68, number=209,
+      name='GOSSIP_BATCH_BY_BATCH_ID_REQUEST', index=68, number=207,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_GET_PEERS_REQUEST', index=69, number=210,
+      name='GOSSIP_BATCH_BY_TRANSACTION_ID_REQUEST', index=69, number=208,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_GET_PEERS_RESPONSE', index=70, number=211,
+      name='GOSSIP_BATCH_RESPONSE', index=70, number=209,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GOSSIP_CONSENSUS_MESSAGE', index=71, number=212,
+      name='GOSSIP_GET_PEERS_REQUEST', index=71, number=210,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='NETWORK_ACK', index=72, number=300,
+      name='GOSSIP_GET_PEERS_RESPONSE', index=72, number=211,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='NETWORK_CONNECT', index=73, number=301,
+      name='GOSSIP_CONSENSUS_MESSAGE', index=73, number=212,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='NETWORK_DISCONNECT', index=74, number=302,
+      name='NETWORK_ACK', index=74, number=300,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_CONNECTION_RESPONSE', index=75, number=600,
+      name='NETWORK_CONNECT', index=75, number=301,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_VIOLATION', index=76, number=601,
+      name='NETWORK_DISCONNECT', index=76, number=302,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_TRUST_REQUEST', index=77, number=602,
+      name='AUTHORIZATION_CONNECTION_RESPONSE', index=77, number=600,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_TRUST_RESPONSE', index=78, number=603,
+      name='AUTHORIZATION_VIOLATION', index=78, number=601,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_CHALLENGE_REQUEST', index=79, number=604,
+      name='AUTHORIZATION_TRUST_REQUEST', index=79, number=602,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_CHALLENGE_RESPONSE', index=80, number=605,
+      name='AUTHORIZATION_TRUST_RESPONSE', index=80, number=603,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_CHALLENGE_SUBMIT', index=81, number=606,
+      name='AUTHORIZATION_CHALLENGE_REQUEST', index=81, number=604,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AUTHORIZATION_CHALLENGE_RESULT', index=82, number=607,
+      name='AUTHORIZATION_CHALLENGE_RESPONSE', index=82, number=605,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PING_REQUEST', index=83, number=700,
+      name='AUTHORIZATION_CHALLENGE_SUBMIT', index=83, number=606,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PING_RESPONSE', index=84, number=701,
+      name='AUTHORIZATION_CHALLENGE_RESULT', index=84, number=607,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_REGISTER_REQUEST', index=85, number=800,
+      name='PING_REQUEST', index=85, number=700,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_REGISTER_RESPONSE', index=86, number=801,
+      name='PING_RESPONSE', index=86, number=701,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_SEND_TO_REQUEST', index=87, number=802,
+      name='CONSENSUS_REGISTER_REQUEST', index=87, number=800,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_SEND_TO_RESPONSE', index=88, number=803,
+      name='CONSENSUS_REGISTER_RESPONSE', index=88, number=801,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BROADCAST_REQUEST', index=89, number=804,
+      name='CONSENSUS_SEND_TO_REQUEST', index=89, number=802,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BROADCAST_RESPONSE', index=90, number=805,
+      name='CONSENSUS_SEND_TO_RESPONSE', index=90, number=803,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_INITIALIZE_BLOCK_REQUEST', index=91, number=806,
+      name='CONSENSUS_BROADCAST_REQUEST', index=91, number=804,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_INITIALIZE_BLOCK_RESPONSE', index=92, number=807,
+      name='CONSENSUS_BROADCAST_RESPONSE', index=92, number=805,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_FINALIZE_BLOCK_REQUEST', index=93, number=808,
+      name='CONSENSUS_INITIALIZE_BLOCK_REQUEST', index=93, number=806,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_FINALIZE_BLOCK_RESPONSE', index=94, number=809,
+      name='CONSENSUS_INITIALIZE_BLOCK_RESPONSE', index=94, number=807,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_SUMMARIZE_BLOCK_REQUEST', index=95, number=828,
+      name='CONSENSUS_FINALIZE_BLOCK_REQUEST', index=95, number=808,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_SUMMARIZE_BLOCK_RESPONSE', index=96, number=829,
+      name='CONSENSUS_FINALIZE_BLOCK_RESPONSE', index=96, number=809,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_CANCEL_BLOCK_REQUEST', index=97, number=810,
+      name='CONSENSUS_SUMMARIZE_BLOCK_REQUEST', index=97, number=828,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_CANCEL_BLOCK_RESPONSE', index=98, number=811,
+      name='CONSENSUS_SUMMARIZE_BLOCK_RESPONSE', index=98, number=829,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_CHECK_BLOCKS_REQUEST', index=99, number=812,
+      name='CONSENSUS_CANCEL_BLOCK_REQUEST', index=99, number=810,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_CHECK_BLOCKS_RESPONSE', index=100, number=813,
+      name='CONSENSUS_CANCEL_BLOCK_RESPONSE', index=100, number=811,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_COMMIT_BLOCK_REQUEST', index=101, number=814,
+      name='CONSENSUS_CHECK_BLOCKS_REQUEST', index=101, number=812,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_COMMIT_BLOCK_RESPONSE', index=102, number=815,
+      name='CONSENSUS_CHECK_BLOCKS_RESPONSE', index=102, number=813,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_IGNORE_BLOCK_REQUEST', index=103, number=816,
+      name='CONSENSUS_COMMIT_BLOCK_REQUEST', index=103, number=814,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_IGNORE_BLOCK_RESPONSE', index=104, number=817,
+      name='CONSENSUS_COMMIT_BLOCK_RESPONSE', index=104, number=815,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_FAIL_BLOCK_REQUEST', index=105, number=818,
+      name='CONSENSUS_IGNORE_BLOCK_REQUEST', index=105, number=816,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_FAIL_BLOCK_RESPONSE', index=106, number=819,
+      name='CONSENSUS_IGNORE_BLOCK_RESPONSE', index=106, number=817,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_SETTINGS_GET_REQUEST', index=107, number=820,
+      name='CONSENSUS_FAIL_BLOCK_REQUEST', index=107, number=818,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_SETTINGS_GET_RESPONSE', index=108, number=821,
+      name='CONSENSUS_FAIL_BLOCK_RESPONSE', index=108, number=819,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_STATE_GET_REQUEST', index=109, number=822,
+      name='CONSENSUS_SETTINGS_GET_REQUEST', index=109, number=820,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_STATE_GET_RESPONSE', index=110, number=823,
+      name='CONSENSUS_SETTINGS_GET_RESPONSE', index=110, number=821,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BLOCKS_GET_REQUEST', index=111, number=824,
+      name='CONSENSUS_STATE_GET_REQUEST', index=111, number=822,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BLOCKS_GET_RESPONSE', index=112, number=825,
+      name='CONSENSUS_STATE_GET_RESPONSE', index=112, number=823,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_CHAIN_HEAD_GET_REQUEST', index=113, number=826,
+      name='CONSENSUS_BLOCKS_GET_REQUEST', index=113, number=824,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_CHAIN_HEAD_GET_RESPONSE', index=114, number=827,
+      name='CONSENSUS_BLOCKS_GET_RESPONSE', index=114, number=825,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BROADCAST_ARBITER_REQUEST', index=115, number=830,
+      name='CONSENSUS_CHAIN_HEAD_GET_REQUEST', index=115, number=826,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BROADCAST_ARBITER_RESPONSE', index=116, number=831,
+      name='CONSENSUS_CHAIN_HEAD_GET_RESPONSE', index=116, number=827,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BROADCAST_CLUSTER_REQUEST', index=117, number=832,
+      name='CONSENSUS_BROADCAST_ARBITER_REQUEST', index=117, number=830,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_BROADCAST_CLUSTER_RESPONSE', index=118, number=833,
+      name='CONSENSUS_BROADCAST_ARBITER_RESPONSE', index=118, number=831,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_PEER_CONNECTED', index=119, number=900,
+      name='CONSENSUS_BROADCAST_CLUSTER_REQUEST', index=119, number=832,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_PEER_DISCONNECTED', index=120, number=901,
+      name='CONSENSUS_BROADCAST_CLUSTER_RESPONSE', index=120, number=833,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_PEER_MESSAGE', index=121, number=902,
+      name='CONSENSUS_NOTIFY_PEER_CONNECTED', index=121, number=900,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_BLOCK_NEW', index=122, number=903,
+      name='CONSENSUS_NOTIFY_PEER_DISCONNECTED', index=122, number=901,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_BLOCK_VALID', index=123, number=904,
+      name='CONSENSUS_NOTIFY_PEER_MESSAGE', index=123, number=902,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_BLOCK_INVALID', index=124, number=905,
+      name='CONSENSUS_NOTIFY_BLOCK_NEW', index=124, number=903,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_BLOCK_COMMIT', index=125, number=906,
+      name='CONSENSUS_NOTIFY_BLOCK_VALID', index=125, number=904,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONSENSUS_NOTIFY_ACK', index=126, number=999,
+      name='CONSENSUS_NOTIFY_BLOCK_INVALID', index=126, number=905,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CONSENSUS_NOTIFY_BLOCK_COMMIT', index=127, number=906,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CONSENSUS_NOTIFY_ACK', index=128, number=999,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=177,
-  serialized_end=4421,
+  serialized_end=4484,
 )
 _sym_db.RegisterEnumDescriptor(_MESSAGE_MESSAGETYPE)
 
@@ -620,7 +628,7 @@ _MESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=80,
-  serialized_end=4421,
+  serialized_end=4484,
 )
 
 _MESSAGELIST.fields_by_name['messages'].message_type = _MESSAGE

@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 Intel Corporation
+# Copyright 2016, 2017 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,6 +75,10 @@ from smart_bgt.processor.utils import FAMILY_NAME as SMART_BGX_FAMILY
 from smart_bgt.processor.utils import FAMILY_VER as SMART_BGX_VER
 from smart_bgt.processor.utils import SMART_BGT_META,SMART_BGT_CREATOR_KEY,SMART_BGT_PRESENT_AMOUNT
 from smart_bgt.processor.utils import make_smart_bgt_address
+# bgt families                                                                               
+from dgt_bgt.client_cli.generate import BgtPayload,create_bgt_transaction,loads_bgt_token    
+from dgt_bgt.processor.handler import make_bgt_address, make_bgt_prefix 
+                                      
 import time
 LOGGER = logging.getLogger(__name__)
 
@@ -94,7 +98,7 @@ def _base64url2public(addr):
 def _public2base64url(key):
     return base64.urlsafe_b64encode(key.encode()).decode('utf-8')
 
-class BgxRouteHandler(RouteHandler):
+class DgtRouteHandler(RouteHandler):
     """Contains a number of aiohttp handlers for endpoints in the Rest Api.
 
     Each handler takes an aiohttp Request object, and uses the data in
@@ -149,7 +153,7 @@ class BgxRouteHandler(RouteHandler):
         """
         make transaction
         """
-        LOGGER.debug('BgxRouteHandler: _create_transaction make Transaction')
+        LOGGER.debug('DgtRouteHandler: _create_transaction make Transaction')
         txn_header = TransactionHeader(
             signer_public_key=self._signer.get_public_key().as_hex(),
             family_name=SMART_BGX_FAMILY,
@@ -171,7 +175,7 @@ class BgxRouteHandler(RouteHandler):
         return transaction
 
     async def _get_state_by_addr(self,request,address):
-        LOGGER.debug('BgxRouteHandler:_get_state_by_addr %s',address)
+        LOGGER.debug('DgtRouteHandler:_get_state_by_addr %s',address)
         state_address = make_smart_bgt_address(address)
 
         error_traps = [error_handlers.InvalidAddressTrap] #,error_handlers.StateNotFoundTrap]
@@ -185,14 +189,109 @@ class BgxRouteHandler(RouteHandler):
             client_state_pb2.ClientStateGetRequest(
                 state_root=root, address=state_address),
             error_traps)
-        LOGGER.debug('BgxRouteHandler:_get_state_by_addr %s',address)
+        LOGGER.debug('DgtRouteHandler:_get_state_by_addr %s',address)
         try:
             result = cbor.loads(base64.b64decode(response['value']))
-            LOGGER.debug('BgxRouteHandler: _get_state_by_addr result=%s',type(result))
+            LOGGER.debug('DgtRouteHandler: _get_state_by_addr result=%s',type(result))
         except BaseException:
-            LOGGER.debug('BgxRouteHandler: Cant get state FOR=%s',address)
+            LOGGER.debug('DgtRouteHandler: Cant get state FOR=%s',address)
             return None
         return result
+
+    async def run_transaction(self, request):                                                                                                      
+        """                                                                                                                                        
+        make transfer from wallet to wallet                                                                                                        
+        """                                                                                                                                        
+        family = request.url.query.get('family', None)                                                                                             
+        if family == 'bgt' :                                                                                                                       
+            cmd = request.url.query.get('cmd', None)                                                                                               
+            arg1 = request.url.query.get('wallet', None)                                                                                           
+            if cmd == 'show':                                                                                                                      
+                address = make_bgt_address(arg1)                                                                                                   
+                error_traps = [error_handlers.InvalidAddressTrap,error_handlers.StateNotFoundTrap]                                                 
+                response = await self._query_validator(                                                                                            
+                    Message.CLIENT_STATE_GET_REQUEST,                                                                                              
+                    client_state_pb2.ClientStateGetResponse,                                                                                       
+                    client_state_pb2.ClientStateGetRequest(                                                                                        
+                        state_root='',                                                                                                             
+                        address=address),                                                                                                          
+                    error_traps)                                                                                                                   
+                LOGGER.debug('run_transaction: BGT show=%s (%s)!',arg1,response)                                                                   
+                if response['status'] == 'OK':                                                                                                     
+                    bgt = loads_bgt_token(response['value'],arg1)                                                                                  
+                    LOGGER.debug('run_transaction: BGT[%s]=%s!',arg1,bgt)                                                                          
+                else:                                                                                                                              
+                    bgt = response['value']                                                                                                        
+                return self._wrap_response(                                                                                                        
+                    request,                                                                                                                       
+                    data=bgt,                                                                                                                      
+                    metadata=self._get_metadata(request, response))                                                                                
+            elif  cmd == 'list' :
+                paging_controls = self._get_paging_controls(request)                           
+                # for DAG ask head of chain for getting merkle root is incorrect way           
+                # FIXME - add special method for asking real merkle root                       
+                head, root = await self._head_to_root(request.url.query.get('head', None))     
+                LOGGER.debug('LIST_STATE STATE=%s',root[:10])                                  
+                                                                                               
+                validator_query = client_state_pb2.ClientStateListRequest(                     
+                    state_root='',
+                    address=make_bgt_prefix(),                            
+                    sorting=self._get_sorting_message(request, "default"),                     
+                    paging=self._make_paging_message(paging_controls))                         
+                                                                                               
+                response = await self._query_validator(                                        
+                    Message.CLIENT_STATE_LIST_REQUEST,                                         
+                    client_state_pb2.ClientStateListResponse,                                  
+                    validator_query)                                                           
+                 
+                if response['status'] == 'OK':
+                    decoded = []
+                    for entry in response['entries']:
+                        bgt = loads_bgt_token(entry["data"])      
+                        LOGGER.debug(f'BGT LIST DATA={bgt}')
+                        decoded.append(bgt)
+                    response['entries'] = decoded
+
+                return self._wrap_paginated_response(                                          
+                    request=request,                                                           
+                    response=response,                                                         
+                    controls=paging_controls,                                                  
+                    data=response.get('entries', []),                                          
+                    head=head)                                                                 
+
+                                                                                                                                                   
+            arg2 = request.url.query.get('amount', None)                                                                                           
+            arg3 = request.url.query.get('to', None)                                                                                               
+            LOGGER.debug('run_transaction family=%s cmd=%s(%s,%s) query=%s!!!',family,cmd,arg1,arg2,request.url.query)                             
+            transaction = create_bgt_transaction(verb=cmd,name=arg1,value=int(arg2),signer=self._signer,to=arg3)                                   
+            batch = self._create_batch([transaction])                                                                                              
+            batch_id = batch.header_signature                                                                                                      
+        else:                                                                                                                                      
+            # undefined families                                                                                                                   
+            batch_id = None                                                                                                                        
+            link = ''                                                                                                                              
+                                                                                                                                                   
+        if batch_id is not None:                                                                                                                   
+            error_traps = [error_handlers.BatchInvalidTrap,error_handlers.BatchQueueFullTrap]                                                      
+            validator_query = client_batch_submit_pb2.ClientBatchSubmitRequest(batches=[batch])                                                    
+            LOGGER.debug('run_transaction send batch_id=%s',batch_id)                                                                              
+                                                                                                                                                   
+            with self._post_batches_validator_time.time():                                                                                         
+                await self._query_validator(                                                                                                       
+                    Message.CLIENT_BATCH_SUBMIT_REQUEST,                                                                                           
+                    client_batch_submit_pb2.ClientBatchSubmitResponse,                                                                             
+                    validator_query,                                                                                                               
+                    error_traps)                                                                                                                   
+            link = self._build_url(request, path='/batch_statuses', id=batch_id)                                                                   
+        return self._wrap_response(                                                                                                                
+            request,                                                                                                                               
+            data=None,                                                                                                                             
+            metadata={                                                                                                                             
+              'link': link,                                                                                                                        
+            }                                                                                                                                      
+            )                                                                                                                                      
+
+
 
     def _get_token(self,wallet,key):
         def coin(token):
@@ -204,7 +303,7 @@ class BgxRouteHandler(RouteHandler):
         amount = 0
         coin_code = ''
         for key in tokens:
-            LOGGER.debug('BgxRouteHandler:_get_token group (%s)',key)
+            LOGGER.debug('DgtRouteHandler:_get_token group (%s)',key)
             token = json.loads(tokens[key])
             coin_code = coin_code + ',' + (token['group_code'] if 'group_code' in token else 'white')
             amount    = amount + coin(token)
@@ -220,7 +319,7 @@ class BgxRouteHandler(RouteHandler):
             return meta_token,''
         # create wallet and present some few token
         meta = json.loads(meta_token[SMART_BGT_META])
-        LOGGER.debug('BgxRouteHandler:get_meta_token=%s key=%s',meta,meta[SMART_BGT_CREATOR_KEY])
+        LOGGER.debug('DgtRouteHandler:get_meta_token=%s key=%s',meta,meta[SMART_BGT_CREATOR_KEY])
         return meta_token,meta[SMART_BGT_CREATOR_KEY]
          
 
@@ -247,7 +346,7 @@ class BgxRouteHandler(RouteHandler):
             'num_bgt': num_bgt,
             'group_id' : coin_code
         })
-        LOGGER.debug('BgxRouteHandler: _make_token_transfer make payload=%s',payload_bytes)
+        LOGGER.debug('DgtRouteHandler: _make_token_transfer make payload=%s',payload_bytes)
         in_address = make_smart_bgt_address(address_from)
         out_address = make_smart_bgt_address(address_to)
         inputs =[in_address, out_address]   
@@ -259,7 +358,7 @@ class BgxRouteHandler(RouteHandler):
         # Query validator
         error_traps = [error_handlers.BatchInvalidTrap,error_handlers.BatchQueueFullTrap]
         validator_query = client_batch_submit_pb2.ClientBatchSubmitRequest(batches=[batch])
-        LOGGER.debug('BgxRouteHandler: _make_token_transfer send batch_id=%s',batch_id)
+        LOGGER.debug('DgtRouteHandler: _make_token_transfer send batch_id=%s',batch_id)
 
         with self._post_batches_validator_time.time():
             await self._query_validator(
@@ -304,12 +403,12 @@ class BgxRouteHandler(RouteHandler):
         """
         make transfer from wallet to wallet
         """
-        LOGGER.debug('BgxRouteHandler: post_transfer !!!')
+        LOGGER.debug('DgtRouteHandler: post_transfer !!!')
         timer_ctx = self._post_batches_total_time.time()
         self._post_batches_count.inc()
         body = await request.json()
 
-        LOGGER.debug('BgxRouteHandler: post_transfer body=(%s)',body)
+        LOGGER.debug('DgtRouteHandler: post_transfer body=(%s)',body)
         if 'data' not in body:
             raise errors.NoTransactionPayload()
 
@@ -335,14 +434,14 @@ class BgxRouteHandler(RouteHandler):
         try:
             address_to   =  _base64url2public(address_to)
         except errors.BadWalletAddress:
-            LOGGER.debug('BgxRouteHandler: post_transfer  BadWalletAddress= %s',address_to)
+            LOGGER.debug('DgtRouteHandler: post_transfer  BadWalletAddress= %s',address_to)
             meta_token,meta_wallet = await self.get_meta_token(request,coin_code)
             if meta_token is None:
                 raise errors.BadWalletAddress()
-            LOGGER.debug('BgxRouteHandler: post_transfer to META WALLET=%s',meta_wallet)
+            LOGGER.debug('DgtRouteHandler: post_transfer to META WALLET=%s',meta_wallet)
             address_to = meta_wallet
 
-        LOGGER.debug('BgxRouteHandler: post_transaction make payload=%s',payload)
+        LOGGER.debug('DgtRouteHandler: post_transaction make payload=%s',payload)
         tx_status = await self._make_token_transfer(request,address_from,address_to,num_bgt,coin_code)
         # status = 202
 
@@ -366,7 +465,7 @@ class BgxRouteHandler(RouteHandler):
             # metadata={'link': link},
             metadata=tx,
             status=200)
-        LOGGER.debug('BgxRouteHandler: post_transfer retval=%s',retval)
+        LOGGER.debug('DgtRouteHandler: post_transfer retval=%s',retval)
         timer_ctx.stop()
         return retval
 
@@ -376,10 +475,10 @@ class BgxRouteHandler(RouteHandler):
         get wallet balance
         """
         address = request.match_info.get('address', '')
-        LOGGER.debug('BgxRouteHandler: get_wallet address=%s type=%s',address,type(address))
+        LOGGER.debug('DgtRouteHandler: get_wallet address=%s type=%s',address,type(address))
         address =  _base64url2public(address)
 
-        LOGGER.debug('BgxRouteHandler: get_wallet public=(%s) type=%s',address,type(address))
+        LOGGER.debug('DgtRouteHandler: get_wallet public=(%s) type=%s',address,type(address))
         result = await self._get_state_by_addr(request,address)
         if result is None :
             return self._wrap_error(request,400,'There is no wallet for this public key.')
@@ -421,13 +520,13 @@ class BgxRouteHandler(RouteHandler):
         user_address = _public2base64url(public_key)
         wallet = await self._get_state_by_addr(request,public_key)
         if wallet is None:
-            LOGGER.debug('BgxRouteHandler:post_wallet CREATE NEW WALLET') 
+            LOGGER.debug('DgtRouteHandler:post_wallet CREATE NEW WALLET') 
             meta_token,meta_wallet = await self.get_meta_token(request)
             if meta_token is not None:
                 # create wallet and present some few 'bgt' token as default 
                 # make transfer to new wallet
                 tx_status = await self._make_token_transfer(request,meta_wallet,public_key,SMART_BGT_PRESENT_AMOUNT)
-                LOGGER.debug('BgxRouteHandler:post_wallet tx_status=%s',tx_status)
+                LOGGER.debug('DgtRouteHandler:post_wallet tx_status=%s',tx_status)
                 # SHOULD DO waiting until wallet was created
                 #wallet = await self._get_state_by_addr(request,public_key)
                 status = "Wallet WAS CREATED"
@@ -437,7 +536,7 @@ class BgxRouteHandler(RouteHandler):
             else: # we must do emmission before
                 return self._wrap_error(request,400,'Emmission must be done before')
         else:
-            LOGGER.debug('BgxRouteHandler:post_wallet ALREADY CREATED wallet(%s)',wallet)
+            LOGGER.debug('DgtRouteHandler:post_wallet ALREADY CREATED wallet(%s)',wallet)
             status = "Wallet ALREADY CREATED"
             coin_code,amount = self._get_token(wallet,public_key)
             
@@ -553,16 +652,16 @@ class BgxRouteHandler(RouteHandler):
             raise errors.BadTransactionPayload()
 
         
-        LOGGER.debug('BgxRouteHandler:post_add_funds payload(%s)',payload)    
+        LOGGER.debug('DgtRouteHandler:post_add_funds payload(%s)',payload)    
         public_key_to =  _base64url2public(address_to)
         wallet = await self._get_state_by_addr(request,public_key_to)
         if wallet is None:
-            LOGGER.debug('BgxRouteHandler:post_add_funds wallet(%s) not found',address_to)
+            LOGGER.debug('DgtRouteHandler:post_add_funds wallet(%s) not found',address_to)
             raise errors.WalletNotFound()
         # check emmission
         meta_token,meta_wallet = await self.get_meta_token(request,coin_code)
         if meta_token is not None:
-            LOGGER.debug('BgxRouteHandler:post_add_funds key=%s bgt_num=%s reason=%s',meta_wallet,bgt_num,reason) 
+            LOGGER.debug('DgtRouteHandler:post_add_funds key=%s bgt_num=%s reason=%s',meta_wallet,bgt_num,reason) 
             # make transfer to  public_key_to wallet
             tx_status = await self._make_token_transfer(request,meta_wallet,public_key_to,bgt_num,coin_code)
         else:

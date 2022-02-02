@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 Intel Corporation
+# Copyright 2016, 2017 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -126,14 +126,14 @@ class BgxTeleBot(Tbot):
     def __init__(self,loop, connection,tdb,token=None,project_id=None,session_id=None,proxy=None,connects=None):
 
         super().__init__(loop,connection,tdb,token,project_id,session_id,proxy,connects)
-        # BGX init
+        # DGT init
         
         self._context = create_context('secp256k1') 
         self._private_key = self._context.new_random()
         self._public_key = self._context.get_public_key(self._private_key)
         self._crypto_factory = CryptoFactory(self._context)
         self._signer = self._crypto_factory.new_signer(self._private_key)
-        LOGGER.debug('BgxTeleBot: _signer PUBLIC_KEY=%s',self._public_key.as_hex()[:8])
+        LOGGER.debug('DgtTeleBot: _signer PUBLIC_KEY=%s',self._public_key.as_hex()[:8])
 
     def _create_batch(self, transactions):
         """
@@ -161,7 +161,7 @@ class BgxTeleBot(Tbot):
         """
         make transaction
         """
-        LOGGER.debug('BgxTeleBot: _create_transaction make Transaction')
+        LOGGER.debug('DgtTeleBot: _create_transaction make Transaction')
         txn_header = TransactionHeader(
             signer_public_key=self._signer.get_public_key().as_hex(),
             family_name=family,
@@ -183,7 +183,7 @@ class BgxTeleBot(Tbot):
         return transaction
 
     async def _get_state_by_addr(self,request,address):
-        LOGGER.debug('BgxTeleBot:_get_state_by_addr %s',address)
+        LOGGER.debug('DgtTeleBot:_get_state_by_addr %s',address)
         state_address = make_smart_bgt_address(address)
 
         error_traps = [error_handlers.InvalidAddressTrap] #,error_handlers.StateNotFoundTrap]
@@ -197,12 +197,12 @@ class BgxTeleBot(Tbot):
             client_state_pb2.ClientStateGetRequest(
                 state_root=root, address=state_address),
             error_traps)
-        LOGGER.debug('BgxRouteHandler:_get_state_by_addr %s',address)
+        LOGGER.debug('DgtRouteHandler:_get_state_by_addr %s',address)
         try:
             result = cbor.loads(base64.b64decode(response['value']))
-            LOGGER.debug('BgxRouteHandler: _get_state_by_addr result=%s',type(result))
+            LOGGER.debug('DgtRouteHandler: _get_state_by_addr result=%s',type(result))
         except BaseException:
-            LOGGER.debug('BgxRouteHandler: Cant get state FOR=%s',address)
+            LOGGER.debug('DgtRouteHandler: Cant get state FOR=%s',address)
             return None
         return result
 
@@ -286,7 +286,7 @@ class BgxTeleBot(Tbot):
             return response.get('entries', [])
 
     async def _get_state(self,address,state_address):
-        LOGGER.debug('BgxTeleBot:_get_state_by_addr %s',address)
+        LOGGER.debug('DgtTeleBot:_get_state_by_addr %s',address)
         #state_address = make_smart_bgt_address(address)
 
         error_traps = [error_handlers.InvalidAddressTrap] #,error_handlers.StateNotFoundTrap]
@@ -300,19 +300,19 @@ class BgxTeleBot(Tbot):
             client_state_pb2.ClientStateGetRequest(
                 state_root=None, address=state_address),
             error_traps)
-        LOGGER.debug('BgxRouteHandler:_get_state_by_addr %s',address)
+        LOGGER.debug('DgtRouteHandler:_get_state_by_addr %s',address)
         try:
             result = cbor.loads(base64.b64decode(response['value']))
-            LOGGER.debug('BgxRouteHandler: _get_state_by_addr RESULT=%s',result)
+            LOGGER.debug('DgtRouteHandler: _get_state_by_addr RESULT=%s',result)
         except BaseException:
-            LOGGER.debug('BgxRouteHandler: Cant get state FOR=%s',address)
+            LOGGER.debug('DgtRouteHandler: Cant get state FOR=%s',address)
             result = None
         return result
 
     def unfold_stuff_history(self):
         pass
     async def _get_state_history(self,address,state_address,family='stuff'):                                              
-        LOGGER.debug('BgxTeleBot:_get_state_history %s',address) 
+        LOGGER.debug('DgtTeleBot:_get_state_history %s',address) 
         def byTime_key(receipt):
             return receipt['timestamp']
 
@@ -329,7 +329,7 @@ class BgxTeleBot(Tbot):
         try:   
             #value = base64.b64decode(response['value']) 
             value = self._drop_id_prefixes(self._drop_empty_props(response['receipts']))                                                                                   
-            LOGGER.debug('BgxRouteHandler:_get_state_history %s=%s',address,value) 
+            LOGGER.debug('DgtRouteHandler:_get_state_history %s=%s',address,value) 
             result = {}
             n = 0
             prev = None
@@ -340,7 +340,7 @@ class BgxTeleBot(Tbot):
                 for changes in receipt['state_changes']:
                     val = base64.b64decode(changes['value'])
                     content = cbor.loads(val)
-                    LOGGER.debug('BgxRouteHandler:timestamp=%s receipt=%s\n content=%s',dtm,val,content)
+                    LOGGER.debug('DgtRouteHandler:timestamp=%s receipt=%s\n content=%s',dtm,val,content)
                     
                     for key,v in content.items():  
                         if family == 'stuff':
@@ -368,11 +368,11 @@ class BgxTeleBot(Tbot):
                             result[dtm] = {'amount':token.decimals}
 
                         n += 1
-            LOGGER.debug('BgxRouteHandler:n=%s content=%s',n,result)
+            LOGGER.debug('DgtRouteHandler:n=%s content=%s',n,result)
             
             
         except BaseException:                                                                      
-            LOGGER.debug('BgxRouteHandler: Cant get state FOR=%s',address)                         
+            LOGGER.debug('DgtRouteHandler: Cant get state FOR=%s',address)                         
             result = None                                                                          
         return result                                                                              
 
@@ -385,7 +385,7 @@ class BgxTeleBot(Tbot):
                 ClientPeersControlResponse,
                 vquery,
                 error_traps)
-            LOGGER.debug('BgxRouteHandler:_peers_control response %s',response)
+            LOGGER.debug('DgtRouteHandler:_peers_control response %s',response)
             return response['info'] if response is not None else 'Service Unavailable - try again' 
 
         except errors.ValidatorTimedOut:
@@ -472,19 +472,19 @@ class BgxTeleBot(Tbot):
         """
         Get or create wallet for user who send this message
         """
-        LOGGER.debug('BgxTeleBot: create wallet FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: create wallet FOR=%s',minfo)
         await self.make_bgt_transaction('set','wallet_'+str(minfo.user_id),5)
         minfo = minfo._replace(intent='smalltalk.agent.check_wallet')
-        LOGGER.debug('BgxTeleBot: check wallet FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: check wallet FOR=%s',minfo)
         self.intent_handler(minfo)
 
     async def intent_create_wallet(self,minfo):
         """
         Get or create wallet for user who send this message
         """
-        LOGGER.debug('BgxTeleBot: create wallet FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: create wallet FOR=%s',minfo)
         if minfo.batch_id:                                                       
-            LOGGER.debug('BgxTeleBot: CHECK=%s CREATE wallet',minfo.batch_id) 
+            LOGGER.debug('DgtTeleBot: CHECK=%s CREATE wallet',minfo.batch_id) 
             batch = await self.check_batch_status(minfo.batch_id,minfo)          
             return
         args = self.get_args_from_request(minfo.result.parameters) if minfo.result else {'name' : minfo.user_first_name}
@@ -516,40 +516,40 @@ class BgxTeleBot(Tbot):
         """
         Get or create wallet check
         """
-        LOGGER.debug('BgxTeleBot: check wallet FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: check wallet FOR=%s',minfo)
         uname,wallet = self.get_wallet_param(minfo)
         if uname is None:
             return 
            
         try:
             token = await self.bgt_get_state(wallet)
-            LOGGER.debug('BgxTeleBot: %s=%s',wallet,token)
+            LOGGER.debug('DgtTeleBot: %s=%s',wallet,token)
             repl = 'В кошельке {}: {} {}.'.format(uname,token.decimals,token.group_code) if token else "К сожалению у {} нет кошелька".format(uname)
             self.send_message(minfo.chat_id, repl)
         except Exception as ex:
-            LOGGER.debug('BgxTeleBot: cant check token into=%s (%s)',wallet,ex)
+            LOGGER.debug('DgtTeleBot: cant check token into=%s (%s)',wallet,ex)
             
     async def intent_check_wallet_history(self,minfo):
         """
         Get wallet history
         """
-        LOGGER.debug('BgxTeleBot: check_wallet_history FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: check_wallet_history FOR=%s',minfo)
         uname,wallet = self.get_wallet_param(minfo)
         if uname is None:
             return 
 
         try:
             token = await self.bgt_get_state_history(wallet)
-            LOGGER.debug('BgxTeleBot: %s=%s',wallet,token)
+            LOGGER.debug('DgtTeleBot: %s=%s',wallet,token)
             
             repl = 'История кошелька {}:\n{}.'.format(uname,yaml.dump(token, default_flow_style=False)[0:-1]) if token else "К сожалению у {} нет кошелька".format(uname)
             self.send_message(minfo.chat_id, repl)
         except Exception as ex:
-            LOGGER.debug('BgxTeleBot: cant check token into=%s (%s)',wallet,ex)
+            LOGGER.debug('DgtTeleBot: cant check token into=%s (%s)',wallet,ex)
 
     async def intent_trans_token(self,minfo):
         if minfo.batch_id:                                                       
-            LOGGER.debug('BgxTeleBot: CHECK=%s TRANS to wallet',minfo.batch_id) 
+            LOGGER.debug('DgtTeleBot: CHECK=%s TRANS to wallet',minfo.batch_id) 
             batch = await self.check_batch_status(minfo.batch_id,minfo)          
             return
         args = self.get_args_from_request(minfo.result.parameters)
@@ -562,7 +562,7 @@ class BgxTeleBot(Tbot):
                 if token:
                     await self.make_bgt_transaction('trans',user_wallet_name(minfo.user_id),round(args['amount']),to_wallet,minfo=minfo)
                     self.send_message(minfo.chat_id, 'Хорошо {}. Пытаюсь перевести {} BGT : {} {}.'.format(minfo.user_first_name,args['amount'],args['name'],to_user[1]['last_name']))   
-                    LOGGER.debug('BgxTeleBot: TRANS TOKEN %s TO %s(%s=%s)',str(args['amount']),args['name'],to_user[0],to_user[1])
+                    LOGGER.debug('DgtTeleBot: TRANS TOKEN %s TO %s(%s=%s)',str(args['amount']),args['name'],to_user[0],to_user[1])
 
                 else:
                     self.send_message(minfo.chat_id, '{},а у {} {} нет кошелька.'.format(minfo.user_first_name,args['name'],to_user[1]['last_name']))
@@ -575,14 +575,14 @@ class BgxTeleBot(Tbot):
         add token into wallet
         """
         if minfo.batch_id:                                                       
-            LOGGER.debug('BgxTeleBot: INC wallet CHECK=%s',minfo.batch_id) 
+            LOGGER.debug('DgtTeleBot: INC wallet CHECK=%s',minfo.batch_id) 
             batch = await self.check_batch_status(minfo.batch_id,minfo)          
             return                                                               
 
         args = self.get_args_from_request(minfo.result.parameters)
         if 'amount' in args:
             token = round(args['amount'])
-            LOGGER.debug('BgxTeleBot: inc wallet %s',token)
+            LOGGER.debug('DgtTeleBot: inc wallet %s',token)
             await self.make_bgt_transaction('inc','wallet_'+str(minfo.user_id),token,minfo=minfo)
             self.send_message(minfo.chat_id, 'Хорошо {}. Добавляю {} BGT.'.format(minfo.user_first_name,args['amount']))
             
@@ -592,13 +592,13 @@ class BgxTeleBot(Tbot):
         dec token into wallet
         """
         if minfo.batch_id:
-            LOGGER.debug('BgxTeleBot: DEC wallet CHECK TRANS=%s',minfo.batch_id)
+            LOGGER.debug('DgtTeleBot: DEC wallet CHECK TRANS=%s',minfo.batch_id)
             batch = await self.check_batch_status(minfo.batch_id,minfo)
             return
         args = self.get_args_from_request(minfo.result.parameters)
         if 'amount' in args:
             token = round(args['amount'])
-            LOGGER.debug('BgxTeleBot: DEC wallet %s',token)
+            LOGGER.debug('DgtTeleBot: DEC wallet %s',token)
             await self.make_bgt_transaction('dec','wallet_'+str(minfo.user_id),token,minfo=minfo)
             self.send_message(minfo.chat_id, 'Хорошо {}. Скинул {} BGT.'.format(minfo.user_first_name,args['amount']))
             
@@ -608,7 +608,7 @@ class BgxTeleBot(Tbot):
         buy something
         """
         if minfo.batch_id:
-            LOGGER.debug('BgxTeleBot: BUY STUFF CHECK TRANS=%s',minfo.batch_id)
+            LOGGER.debug('DgtTeleBot: BUY STUFF CHECK TRANS=%s',minfo.batch_id)
             batch = await self.check_batch_status(minfo.batch_id,minfo)
             if batch['status'] == 'COMMITTED':
                 # send sticker
@@ -617,7 +617,7 @@ class BgxTeleBot(Tbot):
             return
         args = self.get_args_from_request(minfo.result.parameters)
         if 'stuff' in args:
-            LOGGER.debug('BgxTeleBot: BUY %s',args['stuff'])
+            LOGGER.debug('DgtTeleBot: BUY %s',args['stuff'])
             await self.make_bgt_transaction('dec','wallet_'+str(minfo.user_id),2,minfo=minfo)
             
 
@@ -626,7 +626,7 @@ class BgxTeleBot(Tbot):
         sell something
         """
         if minfo.batch_id:
-            LOGGER.debug('BgxTeleBot: SELL STUFF CHECK TRANS=%s',minfo.batch_id)
+            LOGGER.debug('DgtTeleBot: SELL STUFF CHECK TRANS=%s',minfo.batch_id)
             batch = await self.check_batch_status(minfo.batch_id,minfo)
             if batch['status'] == 'COMMITTED':
                 # send sticker
@@ -634,7 +634,7 @@ class BgxTeleBot(Tbot):
             return
         args = self.get_args_from_request(minfo.result.parameters)
         if 'stuff' in args:
-            LOGGER.debug('BgxTeleBot: SELL %s',args['stuff'])
+            LOGGER.debug('DgtTeleBot: SELL %s',args['stuff'])
             await self.make_bgt_transaction('inc','wallet_'+str(minfo.user_id),3,minfo=minfo)
             
 
@@ -642,13 +642,13 @@ class BgxTeleBot(Tbot):
         """
         Get or create stuff for user who send this message
         """
-        LOGGER.debug('BgxTeleBot: create stuff FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: create stuff FOR=%s',minfo)
         if minfo.batch_id:                                                       
-            LOGGER.debug('BgxTeleBot: CHECK=%s CREATE stuff',minfo.batch_id) 
+            LOGGER.debug('DgtTeleBot: CHECK=%s CREATE stuff',minfo.batch_id) 
             batch = await self.check_batch_status(minfo.batch_id,minfo)          
             return
         args = self.get_args_from_request(minfo.result.parameters) if minfo.result else {'name' : minfo.user_first_name}
-        LOGGER.debug('BgxTeleBot: create stuff args=%s',args)
+        LOGGER.debug('DgtTeleBot: create stuff args=%s',args)
         if 'number' in args:
             new_stuff = user_stuff_name(args['number'])
             await self.make_stuff_transaction('set',new_stuff,{'weight':100,'carbon':3,'type':'stuff','param1':'undef','param2':'undef','param3':'undef'},minfo=minfo)
@@ -661,13 +661,13 @@ class BgxTeleBot(Tbot):
         """                                                                                                                          
         Get or create stuff for user who send this message                                                                           
         """                                                                                                                          
-        LOGGER.debug('BgxTeleBot: update stuff FOR=%s',minfo)                                                                        
+        LOGGER.debug('DgtTeleBot: update stuff FOR=%s',minfo)                                                                        
         if minfo.batch_id:                                                                                                           
-            LOGGER.debug('BgxTeleBot: CHECK=%s CREATE stuff',minfo.batch_id)                                                         
+            LOGGER.debug('DgtTeleBot: CHECK=%s CREATE stuff',minfo.batch_id)                                                         
             batch = await self.check_batch_status(minfo.batch_id,minfo)                                                              
             return                                                                                                                   
         args = self.get_args_from_request(minfo.result.parameters) if minfo.result else {'name' : minfo.user_first_name}             
-        LOGGER.debug('BgxTeleBot: update stuff args=%s',args)                                                                        
+        LOGGER.debug('DgtTeleBot: update stuff args=%s',args)                                                                        
         if 'number' in args:                                                                                                         
             new_stuff = user_stuff_name(args['number']) 
             upd = {}
@@ -689,13 +689,13 @@ class BgxTeleBot(Tbot):
         """                                                                                                                                                      
         Get or create wallet check                                                                                                                               
         """                                                                                                                                                      
-        LOGGER.debug('BgxTeleBot: show  stuff FOR=%s',minfo)                                                                                                    
+        LOGGER.debug('DgtTeleBot: show  stuff FOR=%s',minfo)                                                                                                    
         args = self.get_args_from_request(minfo.result.parameters)                                                                                               
         if 'number' in args : 
             num_stuff = user_stuff_name(args['number'])                                                                                                                                     
             try:                                                                                                                                                     
                 token = await self.stuff_get_state(num_stuff)                                                                                                             
-                LOGGER.debug('BgxTeleBot: %s=%s',num_stuff,token) 
+                LOGGER.debug('DgtTeleBot: %s=%s',num_stuff,token) 
                 if token :
                     user  = token.user
                     token = cbor.loads(token.stuff)
@@ -703,25 +703,25 @@ class BgxTeleBot(Tbot):
                 repl = 'Деталь={} создано={} :\n{}.'.format(num_stuff,user,yaml.dump(token, default_flow_style=False)[0:-1]) if token else "К сожалению деталь {} не существует".format(num_stuff) 
                 self.send_message(minfo.chat_id,repl)
             except Exception as ex:                                                                                                                                  
-                LOGGER.debug('BgxTeleBot: cant check token into=%s (%s)',num_stuff,ex)                                                                                                                                        
+                LOGGER.debug('DgtTeleBot: cant check token into=%s (%s)',num_stuff,ex)                                                                                                                                        
                                                                                          
     
     async def intent_show_stuff_history(self,minfo):                                                                                                                                                                               
         """                                                                                                                                                                                                                
         Get  history stuff                                                                                                                                                                                        
         """                                                                                                                                                                                                                
-        LOGGER.debug('BgxTeleBot: show  stuff history FOR=%s',minfo)                                                                                                                                                               
+        LOGGER.debug('DgtTeleBot: show  stuff history FOR=%s',minfo)                                                                                                                                                               
         args = self.get_args_from_request(minfo.result.parameters)                                                                                                                                                         
         if 'number' in args :                                                                                                                                                                                              
             num_stuff = user_stuff_name(args['number'])                                                                                                                                                                    
             try:                                                                                                                                                                                                           
                 token = await self.stuff_get_state_history(num_stuff)                                                                                                                                                              
-                LOGGER.debug('BgxTeleBot: %s=%s',num_stuff,token)                                                                                                                                                          
+                LOGGER.debug('DgtTeleBot: %s=%s',num_stuff,token)                                                                                                                                                          
                                                                                                                                                                                                                                            
                 repl = 'История детали {}:\n{}.'.format(num_stuff,yaml.dump(token, default_flow_style=False)[0:-1]) if token else "К сожалению деталь {} не существует".format(num_stuff)                         
                 self.send_message(minfo.chat_id,repl)                                                                                                                                                                      
             except Exception as ex:                                                                                                                                                                                        
-                LOGGER.debug('BgxTeleBot: cant check token into=%s (%s)',num_stuff,ex)                                                                                                                                     
+                LOGGER.debug('DgtTeleBot: cant check token into=%s (%s)',num_stuff,ex)                                                                                                                                     
                 
     #                    
     async def intent_show_stuff_list(self,minfo):       
@@ -747,7 +747,7 @@ class BgxTeleBot(Tbot):
             
             self.send_message(minfo.chat_id,repl)                                                                                                                                                                      
         except Exception as ex:                                                                                                                                                                                        
-            LOGGER.debug('BgxTeleBot: cant list stuff(%s)',ex) 
+            LOGGER.debug('DgtTeleBot: cant list stuff(%s)',ex) 
 
     async def _get_topology(self,minfo):
         """Fetches the topology from the validator.
@@ -767,7 +767,7 @@ class BgxTeleBot(Tbot):
             topology = json.loads(base64.b64decode(response['topology']))
             return topology
         except Exception as ex:                                                                                                                                                                                        
-            LOGGER.debug('BgxTeleBot: cant load topology(%s)',ex)
+            LOGGER.debug('DgtTeleBot: cant load topology(%s)',ex)
             self.send_message(minfo.chat_id,'Что то пошло не так')
             return None
 
@@ -791,15 +791,15 @@ class BgxTeleBot(Tbot):
             repl = 'Доступные шлюзы:\n{}.'.format(yaml.dump(self._connects, default_flow_style=False)[0:-1])
             self.send_message(minfo.chat_id,repl)
         except Exception as ex:                                                                                                                                                                                        
-            LOGGER.debug('BgxTeleBot: cant show list gate way(%s)',ex)
+            LOGGER.debug('DgtTeleBot: cant show list gate way(%s)',ex)
     
     async def intent_set_gateway(self,minfo):
-        LOGGER.debug('BgxTeleBot: intent_set_gateway FOR=%s',minfo)                                                                                                    
+        LOGGER.debug('DgtTeleBot: intent_set_gateway FOR=%s',minfo)                                                                                                    
         args = self.get_args_from_request(minfo.result.parameters)                                                                                               
         if 'number' in args : 
             num = int(user_stuff_name(args['number']))
             if self._connects and len(self._connects) >= num:
-                LOGGER.debug('BgxTeleBot: gateway(%s)',self._connects[num-1])
+                LOGGER.debug('DgtTeleBot: gateway(%s)',self._connects[num-1])
                 if self.change_gateway(num-1) :
                     self.send_message(minfo.chat_id,'Переключились на {}'.format(self._connects[num-1]))
                 else:
@@ -811,36 +811,36 @@ class BgxTeleBot(Tbot):
         """
         send request for starting peer
         """
-        LOGGER.debug('BgxTeleBot: intent_peers_down FOR=%s',minfo)                                                                                                    
+        LOGGER.debug('DgtTeleBot: intent_peers_down FOR=%s',minfo)                                                                                                    
         args = self.get_args_from_request(minfo.result.parameters)                                                                                               
         if 'number' in args and 'name' in args:
             cname,pname = args['name'],str(int(args['number']))
-            LOGGER.debug('BgxTeleBot: STOP PEER (%s %s)',cname,pname)
+            LOGGER.debug('DgtTeleBot: STOP PEER (%s %s)',cname,pname)
             repl = await self._peers_control(args['name'],str(int(args['number'])),ClientPeersControlRequest.DOWN)
             self.send_message(minfo.chat_id,'Стоп узла:{} {} - {}'.format(cname,pname,repl))
 
     async def intent_peers_up(self,minfo):
-        LOGGER.debug('BgxTeleBot: intent_peers_up FOR=%s',minfo)                                                                                                    
+        LOGGER.debug('DgtTeleBot: intent_peers_up FOR=%s',minfo)                                                                                                    
         args = self.get_args_from_request(minfo.result.parameters)                                                                                               
         if 'number' in args and 'name' in args:
             cname,pname = args['name'],str(int(args['number']))
-            LOGGER.debug('BgxTeleBot: START PEER (%s %s)',cname,pname)
+            LOGGER.debug('DgtTeleBot: START PEER (%s %s)',cname,pname)
             repl = await self._peers_control(args['name'],str(int(args['number'])),ClientPeersControlRequest.UP)
             self.send_message(minfo.chat_id,'Запуск узла:{} {} - {}'.format(cname,pname,repl))
 
     async def intent_peers_control_list(self,minfo):
-        LOGGER.debug('BgxTeleBot: intent_peers_control_list FOR=%s',minfo)
+        LOGGER.debug('DgtTeleBot: intent_peers_control_list FOR=%s',minfo)
         topology = await self._get_topology(minfo)
         if topology:
             repl = 'Могу контролировать:\n{}.'.format(yaml.dump(topology['Control'], default_flow_style=False)[0:-1])
             self.send_message(minfo.chat_id,repl)
 
     async def intent_peer_info(self,minfo):
-        LOGGER.debug('BgxTeleBot: intent_peer_info FOR=%s',minfo)                                                                                                    
+        LOGGER.debug('DgtTeleBot: intent_peer_info FOR=%s',minfo)                                                                                                    
         args = self.get_args_from_request(minfo.result.parameters)
         if 'cluster' in args and 'name' in args:
             cname,pname = args['cluster'],args['name']
-            LOGGER.debug('BgxTeleBot: intent_peer_info FOR=%s.%s',cname,pname)
+            LOGGER.debug('DgtTeleBot: intent_peer_info FOR=%s.%s',cname,pname)
             repl = await self._peers_control(cname,pname,ClientPeersControlRequest.INFO)
             self.send_message(minfo.chat_id,'Состояние узла:{} {} - {}'.format(cname,pname,repl))
 
@@ -877,7 +877,7 @@ class BgxTeleBot(Tbot):
         amount = 0
         coin_code = ''
         for key in tokens:
-            LOGGER.debug('BgxRouteHandler:_get_token group (%s)',key)
+            LOGGER.debug('DgtRouteHandler:_get_token group (%s)',key)
             token = json.loads(tokens[key])
             coin_code = coin_code + ',' + (token['group_code'] if 'group_code' in token else 'white')
             amount    = amount + coin(token)
@@ -893,7 +893,7 @@ class BgxTeleBot(Tbot):
             return meta_token,''
         # create wallet and present some few token
         meta = json.loads(meta_token[SMART_BGT_META])
-        LOGGER.debug('BgxRouteHandler:get_meta_token=%s key=%s',meta,meta[SMART_BGT_CREATOR_KEY])
+        LOGGER.debug('DgtRouteHandler:get_meta_token=%s key=%s',meta,meta[SMART_BGT_CREATOR_KEY])
         return meta_token,meta[SMART_BGT_CREATOR_KEY]
          
 
@@ -920,7 +920,7 @@ class BgxTeleBot(Tbot):
             'num_bgt': num_bgt,
             'group_id' : coin_code
         })
-        LOGGER.debug('BgxRouteHandler: _make_token_transfer make payload=%s',payload_bytes)
+        LOGGER.debug('DgtRouteHandler: _make_token_transfer make payload=%s',payload_bytes)
         in_address = make_smart_bgt_address(address_from)
         out_address = make_smart_bgt_address(address_to)
         inputs =[in_address, out_address]   
@@ -932,7 +932,7 @@ class BgxTeleBot(Tbot):
         # Query validator
         error_traps = [error_handlers.BatchInvalidTrap,error_handlers.BatchQueueFullTrap]
         validator_query = client_batch_submit_pb2.ClientBatchSubmitRequest(batches=[batch])
-        LOGGER.debug('BgxRouteHandler: _make_token_transfer send batch_id=%s',batch_id)
+        LOGGER.debug('DgtRouteHandler: _make_token_transfer send batch_id=%s',batch_id)
 
         with self._post_batches_validator_time.time():
             await self._query_validator(
@@ -977,12 +977,12 @@ class BgxTeleBot(Tbot):
         """
         make transfer from wallet to wallet
         """
-        LOGGER.debug('BgxRouteHandler: post_transfer !!!')
+        LOGGER.debug('DgtRouteHandler: post_transfer !!!')
         timer_ctx = self._post_batches_total_time.time()
         self._post_batches_count.inc()
         body = await request.json()
 
-        LOGGER.debug('BgxRouteHandler: post_transfer body=(%s)',body)
+        LOGGER.debug('DgtRouteHandler: post_transfer body=(%s)',body)
         if 'data' not in body:
             raise errors.NoTransactionPayload()
 
@@ -1008,14 +1008,14 @@ class BgxTeleBot(Tbot):
         try:
             address_to   =  _base64url2public(address_to)
         except errors.BadWalletAddress:
-            LOGGER.debug('BgxRouteHandler: post_transfer  BadWalletAddress= %s',address_to)
+            LOGGER.debug('DgtRouteHandler: post_transfer  BadWalletAddress= %s',address_to)
             meta_token,meta_wallet = await self.get_meta_token(request,coin_code)
             if meta_token is None:
                 raise errors.BadWalletAddress()
-            LOGGER.debug('BgxRouteHandler: post_transfer to META WALLET=%s',meta_wallet)
+            LOGGER.debug('DgtRouteHandler: post_transfer to META WALLET=%s',meta_wallet)
             address_to = meta_wallet
 
-        LOGGER.debug('BgxRouteHandler: post_transaction make payload=%s',payload)
+        LOGGER.debug('DgtRouteHandler: post_transaction make payload=%s',payload)
         tx_status = await self._make_token_transfer(request,address_from,address_to,num_bgt,coin_code)
         # status = 202
 
@@ -1039,7 +1039,7 @@ class BgxTeleBot(Tbot):
             # metadata={'link': link},
             metadata=tx,
             status=200)
-        LOGGER.debug('BgxRouteHandler: post_transfer retval=%s',retval)
+        LOGGER.debug('DgtRouteHandler: post_transfer retval=%s',retval)
         timer_ctx.stop()
         return retval
 
@@ -1049,10 +1049,10 @@ class BgxTeleBot(Tbot):
         get wallet balance
         """
         address = request.match_info.get('address', '')
-        LOGGER.debug('BgxRouteHandler: get_wallet address=%s type=%s',address,type(address))
+        LOGGER.debug('DgtRouteHandler: get_wallet address=%s type=%s',address,type(address))
         address =  _base64url2public(address)
 
-        LOGGER.debug('BgxRouteHandler: get_wallet public=(%s) type=%s',address,type(address))
+        LOGGER.debug('DgtRouteHandler: get_wallet public=(%s) type=%s',address,type(address))
         result = await self._get_state_by_addr(request,address)
         if result is None :
             return self._wrap_error(request,400,'There is no wallet for this public key.')
@@ -1094,13 +1094,13 @@ class BgxTeleBot(Tbot):
         user_address = _public2base64url(public_key)
         wallet = await self._get_state_by_addr(request,public_key)
         if wallet is None:
-            LOGGER.debug('BgxRouteHandler:post_wallet CREATE NEW WALLET') 
+            LOGGER.debug('DgtRouteHandler:post_wallet CREATE NEW WALLET') 
             meta_token,meta_wallet = await self.get_meta_token(request)
             if meta_token is not None:
                 # create wallet and present some few 'bgt' token as default 
                 # make transfer to new wallet
                 tx_status = await self._make_token_transfer(request,meta_wallet,public_key,SMART_BGT_PRESENT_AMOUNT)
-                LOGGER.debug('BgxRouteHandler:post_wallet tx_status=%s',tx_status)
+                LOGGER.debug('DgtRouteHandler:post_wallet tx_status=%s',tx_status)
                 # SHOULD DO waiting until wallet was created
                 #wallet = await self._get_state_by_addr(request,public_key)
                 status = "Wallet WAS CREATED"
@@ -1110,7 +1110,7 @@ class BgxTeleBot(Tbot):
             else: # we must do emmission before
                 return self._wrap_error(request,400,'Emmission must be done before')
         else:
-            LOGGER.debug('BgxRouteHandler:post_wallet ALREADY CREATED wallet(%s)',wallet)
+            LOGGER.debug('DgtRouteHandler:post_wallet ALREADY CREATED wallet(%s)',wallet)
             status = "Wallet ALREADY CREATED"
             coin_code,amount = self._get_token(wallet,public_key)
             
@@ -1226,16 +1226,16 @@ class BgxTeleBot(Tbot):
             raise errors.BadTransactionPayload()
 
         
-        LOGGER.debug('BgxRouteHandler:post_add_funds payload(%s)',payload)    
+        LOGGER.debug('DgtRouteHandler:post_add_funds payload(%s)',payload)    
         public_key_to =  _base64url2public(address_to)
         wallet = await self._get_state_by_addr(request,public_key_to)
         if wallet is None:
-            LOGGER.debug('BgxRouteHandler:post_add_funds wallet(%s) not found',address_to)
+            LOGGER.debug('DgtRouteHandler:post_add_funds wallet(%s) not found',address_to)
             raise errors.WalletNotFound()
         # check emmission
         meta_token,meta_wallet = await self.get_meta_token(request,coin_code)
         if meta_token is not None:
-            LOGGER.debug('BgxRouteHandler:post_add_funds key=%s bgt_num=%s reason=%s',meta_wallet,bgt_num,reason) 
+            LOGGER.debug('DgtRouteHandler:post_add_funds key=%s bgt_num=%s reason=%s',meta_wallet,bgt_num,reason) 
             # make transfer to  public_key_to wallet
             tx_status = await self._make_token_transfer(request,meta_wallet,public_key_to,bgt_num,coin_code)
         else:

@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 Intel Corporation
+# Copyright 2016, 2017 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ def add_load_parser(subparsers, parent_parser):
         '-U', '--url',
         type=str,
         help='url for the REST API',
-        default='http://localhost:8008')
+        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--auth-user',

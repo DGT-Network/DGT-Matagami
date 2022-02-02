@@ -29,7 +29,7 @@ peers="1 2 3"
 export PNM="dgt"
 
 if [ -z $GATEWAY ]; then 
-  echo STATIC MODE;export DCONFIG='bgx_val.conf';export PEERING='static'; 
+  echo STATIC MODE;export DCONFIG='dgt_val.conf';export PEERING='static'; 
   else 
   echo DYNAMIC MODE;export DCONFIG='dgt_dyn.conf';export PEERING='dynamic';export SEEDS="--seeds $GATEWAY"; 
 fi

@@ -1,4 +1,4 @@
-# Copyright 2020 DGT NETWORK INC 
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ from dgt_cli.keygen import create_new_key,_read_signer
 from dgt_signing import create_context
 from dgt_signing.core import X509_COUNTRY_NAME,X509_STATE_OR_PROVINCE_NAME,X509_LOCALITY_NAME,X509_ORGANIZATION_NAME,X509_COMMON_NAME,X509_DNS_NAME
 
-PROJ_DGT = '/project/bgx'
+DGT_TOP = os.environ.get('DGT_TOP')
+PROJ_DGT = f'/project/{DGT_TOP}'
 PROJ_PEER = '/project/peer'
 PROJ_ETC  = f'{PROJ_DGT}/etc'
 DEF_PEER = 'dgt1'

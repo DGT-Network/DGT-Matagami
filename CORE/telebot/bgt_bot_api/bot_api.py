@@ -1,4 +1,4 @@
-# Copyright 2020 DGT NETWORK INC 
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ from dgt_validator.database.lmdb_nolock_database import LMDBNoLockDatabase
 
 from bgt_bot_api.messaging import Connection
 #from sawtooth_rest_api.route_handlers import RouteHandler
-#BGX handlers
-#from bgt_bot_api.bgx_handlers import BgxRouteHandler
+#DGT handlers
+#from bgt_bot_api.bgx_handlers import DgtRouteHandler
 from bgt_bot_api.bot_handlers import Tbot
 from bgt_bot_api.bgx_handlers import BgxTeleBot
 
@@ -193,7 +193,7 @@ def start_bot_api(host, port, connection, timeout, registry,connects=None,client
     app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    handler = BgxRouteHandler(loop, connection, timeout, registry)
+    handler = DgtRouteHandler(loop, connection, timeout, registry)
     LOGGER.info('Creating handlers for validator at %s', connection.url)
 
     app.router.add_post('/batches', handler.submit_batches)

@@ -1,4 +1,4 @@
-# Copyright 2016 Intel Corporation
+# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ from dgt_sdk.processor.config import get_log_dir
 from dgt_sdk.processor.config import get_config_dir
 from dgt_rest_api.messaging import Connection
 #from dgt_rest_api.route_handlers import RouteHandler
-#BGX handlers
-from dgt_rest_api.bgx_handlers import BgxRouteHandler
+#DGT handlers
+from dgt_rest_api.bgx_handlers import DgtRouteHandler
 from dgt_rest_api.state_delta_subscription_handler import StateDeltaSubscriberHandler
 from dgt_rest_api.config import load_default_rest_api_config
 from dgt_rest_api.config import load_toml_rest_api_config
@@ -44,7 +44,7 @@ from dgt_rest_api.config import RestApiConfig
 
 
 LOGGER = logging.getLogger(__name__)
-DISTRIBUTION_NAME = 'bgx-rest-api'
+DISTRIBUTION_NAME = 'dgt-rest-api'
 
 
 def parse_args(args):
@@ -110,7 +110,7 @@ def start_rest_api(host, port, connection, timeout, registry,
     app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    handler = BgxRouteHandler(loop, connection, timeout, registry)
+    handler = DgtRouteHandler(loop, connection, timeout, registry)
     LOGGER.info('Creating handlers for validator at %s', connection.url)
 
     app.router.add_post('/batches', handler.submit_batches)
@@ -136,10 +136,16 @@ def start_rest_api(host, port, connection, timeout, registry,
     app.router.add_get('/nodes', handler.fetch_nodes) # just for testing
     app.router.add_get('/status', handler.fetch_status)
 
-    # ADD BGX handlers
+    # ADD DGT handlers
     app.router.add_get('/dag', handler.list_dag)
     app.router.add_get('/dag/{head_id}', handler.fetch_dag)
+    app.router.add_get('/graph', handler.fetch_dag_graph)
     app.router.add_get('/topology', handler.fetch_topology)
+    #ADD TP FAMILY handlers
+    app.router.add_get('/tx_families', handler.tx_families)                           
+    app.router.add_get('/run', handler.run_transaction)                               
+    #app.router.add_get('/run_statuses',handler.list_statuses)  
+
 
     app.router.add_post('/transactions', handler.post_transfer)
     app.router.add_get('/wallets/{address}', handler.get_wallet)

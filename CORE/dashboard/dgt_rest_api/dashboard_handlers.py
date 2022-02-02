@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 Intel Corporation
+# Copyright 2016, 2017 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ class DashboardRouteHandler(RouteHandler):
         """
         make transaction
         """
-        LOGGER.debug('BgxRouteHandler: _create_transaction make Transaction')
+        LOGGER.debug('DgtRouteHandler: _create_transaction make Transaction')
         txn_header = TransactionHeader(
             signer_public_key=self._signer.get_public_key().as_hex(),
             family_name=family,

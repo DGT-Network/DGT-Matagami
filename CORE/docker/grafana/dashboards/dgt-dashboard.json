@@ -8,7 +8,7 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
-        "type": "bgx-dashboard"
+        "type": "dgt-dashboard"
       }
     ]
   },
@@ -84,7 +84,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.chain.ChainController.chain_head",
+              "measurement": "dgt_validator.chain.ChainController.chain_head",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -176,7 +176,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.chain.ChainController.block_num",
+              "measurement": "dgt_validator.chain.ChainController.block_num",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -289,7 +289,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.chain.ChainController.committed_transactions_gauge",
+              "measurement": "dgt_validator.chain.ChainController.committed_transactions_gauge",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -413,7 +413,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.publisher.BlockPublisher.blocks_published_count",
+              "measurement": "dgt_validator.publisher.BlockPublisher.blocks_published_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -526,7 +526,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.chain.ChainController.blocks_considered_count",
+              "measurement": "dgt_validator.chain.ChainController.blocks_considered_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -638,7 +638,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.chain.BlockValidator.chain_head_moved_to_fork_count",
+              "measurement": "dgt_validator.chain.BlockValidator.chain_head_moved_to_fork_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -762,7 +762,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.publisher.BlockPublisher.pending_batch_gauge",
+              "measurement": "dgt_validator.publisher.BlockPublisher.pending_batch_gauge",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -874,7 +874,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.back_pressure_handlers.ClientBatchSubmitBackpressureHandler.backpressure_batches_rejected_gauge",
+              "measurement": "dgt_validator.back_pressure_handlers.ClientBatchSubmitBackpressureHandler.backpressure_batches_rejected_gauge",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -998,7 +998,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.executor.TransactionExecutorThread.transaction_execution_count",
+              "measurement": "dgt_validator.executor.TransactionExecutorThread.transaction_execution_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1122,7 +1122,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.executor.TransactionExecutorThread.in_process_transactions_count",
+              "measurement": "dgt_validator.executor.TransactionExecutorThread.in_process_transactions_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1234,7 +1234,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.interconnect.Interconnect.send_response_time",
+              "measurement": "dgt_validator.interconnect.Interconnect.send_response_time",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1352,7 +1352,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_rest_api.post_batches_validator_time",
+              "measurement": "dgt_rest_api.post_batches_validator_time",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1467,7 +1467,7 @@
                 }
               ],
               "hide": false,
-              "measurement": "bgx_rest_api.post_batches_count",
+              "measurement": "dgt_rest_api.post_batches_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1512,7 +1512,7 @@
                 }
               ],
               "hide": false,
-              "measurement": "bgx_rest_api.post_batches_count",
+              "measurement": "dgt_rest_api.post_batches_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "B",
@@ -1648,7 +1648,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.executor.TransactionExecutorThread.tp_process_response_count",
+              "measurement": "dgt_validator.executor.TransactionExecutorThread.tp_process_response_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1778,7 +1778,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.executor.TransactionExecutorThread.tp_process_response_count",
+              "measurement": "dgt_validator.executor.TransactionExecutorThread.tp_process_response_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -1908,7 +1908,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.executor.TransactionExecutorThread.tp_process_response_count",
+              "measurement": "dgt_validator.executor.TransactionExecutorThread.tp_process_response_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -2056,7 +2056,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.interconnect.Interconnect.send_response_time",
+              "measurement": "dgt_validator.interconnect.Interconnect.send_response_time",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -2174,7 +2174,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.interconnect.Interconnect.send_response_time",
+              "measurement": "dgt_validator.interconnect.Interconnect.send_response_time",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -2305,7 +2305,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.interconnect._SendReceive.received_message_count",
+              "measurement": "dgt_validator.interconnect._SendReceive.received_message_count",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -4172,10 +4172,10 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time",
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(\"99_percentile\") FROM \"bgx_validator.Component-threadpool.task_run_time\" WHERE $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT last(\"99_percentile\") FROM \"dgt_validator.Component-threadpool.task_run_time\" WHERE $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
@@ -4294,7 +4294,7 @@
               ],
               "hide": false,
               "limit": "",
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "",
@@ -4414,7 +4414,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "",
@@ -4547,7 +4547,7 @@
                 }
               ],
               "hide": false,
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "",
@@ -4667,7 +4667,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "",
@@ -4787,7 +4787,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "",
@@ -4920,10 +4920,10 @@
                 }
               ],
               "hide": false,
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time",
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(\"99_percentile\") FROM \"bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time\" WHERE (\"name\" = 'Signature') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT last(\"99_percentile\") FROM \"dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time\" WHERE (\"name\" = 'Signature') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5040,10 +5040,10 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue",
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(\"99_percentile\") FROM \"bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue\" WHERE (\"name\" = 'Signature') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT last(\"99_percentile\") FROM \"dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue\" WHERE (\"name\" = 'Signature') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5160,7 +5160,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use",
+              "measurement": "dgt_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "",
@@ -5289,7 +5289,7 @@
               "hide": false,
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(\"99_percentile\") FROM \"bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time\" WHERE (\"name\" = 'Executing') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT last(\"99_percentile\") FROM \"dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_run_time\" WHERE (\"name\" = 'Executing') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": true,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5396,7 +5396,7 @@
               ],
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(\"99_percentile\") FROM \"bgx_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue\" WHERE (\"name\" = 'Executing') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT last(\"99_percentile\") FROM \"dgt_validator.threadpool.InstrumentedThreadPoolExecutor.task_time_in_queue\" WHERE (\"name\" = 'Executing') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": true,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5503,7 +5503,7 @@
               ],
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT last(\"count\") FROM \"bgx_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use\" WHERE (\"name\" = 'Executing') AND $timeFilter GROUP BY time($__interval), \"host\" fill(previous)",
+              "query": "SELECT last(\"count\") FROM \"dgt_validator.threadpool.InstrumentedThreadPoolExecutor.workers_in_use\" WHERE (\"name\" = 'Executing') AND $timeFilter GROUP BY time($__interval), \"host\" fill(previous)",
               "rawQuery": true,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5626,10 +5626,10 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "bgx_validator.interconnect._SendReceive.dispatcher_queue_size",
+              "measurement": "dgt_validator.interconnect._SendReceive.dispatcher_queue_size",
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT mean(\"value\") FROM \"bgx_validator.interconnect.dispatcher_queue_size\" WHERE (\"connection\" = 'OutBoundCOnnectionTHread') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT mean(\"value\") FROM \"dgt_validator.interconnect.dispatcher_queue_size\" WHERE (\"connection\" = 'OutBoundCOnnectionTHread') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5747,10 +5747,10 @@
                 }
               ],
               "hide": false,
-              "measurement": "bgx_validator.interconnect._SendReceive.dispatcher_queue_size",
+              "measurement": "dgt_validator.interconnect._SendReceive.dispatcher_queue_size",
               "orderByTime": "ASC",
               "policy": "default",
-              "query": "SELECT mean(\"value\") FROM \"bgx_validator.interconnect.dispatcher_queue_size\" WHERE (\"connection\" =~ 'OutboundConnectionThread') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
+              "query": "SELECT mean(\"value\") FROM \"dgt_validator.interconnect.dispatcher_queue_size\" WHERE (\"connection\" =~ 'OutboundConnectionThread') AND $timeFilter GROUP BY time($__interval), \"host\" fill(none)",
               "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
@@ -5873,6 +5873,6 @@
     ]
   },
   "timezone": "browser",
-  "title": "BGX-Dashboard",
+  "title": "DGT-dashboard",
   "version": 0
 }

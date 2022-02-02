@@ -1,4 +1,4 @@
-# Copyright 2016 Intel Corporation
+# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -173,10 +173,10 @@ def main(args=None):
                 db = client.db_create( DB_NAME, pyorient.DB_TYPE_GRAPH, pyorient.STORAGE_TYPE_MEMORY )
                 is_db = client.db_exists( DB_NAME, pyorient.STORAGE_TYPE_MEMORY )
                 if is_db :
-                    db_bgx = client.db_open( DB_NAME, DB_USER, DB_PASS )
+                    db_dgt = client.db_open( DB_NAME, DB_USER, DB_PASS )
                     result = client.query_async ("select from OUser", 10, '*:0',_my_callback) #client.query
                     LOGGER.debug("_ORIENTDB_ result=%s",result)
-                    LOGGER.debug("_ORIENTDB_ DB-BGX=%s db_count_records=%s",type(db_bgx),client.db_count_records())
+                    LOGGER.debug("_ORIENTDB_ DB-DGT=%s db_count_records=%s",type(db_dgt),client.db_count_records())
                 LOGGER.debug("_ORIENTDB_ DB=%s is_db=%s list=%s",db,is_db,client.db_list())
                 
 

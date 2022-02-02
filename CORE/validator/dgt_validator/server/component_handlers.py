@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 DGT NETWORK INC 
+# Copyright 2016, 2017 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -237,6 +237,13 @@ def add(
         validator_pb2.Message.CLIENT_HEADS_GET_REQUEST,
         client_handlers.HeadsGetRequest(block_store,block_publisher),
         thread_pool)
+
+    dispatcher.add_handler(                                              
+        validator_pb2.Message.CLIENT_GRAPH_GET_REQUEST,                  
+        client_handlers.DagGraphGetRequest(block_store),    
+        thread_pool)                                                     
+                                                                         
+
 
     # get topology 
     dispatcher.add_handler(

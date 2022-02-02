@@ -1,4 +1,4 @@
-# Copyright 2020 DGT NETWORK INC 
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,10 +52,11 @@ from dgt_validator.gossip.fbft_topology import (PeerSync,PeerRole,PeerAtr,FbftTo
                                                 DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,DGT_TOPOLOGY_NEST_NM,TOPO_MAP,DGT_NET_NEST
                                                 )
 
-DISTRIBUTION_NAME = 'bgxset'
+DGT_TOP = os.environ.get('DGT_TOP')
+DISTRIBUTION_NAME = 'dgtset'
 VALIDATOR_PKEY = '/project/peer/keys/validator.priv'
 VALIDATOR_PUB_KEY = '/project/peer/keys/validator.pub'
-PROJ_DGT = '/project/bgx'
+PROJ_DGT = f'/project/{DGT_TOP}'
 MAP_NET_FNM = f"{PROJ_DGT}/etc/dgt.net.map"
 STATIC_MAP = "static_map"
 
@@ -907,7 +908,7 @@ def create_parser(prog_name):
         '--url',
         type=str,
         help="identify the URL of a validator's REST API",
-        default='http://bgx-api-c1-1:8008')
+        default='http://api-dgt-c1-1:8108')
     topology_param_parser.add_argument(
         'param_name',
         type=str,
@@ -935,7 +936,7 @@ def create_parser(prog_name):
         '--url',                                                                         
         type=str,                                                                        
         help="identify the URL of a validator's REST API",                               
-        default='http://bgx-api-c1-1:8008')                                              
+        default='http://api-dgt-c1-1:8108')                                              
 
 
 

@@ -1,4 +1,4 @@
-# Copyright 2020 DGT NETWORK INC 
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ from dgt_cli.admin_command.node import add_node_parser
 from dgt_cli.admin_command.node import do_node
 
 
-DISTRIBUTION_NAME = 'bgxadm'
+DISTRIBUTION_NAME = 'dgtadm'
 
 
 def create_parser(prog_name):
