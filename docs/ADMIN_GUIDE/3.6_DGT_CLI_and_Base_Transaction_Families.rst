@@ -350,7 +350,7 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | not require       |                   |
 |      |                   | repetition        |                   |
 +------+-------------------+-------------------+-------------------+
-| 3.2  | dgt proposal      | This command is   | ⚠ NOT RECOMMENDED |
+| 3.2  | dgtset proposal   | This command is   | ⚠ NOT RECOMMENDED |
 |      |                   | used only when    | FOR USE OUTSIDE   |
 |      |                   | launching a node  | OF DEVELOPMENT    |
 |      |                   | and creates a     |                   |
@@ -361,7 +361,7 @@ Inside, it is possible to enter commands regarding the node's status and the tes
 |      |                   | including the     |                   |
 |      |                   | topology          |                   |
 +------+-------------------+-------------------+-------------------+
-| 3.3  | dgt topology      | Displays the      | dgtset topology   |
+| 3.3  | dgtset topology   | Displays the      | dgtset topology   |
 |      |                   | current topology: | list –url         |
 |      |                   | dgtset topology   | http://           |
 |      |                   | list –url URL     | api-dgt-c1-1:8108 |

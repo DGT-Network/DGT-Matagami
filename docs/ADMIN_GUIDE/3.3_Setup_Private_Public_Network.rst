@@ -8,7 +8,7 @@
 .. _see 2.2: ../ARCHITECTURE/2.2_DGT_Network_Topology.html
 .. _see 3.7: 3.7_Adjust_DGT_Settings.html
 .. _see 3.5: 3.5_Manage_the_Dashboard.html
-.. _see 3.7.3: 3.7_Adjust_DGT_Settings.html#cryptography-adjusting
+.. _see 3.7.3: 3.7_Adjust_DGT_Settings.html#adjusting-cryptography
 
 Network deployment is the installation of several nodes interacting with each other. Unlike peer-to-peer network, a DGT network can have a set structure that is thought out and configured in advance (`see 2.2`_). The following items must be considered: 
 
@@ -214,20 +214,207 @@ We check the received amount through another node:
 
 Expected result: even though the command was sent to the node in the second cluster, the data is synchronized, and the correct amount was displayed for the first wallet. 
 
+
 3.3.3	A Physical Network
 ==============================
 
 3.3.3.1	Network Deployment Preparation
 ---------------------------------------------
 
+.. _see 3.3.2: 3.3_Setup_Private_Public_Network.html#a-virtual-cluster
+.. _see 3.2.4: 3.2_Setup_single_Node.html#nodes-port-configuration
+.. _see 3.7.1: 3.7_Adjust_DGT_Settings.html#dgt-topology
+
+It is typical to deploy a virtual network (`see 3.3.2`_) for solving experimental problems or developing applications. Operating the network in enterprise environments may require the formation of nodes on physically distinct servers. Servers may also be located on different physical networks protected by a firewall. The installation is generally similar to deploying a virtual network (`see 3.3.2`_`) with the following amendments: 
+
+    •	When assembling nodes located on physically different servers, additional parameters are used for the bash command, depending on whether the node is connected to closed segments (private network) or public segments - see below.
+
+    •	When servers are behind firewalls, network-supporting ports must be opened ([NET] parameter in the «upDgtCluster.sh» file, `see 3.2.4`_).
+
+    •	In case of deploying nodes in the internal network, you must use an explicit indication of the node's IP (flag -H 7, host - see below). [5]_
+
+    •	Network deployment must be preceded by the design of its topology, including planning for the size of clusters and segments (`see 3.7.1`_).
+
+    •	The initial implementation of the network, also called the “static core” or “seed network” is a group of nodes / clusters that form special trust relationships (public keys of such nodes are known in advance and are registered at the time of kernel deployment). The joining of other nodes requires the processing of node certificates for private segments and / or dynamic joining in the case of public segments.
+
+    •	A node attached to a seed-network is called an external node. To establish interaction with the network, an entry point must be defined - a gateway, a node of the source network through which a new node is connected. Connecting to private (closed) and public segments is different [6]_
+
+        •	in case of a private segment, the attaching node has a concrete entry point (cluster number and cell number, as well as a verifiable and valid certificate that assigns a public key to the node)
+
+        •	in case of a public segment, the dynamic topology is used (the certificate is accepted, but verified, while joining is conducted through any available point, subject to the restrictions of the cluster). 
+
+    .. image:: ../images/figure_18.png
+        :align: center
+
+Each network node is a server that simultaneously acts as a client of the rest of the network that gains access through other nodes (gateways). To prepare for correct network deployment, it is suggested that you perform the following self-check:
+
+    .. image:: ../images/table_8_01.PNG
+        :align: center
 
 3.3.3.2	Setup a physical network
 ------------------------------------
 
+.. _see 3.3.3.1: 3.3_Setup_Private_Public_Network.html#network-deployment-preparation
+.. _see 3.2.1: 3.2_Setup_single_Node.html#server-preparation
+.. _see 3.8.3: 3.8_DGT_Maintenance.html#network-performance
+.. _see 3.3.2.2: 3.3_Setup_Private_Public_Network.html#virtual-cluster-evaluation
+.. _3.3.2.2: 3.3_Setup_Private_Public_Network.html#virtual-cluster-evaluation
+
+Network deployment is determined by the selected configuration options (including topology, network environment, and cryptography). The following basic steps allow you to deploy a physical network:
+
+    •	Carefully check that the prerequisites are met (`see 3.3.3.1`_).
+
+    •	Deploy the Seed Network (static network core) by performing the following procedures (the initial network can be completely virtual - `see 3.3.2`_):
+
+        •	Prepare the hardware platform and system software (one of more physical servers that meet the requirements for platform nodes - `see  3.2.1`_).
+
+        •	Prepare the necessary topology configuration of the seed network (`see 3.7.1`_).
+
+        •	Sequentially expand the seed network nodes using the command: 
+
+            .. code-block:: python
+
+                 bash upDgtCluster.sh  -G -SC -H [SERVER_IP] -CB openssl 
+	            -S [GATE_URL:GATE_PORT] NumCluster NumNode
+
+        Here:
+
+         `-G` - a requirement to create or synchronize DAG starting from the genesis block.
+
+         `-SC` - a flag indicating the need for transactions to be signed by nodes.
+
+         `-H [SERVER_IP]` - host, IP address of the physical server on which the node is running. This is important for launching a network in the internal network; in case of absence, it will be determined as an address in the Internet and nodes will need to be launched even if the network is internal
+
+         `-CB openssl/bitcoin` - a flag that indicates the selected cryptography; cryptography must be the same for the entire network.
+
+         `-S [GATE_URL:GATE_PORT]` - a pointer to the gateway through which each subsequent node is connected (except or the first one, moreover this is unnecessary in case of deploying a virtual cluster, see 3.3.2.1)
+
+         `NumCluster` - the number of the cluster to which the current node is joining (“1” is recommended for the first node)
+
+         `NumNode` - the number of the node joining (“1” is recommended for the first node) 
+
+        •	Launching the Dashboard [7]_ component (optional) with the command:
+
+            .. code-block:: python
+
+                 bash upDgtDashboard.sh -CB openssl
+	           
+        •	Launching the system monitoring subsystem (if necessary) - `see 3.8.3`_.
+
+        •	Check the correctness of seed-network deployment using procedures similar to the virtual cluster checks (`see 3.3.2.2`_): BGT transaction check, API check, Dashboard check (if it is running). 
+
+    •	Connect external nodes to the seed network: 
+
+        •	If nodes are included into closed (private) segments defined by topology (`see 3.7.1`_), then for each such node execute the following command in sequence (such nodes must have agreed-upon certificates and their place in the network (a cell determined by the topology configuration)):
+
+             .. code-block:: python
+
+                 bash upDgtCluster.sh -G -E -SC -CB openssl -P [NODE_PORT] -H [SERVER_IP] -N [NETWORK_NAME] -S [GATE_URL:GATE_PORT] NumCluster NumNode 
+
+        Here:
+
+        `-G` - a requirement to create or synchronize DAG, starting from the genesis block. 
+
+        `-E` - flag indicating that the connected node is external
+
+        `-SC` - flag indicating the need for transactions to be signed by nodes
+
+        `-P [NODE_PORT]` - flag that defines the port opened on a remote node, through which a given node communicates with the network. 
+
+        `-H [SERVER_IP]` - host, IP address of the physical server on which a node is running. It is important for starting a network on an internal network; in its absence, it will be defined as an address on the Internet and nodes will need to be opened even if the network is internal.  
+
+        `-CB openssl/bitcoin` - flag indicated the selected cryptography; cryptography must be the same for the entire network. 
+
+        `-S [GATE_URL:GATE_PORT]` - a pointer to the gateway through which each subsequent node is connected (except for the first one; it is also not necessary in case of deploying a virtual cluster, see 3.3.2.1)
+
+        `NumCluster` - the number of the cluster to which the current node is connecting (“1” recommended for the first node)
+
+        `NumNode` - the number of a node that is connecting (“1” is recommended for the first node) 
+
+        •	In case of connecting external nodes to a public segment, use the following command: 
+
+            .. code-block:: python
+
+                bash upDgtCluster.sh -G -E -P [NODE_PORT] -N my_host_net -S [GATE_URL:GATE_PORT] dyn 1
+
+        Here:
+
+        `dyn 1` - a pointer to the dynamic topology and cluster to which the node wants to connect.
+
+        `-S [GATE_URL:GATE_PORT]` - you can state the gateway as a link to a file (an anchor file in JSON format) hosted in the cloud (for example, Google Drive). For example:
+             
+              .. code-block:: python
+
+                https://drive.google.com/file/d/1o6SEUvogow432pIKQEL8-EEzNBinzW9R/view?usp=sharing
+
+        The anchor file has the following structure, which contains a directory of available gateways to public networks (can also use special services that provide dynamic SD-WAN configuration):
+
+               .. code-block:: python
+
+                    {
+                     "public":["tcp://validator-dgt-c1-1:8101","tcp://209.124.84.6:8101"],
+                     "private": [],
+                     "restapi": ["http://dgt-api:8108"]
+                    }
+
+    •	After connecting external nodes, carry out the checks like `3.3.2.2`_.
 
 
 3.3.3.3	DGT Network Example
 ------------------------------------
+
+This section provides an example physical network configuration with the following settings:
+
+    •	The network unites 6 nodes, from which three clusters are formed: cluster 1 (nodes c1-1, c1-2, c1-3), cluster 2 (nodes c2-1, c2-2) and cluster 3 (sole node c3-1); 
+
+    •	Static core (seed network) that is represented by a virtual cluster of nodes c1-1, c1-2, c1-3, c2-1 [8]_ located on one physical server Dell Server-1 with the IP [9]_ = 192.168.1.134 (thus the initial network is represented by two clusters). 
+
+    •	Node c2-2 is located on a separate physical server, AMD Server-2 with IP = 192.168.1.16 and “completes” cluster 2 in the private seed-network segment. 
+
+    •	Nodes c2-3 and c3-1 are located on a separate physical server, as well as in a virtual cluster and are placed in clusters 2 and 3, respectively. 
+
+    •	Node c1-1 acts at the only gateway for connecting external nodes to the seed-network. Services and network (NET) ports are set automatically according to upDgtCluster.sh
+
+The nature of the testnet is presented below in principle:
+
+    .. image:: ../images/figure_19.png
+        :align: center
+
+The network is deployed as follows:
+
+    •	Installation of a virtual cluster (c1-1, c1-2, c1-3, c2-1) representing the seed-network is done in the CLI Dell-Server-1:
+
+        .. code-block:: python
+
+            bash upDgtCluster.sh  -G -SC -H 192.168.1.134 -CB openssl 1 1
+            bash upDgtCluster.sh  -G -SC -H 192.168.1.134 -CB openssl 1 2
+            bash upDgtCluster.sh  -G -SC -H 192.168.1.134 -CB openssl 1 3
+            bash upDgtCluster.sh  -G -SC -H 192.168.1.134 -CB openssl 2 1
+
+    •	The installation of the c2-2 node (external node in a private segment) is set up as follows:
+
+        .. code-block:: python
+
+            bash upDgtCluster.sh -G -E -SC -CB openssl -P 8202 -H 192.168.1.16 -N net2022 -S tcp://192.168.1.134:8101 2 2
+
+        You should pay attention to the parameters:     
+
+            •	-P 8202 - of the c2-2 node, through which communication with the network is maintained.
+
+            •	-N net2022 - network name (domain name) must be the same for all nodes of this physical network. 
+
+            •	-H 192.168.1.16 - IP of the physical server (AMD Server-2) on which the node c2-2 is installed. 
+
+            •	-S tcp://192.168.1.134:8101 - pointer to the gateway to the network (which is node 1)
+
+            •	2 2 - cluster number and node number
+
+    •	Deploying nodes c2-3 и c3-1 [10]_ in the CLI servers AMD Server-3:
+
+        .. code-block:: python
+
+            bash upDgtCluster.sh -G -E -SC -CB openssl -P 8203 -H 192.168.1.126 -N net2022 -S tcp://192.168.1.134:8101 2 3
+            bash upDgtCluster.sh -G -E -SC -CB openssl -P 8301 -H 192.168.1.126 -N net2022 -S tcp://192.168.1.134:8101 3 1
 
 
 .. rubric:: Footnotes
@@ -239,3 +426,15 @@ Expected result: even though the command was sent to the node in the second clus
 .. [3] is not displayed, since the request was made to this node
 
 .. [4] Cluster port data can also be set in the configuration file, `see 3.7.1`_ for more information
+
+.. [5] Otherwise, the node determines its IP from the external network
+
+.. [6] Although DGT nodes allow for considerable flexibility in configuration, using private and public segments on the same network is only suitable for very large solutions that require professional architecture design performed by specialists. 
+
+.. [7] The Dashboard may only be launched on one of the nodes, most often on the first node of the network.
+
+.. [8] This configuration is written in the configuration file «CORE/etc/dgt.net.map» in the field "static_map" :["c1.dgt1","c1.dgt2","c1.dgt3","c2.dgt1"]
+
+.. [9] IP may be different for the user network. In case of dynamic IP (DHCP or PPPoE), the servers receive Ip in the process of accessing the network router. 
+
+.. [10] As a result of the connection, a dynamic configuration will be generated. For example, for node c3-1 - file «dgt.net.nest» the directory «DGT-Matagami/dgt_clust/c3/dgt1/keys» 

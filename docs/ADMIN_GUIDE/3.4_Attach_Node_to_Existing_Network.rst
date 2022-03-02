@@ -1,3 +1,43 @@
 
 3.4	Attach Node to Existing Network
-+++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++
+
+.. _see 3.3.3: 3.3_Setup_Private_Public_Network.html#a-physical-network
+.. _see 3.2: 3.2_Setup_single_Node.html
+.. _see 3.7.3: 3.7_Adjust_DGT_Settings.html#cryptography-adjusting
+.. _see 3.2.2: 3.2_Setup_single_Node.html#setup-dgt-single-node
+.. _canyouseeme: https://canyouseeme.org/
+.. _see 3.2.5: 3.5_Manage_the_Dashboard.html
+
+
+After a network is deployed or if one is already available (`see 3.3.3`_), the most frequent task is to connect a node to an existing network. The solution to this objective is basically the same as managing a physical network, except that there is no need to deploy a SEED configuration. To create and add a node to an existing network, you must perform the following steps: 
+
+    •	Prepare the environment and clone the DGT node software of a relevant version (`see 3.2`_).
+
+    •	Additionally, make sure the following requirements are met: 
+
+        •	In case of joining a private segment (private network), you must have the following information: IP and port of the gateway, as well as a cell for connection (cluster number and node number).
+
+        • 	In case of joining a private segment (private network), you received and approved the certificate of your node (`see 3.7.3`_).
+
+        •	In case of joining a public segment (public network) you know the number of the gateway for connecting or the address/link to the JSON anchor file with the configuration of public network gateways.
+
+    •	Go to the version directory (for example, «DGT-Matagami/CORE») and customize the template of the «certificate.json» certificate (`see 3.2.2`_). 
+
+    •	Build and connect the node using one of the following commands:
+
+        • Connecting to a closed (private) segment:
+
+        .. code-block:: python
+
+            bash upDgtCluster.sh -G -E -SC -CB openssl -P [NODE_PORT] -H [SERVER_IP] -N my_host_name -S [GATE_URL:GATE_PORT]  NumCluster NumNode
+
+        •	Connecting to an open (public) segment:
+
+        .. code-block:: python
+
+            bash upDgtCluster.sh -G -E -P [NODE_PORT] -N my_host_net -S [GATE_URL:GATE_PORT] dyn 1
+        
+        If more than one node from one subnet is joining, you must set the my_host_net as the same. A node connected to the network not only receives, but also transmits data. Therefore, you must be sure that the corresponding port is open externally (this can be checked with telnet or for an external network using the `canyouseeme`_ service)
+
+    •	Perform a standard node health check through the BGT transaction test family or other calls (`see 3.2.5`_)

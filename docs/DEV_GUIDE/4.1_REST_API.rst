@@ -1147,6 +1147,8 @@ Example:
 
      curl "http://192.168.1.81:8003/run?family=bgt&url=tcp%3A%2F%2Fvalidator-dgt-c1-1%3A8101&cmd=trans&wallet=WAL1&amount=1&to=WAL2"
 
+     curl "http://192.168.1.90:8108/run?family=bgt&&cmd=trans&wallet=wallet-1&amount=111&to=wallet-2"
+
 4.1.9.7	BGT LIST
 ---------------------
 
@@ -1154,7 +1156,67 @@ Example:
 
       /run?family=bgt&cmd=list
 
+The command increases the number of tokens in the wallet by a certain amount.
 
++---+-----------------+--------+---------------------+-----------+
+| # | Query Parameter | Type   | Description         | Required? |
++===+=================+========+=====================+===========+
+| 1 | family          | string | Specifies the value |           |
+|   |                 |        | of the default      |           |
+|   |                 |        | transaction family  |           |
+|   |                 |        | (bgt)               |           |
++---+-----------------+--------+---------------------+-----------+
+| 2 | url             | string | Indicator of a      |           |
+|   |                 |        | specific node and   |           |
+|   |                 |        | port (in case of a  |           |
+|   |                 |        | virtual cluster,    |           |
+|   |                 |        | several virtual     |           |
+|   |                 |        | servers can be      |           |
+|   |                 |        | deployed on one     |           |
+|   |                 |        | physical server).   |           |
+|   |                 |        | The url must be     |           |
+|   |                 |        | encoded in          |           |
+|   |                 |        | accordance with     |           |
+|   |                 |        | `RFC                |           |
+|   |                 |        | 3986 <https://data  |           |
+|   |                 |        | tracker.ietf.org/do |           |
+|   |                 |        | c/html/rfc3986>`__. |           |
+|   |                 |        | The JavaScript      |           |
+|   |                 |        | encodeURI or        |           |
+|   |                 |        | `                   |           |
+|   |                 |        | url-encode-decode < |           |
+|   |                 |        | https://www.url-enc |           |
+|   |                 |        | ode-decode.com/>`__ |           |
+|   |                 |        | service.            |           |
++---+-----------------+--------+---------------------+-----------+
+| 3 | cmd             | string | Defines the         |           |
+|   |                 |        | command; for this   |           |
+|   |                 |        | application         |           |
+|   |                 |        | it's“inc”           |           |
++---+-----------------+--------+---------------------+-----------+
+
+When the query is executed, the following codes may be returned:
+
++---+-------------+-----------------------+------------------------+
+| # | Status Code | Value                 | Description            |
++===+=============+=======================+========================+
+| 1 | 200         | OK                    | Required data received |
++---+-------------+-----------------------+------------------------+
+| 2 | 400         | Bad Request           | The request was        |
+|   |             |                       | formulated incorrectly |
++---+-------------+-----------------------+------------------------+
+| 3 | 500         | Internal Server Error | Validator problems     |
++---+-------------+-----------------------+------------------------+
+| 4 | 503         | Service Unavailable   | API cannot reach       |
+|   |             |                       | validator (internal    |
+|   |             |                       | network problems)      |
++---+-------------+-----------------------+------------------------+
+
+Example:
+
+.. code-block:: python
+
+      curl "http://191.168.1.166:8108/run?family=bgt&url=tcp%3A%2F%2Fvalidator-dgt-c1-1%3A8101&cmd=list"
 
 4.1.10	Graph
 =========================
@@ -1165,18 +1227,17 @@ Example:
 
 This call allows you to unload the current transaction graph (DAG) in dot format for further analysis and presentation. Converting a graph to a drawing can be done in the form of a sequence of commands (provided that dot is installed): 
 
-.. code-block:: python
+      .. code-block:: python
 
-      curl "http://[NODE_IP]:8108/graph" > DAG.gv
-      dot -Tpng DAG.gv > dag.png 
+             curl "http://[NODE_IP]:8108/graph" > DAG.gv
+            dot -Tpng DAG.gv > dag.png 
 
 Example:
 
-.. code-block:: python
+      .. code-block:: python
 
-      curl "192.168.1.243:8108/graph"
+            curl "192.168.1.243:8108/graph"
 
-.. image:: ../images/figure_17.png
-     :align: center      
+      .. image:: ../images/figure_17.png
+              :align: center      
 
-.

@@ -536,6 +536,7 @@ As a result of installing the node in given containers, several services are lau
  .. image:: ../images/figure_11.png
        :align: center
 
+
 .. image:: ../images/table_6_05.PNG
        :align: center
 
