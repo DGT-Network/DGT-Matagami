@@ -4,10 +4,10 @@
 
 .. _see 3.3.3: 3.3_Setup_Private_Public_Network.html#a-physical-network
 .. _see 3.2: 3.2_Setup_single_Node.html
-.. _see 3.7.3: 3.7_Adjust_DGT_Settings.html#cryptography-adjusting
+.. _see 3.7.3: 3.7_Adjust_DGT_Settings.html#adjusting-cryptography
 .. _see 3.2.2: 3.2_Setup_single_Node.html#setup-dgt-single-node
 .. _canyouseeme: https://canyouseeme.org/
-.. _see 3.2.5: 3.5_Manage_the_Dashboard.html
+.. _see 3.2.5: 3.2_Setup_single_Node.html#single-node-check
 
 
 After a network is deployed or if one is already available (`see 3.3.3`_), the most frequent task is to connect a node to an existing network. The solution to this objective is basically the same as managing a physical network, except that there is no need to deploy a SEED configuration. To create and add a node to an existing network, you must perform the following steps: 

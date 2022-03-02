@@ -9,7 +9,7 @@
 .. _section 2.2: ../ARCHITECTURE/2.1_Platform_Components.html
 .. _see 2.2: ../ARCHITECTURE/2.1_Platform_Components.html
 .. _see 3.7.1.2: 3.7_Adjust_DGT_Settings.html#port-configuration
-.. _see 3.2.2: 3.2_Setup_single_Node.html#setup-dgt-single-node
+.. _see 3.2.2: 3.2_Setup_single_Node.html#setup-single-node
 .. _MiTec Json Viewer: https://www.mitec.cz/jsonv.html
 
 Section  3.1 dealt with the installation of a single node. Each node is a set of services that interact with each other and are responsible for organizing the network, storing data, and processing transactions. Even a single node provides a significant service that supports client applications via an API (`see 4.1`_). At the same time, several the platform's network capabilities can only be used if there are several nodes. A detailed overview of DGT networking features is provided in `section 2.2`_ while below is a description of the practical setup of the DGT network. Basic concepts of topology include: 
@@ -138,7 +138,7 @@ Topological settings are set in the following files located in the “etc” wor
 .. _3.2.4: 3.2_Setup_single_Node.html#nodes-port-configuration
 .. _see 3.3.2: 3.3_Setup_Private_Public_Network.html#a-virtual-cluster
 .. _see 3.3.3.2: 3.3_Setup_Private_Public_Network.html#setup-a-physical-network
-.. _see also 3.7.3: 3.7_Adjust_DGT_Settings.html#cryptography-adjusting
+.. _see also 3.7.3: 3.7_Adjust_DGT_Settings.html#adjusting-cryptography
 
 Section `3.2.4`_ describes ports for a single node. Each DGT node is represented by a set of services that support the operation of the node: 
 
