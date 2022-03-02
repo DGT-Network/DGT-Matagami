@@ -30,15 +30,19 @@ services:
     - network1
     ports:
       - 3000:3000
-    user : "1000"
+    user : root
     volumes:
-#      - /var/lib/grafana:/var/lib/grafana
+      - ../../grafana:/var/lib/grafana
       - ../etc/grafana:/etc/grafana
+    environment:
+      - DATASOURCE=abcdabcd
     depends_on:
       - influxdb
     command: |
       bash -c "
-        cd app
+      echo start ...;
+        chown -R grafana:grafana /var/lib/grafana;
+        cd app;
         /app/grafana_entrypoint.sh
       "
     stop_signal: SIGKILL

@@ -256,7 +256,7 @@ def main():
                 registry=registry,
                 reporting_interval=10,
                 database=rest_api_config.opentsdb_db,
-                prefix="bgx_rest_api",
+                prefix="dgt_rest_api",
                 port=db_port,
                 protocol=proto,
                 server=db_server,
