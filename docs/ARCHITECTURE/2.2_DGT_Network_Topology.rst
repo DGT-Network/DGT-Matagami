@@ -1,3 +1,108 @@
 
 2.2	DGT Network Topology
 ++++++++++++++++++++++++++++
+
+2.2.1	Network Architecture in General
+=============================================
+
+Most blockchain platforms organize interaction between nodes base don the P2P paradigm, a peer-to-peer network in which a node initially gains access to some dedicated nodes and then propagates the network through the GOSSIP protocol (interacting with randomly selected nodes). DGT uses cluster networking, in which individual groups of nodes are connected by permalinks, a dynamic network over the Internet. Specific features of the DGT network organization include: 
+
+ •	The network consists of independently functioning nodes, each of which has a full set of functions common to the network (first and foremost, the ability to receive and process transactions, saving them in the local ledger).
+
+ •	Node can differ in terms of roles, additional API capabilities, access to different data sources, and different network environments. Finally, the nodes may belong to different operators (individuals and legal entities) with conflicting interests. If access to the network is controlled by one organization / group of persons, the network is called private. If participants have free access to the network, it is called public. There is an intermediate situation in which access to the network remains free under certain conditions (consortium-based access), or a mixed network is allowed (some remain freely available, some are regulated by the organization). Such networks are called hybrid networks. DGT supports various networking methods. 
+
+ •	As a distributed and decentralized network, DGT must support mechanisms to prevent data conflicts that arise from network failures or intentional distortions (attacks) on data integrity. Some of the possible problems may relate to the irregularity of network objects (for example, node failure, unexpected loss of connections). Resistance to such problems is called Crash Fault Tolerance - CFT. This problem is most relevant for closed private networks. In open networks, the problems of specific attacks on data integrity are also manifested. The resistance to these is called the Byzantine Fault Tolerance - BFT. Using the F-BFT consensus mechanism (a special set of rules for actions in regard to transactions), the nodes can reject wrong transactions and ensure that the correct copy of the ledger is distributed throughout the network. The consensus mechanism is directly related to the network topology. 
+
+ •	Nodes are grouped into clusters. Each cluster has a variable leader through which the other nodes of the cluster interact with each other. The cluster communicates with the network through a set of gateways. The current interaction channels that represent the local peer-to-peer network are called permalinks. Thus, DGT offers dynamic links between nodes instead of the dynamics of linking nodes. 
+
+    .. image:: ../images/figure_37.png
+        :align: center
+
+The nodes form a network divided into clusters (federations). The topology of such a network is defined by special anchor rules: special transactions with conditions under which a node is allowed to connect to the cluster and transmit messages onto the network. The image above shows a typical network fragment [1]_
+
+Each node keeps a copy of the transaction ledger. Each node can be connected to several clients (or even none) that generate transactions. 
+
+Within the given topology (the schematics of organizing a network of nodes), data about servers and their relationships are determined by a special module - the processor of topological transactions. It ledgers links and position of nodes directly in the distributed ledger. Thus, each node has access to data about the topology of a particular implementation. According to the given rules, nodes perform certain calculations on transactions (“votes”). As shown above, nodes can take the roles of PRIMARY (transmits a transaction received from the client into the network), LEADER (collects the vote and then passes it on), or ARBITRATOR (performs a final check of transactions and inserts them into the ledger) depending on the functions in the context of the consensus. 
+
+2.2.2	H-Net Architecture
+=============================
+
+.. _see 2.3.3: 2.3_DGT_Transactions.html#transactions-and-batches
+.. _Section 3.7.1.1: ../ADMIN_GUIDE/3.7_Adjust_DGT_Settings.html#dgt-topology-settings
+
+The DGT network can allow for a variety of architectures that are customizable for private networks. In case of public networks or networks for ecosystems, a hybrid H-Net structure is proposed. Its main features include: 
+
+    •	The network combines several segments of different access types. This includes several private segments controlled by consortium participants, as well as a public segment. 
+
+    •	Joining of nodes to private segments is controlled through a certificate mechanism adapted for decentralized use (`see 2.3.3`_).
+
+    •	Nodes interact with the network through gateways and cluster intersections are not allowed. Each node belongs to one and only one segment. 
+
+    •	Nodes have different roles. In addition to the typical validators, leaders, and arbitrators, such roles as Notary are added - which interact with off-chain operations, as well as Gateway - which interact with other networks. 
+
+    .. image:: ../images/figure_38.png
+        :align: center
+
+`Section 3.7.1.1`_ presents a notation that gives designation for segments, clusters, as well as the initial network configuration (SEED) that is subsequently changed by the topological transaction processor. 
+
+2.2.3	Transport Level
+============================
+
+.. _0MQ: https://zeromq.org/
+.. _asynchronous client-server communication: https://zguide.zeromq.org/docs/chapter3/#toc24
+.. _see 2.5: 2.5_F-BFT_Consensus.html
+
+Connection handling is based on `0MQ`_, which provide a variety of connection patterns and support for transport layer protocols. The basic pattern is `asynchronous client-server communication`_, represented by a server-side 0MQ ROUTER, which listens to the provided endpoint and with multiple connected 0Mq DEALER sockets as connected clients. The following rules apply to this pattern: 
+
+   •	Clients connect to the server and send requests.
+   •	For each request, the server sends 0 or more responses.
+   •	Clients can send multiple requests without waiting for a response.
+   •	Servers can send multiple responses without waiting for new requests.
+
+After the connection is established, exchange of messages begins (peering). The following states are allowed:
+
+   •	The nodes are not connected.
+   •	Connected - a prerequisite for peering.
+   •	Peering - nodes exchange messages. 
+
+0MQ includes a TLS-like certificate exchange mechanism and protocol encryption capability that is transparent to the sockets implementation. Support for socket-level encryption in Sawtooth is conducted through a key server; the keys are read from the validator.toml configuration file. Certificates are generated for each client upon connection. If the server key pair is not configured, network connections between validators will not be authenticated or encrypted. 
+
+In case of DGT, node joining, and validation is additionally governed by the topology that is managed in a separate transaction family.  
+
+2.2.4	Static and Dynamic Topologies
+=======================================
+
+Static topology has a pre-marked structure where clusters and vacant “cells” for new nodes are defined. Dynamic topology only defines the conditions for adding nodes, the fulfillment of which allows the node to join the cluster.  Joining closed segments within the H-Net architecture requires confirmation of certificates ledgered by notaries (`see 2.5`_).  The main types of definitions for network architecture include: 
+
+ •	SEED - the core of the main network that is launched during the first network initialization. These nodes differ by having public keys directly written in the configuration files (later loaded into the ledger). They form a network of trust and are the equivalent of genesis-structures in similar systems. The SEED structure is not required for the existence of the network after a certain time but is associated with the initial launch of the network. 
+
+ •	PRIVATE SEGMENT - closed network segments allow nodes to connect based on a dedicated Node Cell, which is the specific cluster number and number node reserved for the specific node. When joining, the new node provides the details of a certificate it was previously issued and based on that, its membership is confirmed in a particular cluster. 
+
+ •	PUBLIC SEGMENT - joining the public segment (the only one within the network) requires an understanding of the gateway: a node with a certain IP and open ports that allows one to “find” the desired cluster and a specific cell. This can be done through off-line communication or through accessing SDN (special listings of gateways hosted in the cloud, such as Google Drive, which may list various gateways or other SDN files). 
+
+The figure below shows a general network diagram with indications for various segment types: 
+
+ .. image:: ../images/figure_39.png
+        :align: center
+
+The dynamic nature of the network is also determined by the different in choice of network ports, which can be changed dynamically and allow for rebuilding configuration on the go. The main dynamic support for DGT does not come from the GOSSIP protocol, but rather from the topological family of transactions. The joining of a node can also be determined by anchor mechanisms, such as the fulfillment of preconditions for payments or reservations of ETH in the Ethereum network. 
+
+2.2.5	Cluster Formation
+==============================
+
+A cluster is represented by a group of servers that have a common leader. In fact, a cluster is a virtual non-existent (empty) node that describes a group of a servers as one whole. 
+
+ •	Forming a cluster is only possible within the conditions specified by the topology (a node that joins the network receives a “licence” to open its own cluster
+
+ •	Each cluster has a leader who collects data based on voting results. After a given number of rounds (also determined by the topology processor), a change of leader occurs. This leads to the change of all permalinks - those inside the cluster, and those leading inside it and outside as well. 
+
+ •	The change of permalinks is one of the transactions of the topological processor and is written inside the ledger.
+
+ •	A cluster can have a limit on its width (number of nodes inside it) and depth (the number of other clusters connected to it by permalinks)
+
+ •	In case of loss of connection on the existing permalinks, the remounting operation is provided. It performs the regrouping of nodes in the absence of communication with the “parent cluster.” 
+
+
+.. rubric:: Footnotes
+
+.. [1] A tree-like topology is shown, but it can be more complex in practice.

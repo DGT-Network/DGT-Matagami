@@ -34,7 +34,7 @@ Please, visit `our website`_ to find more
    :maxdepth: 2
    :caption: 2. DGT ARCHITECTURE
 
-   ARCHITECTURE/2.1_Platform_Components
+   ARCHITECTURE/2.1_System_Overview
    ARCHITECTURE/2.2_DGT_Network_Topology
    ARCHITECTURE/2.3_DGT_Transactions
    ARCHITECTURE/2.4_Token_Model
