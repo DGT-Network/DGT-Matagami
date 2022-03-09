@@ -36,11 +36,13 @@ Please, visit `our website`_ to find more
 
    ARCHITECTURE/2.1_System_Overview
    ARCHITECTURE/2.2_DGT_Network_Topology
-   ARCHITECTURE/2.3_DGT_Transactions
-   ARCHITECTURE/2.4_Token_Model
-   ARCHITECTURE/2.5_F-BFT_Consensus
-   ARCHITECTURE/2.6_DGT_API_and_Consumer_Apps
-   ARCHITECTURE/2.7_Technology_Stack
+   ARCHITECTURE/2.3_F-BFT_Consensus
+   ARCHITECTURE/2.4_DGT_Transactions
+   ARCHITECTURE/2.5_DGT_Cryptography
+   ARCHITECTURE/2.6_Data_Model
+   ARCHITECTURE/2.7_Token_Model
+   ARCHITECTURE/2.8_DGT_API_and_Consumer_Apps
+   ARCHITECTURE/2.9_Technology_Stack
 
 .. toctree::
    :maxdepth: 2
