@@ -1,3 +1,21 @@
 
 2.9	Technology Stack
 +++++++++++++++++++++++++++++++
+
+The technological stack of the platform is determined by the technologies of its core, service components and applications: 
+
+ •	Programming languages used: C++, Python, JavaScript, Bash Scripting.
+
+ •	Databases: LMDB/REDIS/OrientDB/etcd, InfluxDB.
+
+ •	Cryptography: OpenSSL, WolfSSL, CurveZMQ, bitcoin secp256k1
+
+ •	Networking: ZMQ
+
+ •	Application/API: NodeJS, Flask, Django + Swagger
+
+ •	Monitoring: Grafana. 
+
+ •	Presentation: Redux, React Native, JavaScript.
+
+Designing and working with applications is possible through SDK that support Python, Java, Rust, .Net. 
