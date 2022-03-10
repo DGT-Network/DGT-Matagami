@@ -1,3 +1,162 @@
 
 2.8	DGT API and Consumer Apps
 +++++++++++++++++++++++++++++++++++
+
+2.8.1	Presentation Layer
+=================================
+
+In accordance with the architecture outlined above, the presentation layer addresses the end users to present transactions and information about the end results of storing data in the ledger. 
+
+Implementation features of the DGT platform presentation layer: 
+
+ •	Each client interacts with a certain node through an API layer that the node is equipped with (the Primary Node in terms of roles)
+
+ •	The functionality of the client is the creation and signing of a transaction or receiving data on already executed transactions. The DGT platform works asynchronously, so some time elapses between the information being sent to the node and receiving data about the acceptance of this transaction (insertion into the ledger). The transaction may also be rejected as a result of consensus and fall into the set of “lost” transactions. 
+
+ •	The clients may contain additional business logic, including back-end support outside of the DGT platform or even have a server side for third-party clients.
+
+ •	The Validator (actual core of the node) is the node's main component in the context of service architecture, while such components as REST-API, CLI, DASHBOARD are clients that coordinate with the Validator in a unified way. 
+
+ •	It is necessary to distinguish between read transactions (lighter transactions, mostly open ones - without authentication requirements, except for certain special transactions associated with notary node services) and write transactions (heavier transactions that require digital signature and possibly additional links to decentralized identifiers - DID). 
+
+ •	The basic functionality of the platform (mainly represented by the CORE version) consists of storing and processing transactions of a general kind. Specifying transactions and implementing additional business logic falls on transaction processors: families of transactions. Such families may have functionality connected with token processing or saving key-value data (`see 2.4.3`_). Depending on such functionality, the appearance and behaviour of clients will differ. For example, a Wallet client for the DEC family might allow you to do the following:
+
+        •	Create and manage decentralized identifiers
+
+        •	Create and manage accounts, including public-private key pairs
+
+        •	Receive and transfer DEC tokens between network clients (known account)
+
+        •	Register new digital objects onto the network and confirm their attributes through notary node services
+
+        •	Create and exchange secondary tokens for native DEC, as well as buy and sell digital objects previously registered on the network.
+
+ •	Development and implementation of clients is possible using Sawtooth SDK or without SDK if adhering to the overall application architecture.
+
+.. _see 2.4.3: 2.4_DGT_Transactions.html#transaction-families
+
+2.8.2	Application Architecture
+=======================================
+
+The application architecture is defined by the basic application functionality that is necessary to form and host transactions. The general logic can be refined taking into account the additional functionality of the application. REST-API of the platform will return data on the execution of transactions in JSON (raw) form or specific data for a given family of transactions. Writing to the ledger requires a digital signature and must use the requirements for a common transaction structure. 
+
+.. _Google Protocol Buffer: https://developers.google.com/protocol-buffers/
+
+The structure of the general transaction (steps to create it) defines the main components of the application: 
+
+ •	Creating a key pair (private and public). Regardless of any additional identity components (DID), the DGT platform works using asymmetric cryptography. In the simplest case, 256-bit private keys are used, which can be generated offline, for example, using the secp256k1 library. Since DGT can work with various cryptographies, any particular application implementation should support the same cryptography (type, curve) as the entire platform. The public key can be derived from the private key. Example of a Python code:
+
+    .. code-block:: python    
+
+            import secp256k1
+            key_handler = secp256k1.PrivateKey()
+            private_key_bytes = key_handler.private_key
+
+            public_key_bytes = key_handler.public_key.serialize()
+            public_key_hex = public_key_bytes.hex()
+
+ •	Creating the transaction payload (body). The body of the transaction is the functionality for which the transaction is launched. The body of the transaction is encoded into a set of bytes (binary-encoded), for example, using Concise Binary Object Representation (CBOR) serialization. Example: 
+
+    .. code-block:: python    
+
+            import cbor
+
+            payload = {‘Verb’: ‘set’,
+           ‘Key’: ‘THENAME’,
+           ‘Value’: 256}
+
+ •	Creating a transaction header requires additional steps to generate the corresponding hash, as well as the content of the header. Header encoding is done through the `Google Protocol Buffer`_ (Protobuff). The header of the transaction may also contain certain inputs and outputs that allow for the control of processing. An example using Sawtooth SDK: 
+
+    .. code-block:: python    
+
+            from random import randint
+            from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader
+
+            txn_header = TransactionHeader(
+                batcher_public_key=public_key_hex,
+            # If we had any dependencies, this is what it might look like:
+            #dependencies=[
+            '540a6803971d1880ec73a96cb97815a95d374cbad5d865925e5aa0432fcf1931539afe10310c1    
+            22c5eaae15df61236079abbf4f258889359c4d175516934484a'
+            ],
+            family_name='intkey',
+            family_version='1.0',
+            inputs=[
+            '1cf1266e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7'],
+                nonce=str(randint(0, 1000000000)),
+                outputs=[
+            '1cf1266e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7'],
+                payload_sha512=payload_sha512,
+                signer_public_key=public_key_hex)
+
+            txn_header_bytes = txn_header.SerializeToString()
+
+ •	Signing the transaction header using cryptography, e.g. ECDSA (such as secp256k1 elliptic curve, SHA-256 hash)
+
+    .. code-block:: python    
+
+            key_handler = secp256k1.PrivateKey(private_key_bytes)
+
+            # ecdsa_sign automatically generates a SHA-256 hash of the header bytes
+            txn_signature = key_handler.ecdsa_sign(txn_header_bytes)
+            txn_signature_bytes = key_handler.ecdsa_serialize_compact(txn_signature)
+            txn_signature_hex = txn_signature_bytes.hex()
+
+ •	Creating a transaction requires joining the transaction header, signature, and payload (body):
+
+    .. code-block:: python    
+
+           from sawtooth_sdk.protobuf.transaction_pb2 import Transaction
+            txn = Transaction(
+                header=txn_header_bytes,
+                header_signature=txn_signature_hex,
+                payload=payload_bytes)
+
+ •	The transaction may be additionally decoded in case of external processing (forming a TransactionList): 
+
+    .. code-block:: python    
+
+            txnList = TransactionList()
+            txnList.ParseFromString(txnBytes)
+
+            txn = txnList.transactions[0]
+
+ •	Forming and signing the transaction package. To optimize network processing, transactions are transmitted and processed in batches. At minimum, batches of transactions and the transactions themselves coincide.  
+
+     .. code-block:: python    
+
+            batch_signature = key_handler.ecdsa_sign(batch_header_bytes)
+
+            batch_signature_bytes = key_handler.ecdsa_serialize_compact(batch_signature)
+
+            batch_signature_hex = batch_signature_bytes.hex()
+
+            from sawtooth_sdk.protobuf.batch_pb2 import Batch
+
+            batch = Batch(
+             header=batch_header_bytes,
+                header_signature=batch_signature_hex,
+             transactions=[txn])
+
+ •	Encoding the transaction batches (serializing). Transaction batches passed to the node core (Validator) must be serialized into a BatchList structure:
+
+     .. code-block:: python    
+
+            from sawtooth_sdk.protobuf.batch_pb2 import BatchList
+
+            batch_list = BatchList(batches=[batch])
+            batch_bytes = batch_list.SerializeToString()
+
+ •	Transferring transactions to the validator is essentially calling to the REST-API:
+
+      .. code-block:: python    
+
+            request = urllib.request.Request(
+                    'http://rest.api.domain/batches',
+                 batch_list_bytes,
+                    method='POST',
+                    headers={'Content-Type': 'application/octet-stream'})
+                response = urllib.request.urlopen(request)
+
+            except HTTPError as e:
+             response = e.file

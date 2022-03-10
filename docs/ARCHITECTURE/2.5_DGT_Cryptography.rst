@@ -1,2 +1,19 @@
 2.5 DGT Cryptography
 ++++++++++++++++++++++++++++
+
+The cryptographic subsystem of the platform is an encapsulated mechanism that provides the following functions: 
+
+ •	Generation of keys (private and public) using specified cryptography parameters
+ •	Formation of electronic signatures of transactions on the client and voting nodes
+ •	Creation and management of node certificates
+ •	Computation of addresses and hashes to encode entries, as well as of policies and roles (including ZKP methods)
+ •	Encryption of traffic and records
+
+When the DGT Network is deployed, an appropriate library must be specified that will be used for all networks and clients to ensure the required compatibility. The OpenSSL and bitcoin (secp256k1) libraries are currently supported. All signatures on the platform, including customer-signed transactions and packages, use the ECDSA secp 256k1 curve.  
+
+The data exchanged between nodes and between the services within the node (Validator, REST API, Transaction Processor) are also encrypted using ZMQ: with the help of CurveZMQ (a 256-bit ECC key with the elliptic Curve25519).
+
+In the future, the following updates to the cryptography system will be used:  
+
+ •	The use of ZKP tools o the libzmix ursa library
+ •	The use of libraries based on NTRU: a lattice-based cryptography to protect against quantum attacks (post-quantum cryptography) 

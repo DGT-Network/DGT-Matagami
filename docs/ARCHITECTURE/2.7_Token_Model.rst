@@ -5,11 +5,65 @@
 2.7.1	Tokenization Approach
 ===================================
 
+One of the directions of the platform's work is tokenization. Here and below, tokenization refers to the representation of user value in the form of calculated value. User value is the network access to information, the information itself, as well as the digital or real objects represented as a reflection in the DGT network (digital twins). We do not separate cryptocurrency and secondary tokens in terms of the technical implementation. Cryptocurrency will be referred to as a native network token (primary network token) and user tokens will be referred to as secondary tokens. The main characteristics of tokens are:
 
-2.7.2	DGT Economic
+ •	There are countable (Fungible) tokens and non-countable, unique tokens (Non-Fungible Tokens, NFT). Countable tokens are used to represent something as a whole, have volume (number of issued tokens), and are similar to electronic money. NFT represent some digital object and determine the ownership of this object. Both tokens describe some objects and may participate in token exchange operations among themselves (swap operations are possible if exchanged tokens are represented within the same network), in exchange to external tokens, to cryptocurrencies (using crypto exchanges), and to regular (fiat) money. 
+
+ •	The primary network token (DEC token for the DGT network) reflects the value of the network itself that is expressed in the development and operation of the nodes that support it. The primary (native) token is necessary to support secondary tokens (primarily for exchange operations), as well as for the operation of a hybrid network (that is, a network in which there are several / many participants supporting the network). Blockchain networks, including DGT, can exist without tokens if one of the parties takes on the full cost of maintaining the network. This means that decentralized networks (even partially decentralized ones) cannot exist without at least some model of tokenization. 
+
+ •	The primary token (DEC) is countable, and its volume is determined by its emission. The economy of distributed decentralized platforms is based on regulating the emission, both in terms of the total number of tokens issues and in terms of the order in which tokens are distributed. The distribution model does not have to be mining, like on the Bitcoin platform, but other forms can be used as well (ex. minting).
+
+ •	The following assumptions are made for the tokenization model on the DGT platform (see full description [31]):
+
+        •	The platform is divided into two versions / modifications. CORE supports basic functionality and is not connected to any tokens, while GARANASKA supports tokenization. Most of the information in this document relates to the CORE version, which has the same functionality or general architecture as GARANASKA, except for tokenization aspects. 
+
+        •	The native token of the platform is the DEC token. 
+
+        •	The native token is issued in a limited amount and only once. The total amount is determined by the number Ndec (8 589 869 056) that is transferred to the “initial” GW (Genesis Wallet) account. This account supports a limited number of operations, which guarantee the distribution of funds according to the minting distribution mechanism (see below). 
+
+        •	Support for DEC tokens is provided through the appropriate family of transactions (`see 2.4.3`_). Among other things, it supports mechanisms for transferring tokens, exchanging tokens for digital objects, and other “banking” operations. 
+
+        •	The minting operation is an important component of the model: nodes participating in supporting the network receive tokens in exchange for their SLA, calculated by a complex function with components such as the lifetime of the node, the number of transactions processed, and other contributions to the network like providing data or notarial services (Notary Nodes - `see 2.3.2`_).
+
+        •	The ability to create secondary tokens with functionality like the ERC-20, ERC-777, ERC-721, ERC-1400, and ERC-1155 standards. 
+
+.. _see 2.3.2: 2.3_F-BFT_Consensus.html#general-trust-environment-and-notary-nodes
+.. _see 2.4.3: 2.4_DGT_Transactions.html#transaction-families
+
+2.7.2	DGT Economy
 ===============================
 
+The DGT economy is defined by an endogenous model (see [31]), in which the value of the network is created by many independent agents and is represented by the Cobb-Douglas production function that describes the impact of the capital and work expended onto the volume of the output (which is the actual network connection between nodes). Within the framework of this model, such a function is represented as a solution to a stochastic differential equation with geometric Brownian motion. 
 
+The main provisions of the economic model include:  
+
+ •	The total period covered by the model's calculations is 9 years, throughout which the number of nodes increases along a logistic curve (the maximum number of nodes is 8500).
+
+ •	Nodes benefit through two mechanisms: a transaction fee and minting, which is the direct participation in the emission mechanism. The transaction fee is assumed to be constant, while the minting function is modeled by a special Lucky_Nodes function that forms the minting volume in such a way, as to maximize the distribution of tokens at the network maturity stage based on Metcalfe's Law and increase the retention time of tokens by users based on the Irwin Fisher equation. 
+
+ •	Maintaining the token supply and demand in balance is done through the limited use of the “token burning function.”
+
+The income expected by a node according to the model is presented below:
+
+ .. image:: ../images/figure_53.png
+      :align: center
+
+The general procedure for a node to participate in minting is presented in the diagram below:
+
+ .. image:: ../images/figure_54.png
+      :align: center
 
 2.7.3	DEC Family
 =========================
+
+The DEC transaction family plays the main role in supporting tokenization. It supports the following groups of operations: 
+
+ •	DEC EMISSION - management of the issuance of tokens and parameterization
+ •	DEC MINTING - a mechanism for distributing tokens between nodes
+ •	DEC BANKING - operations of transferring, exchanging tokens
+ •	DEC TOKENIZATION - support for token issuance for registered digital objects
+
+Some of the DEC family processes are shown in the figure below.
+
+ .. image:: ../images/figure_55.png
+      :align: center
