@@ -44,11 +44,13 @@ The Consensus is a special mechanism to ensure the integrity and security of dat
  •	There is also a heuristic CAP Theorem (Brewer's Theorem) that states that out of the three possible states of the system (C - consistency, A - availability, P - partition tolerance), only two can be reached at the same time. In particular, there exist the so-called BASE architectures that oppose ACID systems [1]_  (standard relational databases) and guarantee a Basically Available, Soft-state, Eventually consistent state. It is described through basic availability, unstable state, and consistency that is eventually reached. 
 
 .. _see 2.1.1: 2.1_System_Overview.html#dlt-design-principles
-.. _see 2.3.3: 2.3_DGT_Transactions.html#transactions-and-batches
+.. _see 2.3.3: 2.3_F-BFT_Consensus.html#decentralized-identification
 .. _see 2.7.1: 2.7_Token_Model.html#tokenization-approach
 .. _see 2.4.1: 2.4_DGT_Transactions.html#transaction-overview
+.. _[29]: ../REFERENCES/6.1_References.html
+.. _[30]: ../REFERENCES/6.1_References.html
 
-Common consensus systems can be divided into several classes (see [29]). These include BFT-Compliant algorithms (based on PBFT or RBFT voting), Proof-of-X consensuses (based on proving some advantages, such as computational power for Proof-of-Work), hybrid or alternative consensuses (ex. DAG-based consensuses like Hedera, Hashgraph, IOTA), as well as CFT-consensuses (RAFT, Zabb). Even though the full mathematical description of the F-BFT consensus used by DGT is beyond the scope of this documentation (see [30]), let's review its main architectural features: 
+Common consensus systems can be divided into several classes (see `[29]`_). These include BFT-Compliant algorithms (based on PBFT or RBFT voting), Proof-of-X consensuses (based on proving some advantages, such as computational power for Proof-of-Work), hybrid or alternative consensuses (ex. DAG-based consensuses like Hedera, Hashgraph, IOTA), as well as CFT-consensuses (RAFT, Zabb). Even though the full mathematical description of the F-BFT consensus used by DGT is beyond the scope of this documentation (see `[30]`_), let's review its main architectural features: 
 
  •	F-BFT is a generalization of the PBFT consensus onto a multi-level hierarchical network, in which nodes form clusters with variable leaders. 
 

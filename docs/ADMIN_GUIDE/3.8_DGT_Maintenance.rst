@@ -6,7 +6,7 @@
 ====================================================
 
 .. _see 3.5: 3.5_Manage_the_Dashboard.html
-.. _see 2.5: ../ARCHITECTURE/2.5_F-BFT_Consensus.html
+.. _see 2.3: ../ARCHITECTURE/2.3_F-BFT_Consensus.html
 .. _see 3.2: 3.2_Setup_single_Node.html
 
 Platform maintenance may require special actions to stop or restart the platform. The following steps are required to stop and then restart the platform: 
@@ -45,7 +45,7 @@ In a certain way, any distributed blockchain-like system may be defined as a dat
 
     •	The operating platform is in constant registry synchronization mode. Therefore, the loss of data by one node does not affect the others. When the lost node is restored, it receives an updated portion of data. 
 
-    •	Writing new data into the registry requires going through a consensus procedure (`see 2.5`_), so that “offline” changes, conflicting data, and false entries will be rejected by the system's nodes. 
+    •	Writing new data into the registry requires going through a consensus procedure (`see 2.3`_), so that “offline” changes, conflicting data, and false entries will be rejected by the system's nodes. 
 
 Despite these remarks, undergoing backup and then restoring the database may become useful in some special cases: 
 

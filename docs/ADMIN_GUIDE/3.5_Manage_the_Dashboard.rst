@@ -16,8 +16,8 @@ DGT Dashboard - is a separate node component that is installed to obtain additio
 
 The main purpose of the service is to test and monitor the network. If you have a systematic monitoring task, use the Grafana service (`see 3.8.3`_). Service sections are represented by the following tabs: 
 
-.. image:: ../images/figure_20.png
+ .. image:: ../images/figure_20.png
         :align: center
 
-.. image:: ../images/figure_21.png
+ .. image:: ../images/figure_21.png
         :align: center

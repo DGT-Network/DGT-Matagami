@@ -5,7 +5,9 @@
 2.1.1	DLT Design Principles
 ===================================
 
-The DGT Platform is a Distributed Ledger Technology (DLT) class software, deployed to solve objectives of distributed data storage, their processing and presentation to end users of TCP/IP networks. Although the taxonomy of DLT solutions is still evolving, the figure below presents one of the well-known attempts to systematize the concepts of this area [24]. It is easiest to imagine the DLT network as a distributed database (albeit only within certain limits, as the technology is much more versatile than just a data organization and storage system) in which there are N participants (nodes), each of which has its own copy of the data. 
+The DGT Platform is a Distributed Ledger Technology (DLT) class software, deployed to solve objectives of distributed data storage, their processing and presentation to end users of TCP/IP networks. Although the taxonomy of DLT solutions is still evolving, the figure below presents one of the well-known attempts to systematize the concepts of this area `[24]`_. It is easiest to imagine the DLT network as a distributed database (albeit only within certain limits, as the technology is much more versatile than just a data organization and storage system) in which there are N participants (nodes), each of which has its own copy of the data. 
+
+.. _[24]: ../REFERENCES/6.1_References.html
 
 The entire network is organized in such a way as to ensure the integrity and consistency of data, provided that many participants have access to the record. The main properties of such systems include: 
 
@@ -32,12 +34,12 @@ Each of the listed properties is not binary and may involve a whole range of sol
     .. image:: ../images/figure_30.png
         :align: center
 
-One of the most important components of decentralized systems are the rules of consensus, a mechanism for agreeing on various data that determines which of the records (transactions) will ultimately be entered into a distributed database - a ledger (`see 2.3`_). Decentralized distributed systems do not have a built-in mechanism for synchronizing data at the time of their creation. In the asynchronous network model, the arrival of messages at a given point in the network is not guaranteed within a limited time, which may result in the possible loss of messages. Back in 1985, Fisher, Lynch and Paterson published a theorem about the impossibility of a distributed consensus (the FLP Impossibility, the Fisher-Lynch-Paterson result). According to this theorem, a deterministic asynchronous system can have no more than two of the following three properties:  
+One of the most important components of decentralized systems are the rules of consensus, a mechanism for agreeing on various data that determines which of the records (transactions) will ultimately be entered into a distributed database - a ledger (`see 2.6`_). Decentralized distributed systems do not have a built-in mechanism for synchronizing data at the time of their creation. In the asynchronous network model, the arrival of messages at a given point in the network is not guaranteed within a limited time, which may result in the possible loss of messages. Back in 1985, Fisher, Lynch and Paterson published a theorem about the impossibility of a distributed consensus (the FLP Impossibility, the Fisher-Lynch-Paterson result). According to this theorem, a deterministic asynchronous system can have no more than two of the following three properties:  
 
 .. _see 2.2: 2.2_DGT_Network_Topology.html
-.. _see 2.3: 2.3_DGT_Transactions.html
-.. _section 2.3: 2.3_DGT_Transactions.html
-.. _paragraph 2.5: 2.5_F-BFT_Consensus.html
+.. _see 2.6: 2.6_Data_Model.html
+.. _section 2.3: 2.3_F-BFT_Consensus.html
+.. _paragraph 2.6: 2.6_Data_Model.html
 .. _see 2.1.3: 2.1_System_Overview.html#dgt-approach
 
  •	**Safety** - security, the guarantee that all results are correct and identical on all nodes. 
@@ -48,7 +50,7 @@ One of the most important components of decentralized systems are the rules of c
 
 The F-BFT algorithm that forms the foundation of the DGT platform is designed in such a way, that it prefers Fault Tolerance and Safety to Liveness. Such decisions lead to an appropriate system architecture designed to support asynchronous transaction processing. The limitations of the security model resulting from the architecture are discussed in `section 2.3`_.
 
-Today, the name BLOCKCHAIN has become all-encompassing for a wide range of distributed and decentralized solutions. The name is based on a specific way of organizing data - literally in a chain of blocks. Classical blockchain systems pack transactions into blocks (through the so-called Merkle Tree), which in turn are interconnected, so that each subsequent block contains the hash of the header of the previous block. This data organization provides an easy check of data integrity and makes it impossible to replace previously saved transactions. Features of data organization are discussed in `paragraph 2.5`_,  here we shall restrict ourselves to general remarks on approaches to data storage: 
+Today, the name BLOCKCHAIN has become all-encompassing for a wide range of distributed and decentralized solutions. The name is based on a specific way of organizing data - literally in a chain of blocks. Classical blockchain systems pack transactions into blocks (through the so-called Merkle Tree), which in turn are interconnected, so that each subsequent block contains the hash of the header of the previous block. This data organization provides an easy check of data integrity and makes it impossible to replace previously saved transactions. Features of data organization are discussed in `paragraph 2.6`_,  here we shall restrict ourselves to general remarks on approaches to data storage: 
 
  •	Transactions are the main object for storage. These can be structured in terms of (1) the transaction header containing important meta-information (sometimes also called the envelope); and (2) the transaction body containing the actual content of the transaction. 
 
@@ -64,9 +66,12 @@ Other solutions are improvements of the Merkle Tree, such as the Prefix Merkle T
 
  •	Storing data in a chain of blocks (blockchain) is not the only option. Common approaches include:
 
-        •	Blockchain (classic option, see [24] for example)
-        •	Directed graph (Directed Acyclic Graph, DAG) - used by the DGT Platform, see [25]
-        •	BlockMatrix (see [26])
+        •	Blockchain (classic option, see `[24]`_ for example)
+        •	Directed graph (Directed Acyclic Graph, DAG) - used by the DGT Platform, see `[25]`_
+        •	BlockMatrix (see `[26]`_)
+
+.. _[25]: ../REFERENCES/6.1_References.html
+.. _[26]: ../REFERENCES/6.1_References.html
 
 In terms of architecture, there are comparisons of centralized and decentralized systems that are used to solve similar problems. The main attributes of solutions for different types of systems are presented in the table below.  
 
@@ -92,7 +97,10 @@ The above list of architectural features allows for the conclusion that there is
 2.1.2	Reference Architecture
 ===================================
 
-The reference architecture involves the description of the most important decisions and components of the corresponding software system. The DGT platform supports standardized cryptography, networking, and data storage components that correlate with the most important published models of distributed architectures, primarily [9] and [10]. In accordance with these principles, the architecture of distributed systems can be represented by basic layers:
+The reference architecture involves the description of the most important decisions and components of the corresponding software system. The DGT platform supports standardized cryptography, networking, and data storage components that correlate with the most important published models of distributed architectures, primarily `[9]`_ and `[10]`_. In accordance with these principles, the architecture of distributed systems can be represented by basic layers:
+
+.. _[9]: ../REFERENCES/6.1_References.html
+.. _[10]: ../REFERENCES/6.1_References.html
 
     .. image:: ../images/figure_31.png
         :align: center
@@ -117,7 +125,7 @@ DGT is positioned as a platform for distributed and decentralized computing:
 Distribution and decentralization can have different degrees, so that the operation of the system is possible in an incompletely decentralized and only partially distributed network. DGT's approach: 
 
 .. _see 2.1.3.2: 2.1_System_Overview.html#process-domain
-.. _see 2.3: 2.3_DGT_Transactions.html
+.. _see 2.3: 2.3_F-BFT_Consensus.html
 
     •	DGT is called a **platform** in a sense that the system processes data regardless of a specific application task. To solve a specific task, setting up a family of transactions is required, as well as an addition of an application client. 
 
@@ -224,15 +232,17 @@ Having some of DGT's functional properties intersect other existing solutions al
 
  •	A single ontological layer due to the support of several families of transactions. 
 
-.. image:: ../images/figure_34.png
+ .. image:: ../images/figure_34.png
         :align: center
 
 The implementation of the F-BFT consensus, based on the probabilistic ratio of the time the network takes to vote and the polynomial interpolation of the voting results in nodes [8]_, allows for an effective and unique technical solution with broad functional properties and exceptional interoperability. This is necessary for constructing business systems that achieve a required level of maturity [9]_. 
 
-DGT was initially built on a well-known Hyperledger Sawtooth framework [21], led by the Intel Corporation. The philosophy, architecture and implementation of Sawtooth most closely represent the goals and objectives of DGT. DGT inherited some low-level technical features, while also adding several its own - as presented in the table below: 
+DGT was initially built on a well-known Hyperledger Sawtooth framework `[21]`_, led by the Intel Corporation. The philosophy, architecture and implementation of Sawtooth most closely represent the goals and objectives of DGT. DGT inherited some low-level technical features, while also adding several its own - as presented in the table below: 
 
-.. image:: ../images/table_9_02.png
+ .. image:: ../images/table_9_02.png
         :align: center
+
+.. _[21]: ../REFERENCES/6.1_References.html
 
 Backward compatibility with Sawtooth provides the following benefits:
 

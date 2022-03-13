@@ -71,4 +71,9 @@ Please, visit `our website`_ to find more
    COMMUNITY/5.2_DGT_Development_Contributing
    COMMUNITY/5.3_Testing_and_Support
    COMMUNITY/5.4_Code_of_Conduct
-  
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 6. REFERENCES
+
+   REFERENCES/6.1_References

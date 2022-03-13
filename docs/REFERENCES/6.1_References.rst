@@ -1,0 +1,65 @@
+References
++++++++++++++++++++++++++++
+
+[1].	DGT One Pager, official and short DGT Platform Description | Available on corporate site;
+
+[2].	DGT About, official presentation | Available on corporate site;
+
+[3].	DGT Github Repository, the source code and more | Available on github.com;
+
+[4].	DGT. The Blockchain Handbook | Available ate corporate site;
+
+[5].	Dylan Yaga, Peter Mell, Nik Roby, Karen Scarfone, Blockchain Technology Overview, NIST Publication, NISTIR 8202| Available from: https://doi.org/10.6028/NIST.IR.8202 
+
+[6].	ITU-T Technical Specification FG DLT D1.1 Distributed ledger technology terms and defini-tions, 2019
+
+[7].	ITU-T Technical Report FG DLT D1.2 Distributed ledger technology overview, concepts, eco-system, 2019
+
+[8].	ITU-T Technical Report FG DLT D2.1 Distributed ledger technology use cases, 2019
+
+[9].	ITU-T Technical Specification FG DLT D3.1 Distributed ledger technology reference architec-ture, 2019
+
+[10].	ISO 23257 Blockchain and distributed ledger technologies — Reference architecture
+
+[11].	DGT, Technical Deep Dive, 2021 | Available at corporate site.
+
+[12].	DGT. GARANASKA TOKENIZATION SYSTEM, 2021 | Available at corporate site. 
+
+[13].	CONSENSYS. Blockchain Use Cases and Application by Industry | Online access at site of con-sensys;
+
+[14].	EY, Tokenization of Assets, 2020
+
+[15].	PWC, Use Cases for Blockchain Technology in Energy & Commodity Trading, 2017
+
+[16].	DGT. Supply Chain,  2020 | Available on corporate site
+
+[17].	DGT. Capturing Non-Core Value. Cross-Enterprise Ecosystem | Available on corporate site
+
+[18].	DGT. Achieving Data-Rich Value Chains.  Cross-Enterprise Integration | Available on Corpo-rate site
+
+[19].	DGT Partnership Program, 2022
+
+[20].	DGT. Technology Roadmap, 2021 | Available on corporate site
+
+[21].	Hyperledger Sawtooth, Core Documentation v 1.2.6 | Available on Hyperledger portal
+
+[22].	Open-Source Initiative. Licenses & Standards | Available on foundation site.
+
+[23].	Ubuntu Server. Network Configuration | Available on official UBUNTU Guides
+
+[24].	Hyperledger Sawtooth, Security Assessment Technical Report. The Linux Foundation, 2017 | Available on foundation site.
+
+[25].	Lima, C. “Developing Open and Interoperable DLT \/ Blockchain Standards [Standards]” in Computer, vol. 51, no. 11, 2018, 106-111. | Available at IEEE Site
+
+[26].	Gavin Wood, Ethereum Yellow Page: A Secure Decentralised Generalised Transaction Ledger, 2022 |Available at github.
+
+[27].	Qin Wang, Jiangshan Yu, Shiping Chen, Yang Xiang, SoK: Diving into DAG-based Blockchain Systems. CoRR abs/2012.06128 (2020) | Available at Arxiv.
+
+[28].	NIST, D. Richard Kuhn, A Data Structure for Integrity Protection with Erasure Capability, 2018 | Available online.
+
+[29].	B. Lashkari and P. Musilek, "A Comprehensive Review of Blockchain Consensus Mechanisms," in IEEE Access, vol. 9, pp. 43620-43652, 2021, doi: 10.1109/ACCESS.2021.3065880.
+
+[30].	DGT F-BFT Consensus Whitepaper, 2022 | Available on official DGT Site.
+
+[31].	DGT TOKENIZATION MODEL, 2022 | Available on official DGT Site.
+

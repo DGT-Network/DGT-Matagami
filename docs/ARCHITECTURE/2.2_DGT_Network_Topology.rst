@@ -27,7 +27,7 @@ Within the given topology (the schematics of organizing a network of nodes), dat
 2.2.2	H-Net Architecture
 =============================
 
-.. _see 2.3.3: 2.3_DGT_Transactions.html#transactions-and-batches
+.. _see 2.3.3: 2.3_F-BFT_Consensus.html#decentralized-identification
 .. _Section 3.7.1.1: ../ADMIN_GUIDE/3.7_Adjust_DGT_Settings.html#dgt-topology-settings
 
 The DGT network can allow for a variety of architectures that are customizable for private networks. In case of public networks or networks for ecosystems, a hybrid H-Net structure is proposed. Its main features include: 
@@ -50,7 +50,7 @@ The DGT network can allow for a variety of architectures that are customizable f
 
 .. _0MQ: https://zeromq.org/
 .. _asynchronous client-server communication: https://zguide.zeromq.org/docs/chapter3/#toc24
-.. _see 2.5: 2.5_F-BFT_Consensus.html
+.. _see 2.3.2: 2.3_F-BFT_Consensus.html#general-trust-environment-and-notary-nodes
 
 Connection handling is based on `0MQ`_, which provide a variety of connection patterns and support for transport layer protocols. The basic pattern is `asynchronous client-server communication`_, represented by a server-side 0MQ ROUTER, which listens to the provided endpoint and with multiple connected 0Mq DEALER sockets as connected clients. The following rules apply to this pattern: 
 
@@ -72,7 +72,7 @@ In case of DGT, node joining, and validation is additionally governed by the top
 2.2.4	Static and Dynamic Topologies
 =======================================
 
-Static topology has a pre-marked structure where clusters and vacant “cells” for new nodes are defined. Dynamic topology only defines the conditions for adding nodes, the fulfillment of which allows the node to join the cluster.  Joining closed segments within the H-Net architecture requires confirmation of certificates ledgered by notaries (`see 2.5`_).  The main types of definitions for network architecture include: 
+Static topology has a pre-marked structure where clusters and vacant “cells” for new nodes are defined. Dynamic topology only defines the conditions for adding nodes, the fulfillment of which allows the node to join the cluster.  Joining closed segments within the H-Net architecture requires confirmation of certificates ledgered by notaries (`see 2.3.2`_).  The main types of definitions for network architecture include: 
 
  •	SEED - the core of the main network that is launched during the first network initialization. These nodes differ by having public keys directly written in the configuration files (later loaded into the ledger). They form a network of trust and are the equivalent of genesis-structures in similar systems. The SEED structure is not required for the existence of the network after a certain time but is associated with the initial launch of the network. 
 

@@ -13,7 +13,9 @@ One of the directions of the platform's work is tokenization. Here and below, to
 
  •	The primary token (DEC) is countable, and its volume is determined by its emission. The economy of distributed decentralized platforms is based on regulating the emission, both in terms of the total number of tokens issues and in terms of the order in which tokens are distributed. The distribution model does not have to be mining, like on the Bitcoin platform, but other forms can be used as well (ex. minting).
 
- •	The following assumptions are made for the tokenization model on the DGT platform (see full description [31]):
+ .. _[31]: ../REFERENCES/6.1_References.html
+
+ •	The following assumptions are made for the tokenization model on the DGT platform (see full description `[31]`_):
 
         •	The platform is divided into two versions / modifications. CORE supports basic functionality and is not connected to any tokens, while GARANASKA supports tokenization. Most of the information in this document relates to the CORE version, which has the same functionality or general architecture as GARANASKA, except for tokenization aspects. 
 
@@ -33,7 +35,7 @@ One of the directions of the platform's work is tokenization. Here and below, to
 2.7.2	DGT Economy
 ===============================
 
-The DGT economy is defined by an endogenous model (see [31]), in which the value of the network is created by many independent agents and is represented by the Cobb-Douglas production function that describes the impact of the capital and work expended onto the volume of the output (which is the actual network connection between nodes). Within the framework of this model, such a function is represented as a solution to a stochastic differential equation with geometric Brownian motion. 
+The DGT economy is defined by an endogenous model (see `[31]`_), in which the value of the network is created by many independent agents and is represented by the Cobb-Douglas production function that describes the impact of the capital and work expended onto the volume of the output (which is the actual network connection between nodes). Within the framework of this model, such a function is represented as a solution to a stochastic differential equation with geometric Brownian motion. 
 
 The main provisions of the economic model include:  
 
