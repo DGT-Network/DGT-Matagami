@@ -142,7 +142,7 @@ Executing can return the following codes:
 
 .. Warning::
 
-    It is not recommended to use this API without the support of the SDK or libraries due to the significant logic involved in the formation of transactions and packages `see 4.2 <4.2_SDK_Development.html>`__. You can also use the API of specific families to send transactions of a certain type (see below).
+    It is not recommended to use this API without the support of the SDK or libraries due to the significant logic involved in the formation of transactions and packages. You can also use the API of specific families to send transactions of a certain type (see below).
 
 4.1.1.4	[GET] Get Batch Status
 ----------------------------------------

@@ -12,9 +12,9 @@ The main administrative tasks covered in this section are:
 
 The DGT platform aims to support the network. The DGT Network consists of individual nodes. Each node is a full-featured server solution, equipped with a significant number of services and software components. Even a single node is a complete solution that can support application solutions and can be deployed and tested by a single organization. 
 
-Although the DGT solution can be deployed in any environment that supports the appropriate technology stack (`see 2.7`_), for simplicity, here we examine how to deploy a node for OS Ubuntu in a Docker virtualization environment. 
+Although the DGT solution can be deployed in any environment that supports the appropriate technology stack (`see 2.9`_), for simplicity, here we examine how to deploy a node for OS Ubuntu in a Docker virtualization environment. 
 
-.. _see 2.7: ../ARCHITECTURE/2.7_Technology_Stack.html
+.. _see 2.9: ../ARCHITECTURE/2.7_Technology_Stack.html
 .. _see 3.2: 3.2_Setup_single_Node.html
 .. _see 3.4: 3.4_Attach_Node_to_Existing_Network.html
 .. _see 3.2.2: 3.2_Setup_single_Node.html#setup-dgt-single-node
