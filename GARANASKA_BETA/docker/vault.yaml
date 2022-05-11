@@ -1,0 +1,27 @@
+version: '3.6'
+
+services:
+
+    vault:
+      image: vault:latest
+      volumes:
+        - ../../vault/config:/vault/config
+        - ../../vault/policies:/vault/policies
+        - ../../vault/data:/vault/data
+      ports:
+        - ${VAULT_PORT}:${VAULT_PORT}
+      expose:
+        - ${VAULT_PORT}
+      networks:        
+      - network1     
+      environment:
+        - VAULT_ADDR=http://0.0.0.0:${VAULT_PORT}
+        - VAULT_API_ADDR=http://0.0.0.0:${VAULT_PORT}
+        - VAULT_ADDRESS=http://0.0.0.0:${VAULT_PORT}
+      container_name: vault
+      cap_add:
+        - IPC_LOCK  # -dev
+      command: vault server  -log-level=debug -config=/vault/config/vault.hcl
+networks:                
+  network1:              
+     name: dgt1-network  

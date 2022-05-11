@@ -1,0 +1,8 @@
+{
+  "name":"metrics",
+  "type":"influxdb",
+  "url":"http://stats-influxdb-dgt:8086",
+  "access":"proxy",
+  "database":"metrics",
+  "basicauth":false
+}

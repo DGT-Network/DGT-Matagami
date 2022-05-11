@@ -1,0 +1,53 @@
+version: '3.6'
+
+services:
+  influxdb:
+    build:
+      context: ..
+      dockerfile: docker/grafana/dgt-stats-influxdb
+    image: influxdb
+    container_name: stats-influxdb-dgt
+    networks:
+    - network1
+    ports:
+      - '8086:8086'
+    volumes:
+      - /var/lib/influx-data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=metrics
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=pwadmin
+      - INFLUXDB_USER=lrdata          
+      - INFLUXDB_USER_PASSWORD=pwlrdata
+      - INFLUXD_LOG_LEVEL=debug 
+  grafana:
+    build:
+      context: ..
+      dockerfile: docker/grafana/dgt-stats-grafana
+    image: stats-grafana-dgt
+    container_name: stats-grafana-dgt
+    networks:
+    - network1
+    ports:
+      - 3000:3000
+    user : root
+    volumes:
+      - ../../grafana:/var/lib/grafana
+      - ../etc/grafana:/etc/grafana
+    environment:
+      - DATASOURCE=abcdabcd
+    depends_on:
+      - influxdb
+    command: |
+      bash -c "
+      echo start ...;
+        chown -R grafana:grafana /var/lib/grafana;
+        cd app;
+        /app/grafana_entrypoint.sh
+      "
+    stop_signal: SIGKILL
+
+networks:
+  network1:
+     name: dgt1-network
+

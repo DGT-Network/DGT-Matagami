@@ -1,0 +1,53 @@
+@startuml
+!theme vibrant
+
+rectangle "Нотариусы" <<Описание>> {
+
+frame N0 as keykeeper {
+label "Хранитель ключа"
+
+}
+cloud "DGT Network" as dgt
+cloud "Сеть нотариусов (RAFT консенсус)" as notaries {
+frame N1 as leader {
+label "Лидер сети нотариусов "
+
+}
+frame N2 as notary {
+label "Узел 1 сети нотариусов"
+
+}
+frame NN as notary1 {
+label "Узел N сети нотариусов"
+
+}
+}
+database  {
+storage "Секреты" as secrets {
+label "Сертификаты пользователей DGT"
+}
+}
+cloud "Сеть телеграмм " as telega {
+actor "Оператор нотариус" as user_notary
+actor "Пользователь 1" as user1
+actor "Пользователь 2" as user2
+}
+keykeeper-->dgt
+keykeeper-->notaries
+leader-->dgt
+notary-->dgt
+notary1-->dgt
+leader<-->secrets
+notary<-->secrets
+notary1<-->secrets
+notaries<-->telega
+
+note left of keykeeper 
+Создает при инициализации ключ 
+доступа к хранилицу секретов.
+end note
+
+
+
+
+@enduml

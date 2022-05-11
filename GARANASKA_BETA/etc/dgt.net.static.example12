@@ -1,0 +1,110 @@
+{
+  "children": {
+    "AA.aa2": {
+      "name": "12",
+      "role": "plink",
+      "type": "peer"
+    },
+    "AA.aa3": {
+      "name": "13",
+      "role": "plink",
+      "type": "peer"
+    },
+    "AA.aa1": {
+      "cluster": {
+        "children": {
+          "AB.ab2": {
+            "name": "22",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AB.ab1": {
+            "cluster": {
+              "children": {
+                "AC.ac3": {
+                  "name": "33",
+                  "role": "plink",
+                  "type": "peer"
+                },
+                "AC.ac1": {
+                  "delegate": true,
+                  "name": "31",
+                  "role": "leader",
+                  "type": "peer"
+                },
+                "AC.ac4": {
+                  "name": "34",
+                  "role": "plink",
+                  "type": "peer"
+                },
+                "AC.ac2": {
+                  "name": "32",
+                  "role": "plink",
+                  "type": "peer"
+                }
+              },
+              "name": "Dgt3",
+              "type": "cluster",
+	      "segment" : "AC"
+            },
+            "delegate": true,
+            "name": "21",
+            "role": "leader",
+            "type": "peer"
+          },
+          "AB.ab4": {
+            "name": "24",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AB.ab3": {
+            "name": "23",
+            "role": "plink",
+            "type": "peer"
+          }
+        },
+        "maxpeer": 8,
+        "name": "Dgt2",
+        "public": true,
+        "type": "cluster",
+	"segment" : "AB"
+      },
+      "delegate": true,
+      "genesis": true,
+      "name": "11",
+      "role": "leader",
+      "type": "peer"
+    },
+    "AA.aa4": {
+      "name": "14",
+      "role": "plink",
+      "type": "peer"
+    }
+  },
+  "name": "Genesis",
+  "role": "genesis",
+  "type": "cluster",
+  "map" : {},
+  "segment" : "AA",
+  "segments" : {
+    "A" : {
+	    "NETWORK_WIDTH" : 4,
+	    "NETWORK_HEIGHT" : 3,
+	    "NETWORK_ROLES"  : [],
+	    "NETWORK_CA" : {
+	      "mode": true
+	    }
+          },
+    "B" : {
+	    "NETWORK_WIDTH" : 4,   
+	    "NETWORK_HEIGHT" : 3,  
+	    "NETWORK_ROLES"  : []
+	  },
+    "C" : {
+	    "NETWORK_WIDTH" : 4,   
+	    "NETWORK_HEIGHT" : 3,  
+	    "NETWORK_ROLES"  : []
+
+	  }
+  }
+}

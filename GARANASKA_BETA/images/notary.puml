@@ -1,0 +1,34 @@
+@startuml
+mainframe Запуск **нотариусов**
+
+start
+:Запустить хотя бы один узел DGT
+для хранения метаинформации о нотариусах
+**bash upDgtCluster.sh   -SC -CB openssl 1 1**
+и узел для динамического подключения узлов в приватную зону
+**bash upDgtCluster.sh   -SC -CB openssl 2 1**
+;
+:Запустить узел хранитель ключа:
+**bash upDgtNotary.sh  -CB openssl 1**;
+
+:Запустить узел хранитель ключа:
+**bash upDgtNotary.sh  -CB openssl 1**;
+:Запустить узел лидер сети нотариусов:
+**bash upDgtNotary.sh  -CB openssl  2**
+или в режиме контроля через оператора 
+**bash upDgtNotary.sh  -CB openssl -UN 456125525 2**
+;
+:В телеграмме подключить бота:
+**@shiva64_bot**;
+:В диалоге с ботом ввести команду:
+**Создать сертификат**;
+:Ответить на вопросы бота;
+:В случае успеха будет сообщение
+Ваш сертификат 
+KYC=**did:notary:30563010:456125525**;
+:Используя KYC можно запустить новый узел DGT:
+**bash upDgtCluster.sh   -G -SC -CB openssl -KYC did:notary:30563010:456125525 -S tcp://validator-dgt-c1-1:8101 2 2** 
+Узел войдет в приватную зону сети DGT 
+;
+stop
+@enduml

@@ -1,0 +1,143 @@
+// Copyright 2018 NTRlab
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// -----------------------------------------------------------------------------
+
+syntax = "proto3";
+import "consensus.proto";
+// --== Data Structures ==--
+
+// All information about a block that is relevant to PBFT consensus
+message PbftBlockMessage {
+  bytes block_id = 1;
+  // bytes previous_id = 2;
+  // The id of peer that signed this block
+  bytes signer_id = 3;
+  uint64 block_num = 4;
+  // bytes payload = 5;
+  // A summary of the contents of the block
+  bytes summary = 6;
+}
+// PBFT message info
+message PbftMessageInfo {
+  enum PbftMessageType {
+      PRE_PREPARE_MSG = 0;
+      PREPARE_MSG = 1;
+      COMMIT_MSG = 2;
+      CHECKPOINT_MSG = 3;
+      VIEWCHANGE_MSG = 4;
+      ARBITRATION_MSG =5;
+      ARBITRATION_DONE_MSG = 6; 
+  }
+  // Message type
+  PbftMessageType msg_type = 1;
+
+  // Current view 
+  uint64 view = 2;
+
+  // view seq number
+  uint64 seq_num = 3;
+
+  // nodes sign
+  bytes signer_id = 4;
+}
+// PBFT message
+message PbftMessage {
+  // message info
+  PbftMessageInfo info = 1;
+
+  // depends on PbftMessageType - content could contain : PbftBlockMessage,PbftNewView(VIEWCHANGE_MSG),PbftSeal(ARBITRATION_DONE_MSG)
+  bytes           content = 2;
+  // block info 
+  //PbftBlockMessage block = 2;
+}
+// PBFT LEADER change message
+message PbftViewChange {
+  // Message information
+  PbftMessageInfo info = 1;
+
+  // Set of `2f + 1` Checkpoint messages, proving correctness of stable
+  // Checkpoint mentioned in info's `seq_num`
+  //repeated PbftMessage checkpoint_messages = 2;
+}
+
+// A message sent by the new primary to signify that the new view should be
+// started
+message PbftNewView {
+  // Message information
+  //PbftMessageInfo info = 1;
+
+  // A list of ViewChange messages to prove this view change (must contain at
+  // least 2f messages)
+  //repeated PbftSignedVote view_changes = 1;
+  repeated ConsensusPeerMessageNew view_changes = 1;
+}
+
+// vote of peer - the same ConsensusPeerMessageNew and for COMMIT_MSG and ARBITRATION_MSG use it for assemble SEAL
+message PbftSignedVote {
+  // Serialized ConsensusPeerMessage header
+  bytes header_bytes = 1;
+
+  // Signature of the serialized ConsensusPeerMessageHeader
+  bytes header_signature = 2;
+
+  // Serialized PBFT message
+  bytes message_bytes = 3;
+}
+//
+// seal of commited block
+//    Parse the PbftSeal from the bytes in the block's payload field
+//    Check that the block_id field in the seal matches the previous_id field in the block that the node is trying to commit
+//    For each vote, verify that:
+//        It is a Commit message
+//        Its block_id, seq_num, and view fields match those of the PbftSeal
+//        Its header_signature is a valid signature over header using the private key associated with the public key in the header's signer_id field.
+//        The header's content_sha512 is a valid SHA-512 hash of the vote's message_bytes.
+//        The signer was a member of the network at the time the block was voted on (the block was voted on before it was committed, so the list of peers should be taken from the block before the one the seal verifies)
+//        The signer is not the same as the consensus seal's signer (this would be a double-vote)
+//    Check that the consensus seal's signer was a member of the network at the time the block was voted on (the block was voted on before it was committed, so the signer's ID should be in the list of peers that is taken from the block before the one the seal verifies)
+//    Check that all votes are from unique peers
+//    Check that there are a total of 2f votes
+//
+// this is message will be PbftMessage.content for PbftMessageType.ARBITRATION_DONE_MSG
+message PbftSeal { 
+  // Message information
+  //PbftMessageInfo info = 1;
+
+  // ID of the block this seal verifies
+  //bytes block_id = 1;
+  PbftBlockMessage block = 1;
+  // A list of Commit votes to prove the block commit (must contain at least
+  // 2f votes) and vote of arbiters 
+  // repeated PbftSignedVote commit_votes = 2;
+  repeated ConsensusPeerMessageNew commit_votes = 2;
+}
+
+//message ConsensusRegisterResponse {
+//  enum Status {
+//    STATUS_UNSET = 0;
+//    OK = 1;
+//    BAD_REQUEST = 2;
+//    SERVICE_ERROR = 3;
+//    NOT_READY = 4;
+//  }
+
+//  Status status = 1;
+
+  // Startup Info
+//  ConsensusBlock chain_head = 2;
+//  repeated ConsensusPeerInfo peers = 3;
+//  ConsensusPeerInfo local_peer_info = 4;
+//}
+
+

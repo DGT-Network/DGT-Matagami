@@ -1,0 +1,267 @@
+{
+  "children": {
+    "AA.aa2": {
+      "cluster": {
+        "children": {
+          "AE.ae3": {
+            "name": "43",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AE.ae5": {
+            "name": "45",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AE.ae1": {
+            "delegate": true,
+            "name": "41",
+            "role": "leader",
+            "type": "peer"
+          },
+          "AE.ae6": {
+            "name": "46",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AE.ae2": {
+            "name": "42",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AE.ae4": {
+            "name": "44",
+            "role": "plink",
+            "type": "peer"
+          }
+        },
+        "name": "Dgt4",
+        "type": "cluster",
+	"segment" : "AE"
+      },
+      "name": "12",
+      "role": "plink",
+      "type": "peer"
+    },
+    "AA.aa6": {
+      "name": "16",
+      "role": "plink",
+      "type": "peer"
+    },
+    "AA.aa3": {
+      "cluster": {
+        "children": {
+          "AD.ad5": {
+            "name": "55",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AD.ad1": {
+            "delegate": true,
+            "name": "51",
+            "role": "leader",
+            "type": "peer"
+          },
+          "AD.ad2": {
+            "name": "52",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AD.ad4": {
+            "name": "54",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AD.ad3": {
+            "name": "53",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AD.ad6": {
+            "name": "56",
+            "role": "plink",
+            "type": "peer"
+          }
+        },
+        "name": "Dgt5",
+        "type": "cluster",
+	"segment" : "AD"
+      },
+      "name": "13",
+      "role": "plink",
+      "type": "peer"
+    },
+    "AA.aa5": {
+      "name": "15",
+      "role": "plink",
+      "type": "peer"
+    },
+    "AA.aa1": {
+      "cluster": {
+        "children": {
+          "AB.ab2": {
+            "name": "22",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AB.ab1": {
+            "cluster": {
+              "children": {
+                "AC.ac3": {
+                  "name": "33",
+                  "role": "plink",
+                  "type": "peer"
+                },
+                "AC.ac6": {
+                  "name": "36",
+                  "role": "plink",
+                  "type": "peer"
+                },
+                "AC.ac5": {
+                  "name": "35",
+                  "role": "plink",
+                  "type": "peer"
+                },
+                "AC.ac1": {
+                  "delegate": true,
+                  "name": "31",
+                  "role": "leader",
+                  "type": "peer"
+                },
+                "AC.ac4": {
+                  "name": "34",
+                  "role": "plink",
+                  "type": "peer"
+                },
+                "AC.ac2": {
+                  "name": "32",
+                  "role": "plink",
+                  "type": "peer"
+                }
+              },
+              "name": "Dgt3",
+              "type": "cluster",
+	      "segment" : "AC"
+            },
+            "delegate": true,
+            "name": "21",
+            "role": "leader",
+            "type": "peer"
+          },
+          "AB.ab6": {
+            "name": "26",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AB.ab4": {
+            "name": "24",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AB.ab3": {
+            "name": "23",
+            "role": "plink",
+            "type": "peer"
+          },
+          "AB.ab5": {
+            "name": "25",
+            "role": "plink",
+            "type": "peer"
+          }
+        },
+        "maxpeer": 8,
+        "name": "Dgt2",
+        "public": true,
+        "type": "cluster",
+	"segment" : "AB"
+      },
+      "delegate": true,
+      "genesis": true,
+      "name": "11",
+      "role": "leader",
+      "type": "peer"
+    },
+    "AA.aa4": {
+      "cluster": {
+        "children": {
+          "BA.ba4": {
+            "name": "64",
+            "role": "plink",
+            "type": "peer"
+          },
+          "BA.ba2": {
+            "name": "62",
+            "role": "plink",
+            "type": "peer"
+          },
+          "BA.ba5": {
+            "name": "65",
+            "role": "plink",
+            "type": "peer"
+          },
+          "BA.ba6": {
+            "name": "66",
+            "role": "plink",
+            "type": "peer"
+          },
+          "BA.ba1": {
+            "delegate": true,
+            "name": "61",
+            "role": "leader",
+            "type": "peer"
+          },
+          "BA.ba3": {
+            "name": "63",
+            "role": "plink",
+            "type": "peer"
+          }
+        },
+        "name": "Dgt6",
+        "type": "cluster",
+	"segment" : "BA"
+      },
+      "name": "14",
+      "role": "plink",
+      "type": "peer"
+    }
+  },
+  "name": "Genesis",
+  "role": "genesis",
+  "type": "cluster",
+  "map" : {},
+  "segment" : "AA",
+  "segments" : {
+    "A" : {
+	    "NETWORK_WIDTH" : 6,
+	    "NETWORK_HEIGHT" : 3,
+	    "NETWORK_ROLES"  : [],
+	    "NETWORK_CA" : {
+	      "mode": true
+	    }
+          },
+    "B" : {
+	    "NETWORK_WIDTH" : 6,   
+	    "NETWORK_HEIGHT" : 3,  
+	    "NETWORK_ROLES"  : []
+	  },
+    "C" : {
+	    "NETWORK_WIDTH" : 6,   
+	    "NETWORK_HEIGHT" : 3,  
+	    "NETWORK_ROLES"  : []
+
+	  },
+    "D" : {  
+	    "NETWORK_WIDTH" : 6,   
+	    "NETWORK_HEIGHT" : 3,  
+	    "NETWORK_ROLES"  : []
+
+	  },
+    "E" : { 
+	    "NETWORK_WIDTH" : 6,   		
+	    "NETWORK_HEIGHT" : 3,  
+	    "NETWORK_ROLES"  : []
+  
+  
+	  } 
+  }
+}
