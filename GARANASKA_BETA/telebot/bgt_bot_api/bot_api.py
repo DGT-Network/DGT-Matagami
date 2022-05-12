@@ -130,9 +130,11 @@ def parse_args(args):
         help='Specify a crypto back',                  
         default='bitcoin')                             
 
-    parser.add_argument('--bot-token', 
-                        default="",                                                                                
+    parser.add_argument('-bt','--bot-token',
+                        type=str, 
+                        default=None,                                                                                
                         help='specify token for telegram bot access') 
+
     parser.add_argument('-un','--user-notary',                              
                         type=str, 
                         default=None,                                         
@@ -165,7 +167,7 @@ def parse_args(args):
 def start_bot_api(host, port, connection, vtimeout, registry,connects=None,client_max_size=None,conf=None,vault=None):
     """Builds the web app, adds route handlers, and finally starts the app.
     """
-    bot_token = conf.bot_token if conf else TOKEN
+    bot_token = conf.bot_token if conf and conf.bot_token else TOKEN
     #tele_db = LMDBNoLockDatabase(TELE_DB_FILENAME, 'c')
     tele_db = IndexedDatabase(
             TELE_DB_FILENAME,
@@ -398,7 +400,7 @@ def main():
                 password=bot_api_config.opentsdb_password)
             reporter.start()
 
-        LOGGER.info(f"BOT MODE={bot_api_config.bot_on} bot={opts.bot_on}")
+        LOGGER.info(f"BOT MODE={bot_api_config.bot_on} bot={opts.bot_on} token={bot_api_config.bot_token}")
         if bot_api_config.vault_on:
             LOGGER.info(f"VAULT MODE url={bot_api_config.vault_url} NOTARY={opts.user_notary} LEAD={opts.lead_addr} REST={opts.url}")
             vault = Vault(bot_api_config.vault_url,notary=opts.notary_name,lead_addr=opts.lead_addr,opts=opts)

@@ -6,6 +6,7 @@ rmode="up"
 export PNM="dgt"
 export CRYPTO_BACK="bitcoin"
 export USER_NOTARY=""
+export BOT_TOKEN=""
 export LADDR=""
 export REST_API="--url http://api-dgt-c1-1:8108"
 while [ -n "$1" ]
@@ -15,6 +16,7 @@ case "$1" in
 -H) shift; export ENDHOST=$1 ;;
 -CB) shift; export CRYPTO_BACK=$1 ;;
 -UN) shift; export USER_NOTARY="--user-notary $1" ;;
+-BT) shift; export BOT_TOKEN="-bt $1" ;;
 -RA) shift; export REST_API="--url $1" ;;
 -LA) shift; export LADDR="-la $1";echo lead=$LADDR ;;
 -IDB) export INFLUXDB="--opentsdb-url";echo "SAVE metrics mode." ;;

@@ -128,6 +128,9 @@ class Tbot(object):
             apihelper.delete_webhook(self._token)
         except requests.exceptions.ConnectionError as ex:
             LOGGER.info(f'Cant del webhook err={ex}')
+        except Exception as ex:
+             LOGGER.info(f'Cant del webhook err={ex}')
+
         def send_message(chat_id,repl):
             try:                                              
                 if repl != '':                                

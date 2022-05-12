@@ -44,13 +44,14 @@ services:
        - vault 
     command: |
       bash -c "
-        bin/protogen;echo TELEGA LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK} UN=${USER_NOTARY};
+        bin/protogen;echo TELEGA LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK} UN=${USER_NOTARY} BT=${BOT_TOKEN};
         dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR} ${LA} ${REST_API}
         rm -f /project/peer/logs/bgt-bot*.log;
         cd telebot
         python3 setup.py clean --all
         python3 setup.py build
-        dgt-telebot -vv  -nn n${V} --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204 ${ONBOT} ${REST_API} -cb ${CRYPTO_BACK} --bot-token ${BOT_TOKEN} ${USER_NOTARY} ${LA} --vault-url http://vault-n${V}:${VPORT} --vault-on 
+        echo dgt-telebot -vv  -nn n${V} --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204 ${BOT_TOKEN} ${ONBOT} ;
+        dgt-telebot -vv  -nn n${V} --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204  ${ONBOT}  ${REST_API} -cb ${CRYPTO_BACK} ${BOT_TOKEN} ${USER_NOTARY} ${LA} --vault-url http://vault-n${V}:${VPORT} --vault-on 
       "
     stop_signal: SIGKILL
 
