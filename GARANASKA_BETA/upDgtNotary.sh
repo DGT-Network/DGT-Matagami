@@ -23,7 +23,12 @@ case "$1" in
 esac
 shift
 done
-
+if [[ -e "bin/vault" ]] ; then
+      printf "Using [VAULT] from bin/vault\n"
+else
+     cp docker/vault/vault_1.10.2_linux_amd64.zip bin
+     (cd bin;unzip  vault_1.10.2_linux_amd64.zip)   
+fi
 function upNotary {
   echo "upNotary $#"
   for node in $@;do
