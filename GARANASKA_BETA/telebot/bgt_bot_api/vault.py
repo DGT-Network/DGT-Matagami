@@ -112,7 +112,7 @@ class Vault(object):
                 LOGGER.info(f"READ_LEADER_STATUS {status}...")
                 #self.create_or_update_secret("cubbyhole/user_key",secret="mykey")
 
-            self.upd_xcert({NOTARY_TOKEN:self._root_token,NOTARY_URL:self._vault_url},self._notary_id,init=True)
+            self.upd_meta_xcert({NOTARY_TOKEN:self._root_token,NOTARY_URL:self._vault_url},self._notary_id,init=True)
             if notary == SEAL_NODE_NM:
                 # subprocess.call
                 ret = os.system(f"export VAULT_ADDR={self._vault_url} VAULT_TOKEN={self._root_token};vault secrets enable transit && vault write -f transit/keys/unseal_key")
@@ -139,7 +139,7 @@ class Vault(object):
                 self._vault_token = vconf[NOTARY_ROOT_TOKEN]
                 self._client.token = self._vault_token
                 self.unseal()
-                self.upd_xcert({NOTARY_TOKEN:self._vault_token,NOTARY_URL:self._vault_url},self._notary_id)
+                self.upd_meta_xcert({NOTARY_TOKEN:self._vault_token,NOTARY_URL:self._vault_url},self._notary_id)
             else:
                 if notary != SEAL_NODE_NM and lead_addr is not None:
                     for n in range(CONNECT_ATTEMPT):
@@ -259,11 +259,13 @@ class Vault(object):
             LOGGER.info(f"READ SECRET err={ex}")
             raise errors.VaultNotReady
 
-    def create_xcert(self,args,uid='456125525'):
+    def create_xcert(self,args,proto,uid='456125525'):
         LOGGER.info(f"CREATE XCERT[{uid}]={args}")
         #args['uid'] = uid
         did = args['did'] if 'did' in args else uid
         if self.create_or_update_secret(f"{uid}",args):
+            # 
+            self.upd_user_xcert(proto,str(uid))
             return did
         
 
@@ -309,7 +311,8 @@ class Vault(object):
             client = None
         return client 
     
-    def upd_xcert(self,info,key,init=False):
+    def upd_meta_xcert(self,info,key,init=False):
+        # meta cert for keykeeper and raft node
         if self._rest is None:
             return
         info[NOTARY_NAME] = self._notary
@@ -318,4 +321,14 @@ class Vault(object):
             response = self._rest.set(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM) 
         else:
             response = self._rest.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)
-        LOGGER.info(f"RESPONSE ={response}")                                                                                   
+        LOGGER.info(f"RESPONSE ={response}") 
+        
+    def upd_user_xcert(self,info,key):                                                                                                                                                                  
+        # user cert                                                                                   
+        if self._rest is None:
+            LOGGER.info(f"REST CLIENT NOT READY")                                                                                                   
+            return   
+                     
+        
+        response = self._rest.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)                                                   
+        LOGGER.info(f"USER XCERT RESPONSE ={response}")                                                                                     

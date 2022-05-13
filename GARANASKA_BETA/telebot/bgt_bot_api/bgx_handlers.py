@@ -213,21 +213,24 @@ class BgxTeleBot(Tbot):
         did = f"did:notary:{self._public_key.as_hex()[:8]}:{uid}"
         return did
 
+    def make_xcert_prof(self,proto_xcert,info):
+        proto = proto_xcert.copy()     
+        if EMAIL_ATTR in info:                                
+            proto["EMAIL_ADDRESS"] = info[EMAIL_ATTR]         
+        if DID_ATTR in info:                                  
+            proto["USER_ID"] = str(info[DID_ATTR])            
+                                                              
+        if ADDRESS_ATTR  in info:                             
+            proto["LOCALITY_NAME"] = info[ADDRESS_ATTR]       
+        if COUNTRY_ATTR in info:                              
+            proto["COUNTRY_NAME"] = info[COUNTRY_ATTR]        
+        return proto
+
+
+
     def make_xcert(self,proto,info,after=10,before=0):
-        if EMAIL_ATTR in info:
-            proto["EMAIL_ADDRESS"] = info[EMAIL_ATTR]
-        #if 'uid' in info:
-        #    proto["USER_ID"] = str(info['uid'])
 
-        if DID_ATTR in info:
-            proto["USER_ID"] = str(info[DID_ATTR])
-
-        if ADDRESS_ATTR  in info:
-            proto["LOCALITY_NAME"] = info[ADDRESS_ATTR]
-        if COUNTRY_ATTR in info:
-            proto["COUNTRY_NAME"] = info[COUNTRY_ATTR]
-
-
+        proto = self.make_xcert_prof(proto,info)
         cert = self._signer.context.create_x509_certificate(proto,self._signer.private_key,after=after,before=before)        
         pubkey = self._signer.get_public_key().as_hex() 
         token = X509CertInfo(                      
@@ -953,11 +956,12 @@ class BgxTeleBot(Tbot):
                             self._approve_q[minfo.user_id] = args.copy()
                         else: 
                             # do it right now
-                            cert,_ = self.make_xcert(XCERT_PROTO,args)
-                            kyc = self._vault.create_xcert(args,uid=minfo.user_id)                                                                              
+                            #cert,_ = self.make_xcert(XCERT_PROTO,args)
+                            proto = self.make_xcert_prof(XCERT_PROTO,args)
+                            kyc = self._vault.create_xcert(args,proto,uid=minfo.user_id)                                                                              
                             if kyc is not None:                                                                                                                 
                                 self.send_message(minfo.chat_id, f'Успешно {"изменен" if data else "создан"} сертификат доступа для {minfo.user_first_name} KYC={kyc}.')  
-                                await self.make_xcert_transaction('crt',str(minfo.user_id),cert,minfo)                 
+                                #await self.make_xcert_transaction('crt',str(minfo.user_id),cert,minfo)                 
                             else:                                                                                                                               
                                 self.send_message(minfo.chat_id, f'Не смог выполнить запрос создания сертификата для {minfo.user_first_name}.')  
                 except errors.VaultNotReady  :
@@ -1005,11 +1009,12 @@ class BgxTeleBot(Tbot):
 
                 oper = req[OPR_ATTR]
                 did = req[DID_ATTR]
-                cert,_ = self.make_xcert(XCERT_PROTO,req)                                                                                                           
-                kyc = self._vault.create_xcert(req,uid=req[UID_ATTR])                                                                                               
+                #cert,_ = self.make_xcert(XCERT_PROTO,req)
+                proto = self.make_xcert_prof(XCERT_PROTO,req)                                                                                                           
+                kyc = self._vault.create_xcert(req,proto,uid=req[UID_ATTR])                                                                                               
                 if kyc is not None:                                                                                                                                  
                     self.send_message(chat_id, f'Успешно создан сертификат доступа для {user_first_name} KYC={kyc}.')         
-                    await self.make_xcert_transaction(oper,str(did),cert)                                                             
+                    #await self.make_xcert_transaction(oper,str(did),cert)                                                             
                 else:                                                                                                                                                
                     self.send_message(chat_id, f'Не смог выполнить запрос создания сертификата для {user_first_name}.') 
             else:
