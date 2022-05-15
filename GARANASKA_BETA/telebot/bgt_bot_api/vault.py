@@ -32,7 +32,8 @@ from x509_cert.client_cli.xcert_client import (XcertClient,KEYKEEPER_ID,NOTARY_L
 LOGGER = logging.getLogger(__name__)
 SHARES = 1 #5       
 THRESHOLD = 1 #3    
-CONNECT_ATTEMPT = 10 
+CONNECT_ATTEMPT = 10
+TIMEOUT_VAULT_READY=8 
 RECOVERY_SHARES=1
 RECOVERY_THRESHOLD=1
 SEAL_NODE_NM = 'n1'
@@ -74,7 +75,7 @@ class Vault(object):
                 self.is_init = self._client.sys.is_initialized()
             except Exception as ex:
                 LOGGER.info(f"VAULT IS NOT READY err={ex}")
-                time.sleep(3)
+                time.sleep(TIMEOUT_VAULT_READY)
         if self.is_init is None:
             LOGGER.info(f"VAULT IS NOT READY")
             return 
