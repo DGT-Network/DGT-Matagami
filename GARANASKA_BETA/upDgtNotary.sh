@@ -49,7 +49,7 @@ function upNotary {
           export COMPOSE_PROJECT_NAME=4 LA=$LADDR C=c1   N=1 V=4 COMP=4104 VPORT=8520 CPORT=8521 SADDR=vault-n1:8220 ONBOT= ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;
         build)
-         export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 COMP=4104 VPORT=8200 CPORT=8201 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml build vault
+         export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 COMP=4104 VPORT=8200 CPORT=8201 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml build 
         ;;
         *)
           echo "Undefined notary."
