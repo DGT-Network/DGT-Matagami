@@ -28,6 +28,7 @@ import json
 import base64
 import requests
 from collections import namedtuple
+
 from threading import Thread,RLock
 
 from concurrent.futures import ThreadPoolExecutor,ProcessPoolExecutor
@@ -122,7 +123,6 @@ class Tbot(object):
         self._check_cmd_frequency = 100
         self._bgt_queue = queue.Queue()
         self._lock = RLock()
-
         self.is_pause = False
         LOGGER.info('USE proxy=%d from %d',self._proxy_pos,len(self._proxies))
         try:
@@ -390,21 +390,24 @@ class Tbot(object):
     def check_member_add_left(self,updates):
         # for update in updates:'new_chat_member': None, 'new_chat_members': None, 'left_chat_member'
         for update in updates:
-            if update.message.new_chat_member is not None:
-                # new_chat_member {'id': 1205652427, 'is_bot': True, 'first_name': 'Mongoose', 'username': 'Shiva64_bot', 'last_name': None, 'language_code': None}
-                if self.check_user(update.message.new_chat_member):
-                    # make new wallet
-                    new_chat_member = update.message.new_chat_member
-                    LOGGER.info('new_chat_member7 %s',new_chat_member)
-                    minfo = BotMessage(update.message.message_id,update.message.chat.id,new_chat_member.id,new_chat_member.first_name,new_chat_member.last_name,'smalltalk.agent.create_wallet',1.0,None,None)
-                    self.intent_handler(minfo)
-            if update.message.new_chat_members is not None:
-                #new_chat_members [<telebot.types.User object at 0x7fd4b19e2d68>]
-                LOGGER.info('new_chat_members %s',update.message.new_chat_members)
-            if update.message.left_chat_member is not None:
-                left_chat_member = update.message.left_chat_member 
-                LOGGER.info('del left_chat_member %s from DB',left_chat_member)
-                self._tdb.delete(str(left_chat_member.id))
+            try:
+                if update.message.new_chat_member is not None:
+                    # new_chat_member {'id': 1205652427, 'is_bot': True, 'first_name': 'Mongoose', 'username': 'Shiva64_bot', 'last_name': None, 'language_code': None}
+                    if self.check_user(update.message.new_chat_member):
+                        # make new wallet
+                        new_chat_member = update.message.new_chat_member
+                        LOGGER.info('new_chat_member7 %s',new_chat_member)
+                        minfo = BotMessage(update.message.message_id,update.message.chat.id,new_chat_member.id,new_chat_member.first_name,new_chat_member.last_name,'smalltalk.agent.create_wallet',1.0,None,None)
+                        self.intent_handler(minfo)
+                if update.message.new_chat_members is not None:
+                    #new_chat_members [<telebot.types.User object at 0x7fd4b19e2d68>]
+                    LOGGER.info('new_chat_members %s',update.message.new_chat_members)
+                if update.message.left_chat_member is not None:
+                    left_chat_member = update.message.left_chat_member 
+                    LOGGER.info('del left_chat_member %s from DB',left_chat_member)
+                    self._tdb.delete(str(left_chat_member.id))
+            except Exception as ex:
+                LOGGER.info('check_member_add_left error - {}'.format(update.message))
 
     def add_intent_handler(self,intent_name,intent_handler):
         """
@@ -663,7 +666,6 @@ class Tbot(object):
         return item
     def can_talk(self,intent):
         return not self.is_pause or (intent == "smalltalk.agent.unpause")
-
     async def validator_task(self):
         try:                                                                                                                 
             LOGGER.debug("validator_task:queue...")       
