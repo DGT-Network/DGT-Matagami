@@ -28,6 +28,7 @@ import json
 import base64
 import requests
 from collections import namedtuple
+from threading import Thread,RLock
 
 from concurrent.futures import ThreadPoolExecutor,ProcessPoolExecutor
 
@@ -58,6 +59,47 @@ language_code = 'ru'
 TOKEN='1205652427:AAFr0eynwihWGyvObUA0QSjOfKMwiH3HkZs'
 PROXIES = ['82.223.120.213:1080','138.201.6.102:1080','85.10.235.14:1080','217.69.10.129:32401','217.182.230.15:4485','96.96.33.133:1080','93.157.248.106:1080','81.17.20.50:1177','217.69.10.129:32401','1.179.185.253:8080']
 PULL_TIMEOUT = 0.005
+
+class _CmdHandlerThread(Thread):
+    def __init__(self, cmd_run, cmd_queue,check_cmd_frequency):
+        super().__init__(name='_CmdHandlerThread')
+        self._cmd_run = cmd_run
+        self._cmd_queue = cmd_queue
+        self._check_cmd_frequency = check_cmd_frequency
+        self._exit = False
+
+    def run(self):
+        try:
+            # make sure we don't check to publish the block
+            # to frequently.
+            #next_check_publish_block_time = time.time() + self._check_publish_block_frequency
+            LOGGER.debug("_CmdHandlerThread: ...")
+            while True:
+                try:
+                    cmd = self._cmd_queue.get(timeout=self._check_cmd_frequency)
+                    self._cmd_run.on_cmd_received(cmd)
+
+                except queue.Empty:
+                    # If getting a batch times out, just try again.
+                    pass
+
+                #if next_check_publish_block_time < time.time():
+                #    self._block_publisher.on_check_publish_block()
+                #    next_check_publish_block_time = time.time() + self._check_publish_block_frequency
+                if self._exit:
+                    return
+        # pylint: disable=broad-except
+        except Exception as exc:
+            LOGGER.exception(exc)
+            LOGGER.critical("_CmdHandlerThread thread exited with error.")
+
+    def stop(self):
+        self._exit = True
+
+
+
+
+
 class Tbot(object): 
     def __init__(self,loop, connection,tdb,token=TOKEN,project_id=PROJECT_ID,session_id=SESSION_ID,proxy=PROXIES,connects=None):
         self._connects = connects
@@ -77,7 +119,10 @@ class Tbot(object):
         self._keyboard1 = telebot.types.ReplyKeyboardMarkup(True, True,True)
         self._keyboard1.row('Привет', 'Пока','Sticker')
         self._timeout = DEFAULT_TIMEOUT
+        self._check_cmd_frequency = 100
         self._bgt_queue = queue.Queue()
+        self._lock = RLock()
+
         self.is_pause = False
         LOGGER.info('USE proxy=%d from %d',self._proxy_pos,len(self._proxies))
         try:
@@ -86,6 +131,43 @@ class Tbot(object):
         except Exception as e:
             LOGGER.info('DFLOW error %s',e)
             self._dflow = None
+
+        
+
+    def start_cmd(self):                                                                  
+        self._cmd_thread = _CmdHandlerThread(                                    
+            cmd_run=self,                                                     
+            cmd_queue=self._bgt_queue,                                            
+            check_cmd_frequency=self._check_cmd_frequency)        
+        LOGGER.debug("CMD: start _CmdHandlerThread")                        
+                                                                                      
+        self._cmd_thread.start()                                                
+                                                                                      
+    def stop_cmd(self):                                                                   
+        if self._cmd_thread is not None:                                        
+            self._cmd_thread.stop()                                             
+            self._cmd_thread = None                                             
+
+    def on_cmd_received(self, request):                                                             
+        """                                                                                         
+        A new batch is received, send it for validation                                             
+        :param batch: the new pending batch                                                         
+        :return: None                                                                               
+        """                                                                                         
+        LOGGER.debug("On CMD={}".format(request))
+        with self._lock:                                                                            
+            LOGGER.debug("DO CMD...")      
+            try:                                                                                                                   
+                LOGGER.debug("VALIDATOR_TASK: intent=%s qsize=%s",request.intent,self._bgt_queue.qsize())   
+                if self.can_talk(request.intent):
+                    LOGGER.debug("DO _intent_handlers %s...",request.intent) 
+                    #self.send_message(request.chat_id, "Выполнить '{}'.".format(request.intent))                                                                                
+                    self._intent_handlers[request.intent](request)                                                           
+            except Exception as ex:                                                                                                    
+                LOGGER.debug("CMD HANDLER ERR {}".format(ex))                                                                                                              
+
+
+
 
     def set_proxy(self):
         proxy = self._proxies[self._proxy_pos]
@@ -130,6 +212,8 @@ class Tbot(object):
             LOGGER.info(f'Cant del webhook err={ex}')
         except Exception as ex:
              LOGGER.info(f'Cant del webhook err={ex}')
+        #
+        self.start_cmd()
 
         def send_message(chat_id,repl):
             try:                                              
@@ -258,7 +342,7 @@ class Tbot(object):
 
 
         while not self._stop:
-            await self.process_queue()
+            #await self.process_queue()
             try:
                 updates = self._bot.get_updates(offset=(self._bot.last_update_id+1),timeout=self._timeout) #get_me() # Execute an API call
                 self._attemp = 0
@@ -579,6 +663,7 @@ class Tbot(object):
         return item
     def can_talk(self,intent):
         return not self.is_pause or (intent == "smalltalk.agent.unpause")
+
     async def validator_task(self):
         try:                                                                                                                 
             LOGGER.debug("validator_task:queue...")       

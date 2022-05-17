@@ -59,6 +59,9 @@ DISTRIBUTION_NAME = 'bgt-bot-api'
 TOKEN='1205652427:AAFr0eynwihWGyvObUA0QSjOfKMwiH3HkZs'
 TELE_DB_FILENAME = '/project/peer/data/telebot.lmdb'
 DEFAULT_DB_SIZE= 1024*1024*4
+ENABLE_STUFF = False
+ENABLE_DEC = False
+
 
 def deserialize_data(encoded):
     return cbor.loads(encoded)
@@ -204,20 +207,22 @@ def start_bot_api(host, port, connection, vtimeout, registry,connects=None,clien
     bot.add_intent_handler('smalltalk.dialog.hold_on',bot.intent_hold_on)
     bot.add_intent_handler('smalltalk.user.needs_advice',bot.intent_needs_advice)
     #bot.add_intent_handler('smalltalk.agent.get_wallet',bot.intent_get_wallet)
-    bot.add_intent_handler('smalltalk.agent.check_wallet',bot.intent_check_wallet)
-    bot.add_intent_handler('smalltalk.agent.check_wallet_history',bot.intent_check_wallet_history)
-    bot.add_intent_handler('smalltalk.agent.create_wallet',bot.intent_create_wallet)
-    bot.add_intent_handler('smalltalk.agent.trans_token',bot.intent_trans_token)
-    bot.add_intent_handler('smalltalk.agent.inc_wallet',bot.intent_inc_wallet)
-    bot.add_intent_handler('smalltalk.agent.dec_wallet',bot.intent_dec_wallet)
-    bot.add_intent_handler('smalltalk.agent.buy_stuff',bot.intent_buy_stuff)
-    bot.add_intent_handler('smalltalk.agent.sell_stuff',bot.intent_sell_stuff)
-    # make stuff
-    bot.add_intent_handler('smalltalk.agent.create_stuff',bot.intent_create_stuff)
-    bot.add_intent_handler('smalltalk.agent.update_stuff',bot.intent_update_stuff)
-    bot.add_intent_handler('smalltalk.agent.show_stuff',bot.intent_show_stuff)
-    bot.add_intent_handler("smalltalk.agent.show_stuff_history",bot.intent_show_stuff_history)
-    bot.add_intent_handler("smalltalk.agent.show_stuff_list",bot.intent_show_stuff_list)
+    if ENABLE_DEC:
+        bot.add_intent_handler('smalltalk.agent.check_wallet',bot.intent_check_wallet)
+        bot.add_intent_handler('smalltalk.agent.check_wallet_history',bot.intent_check_wallet_history)
+        bot.add_intent_handler('smalltalk.agent.create_wallet',bot.intent_create_wallet)
+        bot.add_intent_handler('smalltalk.agent.trans_token',bot.intent_trans_token)
+        bot.add_intent_handler('smalltalk.agent.inc_wallet',bot.intent_inc_wallet)
+        bot.add_intent_handler('smalltalk.agent.dec_wallet',bot.intent_dec_wallet)
+        bot.add_intent_handler('smalltalk.agent.buy_stuff',bot.intent_buy_stuff)
+        bot.add_intent_handler('smalltalk.agent.sell_stuff',bot.intent_sell_stuff)
+    if ENABLE_STUFF:
+        # make stuff
+        bot.add_intent_handler('smalltalk.agent.create_stuff',bot.intent_create_stuff)
+        bot.add_intent_handler('smalltalk.agent.update_stuff',bot.intent_update_stuff)
+        bot.add_intent_handler('smalltalk.agent.show_stuff',bot.intent_show_stuff)
+        bot.add_intent_handler("smalltalk.agent.show_stuff_history",bot.intent_show_stuff_history)
+        bot.add_intent_handler("smalltalk.agent.show_stuff_list",bot.intent_show_stuff_list)
     #
     bot.add_intent_handler("smalltalk.agent.show_gateway",bot.intent_show_gateway)
     bot.add_intent_handler("smalltalk.agent.show_gateway_list",bot.intent_show_gateway_list)
@@ -355,7 +360,7 @@ def main():
             url = "tcp://" + bot_api_config.connect[0]
         else:
             url = bot_api_config.connect[0]
-
+        # connection to DGT node
         connection = Connection(url)
 
         log_config = get_log_config(filename="bot_api_log_config.toml")

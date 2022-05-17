@@ -53,6 +53,10 @@ from dgt_validator.gossip.fbft_topology import (PeerSync,PeerRole,PeerAtr,FbftTo
                                                 DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,DGT_TOPOLOGY_NEST_NM,TOPO_MAP,DGT_NET_NEST
                                                 )
 
+from x509_cert.client_cli.xcert_attr import XCERT_CRT_OP,NOTARY_LIST_ID,NOTARY_KEYS,NOTARIES_MAP,DGT_NOTARY_KEYS
+from x509_cert.client_cli.create_batch import create_meta_xcert_txn
+
+
 DGT_TOP = os.environ.get('DGT_TOP')
 DISTRIBUTION_NAME = 'dgtset'
 VALIDATOR_PKEY = '/project/peer/keys/validator.priv'
@@ -60,7 +64,7 @@ VALIDATOR_PUB_KEY = '/project/peer/keys/validator.pub'
 PROJ_DGT = f'/project/{DGT_TOP}'
 MAP_NET_FNM = f"{PROJ_DGT}/etc/dgt.net.map"
 STATIC_MAP = "static_map"
-DGT_NOTARY_KEYS = 'dgt.notary.keys'
+
 
 _MIN_PRINT_WIDTH = 15
 
@@ -102,7 +106,7 @@ def get_pub_key(fpub):
         return None                                        
 
 
-def get_net_map(fname,fpub,crypto):
+def get_net_map(fname,fpub,crypto,mapping):
 
     print(f"MAKE NET MAP key={fpub}...")
     pub_key_str = get_pub_key(fpub)
@@ -121,8 +125,8 @@ def get_net_map(fname,fpub,crypto):
   
            }
     # add static peer into map 
-    mapping = get_mapping_file()
-    if mapping:
+    #mapping = get_mapping_file()
+    if mapping and STATIC_MAP in mapping:
         static_nests = {}
         for nm in mapping[STATIC_MAP]:
             clust = nm.split('.')
@@ -139,16 +143,36 @@ def get_net_map(fname,fpub,crypto):
     print(f"MAP={fmap}")
     return fmap
 
+def get_notary_map(mapping,crypto):
+    notaries = mapping[NOTARIES_MAP] 
+    keys = []  
+    if notaries == []:                 
+        # add notary keys              
+        return keys        
+
+    for nm in notaries:  
+        key_file = "{}/notaries/{}/keys/notary.pub.{}".format(PROJ_DGT,nm,crypto)                                                                
+        pkey = get_pub_key(key_file)                                                            
+        if pkey and  pkey not in keys:                                                          
+            keys.append(pkey) 
+    return keys                                                                  
+
+
+
+
 def _do_config_proposal_create(args):
     """Executes the 'proposal create' subcommand.  Given a key file, and a
     series of key/value pairs, it generates batches of sawtooth_settings
     transactions in a BatchList instance.  The BatchList is either stored to a
     file or submitted to a validator, depending on the supplied CLI arguments.
     """
+    signer = _read_signer(args.key,args.crypto_back)
+    
     settings = [s.split('=', 1) for s in args.setting]
     #print(f"settings = {settings}")
     settings.append((args.crypto_name,args.crypto_back))
-    first_map = get_net_map(args.topology_nest,args.pub_key,args.crypto_back)
+    mapping = get_mapping_file()
+    first_map = get_net_map(args.topology_nest,args.pub_key,args.crypto_back,mapping)
     #if first_map:
     #    settings.append((args.topology_map_name,json.dumps(first_map)))
 
@@ -170,10 +194,18 @@ def _do_config_proposal_create(args):
         print(f"file {args.net} not exists")
     
     
-    signer = _read_signer(args.key,args.crypto_back)
+    #signer = _read_signer(args.key,args.crypto_back)
 
     txns = [_create_propose_txn(signer, setting)
             for setting in settings]
+
+    if NOTARIES_MAP in mapping :                                      
+        notary_keys = get_notary_map(mapping,args.crypto_back)        
+        if notary_keys != []:                                         
+            print("NOTARY KEYS {}".format(notary_keys))  
+            xtrans = create_meta_xcert_txn(signer,NOTARY_LIST_ID,{NOTARY_KEYS:notary_keys}) 
+            txns.append(xtrans)            
+            #settings.append((DGT_NOTARY_KEYS,','.join(notary_keys)))  
 
     batch = _create_batch(signer, txns)
 

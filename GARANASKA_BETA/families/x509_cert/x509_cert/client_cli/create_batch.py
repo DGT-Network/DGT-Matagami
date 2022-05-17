@@ -26,7 +26,7 @@ import cbor
 
 from dgt_signing import create_context
 from dgt_signing import CryptoFactory
-
+from dgt_signing.core import (X509_COMMON_NAME)
 #from dgt_sdk.protobuf import batch_pb2
 #from dgt_sdk.protobuf import transaction_pb2
 from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
@@ -34,7 +34,7 @@ from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
 
 
 from x509_cert.processor.handler import make_xcert_address,FAMILY_NAME,FAMILY_VERSION
-
+from x509_cert.client_cli.xcert_attr import *
 
 LOGGER = logging.getLogger(__name__)
 
@@ -125,7 +125,7 @@ def create_xcert_txn(signer, key, value,oper='set'):
     val = {                                                 
         'Verb': oper,                                       
         'Owner': key,                                      
-        'Value': value.encode('utf-8'),                                     
+        'Value': value, #.encode('utf-8'),                                     
     }                                                       
     LOGGER.debug(f'CREATE XCERT: cert={value} pub={key} ')                                                        
     payload = cbor.dumps(val)                               
@@ -155,6 +155,17 @@ def create_xcert_txn(signer, key, value,oper='set'):
     )                                                                           
 
     return transaction
+
+def create_meta_xcert_txn(signer, key, value): 
+    payload = cbor.dumps(value).hex()    
+    info = {X509_COMMON_NAME:payload}
+    xcert = signer.context.create_x509_certificate(info, signer.private_key, after=0, before=100)
+
+    transaction = create_xcert_txn(signer,key, xcert,XCERT_CRT_OP)
+    return transaction                                                                                                  
+
+
+                                                                                                                        
 
 
 def create_batch(transactions, signer):

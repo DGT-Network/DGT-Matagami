@@ -258,4 +258,8 @@ class OpenCryptoContext(Context):
         else:
             return None
 
+    def get_pub_key(self,xcert):
+        public_key = xcert.public_key()
+        return OpenCryptoPublicKey(self,public_key).as_hex()
+
 

@@ -295,7 +295,8 @@ def do_show(args):
 
     if client.is_notary_info(name):
         val = client.get_xcert_notary_attr(xcert) 
-        print(f"NOTARY={val}")
+        nkey = client.get_pub_key(xcert)
+        print("NOTARY KEY={} DATA={}".format(nkey,val))
 
     print('{}:valid={}->{} {}'.format(name,xcert.not_valid_before,xcert.not_valid_after,xcert))
 

@@ -907,27 +907,27 @@ class BgxTeleBot(Tbot):
 
 
 
-    async def intent_create_xcert(self,minfo):                                                                                                                                        
+    def intent_create_xcert(self,minfo):                                                                                                                                        
         """                                                                                                                                                                           
         Get or create xcert for user who send this message                                                                                                                            
         """   
-        await self.create_xcert(minfo,force=False)    
+        self.create_xcert(minfo,force=False)    
                                                                                                                                                                             
-    async def intent_update_xcert(self,minfo):                        
+    def intent_update_xcert(self,minfo):                        
         """                                                           
         Get or update xcert for user who send this message            
         """                                                           
-        await self.create_xcert(minfo,force=True)                     
+        self.create_xcert(minfo,force=True)                     
 
 
-    async def create_xcert(self,minfo,force=False):                                                                                                          
+    def create_xcert(self,minfo,force=False):                                                                                                          
         """                                                                                                                                             
         Get or create/update xcert for user who send this message                                                                                                                            
         """                                                                                                                                                                           
         LOGGER.debug(f'DgtTeleBot: create/update xcert FOR={minfo}')                                                                                                                         
         if minfo.batch_id:                                                                                                                                                            
             LOGGER.debug('DgtTeleBot: CHECK=%s CREATE/UPDATE xcert',minfo.batch_id)                                                                                                          
-            batch = await self.check_batch_status(minfo.batch_id,minfo)                                                                                                               
+            #batch = await self.check_batch_status(minfo.batch_id,minfo)                                                                                                               
             return                                                                                                                                                                    
         args = self.get_args_from_request(minfo.result.parameters) if minfo.result else {EMAIL_ATTR : f"{minfo.user_first_name}@mail.ru"}                                                              
         LOGGER.debug(f'DgtTeleBot: char={minfo.chat_id} notary={self._user_notary} create xcert args={args}')                                                                                                                         
@@ -971,7 +971,7 @@ class BgxTeleBot(Tbot):
                 self.send_message(minfo.chat_id, f'Нет доступа к BD секретов')                                                                                  
                 return                                                                                                                                      
 
-    async def intent_show_xcert(self,minfo):                                                                                                                          
+    def intent_show_xcert(self,minfo):                                                                                                                          
         """                                                                                                                                                             
         Get or show xcert for user who send this message                                                                                                              
         """                                                                                                                                                             
@@ -994,7 +994,7 @@ class BgxTeleBot(Tbot):
         else:
             self.send_message(minfo.chat_id, f'Нет доступа к хранилищу секретов.') 
                 
-    async def intent_approve_xcert(self,minfo):
+    def intent_approve_xcert(self,minfo):
         args = self.get_args_from_request(minfo.result.parameters) if minfo.result else {}       
         LOGGER.debug(f'DgtTeleBot: approve xcert args={args} {self._approve_q}')                                                                                   
                                                                                                                                                 

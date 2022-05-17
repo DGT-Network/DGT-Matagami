@@ -25,18 +25,20 @@ from dgt_sdk.processor.exceptions import InternalError
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 
 from dgt_signing import CryptoFactory,create_context
+from dgt_signing.core import X509_COMMON_NAME
+from x509_cert.client_cli.xcert_attr import *
 
 LOGGER = logging.getLogger(__name__)
 
 
-VALID_VERBS = 'set', 'upd', 'crt'
+VALID_VERBS = XCERT_SET_OP, XCERT_UPD_OP, XCERT_CRT_OP
 
 MIN_VALUE = 0
 MAX_VALUE = 4294967295
 MAX_NAME_LENGTH = 20
 
-FAMILY_NAME = 'xcert'
-FAMILY_VERSION = '1.0'
+#FAMILY_NAME = 'xcert'
+#FAMILY_VERSION = '1.0'
 XCERT_ADDRESS_PREFIX = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
 
 
@@ -72,21 +74,59 @@ class XcertTransactionHandler(TransactionHandler):
     def apply(self, transaction, context):
         LOGGER.debug('apply:....\n')
         verb, owner, value  = _unpack_transaction(transaction)
-        LOGGER.debug(f'apply:verb={verb} owner={owner} value={value}')
+        LOGGER.debug('apply:verb={} owner={} value={}'.format(verb,owner,value))
+        
         try:
             state = _get_state_data(owner, context)
+            if owner != NOTARY_LIST_ID:
+                slist = _get_state_data(NOTARY_LIST_ID, context)
+                is_notary = self.check_notary_key(NOTARY_LIST_ID,slist)
+                if not is_notary:
+                    raise InvalidTransaction('Xcert cmd={verb} error - NOT AUTHORIZED NOTARY!!!'.format(verb))
+                #LOGGER.debug('apply: NOTARY {}\n'.format(is_notary))
 
             updated_state = self._do_cert(verb, owner, value, state)
         except Exception as ex:
-            raise InvalidTransaction(f'Xcert cmd={verb} error {ex}')
+            raise InvalidTransaction('Xcert cmd={} error {}'.format(verb,ex))
 
         _set_state_data( updated_state, context)
 
+    def get_xcert_pem(self,key,state):
+        if key in state:             
+            curr = state[key]                    
+            token = X509CertInfo()                 
+            token.ParseFromString(curr)            
+            xcert = token.xcert  
+            return xcert    
+                      
+    def get_xcert(self,key,state):
+        xcert_pem = self.get_xcert_pem(key,state)
+        xcert = self._signer.context.load_x509_certificate(xcert_pem)
+        return xcert
+
+    def get_meta_xcert(self,xcert):                                                 
+        #xcert = self.get_xcert(key,state)                                  
+        val = self.get_xcert_attributes(xcert,X509_COMMON_NAME)          
+        return cbor.loads(bytes.fromhex(val)) if val is not None else {}
+         
+    def get_xcert_attributes(self,xcert,attr):                       
+        return self._signer.context.get_xcert_attributes(xcert,attr) 
+
+    def check_notary_key(self,key,state):
+        xcert = self.get_xcert(key,state)
+        mcert = self.get_meta_xcert(xcert)
+        nkey = self._signer.context.get_pub_key(xcert)
+        if NOTARY_KEYS in mcert:
+            nlist = mcert[NOTARY_KEYS]
+            LOGGER.debug('apply: KEY={} NOTARY_LIST={}\n'.format(nkey,nlist))
+            return nkey in nlist
+        return False
+
     def _do_cert(self,verb, owner, value, state):
         verbs = {
-            'set': self._do_set,
-            'upd': self._do_upd,
-            'crt': self._do_crt,
+            XCERT_SET_OP: self._do_set,
+            XCERT_UPD_OP: self._do_upd,
+            XCERT_CRT_OP: self._do_crt,
             
         }
         LOGGER.debug('_do_cert request....')
@@ -135,8 +175,7 @@ class XcertTransactionHandler(TransactionHandler):
         LOGGER.debug('Update "{n}" by {v}'.format(n=owner, v=value))
 
         if owner not in state:
-            raise InvalidTransaction(
-                'Undefined xcert name "{}" not in state'.format(owner))
+            raise InvalidTransaction('Undefined xcert name "{}" not in state'.format(owner))
 
         updated = {k: v for k, v in state.items()}                           
                                                                              
@@ -217,7 +256,7 @@ def _get_state_data(name, context):
         states = {}
         for entry in state_entries:
             state = cbor.loads(entry.data)
-            LOGGER.debug('_get_state_data state=(%s)', state)
+            #LOGGER.debug('_get_state_data state=(%s)', state)
             for key, val in state.items():
                 LOGGER.debug('_get_state_data add=%s', key)
                 states[key] = val

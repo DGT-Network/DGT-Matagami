@@ -335,6 +335,8 @@ def do_node(args):
                     with open(fcrt, "wb") as f:                                                                                                                                               
                         f.write(cert) 
                 if KYC is not None:
+                    # this file is trigger for notary mode
+                    # and we should check notaries key into dgt.net.map
                     fkyc = os.path.join(dname, KYC_NM)
                     with open(fkyc, "w") as f:  
                         f.write(KYC)            
@@ -346,8 +348,9 @@ def do_node(args):
         raise CliException('Exception: {}'.format(str(ex)))
     
     
-    
-from x509_cert.client_cli.xcert_client import XcertClient,KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_TOKEN ,NOTARY_URL ,write_conf,NOTARY_ROOT_TOKEN,NOTARY_UNSEAL_KEYS  
+from x509_cert.client_cli.xcert_attr  import *  
+from x509_cert.client_cli.xcert_client import XcertClient,write_conf  
+
 BEFORE_TM ,AFTER_TM = 1,100
 
 def do_notary(args):

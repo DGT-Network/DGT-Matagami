@@ -26,6 +26,7 @@ TOP_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, os.path.join(TOP_DIR,'cli'))
 sys.path.insert(0, os.path.join(TOP_DIR,'validator'))
 sys.path.insert(0, os.path.join(TOP_DIR,'signing'))
+sys.path.insert(0, os.path.join(TOP_DIR,'families', 'x509_cert'))
 sys.path.insert(0, os.path.join(TOP_DIR,'sdk', 'python'))
 from dgt_cli.dgtset import main_wrapper
 

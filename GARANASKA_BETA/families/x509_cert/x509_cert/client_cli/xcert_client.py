@@ -35,23 +35,11 @@ from dgt_sdk.protobuf.batch_pb2 import Batch
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 
 from x509_cert.client_cli.exceptions import XcertClientException,XcertClientKeyfileException
-
+from x509_cert.client_cli.xcert_attr import *
 LOGGER = logging.getLogger(__name__)
 
-KEYKEEPER_ID = "_keykeeper_"
-NOTARY_LEADER_ID = "_raftleader_"
-NOTARY_FOLOWER_ID = "_raftfolower_"
-NOTARY_TOKEN  = "notary_token"
-NOTARY_URL  = "notary_url"
-NOTARY_NAME = "notary_nm"
-NOTARY_STIME = "notary_stm"
-NOTARY_UNSEAL_KEYS = 'unseal_keys'
-NOTARY_ROOT_TOKEN = 'root_token' 
-NOTARY_CONF_NM  = "/project/peer/etc/.vconf"
-XCERT_BEFORE_TM,XCERT_AFTER_TM = 1,100
-NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID]
-FAMILY_NAME ="xcert"
-FAMILY_VERSION ="1.0"
+NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
+
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
@@ -88,12 +76,64 @@ def read_conf(fconf=NOTARY_CONF_NM):
     LOGGER.info(f"VCONF = {info}")                                   
     return info                                                      
                                                                      
+def _make_xcert_transaction(signer, verb, name, value,to=None):                                                                                                                                
+    val = {                                                                                                                                                                                  
+        'Verb': verb,                                                                                                                                                                        
+        'Owner': name,                                                                                                                                                                       
+        'Value': value,                                                                                                                                                                      
+    }                                                                                                                                                                                        
+    if to is not None:                                                                                                                                                                       
+        val['To'] = to                                                                                                                                                                       
+    payload = cbor.dumps(val)                                                                                                                                                                
+                                                                                                                                                                                             
+    # Construct the address                                                                                                                                                                  
+    address = _get_address(name)                                                                                                                                                        
+    inputs = [address]                                                                                                                                                                       
+    outputs = [address]                                                                                                                                                                      
+    if to is not None:                                                                                                                                                                       
+        address_to = _get_address(to)                                                                                                                                                   
+        inputs.append(address_to)                                                                                                                                                            
+        outputs.append(address_to)                                                                                                                                                           
+                                                                                                                                                                                             
+    header = TransactionHeader(                                                                                                                                                              
+        signer_public_key=signer.get_public_key().as_hex(),                                                                                                                            
+        family_name=FAMILY_NAME,                                                                                                                                                             
+        family_version=FAMILY_VERSION,                                                                                                                                                       
+        inputs=inputs,                                                                                                                                                                       
+        outputs=outputs,                                                                                                                                                                     
+        dependencies=[],                                                                                                                                                                     
+        payload_sha512=_sha512(payload),                                                                                                                                                     
+        batcher_public_key=signer.get_public_key().as_hex(),                                                                                                                           
+        nonce=hex(random.randint(0, 2**64))                                                                                                                                                  
+    ).SerializeToString()                                                                                                                                                                    
+                                                                                                                                                                                             
+    signature = signer.sign(header)                                                                                                                                                    
+                                                                                                                                                                                             
+    transaction = Transaction(                                                                                                                                                               
+        header=header,                                                                                                                                                                       
+        payload=payload,                                                                                                                                                                     
+        header_signature=signature                                                                                                                                                           
+    )                                                                                                                                                                                        
+    return transaction                                                                                                                                                                       
+                                                                     
+
+                                                                     
+def create_meta_xcert_txn(signer, key, value): 
+    payload = cbor.dumps(value).hex()    
+    info = {X509_COMMON_NAME:payload}
+    xcert = signer.context.create_x509_certificate(info, signer.private_key, after=XCERT_AFTER_TM, before=XCERT_BEFORE_TM)
+
+    transaction = _make_xcert_transaction(signer, XCERT_CRT_OP, key, xcert)
+    return transaction                                                                                                  
+                                                                     
+                                                                     
+                                                                     
 
 class XcertClient:
     def __init__(self, url, keyfile=None,backend=None):
         self.url = url
         self._backend = backend
-        print(f"XcertClient: BACKEND={backend} ")
+        #print(f"XcertClient: BACKEND={backend} ")
         self._context = create_context('secp256k1',backend=self._backend)
         if keyfile is not None:
             self._signer = self.get_signer(keyfile)
@@ -125,8 +165,11 @@ class XcertClient:
     def get_xcert_notary_attr(self,xcert):
         val = self.get_xcert_attributes(xcert,X509_COMMON_NAME)
         return cbor.loads(bytes.fromhex(val)) if val is not None else {}
-        
-                  
+
+    def get_pub_key(self,xcert):
+        #
+        return self._signer.context.get_pub_key(xcert)
+
     def is_notary_info(self,key):
         return key in NOTARY_TYPES
 
@@ -164,6 +207,10 @@ class XcertClient:
         cert = signer.context.create_x509_certificate(info, signer.private_key, after=after, before=before)
         return pubkey,cert
 
+    def _do_meta_xcert_transaction(self, oper,value,user,before=XCERT_BEFORE_TM,after=XCERT_AFTER_TM):
+        pubkey,cert = self.set_or_upd(value,user,before,after)
+        transaction = self._make_xcert_transaction(oper,pubkey, cert)
+        return transaction
 
     def _do_oper(self,oper,value,user,before,after,wait=None):                                    
         pubkey,cert = self.set_or_upd(value,user,before,after)                          
@@ -253,47 +300,52 @@ class XcertClient:
 
         return result.text
 
+    def _make_xcert_transaction(self, verb, name, value,to=None):
+        val = {                                                                                                  
+            'Verb': verb,                                                                                        
+            'Owner': name,                                                                                       
+            'Value': value,                                                                                      
+        }    
+        if to is not None:         
+            val['To'] = to                                                                                                             
+        payload = cbor.dumps(val)                                                                                
+                                                                                                                 
+        # Construct the address                                                                                  
+        address = self._get_address(name)                                                                        
+        inputs = [address]                                                                                       
+        outputs = [address]  
+        # add key notary list
+        inputs.append(self._get_address(NOTARY_LIST_ID))                                                                                    
+        if to is not None:                                                                                       
+            address_to = self._get_address(to)                                                                   
+            inputs.append(address_to)                                                                            
+            outputs.append(address_to)                                                                           
+                                                                                                                 
+        header = TransactionHeader(                                                                              
+            signer_public_key=self._signer.get_public_key().as_hex(),                                            
+            family_name=FAMILY_NAME,                                                                             
+            family_version=FAMILY_VERSION,                                                                       
+            inputs=inputs,                                                                                       
+            outputs=outputs,                                                                                     
+            dependencies=[],                                                                                     
+            payload_sha512=_sha512(payload),                                                                     
+            batcher_public_key=self._signer.get_public_key().as_hex(),                                           
+            nonce=hex(random.randint(0, 2**64))                                                                  
+        ).SerializeToString()                                                                                    
+                                                                                                                 
+        signature = self._signer.sign(header)                                                                    
+                                                                                                                 
+        transaction = Transaction(                                                                               
+            header=header,                                                                                       
+            payload=payload,                                                                                     
+            header_signature=signature                                                                           
+        )                                                                                                        
+        return transaction
+
+
     def _send_transaction(self, verb, name, value, to=None, wait=None,user='anybody'):
         # 'set',pubkey, cert, to=None, wait=wait,user=user)
-        val = {
-            'Verb': verb,
-            'Owner': name,
-            'Value': value,
-        }
-        if to is not None:
-            val['To'] = to
-
-        payload = cbor.dumps(val)
-
-        # Construct the address
-        address = self._get_address(name)
-        inputs = [address]
-        outputs = [address]
-        if to is not None:
-            address_to = self._get_address(to)
-            inputs.append(address_to)
-            outputs.append(address_to)
-
-        header = TransactionHeader(
-            signer_public_key=self._signer.get_public_key().as_hex(),
-            family_name=FAMILY_NAME,
-            family_version=FAMILY_VERSION,
-            inputs=inputs,
-            outputs=outputs,
-            dependencies=[],
-            payload_sha512=_sha512(payload),
-            batcher_public_key=self._signer.get_public_key().as_hex(),
-            nonce=hex(random.randint(0, 2**64))
-        ).SerializeToString()
-
-        signature = self._signer.sign(header)
-
-        transaction = Transaction(
-            header=header,
-            payload=payload,
-            header_signature=signature
-        )
-
+        transaction = self._make_xcert_transaction(verb,name,value)
         batch_list = self._create_batch_list([transaction])
         batch_id = batch_list.batches[0].header_signature
 

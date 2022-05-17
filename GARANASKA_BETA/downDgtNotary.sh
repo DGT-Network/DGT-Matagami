@@ -24,16 +24,16 @@ function downNotary {
     echo "STOP $node"
     case $node in
         1)
-          export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1   N=1 V=1 COMP=4104 VPORT=8200;docker-compose -f docker/docker-compose-notary-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1   N=1 V=1 COMP=4104 VPORT=8200;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         2)                                                        
-          export COMPOSE_PROJECT_NAME=2 G=$GENESIS C=c2   N=1 V=2 COMP=4204 VPORT=8300;docker-compose -f docker/docker-compose-notary-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=2 G=$GENESIS C=c1   N=1 V=2 COMP=4204 VPORT=8300;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         3)                                                        
-          export COMPOSE_PROJECT_NAME=3 G=$GENESIS C=c3   N=1 V=3 COMP=4304 VPORT=8400;docker-compose -f docker/docker-compose-notary-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=3 G=$GENESIS C=c1   N=1 V=3 COMP=4304 VPORT=8400;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         4)                                                        
-          export COMPOSE_PROJECT_NAME=4 G=$GENESIS C=c4   N=1 V=4 COMP=4404 VPORT=8500;docker-compose -f docker/docker-compose-notary-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=4 G=$GENESIS C=c1   N=1 V=4 COMP=4404 VPORT=8500;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;
         *)
           echo "Undefined notary."
