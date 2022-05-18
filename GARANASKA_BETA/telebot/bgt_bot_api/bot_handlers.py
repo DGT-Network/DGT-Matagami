@@ -339,7 +339,9 @@ class Tbot(object):
             if self._attemp > len(self._proxies):
                 self._stop = True
             self._attemp += 1
-
+        def change_timeout():
+            if self._timeout < 3:
+                self._timeout += 1
 
         while not self._stop:
             #await self.process_queue()
@@ -348,13 +350,18 @@ class Tbot(object):
                 self._attemp = 0
             except ConnectTimeout:
                 LOGGER.info('Get updates ConnectTimeout')
-                if self._timeout < 6:
-                    self._timeout += 1
-                shift_proxy()
+                #change_timeout()
+                if self._use_proxy
+                    shift_proxy()
                 updates = None 
+            except ReadTimeout:
+                change_timeout()
+                LOGGER.info('Get updates ReadTimeout new val={}'.format(self._timeout))
+                updates = None
             except Exception as ex  :
                 LOGGER.info('Get updates except=%s',ex)
-                shift_proxy()
+                if self._use_proxy
+                    shift_proxy()
                 updates = None
 
             # Do some other operations...
@@ -391,23 +398,31 @@ class Tbot(object):
         # for update in updates:'new_chat_member': None, 'new_chat_members': None, 'left_chat_member'
         for update in updates:
             try:
-                if update.message.new_chat_member is not None:
-                    # new_chat_member {'id': 1205652427, 'is_bot': True, 'first_name': 'Mongoose', 'username': 'Shiva64_bot', 'last_name': None, 'language_code': None}
-                    if self.check_user(update.message.new_chat_member):
-                        # make new wallet
-                        new_chat_member = update.message.new_chat_member
-                        LOGGER.info('new_chat_member7 %s',new_chat_member)
-                        minfo = BotMessage(update.message.message_id,update.message.chat.id,new_chat_member.id,new_chat_member.first_name,new_chat_member.last_name,'smalltalk.agent.create_wallet',1.0,None,None)
-                        self.intent_handler(minfo)
-                if update.message.new_chat_members is not None:
-                    #new_chat_members [<telebot.types.User object at 0x7fd4b19e2d68>]
-                    LOGGER.info('new_chat_members %s',update.message.new_chat_members)
-                if update.message.left_chat_member is not None:
-                    left_chat_member = update.message.left_chat_member 
-                    LOGGER.info('del left_chat_member %s from DB',left_chat_member)
-                    self._tdb.delete(str(left_chat_member.id))
+
+                if update.message is not None:
+                    if update.message.new_chat_member is not None:
+                        # new_chat_member {'id': 1205652427, 'is_bot': True, 'first_name': 'Mongoose', 'username': 'Shiva64_bot', 'last_name': None, 'language_code': None}
+                        if self.check_user(update.message.new_chat_member):
+                            # make new wallet
+                            new_chat_member = update.message.new_chat_member
+                            LOGGER.info('new_chat_member7 %s',new_chat_member)
+                            minfo = BotMessage(update.message.message_id,update.message.chat.id,new_chat_member.id,new_chat_member.first_name,new_chat_member.last_name,'smalltalk.agent.create_wallet',1.0,None,None)
+                            self.intent_handler(minfo)
+                    if update.message.new_chat_members is not None:
+                        #new_chat_members [<telebot.types.User object at 0x7fd4b19e2d68>]
+                        LOGGER.info('new_chat_members %s',update.message.new_chat_members)
+                    if update.message.left_chat_member is not None:
+                        left_chat_member = update.message.left_chat_member 
+                        LOGGER.info('del left_chat_member %s from DB',left_chat_member)
+                        self._tdb.delete(str(left_chat_member.id))
+                else:
+                    if 'my_chat_member' in update:
+                        mchat_mem = update['my_chat_member']
+                        if 'new_chat_member' in mchat_mem:
+                            LOGGER.info('NEW_CHAT_MEMBER {}\n'.format(mchat_mem['new_chat_member']))
+
             except Exception as ex:
-                LOGGER.info('check_member_add_left error - {}'.format(update.message))
+                LOGGER.info('CHECK_MEMBER_ADD_LEFT error - {}\n'.format(update))
 
     def add_intent_handler(self,intent_name,intent_handler):
         """
@@ -749,4 +764,10 @@ sticker_message {'content_type': 'sticker', 'message_id': 1725, 'from_user': {'i
          'date': 1648815620,
          'text': 'Привет'
 }}
+CHECK_MEMBER_ADD_LEFT error -
+ {'update_id': 133693656, 'message': None, 'edited_message': None, 'channel_post': None, 'edited_channel_post': None,
+ 'inline_query': None, 'chosen_inline_result': None, 'callback_query': None, 'shipping_query': None, 'pre_checkout_query': None, 'poll': None, 'poll_answer': None,
+ 'my_chat_member': {'chat': <telebot.types.Chat object at 0x7f3148d4fb38>, 'from_user': <telebot.types.User object at 0x7f3148d99358>, 'date': 1652858256, 
+'old_chat_member': <telebot.types.ChatMember object at 0x7f3148d990b8>,
+ 'new_chat_member': <telebot.types.ChatMember object at 0x7f3148d99048>, 'invite_link': None}, 'chat_member': None, 'chat_join_request': None}
 """
