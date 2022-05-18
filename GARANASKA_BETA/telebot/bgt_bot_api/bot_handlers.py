@@ -238,7 +238,7 @@ class Tbot(object):
         def start_message(message):
             LOGGER.info(f"START MSG={message}")
             self.send_message(message.chat.id, f'Привет {message.from_user.first_name}, ты написал мне /start',reply_markup=keyboard1)
-        @bot.message_handler(commands=['help'])                                                                                        
+        @bot.message_handler(commands=['help','Help'])                                                                                        
         def start_message(message):                                                                                                     
             LOGGER.info(f"HELP MSG={message}")                                                                                         
             self.send_message(message.chat.id, f'Справка :\n Создать сертификат - создать новый.\n Изменить сертификат - изменить существующий.\n Сертификат - показать сертификать если он есть.',reply_markup=keyboard1)  
