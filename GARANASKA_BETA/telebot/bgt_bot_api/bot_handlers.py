@@ -27,6 +27,7 @@ import logging
 import json
 import base64
 import requests
+import time
 from collections import namedtuple
 
 from threading import Thread,RLock
@@ -189,6 +190,9 @@ class Tbot(object):
                 LOGGER.info('Cant send message err=Timeout') 
             except  Exception as ex:
                 LOGGER.info('Cant send message err=%s',ex)
+                err = str(ex)
+                if err.find('Too Many Requests' > 0):
+                    time.sleep(1)
             n += 1
         
     def send_sticker(self,chat_id,sticker):
