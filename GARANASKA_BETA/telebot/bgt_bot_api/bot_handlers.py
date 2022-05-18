@@ -179,7 +179,7 @@ class Tbot(object):
         LOGGER.info("NEXT proxy %d",self._proxy_pos)
 
     def send_message(self,chat_id,repl,reply_markup=None):
-        n = 4
+        n = 30
         while n > 0:
             try:                                              
                 if repl != '':                                
@@ -189,7 +189,7 @@ class Tbot(object):
             except ReadTimeout:           
                 LOGGER.info('Cant send message err=Timeout') 
             except  Exception as ex:
-                LOGGER.info('Cant send message err=%s',ex)
+                LOGGER.info('Cant send message attemp={} err={}'.format(n,ex))
                 err = str(ex)
                 if err.find('Too Many Requests') > 0:
                     time.sleep(1)
