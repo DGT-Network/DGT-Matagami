@@ -123,6 +123,7 @@ class Tbot(object):
         self._timeout = DEFAULT_TIMEOUT
         self._check_cmd_frequency = 100
         self._bgt_queue = queue.Queue()
+        self._last_msg_time = None
         self._lock = RLock()
         self.is_pause = False
         LOGGER.info('USE proxy=%d from %d',self._proxy_pos,len(self._proxies))
@@ -179,12 +180,19 @@ class Tbot(object):
         LOGGER.info("NEXT proxy %d",self._proxy_pos)
 
     def send_message(self,chat_id,repl,reply_markup=None):
-        n = 30
+        n = 3
         while n > 0:
             try:                                              
-                if repl != '':                                
+                if repl != '':  
+                    ctime = time.time()   
+                    if self._last_msg_time :
+                        off = ctime - self._last_msg_time
+                    else:
+                        off = 100
+                    self._last_msg_time = ctime
+                    LOGGER.info('Try to send off={} message[{}]=/{}/'.format(off,chat_id,repl))
                     self._bot.send_message(chat_id,repl) 
-                    LOGGER.info(f'Send message[{chat_id}]=/{repl}/') 
+                     
                 return   
             except ReadTimeout:           
                 LOGGER.info('Cant send message err=Timeout') 
@@ -373,10 +381,11 @@ class Tbot(object):
             if updates:
                 LOGGER.info('UPDATE={}'.format(len(updates)))
                 self.check_member_add_left(updates)
-                try:
-                    self._bot.process_new_updates(updates)
-                except Exception as ex  :
-                    LOGGER.info('Process updates except=%s',ex)
+                with self._lock:
+                    try:
+                        self._bot.process_new_updates(updates)
+                    except Exception as ex  :
+                        LOGGER.info('Process updates except=%s',ex)
 
                 LOGGER.info('last update=%s qsize=%s',self._bot.last_update_id,self._bgt_queue.qsize())
                 #self._bot.get_updates(offset=(self._bot.last_update_id+1),timeout=0.1)
@@ -439,7 +448,7 @@ class Tbot(object):
         self._bgt_queue.put(minfo)
         LOGGER.info('RUN HANDLER FOR=%s size=%s',minfo.intent,self._bgt_queue.qsize())
     
-    async def intent_hello(self,minfo):
+    def intent_hello(self,minfo):
         """
         Reply on hello
         """ 
@@ -460,7 +469,7 @@ class Tbot(object):
         except Exception as ex:                                                                                                                                                                               
             LOGGER.info("Cant pin message %s",ex)                                                                                                                                
 
-    async def intent_bye(self,minfo):
+    def intent_bye(self,minfo):
         self.send_message(minfo.chat_id, 'Заходи еще {}'.format('создатель' if minfo.user_first_name == 'Stan' else 'господин')) 
 
     async def intent_help(self,minfo):
@@ -472,7 +481,7 @@ class Tbot(object):
         self.send_message(minfo.chat_id, 'Посмотри: {}'.format(response))
         LOGGER.info('response HELP=%s\n',response)
         
-    async def intent_chat_admins(self,minfo):
+    def intent_chat_admins(self,minfo):
         #self._bot.send_message(minfo.chat_id, 'Посмотрю : {}'.format(response))
         try:
             repl = self._bot.get_chat_administrators(minfo.chat_id)
@@ -481,7 +490,7 @@ class Tbot(object):
             #{"ok":false,"error_code":400,"description":"Bad Request:                                                                                                                                                                         
             LOGGER.info("cant get admins %s",ex)
 
-    async def intent_get_users(self,minfo):
+    def intent_get_users(self,minfo):
         users = ''
         with self._tdb.cursor(index='name') as curs:
             #values = list(curs.iter())
@@ -490,7 +499,7 @@ class Tbot(object):
                     users += val['name']+','
         self.send_message(minfo.chat_id, 'Я знаю вот кого : {}'.format(users))        
 
-    async def intent_hold_on(self,minfo):
+    def intent_hold_on(self,minfo):
         LOGGER.info('INTENT HOLD ON chat_id=%s confidence=%s\n',minfo.chat_id,minfo.confidence)
 
     async def intent_needs_advice(self,minfo):
@@ -502,11 +511,11 @@ class Tbot(object):
         
         self.send_message(minfo.chat_id, 'Посмотри: {}'.format(response))
 
-    async def intent_pause(self,minfo):
+    def intent_pause(self,minfo):
          LOGGER.info('INTENT PAUSE chat_id=%s confidence=%s\n',minfo.chat_id,minfo.confidence)
          self.is_pause = True
 
-    async def intent_unpause(self,minfo):
+    def intent_unpause(self,minfo):
          LOGGER.info('INTENT UNPAUSE chat_id=%s confidence=%s\n',minfo.chat_id,minfo.confidence)
          self.is_pause = False
     @staticmethod
@@ -683,20 +692,13 @@ class Tbot(object):
                 for k, v in item.items()
             }
         return item
+
     def can_talk(self,intent):
         return not self.is_pause or (intent == "smalltalk.agent.unpause")
-    async def validator_task(self):
-        try:                                                                                                                 
-            LOGGER.debug("validator_task:queue...")       
-            while True:  
-                await self.process_queue()                                                                                                    
-                                                                                                                     
-        # pylint: disable=broad-except                                                                                       
-        except Exception as exc:                                                                                             
-            LOGGER.exception(exc)                                                                                            
-            LOGGER.critical("validator_task thread exited with error.")                                                      
+
 
     async def process_queue(self):
+        # not work
         try:     
             LOGGER.debug("VALIDATOR_TASK: waiting request")                                                 
             request = self._bgt_queue.get(timeout=PULL_TIMEOUT)            
