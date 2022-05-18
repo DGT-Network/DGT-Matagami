@@ -193,7 +193,7 @@ class Tbot(object):
                 err = str(ex)
                 if err.find('Too Many Requests') > 0:
                     time.sleep(1)
-            n += 1
+            n -= 1
         
     def send_sticker(self,chat_id,sticker):
         try:                                              
