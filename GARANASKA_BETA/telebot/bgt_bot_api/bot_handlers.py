@@ -351,7 +351,7 @@ class Tbot(object):
             except ConnectTimeout:
                 LOGGER.info('Get updates ConnectTimeout')
                 #change_timeout()
-                if self._use_proxy
+                if self._use_proxy:
                     shift_proxy()
                 updates = None 
             except ReadTimeout:
@@ -360,7 +360,7 @@ class Tbot(object):
                 updates = None
             except Exception as ex  :
                 LOGGER.info('Get updates except=%s',ex)
-                if self._use_proxy
+                if self._use_proxy:
                     shift_proxy()
                 updates = None
 
