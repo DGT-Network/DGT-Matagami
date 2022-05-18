@@ -159,9 +159,9 @@ class Tbot(object):
         with self._lock:                                                                            
             LOGGER.debug("DO CMD...")      
             try:                                                                                                                   
-                LOGGER.debug("VALIDATOR_TASK: intent=%s qsize=%s",request.intent,self._bgt_queue.qsize())   
+                LOGGER.debug("VALIDATOR_TASK: intent=%{} qsize={}".format(request.intent,self._bgt_queue.qsize()))   
                 if self.can_talk(request.intent):
-                    LOGGER.debug("DO _intent_handlers %s...",request.intent) 
+                    LOGGER.debug("DO _intent_handlers {}...".format(request.intent)) 
                     #self.send_message(request.chat_id, "Выполнить '{}'.".format(request.intent))                                                                                
                     self._intent_handlers[request.intent](request)                                                           
             except Exception as ex:                                                                                                    
