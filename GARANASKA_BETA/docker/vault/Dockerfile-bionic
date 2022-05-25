@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y -q \
     iputils-ping\
     net-tools\
     python3 \
-    python3-stdeb
+    python3-stdeb python3-pip
 
 RUN apt-get install -y -q \
     python3-grpcio \
@@ -44,6 +44,9 @@ RUN apt-get install -y -q \
     python3-yaml \
     unzip jq \
     python3-zmq python3-cbor python3-secp256k1 python3-cryptography>=1.7.1
+ 
+RUN pip3 install hvac             
+RUN pip3 install "hvac[parser]"
  
 COPY ./docker/vault/vault_1.10.2_linux_amd64.zip /usr/local/bin
 RUN (cd /usr/local/bin;unzip   vault_1.10.2_linux_amd64.zip)   

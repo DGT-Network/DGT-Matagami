@@ -8,6 +8,8 @@ export CRYPTO_BACK="bitcoin"
 export USER_NOTARY=""
 export BOT_TOKEN=""
 export LADDR=""
+export BON=""
+export SEAL_ADDR="vault-n1:8220"
 export REST_API="--url http://api-dgt-c1-1:8108"
 while [ -n "$1" ]
 do
@@ -17,7 +19,9 @@ case "$1" in
 -CB) shift; export CRYPTO_BACK=$1 ;;
 -UN) shift; export USER_NOTARY="--user-notary $1" ;;
 -BT) shift; export BOT_TOKEN="-bt $1" ;;
+-BO)  export BON="-bon" ;;
 -RA) shift; export REST_API="--url $1" ;;
+-SA) shift; export SEAL_ADDR="$1" ;;
 -LA) shift; export LADDR="-la $1";echo lead=$LADDR ;;
 -IDB) export INFLUXDB="--opentsdb-url";echo "SAVE metrics mode." ;;
 --) shift;break ;;
@@ -37,16 +41,16 @@ function upNotary {
     echo "START $node"
     case $node in
         1)
-          export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 COMP=4104 VPORT=8220 CPORT=8221 SADDR=vault-n1:8220 ONBOT= ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 COMP=4104 VPORT=8220 CPORT=8221 SADDR=$SEAL_ADDR ONBOT=$BON ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         2)                                                        
-          export COMPOSE_PROJECT_NAME=2 LA=$LADDR C=c1   N=1 V=2 COMP=4104 VPORT=8320 CPORT=8321 SADDR=vault-n1:8220 ONBOT=-bon;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $rmode
+          export COMPOSE_PROJECT_NAME=2 LA=$LADDR C=c1   N=1 V=2 COMP=4104 VPORT=8320 CPORT=8321 SADDR=$SEAL_ADDR ONBOT=$BON;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $rmode
         ;;                                                                          
         3)                                                                          
-          export COMPOSE_PROJECT_NAME=3 LA=$LADDR C=c1   N=1 V=3 COMP=4104 VPORT=8420 CPORT=8421 SADDR=vault-n1:8220 ONBOT= ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=3 LA=$LADDR C=c1   N=1 V=3 COMP=4104 VPORT=8420 CPORT=8421 SADDR=$SEAL_ADDR ONBOT=$BON ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                                          
         4)                                                                          
-          export COMPOSE_PROJECT_NAME=4 LA=$LADDR C=c1   N=1 V=4 COMP=4104 VPORT=8520 CPORT=8521 SADDR=vault-n1:8220 ONBOT= ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=4 LA=$LADDR C=c1   N=1 V=4 COMP=4104 VPORT=8520 CPORT=8521 SADDR=$SEAL_ADDR ONBOT=$BON ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;
         build)
          export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 COMP=4104 VPORT=8200 CPORT=8201 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml build 

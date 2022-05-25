@@ -938,7 +938,10 @@ class BgxTeleBot(Tbot):
                  
                 try:
                     data = self._vault.get_xcert(uid=minfo.user_id)
-                    if data and not force :                                                                                                                               
+                    if data and not force :    
+                        if XCERT_ATTR in data['data']:       
+                            del data['data'][XCERT_ATTR] 
+                                                                                                                                               
                         self.send_message(minfo.chat_id, f'Сертификат существует KYC={did} XCERT={data} ')                                        
                         return                                                                                                                              
                     else:                                                                                                                                   
@@ -958,7 +961,7 @@ class BgxTeleBot(Tbot):
                             # do it right now
                             #cert,_ = self.make_xcert(XCERT_PROTO,args)
                             proto = self.make_xcert_prof(XCERT_PROTO,args)
-                            kyc = self._vault.create_xcert(args,proto,uid=minfo.user_id)                                                                              
+                            kyc = self._vault.create_xcert(proto,uid=minfo.user_id)                                                                              
                             if kyc is not None:                                                                                                                 
                                 self.send_message(minfo.chat_id, f'Успешно {"изменен" if data else "создан"} сертификат доступа для {minfo.user_first_name} KYC={kyc}.')  
                                 #await self.make_xcert_transaction('crt',str(minfo.user_id),cert,minfo)                 
@@ -981,8 +984,8 @@ class BgxTeleBot(Tbot):
                 data = self._vault.get_xcert(uid=minfo.user_id)                                                                                                         
                 if data :  
                     kyc = data['data'][DID_ATTR] if DID_ATTR in data['data'] else minfo.user_id   
-                    if 'xcert' in data['data']:
-                        del data['data']['xcert']
+                    if XCERT_ATTR in data['data']:
+                        del data['data'][XCERT_ATTR]
                     self.send_message(minfo.chat_id, f'Ваш сертификат KYC={kyc} XCERT={data} ')                                                                            
                 else:                                                                                                                                                   
                     # create cert
@@ -1011,7 +1014,7 @@ class BgxTeleBot(Tbot):
                 did = req[DID_ATTR]
                 #cert,_ = self.make_xcert(XCERT_PROTO,req)
                 proto = self.make_xcert_prof(XCERT_PROTO,req)                                                                                                           
-                kyc = self._vault.create_xcert(req,proto,uid=req[UID_ATTR])                                                                                               
+                kyc = self._vault.create_xcert(proto,uid=req[UID_ATTR])                                                                                               
                 if kyc is not None:                                                                                                                                  
                     self.send_message(chat_id, f'Успешно создан сертификат доступа для {user_first_name} KYC={kyc}.')         
                     #await self.make_xcert_transaction(oper,str(did),cert)                                                             

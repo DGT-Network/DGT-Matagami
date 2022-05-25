@@ -137,7 +137,9 @@ class XcertClient:
         self._context = create_context('secp256k1',backend=self._backend)
         if keyfile is not None:
             self._signer = self.get_signer(keyfile)
-            
+        else:
+            self._private_key = None
+            self._public_key = None
 
     def get_signer(self,keyfile):
         try:                                                                                          
@@ -148,11 +150,12 @@ class XcertClient:
             raise XcertClientKeyfileException('Failed to read private key: {}'.format(str(err)))                                    
                                                                                                       
         try:                                                                                          
-            private_key = self._context.from_hex(private_key_str)                                           
+            self._private_key = self._context.from_hex(private_key_str) 
+            self._public_key = self._context.get_public_key(self._private_key)                                          
         except ParseError as e:                                                                       
             raise XcertClientException('Unable to load private key: {}'.format(str(e)))               
                                                                                                       
-        return CryptoFactory(self._context).new_signer(private_key)                                 
+        return CryptoFactory(self._context).new_signer(self._private_key)                                 
 
 
     def load_xcert(self,xcert_pem):
@@ -218,13 +221,13 @@ class XcertClient:
         return self._send_transaction(oper,pubkey, cert, to=None, wait=wait,user=user) 
 
     def set(self,value,user,before,after,wait=None):
-        return self._do_oper('set',value,user,before,after, wait=wait)
+        return self._do_oper(XCERT_SET_OP,value,user,before,after, wait=wait)
 
     def upd(self,value,user,before,after, wait=None):
-        return self._do_oper('upd',value,user,before,after, wait=wait)      
+        return self._do_oper(XCERT_UPD_OP,value,user,before,after, wait=wait)      
 
     def crt(self,value,user,before,after, wait=None):  
-        return self._do_oper('crt',value,user,before,after, wait=wait)                                   
+        return self._do_oper(XCERT_CRT_OP,value,user,before,after, wait=wait)                                   
         
 
     def list(self):

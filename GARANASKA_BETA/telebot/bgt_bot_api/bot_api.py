@@ -43,7 +43,8 @@ from bgt_bot_api.messaging import Connection
 from bgt_bot_api.bot_handlers import Tbot
 from bgt_bot_api.bgx_handlers import BgxTeleBot
 
-from bgt_bot_api.vault import Vault
+#from bgt_bot_api.vault import Vault
+from x509_cert.client_cli.notary_client import NotaryClient
 
 from bgt_bot_api.state_delta_subscription_handler import StateDeltaSubscriberHandler
 from bgt_bot_api.config import load_default_bot_api_config
@@ -408,7 +409,9 @@ def main():
         LOGGER.info(f"BOT MODE={bot_api_config.bot_on} bot={opts.bot_on} token={bot_api_config.bot_token}")
         if bot_api_config.vault_on:
             LOGGER.info(f"VAULT MODE url={bot_api_config.vault_url} NOTARY={opts.user_notary} LEAD={opts.lead_addr} REST={opts.url}")
-            vault = Vault(bot_api_config.vault_url,notary=opts.notary_name,lead_addr=opts.lead_addr,opts=opts)
+            #vault = Vault(bot_api_config.vault_url,notary=opts.notary_name,lead_addr=opts.lead_addr,opts=opts)
+            vault = NotaryClient(opts.url,'/project/peer/keys/notary.priv',opts.crypto_back,vault_url=bot_api_config.vault_url,notary=opts.notary_name,lead_addr=opts.lead_addr)
+            vault.init(opts.notary_name)
         else:
             vault = None
         if opts.bot_on:
