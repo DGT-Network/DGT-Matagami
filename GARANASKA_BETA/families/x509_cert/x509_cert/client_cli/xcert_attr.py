@@ -33,3 +33,26 @@ XCERT_SET_OP = 'set'
 XCERT_UPD_OP = 'upd'
 NOTARIES_MAP = "notaries"
 DGT_NOTARY_KEYS = 'dgt.notary.authorized_keys'
+
+XCERT_PROTO = {                                                                 
+    "COUNTRY_NAME"              : "CA",                                         
+    "STATE_OR_PROVINCE_NAME"    : "ONTARIO",                                    
+    "LOCALITY_NAME"             : "BARRIE",                                     
+    "ORGANIZATION_NAME"         : "YOUR ORGANIZATION NAME" ,                    
+    "COMMON_NAME"               : "NODE SAMPLE",                                
+    "DNS_NAME"                  : "dgt.world",                                  
+    "EMAIL_ADDRESS"             : "adminmail@mail.com",                         
+    "PSEUDONYM"                 : "dgt00000000000000000",                       
+    "JURISDICTION_COUNTRY_NAME" : "CA",                                         
+    "BUSINESS_CATEGORY"         : "YOUR BUSINESS CATEGORY",                     
+    "USER_ID"                   : "000000000000000001"                          
+}                                                                               
+DID_ATTR = 'did'                                                                
+UID_ATTR = 'uid'                                                                
+CID_ATTR = 'chat_id'                                                            
+UFN_ATTR = 'user_first_name'                                                    
+OPR_ATTR = 'oper'                                                               
+EMAIL_ATTR = 'email'                                                            
+ADDRESS_ATTR = 'address'                                                        
+XCERT_ATTR = 'xcert'                                                            
+COUNTRY_ATTR = 'country'                                                        

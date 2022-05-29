@@ -216,7 +216,21 @@ class NotaryClient(XcertClient):
 
     def get_user_did(self,uid):                                    
         did = f"did:notary:{self._public_key.as_hex()[:8]}:{uid}"      
-        return did    
+        return did   
+ 
+    def make_xcert_prof(self,info,proto_xcert=None):                              
+        proto = XCERT_PROTO.copy() if proto_xcert is None else proto_xcert.copy()                                          
+        if EMAIL_ATTR in info and info[EMAIL_ATTR]:                                               
+            proto["EMAIL_ADDRESS"] = info[EMAIL_ATTR]                        
+        if DID_ATTR in info and info[DID_ATTR]:                                                 
+            proto["USER_ID"] = str(info[DID_ATTR])                           
+                                                                             
+        if ADDRESS_ATTR  in info and info[ADDRESS_ATTR]:                                            
+            proto["LOCALITY_NAME"] = info[ADDRESS_ATTR]                      
+        if COUNTRY_ATTR in info and info[COUNTRY_ATTR]:                                             
+            proto["COUNTRY_NAME"] = info[COUNTRY_ATTR]                       
+        return proto                                                         
+    
                                                          
     """
     def upd_meta_xcert(self,info,key,init=False):                                                                                             
