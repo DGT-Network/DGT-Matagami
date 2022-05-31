@@ -36,9 +36,12 @@ class Dflow(object):
         
 
     def detect_intent_text(self,text,language_code):
-        text_input = dialogflow.types.TextInput(text=text, language_code=language_code)
-        query_input = dialogflow.types.QueryInput(text=text_input)
+        
+        
         try:
+            text_input = dialogflow.types.TextInput(text=text, language_code=language_code)       
+            query_input = dialogflow.types.QueryInput(text=text_input)                            
+
             LOGGER.info('try detect query={query_input}')
             response = self.session_client.detect_intent(session=self.session, query_input=query_input)
             LOGGER.info('{} {}'.format('=' * 20,language_code))                                                                    
