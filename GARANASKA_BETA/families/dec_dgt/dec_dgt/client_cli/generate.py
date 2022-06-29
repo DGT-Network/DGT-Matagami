@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ from dgt_signing import CryptoFactory
 
 from dgt_sdk.protobuf import transaction_pb2
 from dgt_sdk.protobuf import batch_pb2
-from bgt_common.protobuf.smart_bgt_token_pb2 import BgtTokenInfo
-from dgt_bgt.processor.handler import make_bgt_address
-
+from dec_common.protobuf.dec_dgt_token_pb2 import DecTokenInfo
+from dec_dgt.processor.handler import make_dec_address
+from dec_dgt.client_cli.dec_attr import *
 
 LOGGER = logging.getLogger(__name__)
 
-def loads_bgt_token(data,name=None):
+def loads_dec_token(data,name=None):
     decoded = cbor.loads(base64.b64decode(data))
     if name is not None:
         value = decoded[name]
@@ -44,12 +44,12 @@ def loads_bgt_token(data,name=None):
         for key,data in decoded.items():
             name,value = key,data
             break 
-    token = BgtTokenInfo()
+    token = DecTokenInfo()
     token.ParseFromString(value)
-    LOGGER.debug("BGT:%s %s=%s",name,token.group_code,token.decimals)
-    return {'bgt':name,'group':token.group_code,'value':token.decimals,'sign':token.sign}
+    LOGGER.debug("DEC:%s %s=%s",name,token.group_code,token.decimals)
+    return {FAMILY_NAME:name,'group':token.group_code,'value':token.decimals,'sign':token.sign}
 
-class BgtPayload:
+class DecPayload:
     def __init__(self, verb, name, value,to = None):
         self._verb = verb
         self._name = name
@@ -81,23 +81,23 @@ class BgtPayload:
         return self._sha512
 
 
-def create_bgt_transaction(verb, name, value, signer,to = None):
-    payload = BgtPayload(verb=verb, name=name, value=value, to = to)
+def create_dec_transaction(verb, name, value, signer,to = None):
+    payload = DecPayload(verb=verb, name=name, value=value, to = to)
 
     # The prefix should eventually be looked up from the
     # validator's namespace registry.
-    addr = make_bgt_address(name)
+    addr = make_dec_address(name)
     inputs  = [addr]
     outputs = [addr]
     if to is not None:
-        addr_to = make_bgt_address(to)
+        addr_to = make_dec_address(to)
         inputs.append(addr_to)
         outputs.append(addr_to)
     
     header = transaction_pb2.TransactionHeader(
         signer_public_key=signer.get_public_key().as_hex(),
-        family_name='bgt',
-        family_version='1.0',
+        family_name=FAMILY_NAME,
+        family_version=FAMILY_VERSION,
         inputs=inputs,
         outputs=outputs,
         dependencies=[],
@@ -161,8 +161,8 @@ def do_generate(args):
     for i in range(0, args.count):
         txns = []
         for _ in range(0, random.randint(1, args.batch_max_size)):
-            txn = create_bgt_transaction(
-                verb=random.choice(['inc', 'dec']),
+            txn = create_dec_transaction(
+                verb=random.choice([DEC_INC_OP, DEC_DEC_OP]),
                 name=random.choice(words),
                 value=1,
                 signer=signer)

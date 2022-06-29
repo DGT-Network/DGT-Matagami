@@ -1,4 +1,4 @@
-# Copyright 2017 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ from dgt_signing import create_context
 from dgt_signing import CryptoFactory
 from dgt_signing import ParseError
 
-from dgt_bgt.client_cli.workload.workload_generator import \
-    WorkloadGenerator
-from dgt_bgt.client_cli.workload.sawtooth_workload import Workload
-from dgt_bgt.client_cli.create_batch import create_bgt_transaction
-from dgt_bgt.client_cli.create_batch import create_batch
-from dgt_bgt.client_cli.exceptions import BgtCliException
+from dec_dgt.client_cli.workload.workload_generator import WorkloadGenerator
+from dec_dgt.client_cli.workload.dgt_workload import Workload
+from dec_dgt.client_cli.create_batch import create_dec_transaction
+from dec_dgt.client_cli.create_batch import create_batch
+from dec_dgt.client_cli.exceptions import DecCliException
 from dgt_sdk.protobuf import batch_pb2
+from dec_dgt.client_cli.dec_attr import *
 
 LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def post_batches(url, batches, auth_info=None):
         )
 
 
-class BgtWorkload(Workload):
+class DecWorkload(Workload):
     """
     This workload is for the Sawtooth Integer Key transaction family.  In
     order to guarantee that batches of transactions are submitted at a
@@ -85,7 +85,7 @@ class BgtWorkload(Workload):
     """
 
     def __init__(self, delegate, args):
-        super(BgtWorkload, self).__init__(delegate, args)
+        super(DecWorkload, self).__init__(delegate, args)
         self._auth_info = args.auth_info
         self._urls = []
         self._pending_batches = {}
@@ -102,9 +102,9 @@ class BgtWorkload(Workload):
 
                 self._signer = crypto_factory.new_signer(private_key=private_key)
             except ParseError as pe:
-                raise BgtCliException(str(pe))
+                raise DecCliException(str(pe))
             except IOError as ioe:
-                raise BgtCliException(str(ioe))
+                raise DecCliException(str(ioe))
         else:
             self._signer = crypto_factory.new_signer(
                 context.new_random_private_key())
@@ -135,8 +135,8 @@ class BgtWorkload(Workload):
 
         if key is not None:
             if key.value < 1000000:
-                txn = create_bgt_transaction(
-                    verb="inc",
+                txn = create_dec_transaction(
+                    verb=DEC_INC_OP,
                     name=key.name,
                     value=1,
                     deps=[self._deps[key.name]],
@@ -176,8 +176,8 @@ class BgtWorkload(Workload):
         batch_id = None
         if url is not None:
             name = datetime.now().isoformat()[-20:]
-            txn = create_bgt_transaction(
-                verb="set",
+            txn = create_dec_transaction(
+                verb=DEC_SET_OP,
                 name=name,
                 value=0,
                 deps=[],
@@ -204,13 +204,13 @@ class BgtWorkload(Workload):
 
 def do_workload(args):
     """
-    Create WorkloadGenerator and BgtWorkload. Set Bgt workload in
+    Create WorkloadGenerator and DecWorkload. Set Bgt workload in
     generator and run.
     """
     try:
         args.auth_info = _get_auth_info(args.auth_user, args.auth_password)
         generator = WorkloadGenerator(args)
-        workload = BgtWorkload(generator, args)
+        workload = DecWorkload(generator, args)
         generator.set_workload(workload)
         generator.run()
     except KeyboardInterrupt:

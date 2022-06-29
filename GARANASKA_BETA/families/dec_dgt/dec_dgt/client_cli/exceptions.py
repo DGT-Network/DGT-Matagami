@@ -1,4 +1,4 @@
-# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
 # ------------------------------------------------------------------------------
 
 
-class BgtCliException(Exception):
+class DecCliException(Exception):
     pass
 
 
-class BgtClientException(Exception):
+class DecClientException(Exception):
     pass

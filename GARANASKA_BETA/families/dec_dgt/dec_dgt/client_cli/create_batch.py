@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ from dgt_signing import CryptoFactory
 from dgt_sdk.protobuf import batch_pb2
 from dgt_sdk.protobuf import transaction_pb2
 
-from dgt_bgt.processor.handler import make_bgt_address
-
+from dec_dgt.processor.handler import make_dec_address
+from dec_dgt.client_cli.dec_attr import *
 
 LOGGER = logging.getLogger(__name__)
 
 
-class BgtPayload:
+class DecPayload:
     def __init__(self, verb, name, value):
         self._verb = verb
         self._name = name
@@ -63,7 +63,7 @@ class BgtPayload:
         return self._sha512
 
 
-def create_bgt_transaction(verb, name, value, deps, signer):
+def create_dec_transaction(verb, name, value, deps, signer):
     """Creates a signed bgt transaction.
 
     Args:
@@ -81,17 +81,17 @@ def create_bgt_transaction(verb, name, value, deps, signer):
         transaction (transaction_pb2.Transaction): the signed bgt
             transaction
     """
-    payload = BgtPayload(
+    payload = DecPayload(
         verb=verb, name=name, value=value)
 
     # The prefix should eventually be looked up from the
     # validator's namespace registry.
-    addr = make_bgt_address(name)
+    addr = make_dec_address(name)
 
     header = transaction_pb2.TransactionHeader(
         signer_public_key=signer.get_public_key().as_hex(),
-        family_name='bgt',
-        family_version='1.0',
+        family_name=FAMILY_NAME,
+        family_version=FAMILY_VERSION,
         inputs=[addr],
         outputs=[addr],
         dependencies=deps,
@@ -153,8 +153,8 @@ def do_populate(batches, keys):
     txns = []
     for i in range(0, len(keys)):
         name = list(keys)[i]
-        txn = create_bgt_transaction(
-            verb='set',
+        txn = create_dec_transaction(
+            verb=DEC_SET_OP,
             name=name,
             value=random.randint(9000, 100000),
             deps=[],
@@ -184,8 +184,8 @@ def do_generate(args, batches, keys):
         txns = []
         for _ in range(0, random.randint(1, args.max_batch_size)):
             name = random.choice(list(keys))
-            txn = create_bgt_transaction(
-                verb=random.choice(['inc', 'dec']),
+            txn = create_dec_transaction(
+                verb=random.choice([DEC_INC_OP, DEC_DEC_OP]),
                 name=name,
                 value=random.randint(1, 10),
                 deps=[keys[name]],

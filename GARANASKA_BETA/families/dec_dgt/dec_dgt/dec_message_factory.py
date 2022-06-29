@@ -1,4 +1,4 @@
-# Copyright 2016 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 import cbor
 
 from sawtooth_processor_test.message_factory import MessageFactory
-from dgt_bgt.processor.handler import BGT_ADDRESS_PREFIX
-from dgt_bgt.processor.handler import make_bgt_address
+from dec_dgt.processor.handler import DEC_ADDRESS_PREFIX
+from dec_dgt.processor.handler import make_dec_address
+from dec_dgt.client_cli.dec_attr import *
 
-
-class BgtMessageFactory:
+class DecMessageFactory:
     def __init__(self, signer=None):
         self._factory = MessageFactory(
-            family_name='bgt',
-            family_version='1.0',
-            namespace=INTKEY_ADDRESS_PREFIX,
+            family_name=FAMILY_NAME,
+            family_version=FAMILY_VERSION,
+            namespace=DEC_ADDRESS_PREFIX,
             signer=signer)
 
     def _dumps(self, obj):
@@ -43,7 +43,7 @@ class BgtMessageFactory:
     def _create_txn(self, txn_function, verb, name, value):
         payload = self._dumps({'Verb': verb, 'Name': name, 'Value': value})
 
-        addresses = [make_bgt_address(name)]
+        addresses = [make_dec_address(name)]
 
         return txn_function(payload, addresses, addresses, [])
 
@@ -64,11 +64,11 @@ class BgtMessageFactory:
         return self._factory.create_batch(txns)
 
     def create_get_request(self, name):
-        addresses = [make_bgt_address(name)]
+        addresses = [make_dec_address(name)]
         return self._factory.create_get_request(addresses)
 
     def create_get_response(self, name, value):
-        address = make_bgt_address(name)
+        address = make_dec_address(name)
 
         if value is not None:
             data = self._dumps({name: value})
@@ -78,7 +78,7 @@ class BgtMessageFactory:
         return self._factory.create_get_response({address: data})
 
     def create_set_request(self, name, value):
-        address = make_bgt_address(name)
+        address = make_dec_address(name)
 
         if value is not None:
             data = self._dumps({name: value})
@@ -88,5 +88,5 @@ class BgtMessageFactory:
         return self._factory.create_set_request({address: data})
 
     def create_set_response(self, name):
-        addresses = [make_bgt_address(name)]
+        addresses = [make_dec_address(name)]
         return self._factory.create_set_response(addresses)
