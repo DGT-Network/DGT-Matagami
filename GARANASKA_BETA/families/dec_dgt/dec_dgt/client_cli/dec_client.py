@@ -54,7 +54,7 @@ def _token_info(val):
     return token
 
 class DecClient:
-    def __init__(self, url, keyfile=None):
+    def __init__(self, url=None, keyfile=None,signer=None):
         self.url = url
 
         if keyfile is not None:
@@ -73,6 +73,8 @@ class DecClient:
                     'Unable to load private key: {}'.format(str(e)))
 
             self._signer = CryptoFactory(context).new_signer(private_key)
+        elif signer:
+            self._signer = signer
 
     def load_json_proto(self,value):
         if isinstance(value,dict):                        
@@ -96,9 +98,23 @@ class DecClient:
             info[DEC_NAME][DATTR_VAL] = args.name
         if args.fee :                             
             info[DEC_FEE][DATTR_VAL] = args.fee 
+        if args.corporate_pub_key:
+            # check when create corporate wallet - only owner this key have responsibilities for operation
+            info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : args.corporate_pub_key}
+        else:
+            info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
+        info[DEC_TMSTAMP] = time.time()
         print('PROTO',info)
         self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)
+
+    def wallet(self,args,wait=None):   
+        info = {}
+        if args.did:                     
+            info[DEC_DID_VAL] = args.did      
+        info[DEC_TMSTAMP] = time.time()                                          
+        return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY      
+
 
     def birth(self,args,wait=None):
         token = self.show(DEC_EMISSION_KEY)
@@ -178,10 +194,37 @@ class DecClient:
     #  
     # minting cmd parts 
     def mint(self,args,wait=None): 
-        pass 
+        info = {}
+        if args.sum:                                                                                              
+            info[DATTR_VAL]   = args.sum                                                                            
+        if args.did:
+            info[DEC_DID_VAL] = args.did
+
+        info[DEC_TMSTAMP] = time.time()
+        self._send_transaction(DEC_MINT_OP, args.pubkey, info, to=DEC_HEART_BEAT_KEY, wait=wait,din=[DEC_EMISSION_KEY])                  
+
 
     def heart_beat(self,args,wait=None):      
-        pass 
+        info = {}                                                                                       
+        if args.passkey:                                                                                    
+            info[DATTR_VAL]   = args.passkey                                                                
+        if args.period:                                                                                    
+            info[DEC_HEART_BEAT_PERIOD] = args.period  
+
+        info[DEC_TMSTAMP] = time.time()
+                                                                    
+        self._send_transaction(DEC_HEART_BEAT_OP, DEC_HEART_BEAT_KEY, info, to=None, wait=wait,din=None) #DEC_EMISSION_KEY) 
+
+    def make_heart_beat_tnx(self,passkey=None,period=None,peers=[]):
+        info = {}                                
+        if passkey:                              
+            info[DATTR_VAL]   = passkey          
+        if period:                               
+            info[DEC_HEART_BEAT_PERIOD] = period
+        info[DEC_HEART_BEAT_PEERS] = peers
+        info[DEC_TMSTAMP] = time.time()
+        return self._make_transaction(DEC_HEART_BEAT_OP,DEC_HEART_BEAT_KEY,info,to=None,din=DEC_EMISSION_KEY)
+
     
     def seal_count(self,args,wait=None):                            
         pass  
@@ -320,54 +363,66 @@ class DecClient:
 
         return result.text
 
-    def _send_transaction(self, verb, name, value, to=None, wait=None,din=None):
-        val = {
-            'Verb': verb,
-            'Name': name,
-            'Value': value,
-        }
-        if to is not None:
-            val['To'] = to
-        
-        
-
-        # Construct the address
-        address = self._get_address(name)
-        inputs = [address]
-        outputs = [address]
-        if to is not None:
-            address_to = self._get_address(to)
-            inputs.append(address_to)
-            outputs.append(address_to)
-        if din is not None:
-            dinputs = din if isinstance(din,list) else [din]
-            val[DATTR_INPUTS] = dinputs
-            for ain in dinputs:
-                address_in = self._get_address(ain)
-                inputs.append(address_in)
-
+    def _make_transaction(self, verb, name, value, to=None,din=None):                                                                  
+        val = {                                                                                                                                   
+            'Verb': verb,                                                                                                                         
+            'Name': name,                                                                                                                         
+            'Value': value,                                                                                                                       
+        }                                                                                                                                         
+        if to is not None:                                                                                                                        
+            val['To'] = to                                                                                                                        
+                                                                                                                                                  
+        hex_pubkey =  self._signer.get_public_key().as_hex()                                                                                                                                       
+        sign_val = {} 
+                                                                                                                                                
+        # Construct the address                                                                                                                   
+        address = self._get_address(name)                                                                                                         
+        inputs = [address]                                                                                                                        
+        outputs = [address]                                                                                                                       
+        if to is not None:                                                                                                                        
+            address_to = self._get_address(to)                                                                                                    
+            inputs.append(address_to)                                                                                                             
+            outputs.append(address_to)                                                                                                            
+        if din is not None:                                                                                                                       
+            dinputs = din if isinstance(din,list) else [din]                                                                                      
+            val[DATTR_INPUTS] = dinputs                                                                                                           
+            for ain in dinputs:                                                                                                                   
+                address_in = self._get_address(ain)                                                                                               
+                inputs.append(address_in)                                                                                                         
+                                                                                                                                                  
         print("in={} out={}".format(inputs,outputs))
         payload = cbor.dumps(val)
-        header = TransactionHeader(
-            signer_public_key=self._signer.get_public_key().as_hex(),
-            family_name=FAMILY_NAME,
-            family_version=FAMILY_VERSION,
-            inputs=inputs,
-            outputs=outputs,
-            dependencies=[],
-            payload_sha512=_sha512(payload),
-            batcher_public_key=self._signer.get_public_key().as_hex(),
-            nonce=hex(random.randint(0, 2**64))
-        ).SerializeToString()
+        psign = self._signer.sign(payload)
+        sign_val[DEC_SIGNATURE] =  psign
+        sign_val[DEC_PUBKEY] = hex_pubkey
+        sign_val[DATTR_VAL] =  payload                                                                                         
+        spayload = cbor.dumps(sign_val)  
+        
+        print("PSIGN={}".format(psign))                                                                                                               
+        header = TransactionHeader(                                                                                                               
+            signer_public_key=hex_pubkey,                                                                             
+            family_name=FAMILY_NAME,                                                                                                              
+            family_version=FAMILY_VERSION,                                                                                                        
+            inputs=inputs,                                                                                                                        
+            outputs=outputs,                                                                                                                      
+            dependencies=[],                                                                                                                      
+            payload_sha512=_sha512(spayload),                                                                                                      
+            batcher_public_key=hex_pubkey,                                                                            
+            nonce=hex(random.randint(0, 2**64))                                                                                                   
+        ).SerializeToString()                                                                                                                     
+                                                                                                                                                  
+        signature = self._signer.sign(header)                                                                                                     
+                                                                                                                                                  
+        transaction = Transaction(                                                                                                                
+            header=header,                                                                                                                        
+            payload=spayload,                                                                                                                      
+            header_signature=signature                                                                                                            
+        ) 
+        return transaction                                                                                                                                        
 
-        signature = self._signer.sign(header)
 
-        transaction = Transaction(
-            header=header,
-            payload=payload,
-            header_signature=signature
-        )
-
+    def _send_transaction(self, verb, name, value, to=None, wait=None,din=None):
+        transaction = self._make_transaction(verb,name,value,to,din)
         batch_list = self._create_batch_list([transaction])
         batch_id = batch_list.batches[0].header_signature
 

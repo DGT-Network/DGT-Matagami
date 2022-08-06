@@ -112,6 +112,7 @@ def create_parser(prog_name):
     subparsers = parser.add_subparsers(title='subcommands', dest='command')
 
     add_emission_parser(subparsers, parent_parser)
+    add_wallet_parser(subparsers, parent_parser)
     add_birth_parser(subparsers, parent_parser)
     add_total_supply_parser(subparsers, parent_parser)
     add_token_info_parser(subparsers, parent_parser)
@@ -227,7 +228,12 @@ def add_emission_parser(subparsers, parent_parser):
        '--corporate_account','-ca',                     
        type=str,                     
        help='DGT account'        
-       )                             
+       )  
+    parser.add_argument(               
+      '--corporate_pub_key','-ck',    
+      type=str,                       
+      help='Corporate public key for managing corporate account'              
+      )                                                          
     parser.add_argument(        
        '--wait_to_date','-wtd',                
        type=int,               
@@ -256,6 +262,46 @@ def do_emission(args):
     client = _get_client(args)                                
     response = client.emission(args, args.wait)                  
     print(response)                                           
+
+def add_wallet_parser(subparsers, parent_parser):                                                  
+    message = 'Create wallet for  DEC token.'                                                                 
+                                                                                                 
+    parser = subparsers.add_parser(                                                              
+        DEC_WALLET_OP,                                                                             
+        parents=[parent_parser],                                                                 
+        description=message,                                                                     
+        help='Create wallet')                                                                   
+    
+    parser.add_argument(                  
+        '--did','-d',                     
+        type=str,                         
+        help='DID')                       
+
+                                                                                                   
+    parser.add_argument(                                                                         
+        '--url',                                                                                 
+        type=str,                                                                                
+        help='specify URL of REST API',                                                          
+        default='http://api-dgt-c1-1:8108')                                                      
+                                                                                                 
+    parser.add_argument(                                                                         
+        '--keyfile',                                                                             
+        type=str, 
+        default="/project/peer/keys/validator.priv",                                                                               
+        help="identify file containing user's private key")                                      
+                                                                                                 
+    parser.add_argument(                                                                         
+        '--wait',                                                                                
+        nargs='?',                                                                               
+        const=sys.maxsize,                                                                       
+        type=int,                                                                                
+        help='set time, in seconds, to wait for transaction to commit')                          
+                                                                                                 
+def do_wallet(args):                                                                               
+    client = _get_client(args)                                                                   
+    response = client.wallet(args, args.wait)                                                      
+    print(response)                                                                              
+
 
 def add_birth_parser(subparsers, parent_parser):
     message = 'Info about  DEC birth.'
@@ -551,6 +597,7 @@ def add_mint_parser(subparsers, parent_parser):
     parser.add_argument(
         '--keyfile',
         type=str,
+        default="/project/peer/keys/validator.priv",
         help="identify file containing user's private key")
 
     parser.add_argument(
@@ -566,23 +613,25 @@ def do_mint(args):
     print(response) 
     
 def add_heart_beat_parser(subparsers, parent_parser):
-    message = 'Heart beat  DEC token.'
+    message = 'Heartbeat  DEC token.'
 
     parser = subparsers.add_parser(
         DEC_HEART_BEAT_OP,
         parents=[parent_parser],
         description=message,
-        help='Heart beat token')
+        help='Heart beat dec network')
 
     parser.add_argument(                                       
         '--passkey','-pk',                                     
         type=str,                                              
-        help='passkey')                  
+        help='passkey or Dag position ')                  
 
     parser.add_argument(                                       
         '--period','-p',                                          
-        type=int,                                              
-        help='Sum ')  
+        type=int,
+        default=DEC_HEART_BEAT_PERIOD_DEF,                                              
+        help='Period of heartbeat cmd ')
+      
     parser.add_argument(          
         '--pub_keys','-ps',       
         type=str,                                                      
@@ -691,7 +740,8 @@ def do_balance_of(args):
     client = _get_client(args)                                
     token = client.balance_of(args, args.wait) 
     if token:
-        print("{}: {}={} : ".format(args.pubkey,args.asset_type,token.decimals))
+        dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
+        print("{}: {}={} : ".format(args.pubkey,args.asset_type,token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM]))
     else:
         print("{} - undefined".format(args.pubkey))
     
@@ -893,6 +943,49 @@ def do_bank_list(args):
     client = _get_client(args)                                
     response = client.bank_list(args, args.wait)                  
     print(response) 
+
+def add_mint_parser(subparsers, parent_parser):                                            
+    message = 'Mint DEC for <key>.'                                            
+    parser = subparsers.add_parser(                                                       
+        DEC_MINT_OP,                                                                       
+        parents=[parent_parser],                                                          
+        description=message,                                                              
+        help='Mint token for peer')                                                             
+    parser.add_argument(                                                                  
+        'pubkey',                                                                           
+        type=str,                                                                         
+        help='Peer pub key')                                                               
+                                                                                          
+    parser.add_argument(                                                                  
+        '--did','-d',                                                                     
+        type=str,                                                                         
+        help='DID')                                                                       
+    parser.add_argument(                                                                  
+        '--sum','-s',                                                                 
+        type=str,                                                                         
+        help='Token amount')
+                                                          
+    parser.add_argument(                                                                  
+        '--url',                                                                          
+        type=str,                                                                         
+        help='specify URL of REST API',                                                   
+        default='http://api-dgt-c1-1:8108')                                               
+    parser.add_argument(                                                                  
+        '--keyfile',                                                                      
+        type=str,                                                                         
+        help="identify file containing user's private key")                               
+    parser.add_argument(                                                                  
+        '--wait',                                                                         
+        nargs='?',                                                                        
+        const=sys.maxsize,                                                                
+        type=int,                                                                         
+        help='set time, in seconds, to wait for transaction to commit')   
+                    
+def do_mint(args):                                   
+    client = _get_client(args)                            
+    response = client.mint(args, args.wait)          
+    print(response)                                       
+
 
 def add_set_parser(subparsers, parent_parser):
     message = 'Sends an bgt transaction to set <name> to <value>.'
@@ -1102,7 +1195,7 @@ def do_show(args):
     name = args.name
     client = _get_client(args)
     token = client.show(name)
-    dec = cbor.loads(token.dec) if token.group_code  in [DEC_NAME_DEF,DEC_INVOICE_DEF] else {}
+    dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
     print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
 
@@ -1129,7 +1222,7 @@ def do_list(args):
     for pair in results:
         for name, value in pair.items():
             token.ParseFromString(value)
-            dec = cbor.loads(token.dec) if token.group_code in [DEC_NAME_DEF,DEC_INVOICE_DEF] else {}
+            dec = cbor.loads(token.dec) if token.group_code in DEC_TYPES else {}
 
             print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
@@ -1179,7 +1272,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
     elif args.command == DEC_TRANS_OP:
         do_trans(args)
     elif args.command == DEC_EMISSION_OP:          
-        do_emission(args)                          
+        do_emission(args)                        
+    elif args.command == DEC_WALLET_OP:         
+        do_wallet(args)                               
     elif args.command == DEC_BIRTH_OP:             
         do_birth(args)                             
     elif args.command == DEC_TOTAL_SUPPLY_OP:      
