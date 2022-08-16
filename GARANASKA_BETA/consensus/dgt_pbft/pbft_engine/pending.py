@@ -13,7 +13,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------------
 import logging
-from pbft_common.utils import _short_id
+from pbft_common.utils import _short_id,_SID_
 LOGGER = logging.getLogger(__name__)
 
 class PendingForks:
@@ -32,14 +32,14 @@ class PendingForks:
         except ValueError:
             self._queue.insert(0, block.block_id)
             self._blocks[block.block_id] = block
-            LOGGER.debug('PendingForks PUSH block_id=%s',_short_id(block.block_id.hex()))
+            LOGGER.debug('PendingForks PUSH block_id=%s',_SID_(block.block_id.hex()))
             return
         try:
             del self._blocks[block.previous_id]
-            LOGGER.debug('PendingForks DEL block_id=%s',_short_id(block.previous_id.hex()))
+            LOGGER.debug('PendingForks DEL block_id=%s',_SID_(block.previous_id.hex()))
         except KeyError:
             pass
-        LOGGER.debug('PendingForks PUSH  block_id=%s INSTEAD prev',_short_id(block.block_id.hex()))
+        LOGGER.debug('PendingForks PUSH  block_id=%s INSTEAD prev',_SID_(block.block_id.hex()))
         self._queue[index] = block.block_id
         self._blocks[block.block_id] = block
 
@@ -52,4 +52,4 @@ class PendingForks:
         block = self._blocks.pop(block_id)
         return block
     def __str__(self):
-        return "PENDING blocks={}->{}".format([bid.hex()[:8] for bid in self._queue],[bid.hex()[:8] for bid in self._blocks.keys()])
+        return "PENDING blocks={}->{}".format([_SID_(bid.hex()) for bid in self._queue],[_SID_(bid.hex()) for bid in self._blocks.keys()])

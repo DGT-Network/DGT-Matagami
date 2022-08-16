@@ -48,10 +48,10 @@ from pbft.journal.block_wrapper import BlockWrapper
 #from pbft_common.protobuf.pbft_consensus_pb2 import PbftMessage,PbftMessageInfo,PbftBlockMessage,PbftViewChange
 #from pbft_common.protobuf.consensus_pb2 import ConsensusBlock, ConsensusNotifyPeerConnected
 
-from pbft_common.utils import _short_id
+from pbft_common.utils import _short_id,_SID_
 # for nests making
 from dgt_settings.protobuf.settings_pb2 import SettingProposal,SettingsPayload,SettingTopology
-
+from dec_dgt.client_cli.dec_client import DecClient
 #from pbft_common.protobuf.settings_pb2 import SettingTopology
 from pbft_common.utils import _config_inputs,_config_outputs
 try:
@@ -115,6 +115,7 @@ class PbftOracle:
         LOGGER.debug(f'DGT CRYPTO={dgt_crypto} \nNODES = {dgt_nodes}')
         self.get_topology()
         self._canceled = False
+        self._dec_client = None
         #sid = self.get_validator_id().encode()
         #sidd = sid.decode()
         #LOGGER.debug('PbftOracle:: _validator_id %s %s..%s',sid,sidd[:8],sidd[-8:])
@@ -137,6 +138,9 @@ class PbftOracle:
     def update_state_view_block(self,block_id):
         self._state_view.update_block(block_id)
 
+    @property                                    
+    def is_heart_beat(self):                          
+        return self._pbft_settings_view.is_heart_beat 
     @property
     def dag_step(self):
         return self._pbft_settings_view.dag_step
@@ -318,6 +322,15 @@ class PbftOracle:
             # get setting
             pass
 
+    def send_heart_beat(self,peers):
+        if self._dec_client is not None:
+            LOGGER.debug('PbftOracle:send_heart_beat...')
+            transaction = self._dec_client.make_heart_beat_tnx(peers=peers)
+            self._batch_publisher.send([transaction])
+
+    def init_dec_client(self):
+        LOGGER.debug('PbftOracle:init DEC client...')
+        self._dec_client = DecClient(signer=self._signer)
 
     def initialize_block(self, previous_block):
         block_header = NewBlockHeader(
@@ -360,7 +373,7 @@ class PbftOracle:
 
     def switch_forks(self, cur_fork_head, new_fork_head):
         '''"compare_forks" is not an intuitive name.'''
-        LOGGER.debug('PbftOracle: switch_forks %s signer=%s~%s',cur_fork_head,cur_fork_head.signer_id.hex()[:8],new_fork_head.signer_id.hex()[:8])
+        LOGGER.debug('PbftOracle: switch_forks %s signer=%s~%s',cur_fork_head,_SID_(cur_fork_head.signer_id.hex()),_SID_(new_fork_head.signer_id.hex()))
         if new_fork_head.block_num == 0 and new_fork_head.block_num == cur_fork_head.block_num:
             # use genesis block from 
             is_genesis_node = new_fork_head.signer_id.hex() == self.genesis_node or (self._peering_mode == 'dynamic')
@@ -1067,7 +1080,7 @@ class PbftOracle:
         signer_id = info.signer_id.decode()
         #self.get_state_by_summary(summary,"PEER_MESSAGE")
 
-        LOGGER.debug("PbftOracle: => PEER_MESSAGE %s.'%s' block_id=%s summary=%s signer='%s.%s..%s'",info.seq_num,msg_type,_short_id(block_id),_short_id(summary),self.get_node_type_by_id(signer_id),signer_id[:8],signer_id[-8:])
+        LOGGER.debug("PbftOracle: => PEER_MESSAGE %s.'%s' block_id=%s summary=%s signer='%s.%s..%s'",info.seq_num,msg_type,_short_id(block_id),_short_id(summary),self.get_node_type_by_id(signer_id),_SID_(signer_id),_SID_(signer_id))
         return self.message_consensus_handler(info.msg_type,block)
 
     def _send_pre_prepare(self,state,block):
