@@ -34,6 +34,7 @@ class PbftSettingsView:
     _CHECKPOINT_PERIOD_ = 100
     _VIEW_CHANGE_TIMEOUT_ = 4000
     _DAG_STEP_ = 3
+    _IS_HEART_BEAT_ = False
     _IS_PBFT_FULL_ = False
     _IS_LEADER_SHIFT_ = False
     _BLOCK_TIMEOUT_ = 6.5
@@ -47,6 +48,7 @@ class PbftSettingsView:
     DAG_STEP = 'dgt.dag.step'
     DGT_CRYPTO = DGT_CRYPTO_NM
     DGT_CRYPTO_ALG = DGT_CRYPTO_ALG_NM
+    IS_HEART_BEAT = 'dgt.dec.heartbeat'
 
     def __init__(self, state_view):
         """Initialize a PbftSettingsView object.
@@ -261,9 +263,18 @@ class PbftSettingsView:
                     default_value=PbftSettingsView._NODES_,                     
                     validate_function=lambda value: value)                      
                                                                                 
-        return self._params[DGT_TOPOLOGY_SET_NM]                                    
-
-
+        return self._params[DGT_TOPOLOGY_SET_NM]   
+                                     
+    @property                                                                           
+    def is_heart_beat(self):                                                                 
+        if PbftSettingsView.IS_HEART_BEAT not in self._params :                              
+            self._params[PbftSettingsView.IS_HEART_BEAT] = self._get_config_setting(         
+                    name=PbftSettingsView.IS_HEART_BEAT,                                                
+                    value_type=int,                                                     
+                    default_value=PbftSettingsView._IS_HEART_BEAT_,                          
+                    validate_function=lambda value: value==0 or value==1)                              
+            
+        return self._params[PbftSettingsView.IS_HEART_BEAT]                                  
 
 
     @property

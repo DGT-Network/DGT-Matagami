@@ -239,7 +239,18 @@ class ConsensusProxy:
         for version with seal we should receive consensus seal here
 
         """
-        LOGGER.debug("ConsensusProxy:COMMIT BLOCK %s",block_id.hex()[:8])
+        LOGGER.debug("ConsensusProxy:COMMIT BLOCK ID %s seal=(%s)",block_id.hex()[-8:],seal.hex()[:8] if isinstance(seal,bytes) else seal)
+        if seal == b'' or seal is None:
+            #block = next(self._block_manager.get([block_id.hex()]))
+            try:                                                                                      
+                block = self._chain_controller.get_block_from_cache(block_id.hex()) 
+                LOGGER.debug("ConsensusProxy:COMMIT BLOCK=%s",block)
+                self._block_publisher.keep_seal(block.previous_block_id,block.consensus)
+                
+            except Exception as ex:                                                                         
+                pass  
+                LOGGER.debug("ConsensusProxy:COMMIT BLOCK er={}".format(ex))                                                             
+            #LOGGER.debug("ConsensusProxy:COMMIT BLOCK=%s",block)
         self._block_publisher.commit_block(block_id,seal)
         # we can use block manager but we can get this block from _blocks_processing by id
         """

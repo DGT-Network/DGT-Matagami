@@ -804,7 +804,7 @@ class BlockPublisher(object):
         # check SEAL from prev block
         is_seal = chain_head.header_signature in self._block_seals
         seal = self._block_seals[chain_head.header_signature] if is_seal else None
-        LOGGER.debug("Header for block candidate(%s:...)->(%s:%s) SEAL=(%s) heads=%s",block_num,chain_head.block_num,chain_head.header_signature[:8],seal,self.chain_heads)
+        LOGGER.debug("Header for block candidate(%s:...)->(%s:%s) SEAL=(%s) heads=%s",block_num,chain_head.block_num,chain_head.header_signature[-8:],seal,self.chain_heads)
         block_header = BlockHeader(
                            block_num=block_num , # ask last block number from store
                            previous_block_id=chain_head.header_signature,
@@ -1428,12 +1428,17 @@ class BlockPublisher(object):
         # return parent block id 
         return bid 
 
+    def keep_seal(self,block_id,seal):
+        LOGGER.debug('BlockPublisher:KEEP SEAL  BLOCK={} SEAL={}'.format(block_id[-8:],seal[:8]))
+        self._block_seals[block_id] = seal # save seal
+
     def commit_block(self,block_id=None,seal=None):
         bid = block_id.hex()
         LOGGER.debug(f'BlockPublisher:COMMIT BLOCK={bid[:8]} seal={type(seal)}  seals={len(self._block_seals)}') 
-        if seal is not None:
-            LOGGER.debug(f'BlockPublisher:COMMIT BLOCK={bid[:8]} SEAL={seal}')
-        self._block_seals[bid] = seal # save seal                                                                    
+        #if seal is not None:
+        #    LOGGER.debug(f'BlockPublisher:COMMIT BLOCK={bid[:8]} SEAL={seal}')
+        if seal != b'' and seal is not None:
+            self.keep_seal(bid,seal) # save seal                                                                    
 
 
     def cancel_block(self,branch_id=None):

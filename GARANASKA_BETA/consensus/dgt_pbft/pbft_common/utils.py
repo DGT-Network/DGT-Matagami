@@ -62,7 +62,10 @@ def _config_outputs(key,nmap):
 
 
 def _short_id(id):
-    return '/' + id[:8] + '/' # '/' + id[:8] + '..' + id[-8:] + '/'
+    return '{}..{}'.format(id[:4],id[-5:]) # '/' + id[:8] + '..' + id[-8:] + '/'
+
+def _SID_(id):
+    return '{}..{}'.format(id[:4],id[-5:]) 
 
 
 def pretty_print_dict(dictionary):
