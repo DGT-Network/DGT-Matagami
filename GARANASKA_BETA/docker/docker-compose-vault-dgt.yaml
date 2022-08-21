@@ -1,0 +1,54 @@
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.6'
+
+services:
+
+  vault-dgt:
+    build:
+      context: ..
+      dockerfile: docker/vault/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: vault-dgt
+    environment:
+    - DGT_HOME=/project/peer
+    - DGT_TOP=${DGT_TOP}
+    - VAULT_URL=${VAULT_URL}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../vault-guides:/project/peer
+      - ../../dgt_notaries/n${N}/etc:/vault/config      
+      - ../../dgt_notaries/n${N}/policy:/vault/policies 
+      - ../../dgt_notaries/n${N}/data/vault:/vault/data 
+    container_name: vault-dgt
+    networks:
+    - network1
+    ports:
+     - "8200:8200"
+    # depends_on:
+    #   - validator 18.222.233.160
+    command: |
+      bash -c "
+         echo 'START VAULT';tail -f /dev/null
+      "
+    stop_signal: SIGKILL
+
+networks:
+  network1:
+     name: dgt1-network

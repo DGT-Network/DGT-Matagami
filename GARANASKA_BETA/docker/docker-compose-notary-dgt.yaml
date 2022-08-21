@@ -1,0 +1,90 @@
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.6'
+
+services:
+
+  telebot-dgt:
+    build:
+      context: ..
+      dockerfile: telebot/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: telebot-dgt
+    environment:
+    - DGT_HOME=/project/peer
+    - DGT_TOP=${DGT_TOP}
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - BOT_TOKEN=${BOT_TOKEN}
+    - VAULT_URL=${VAULT_URL}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_notaries/n${V}:/project/peer
+    container_name: telebot-dgt-n${V}
+    networks:
+    - network1
+    #ports:
+    #  - "8003:8003"
+    #depends_on:        
+    #   - vault 
+    command: |
+      bash -c "
+        bin/protogen;echo ${USER_NOTARY};
+        dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT}
+        rm -f /project/peer/logs/bgt-bot*.log;
+        cd telebot
+        python3 setup.py clean --all
+        python3 setup.py build
+        dgt-telebot -vv  --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204 --bot-token ${BOT_TOKEN} --vault-url http://vault-n${V}:${VPORT} --vault-on ${USER_NOTARY}
+      "
+    stop_signal: SIGKILL
+
+  vault:
+    image: vault:latest
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_notaries/n${N}/etc:/vault/config
+      - ../../dgt_notaries/n${N}/policy:/vault/policies
+      - ../../dgt_notaries/n${N}/data/vault:/vault/data
+    ports:
+      - ${VPORT}:${VPORT}
+    expose:
+      - ${VPORT}
+    networks:        
+    - network1
+    depends_on:       
+       - telebot-dgt         
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:${VPORT}
+      - VAULT_API_ADDR=http://0.0.0.0:${VPORT}
+      - VAULT_ADDRESS=http://0.0.0.0:${VPORT}
+    container_name: vault-n${V}
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK  # -dev
+    command: |                                                                                                                                                   
+      sh -c " 
+        echo '/project/${DGT_TOP}/bin/dgtadm notary n${V} -cb ${CRYPTO_BACK}'                                                                                                                                               
+        vault server  -log-level=debug -config=/vault/config/vault.hcl  
+      "                                                                                                                                                          
+    stop_signal: SIGKILL                                                                                                                                         
+
+
+networks:
+  network1:
+     name: dgt1-network

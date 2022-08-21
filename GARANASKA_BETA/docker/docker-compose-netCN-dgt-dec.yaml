@@ -1,0 +1,363 @@
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# FOR DGT DEC with DAG 
+# this is for cluster version - we have separate folder for cluster's peers
+version: '3.6'
+
+services:
+
+  settings-tp:
+    build:
+      context: ..
+      dockerfile: docker/settings/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: settings-tp-${PNM}:${ISOLATION_ID}
+    networks: 
+    - network1
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: settings-tp-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    command: |
+      bash -c "
+        cd families/settings
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/settings-*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        settings-tp -vv -C tcp://validator-${PNM}-${C}-${N}:${COMP}
+      "
+    stop_signal: SIGKILL
+
+  bgt-tp-python:
+    build:
+      context: ..
+      dockerfile: families/bgt_python/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: bgt-tp-python-${PNM}:${ISOLATION_ID}
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    networks:
+    - network1
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: bgt-tp-python-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    command: |
+      bash -c "
+        cd families/bgt_python;
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/bgt-*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        bgt-tp-python -vv -C tcp://validator-${PNM}-${C}-${N}:${COMP}
+      "
+    stop_signal: SIGKILL
+
+
+  dec-tp:
+    build:
+      context: ..
+      dockerfile: families/dec_dgt/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: dec-tp-${PNM}:${ISOLATION_ID}
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    networks:
+    - network1
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: dec-tp-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    command: |
+      bash -c "
+        cd families/dec_dgt;
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/dec-*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        dec-tp-dgt -vv -C tcp://validator-${PNM}-${C}-${N}:${COMP}
+      "
+    stop_signal: SIGKILL
+
+
+  stuff-tp:
+    build:
+      context: ..
+      dockerfile: families/smart_stuff/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: stuff-tp-${PNM}:${ISOLATION_ID}
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    networks:
+    - network1
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: stuff-tp-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    command: |
+      bash -c "
+        cd families/smart_stuff;
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/stuff-*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        stuff-tp -vv -C tcp://validator-${PNM}-${C}-${N}:${COMP}
+      "
+    stop_signal: SIGKILL
+
+
+  xcert-tp:
+    build:
+      context: ..
+      dockerfile: families/x509_cert/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: xcert-tp-${PNM}:${ISOLATION_ID}
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    networks:
+    - network1
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: xcert-tp-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    command: |
+      bash -c "
+        cd families/x509_cert;
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/xcert-*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        xcert-tp -vv -C tcp://validator-${PNM}-${C}-${N}:${COMP}
+      "
+    stop_signal: SIGKILL
+
+
+
+  client:
+    build:
+      context: ..
+      dockerfile: docker/shell/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: shell-${PNM}:${ISOLATION_ID}
+    networks:
+    - network1
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: shell-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    command: |
+      bash -c "
+        dgt keygen --force ;ls -l /root/.dgt/keys &&
+        tail -f /dev/null
+      "
+    stop_signal: SIGKILL
+
+
+  validator-dgt:
+    build:
+      context: ..
+      dockerfile: validator/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: validator-${PNM}:${ISOLATION_ID}
+    networks:
+    - network1
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - ENDPOINTS=${ENDPOINTS}
+    - SINGLE=${SINGLE}
+    - ENDHOST=${ENDHOST}
+    - NETWORK=${NETWORK}
+    - PCONTROL=${PCONTROL}
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: validator-${PNM}-${C}-${N}
+    expose:
+      - ${COMP}
+      - ${NET}
+      - ${CONS}
+    ports:
+      - ${COMP}:${COMP}
+      - ${NET}:${NET}
+    # start the validator with an empty genesis batch sawtooth.consensus.algorithm=devmode and ADD sawtooth.consensus.version=0.1 /root/.dgt/keys/my_key.priv
+    # dgtset genesis -k /project/peer/keys/validator.priv -A $$(cat /project/${DGT_TOP}/clusters/c1/${PNM}1/keys/validator.pub) -A $$(cat /project/peer/keys/validator.pub)
+    command: |
+      bash -c "
+        bin/protogen
+        if [ -z ${PEERS} ]; then echo 'ONE HOST MODE'; else echo 'MANY HOST MODE (${PEERS})';add_peers.sh '${PEERS}'; fi
+        cd validator
+        echo python3 setup.py clean --all;echo python3 setup.py build;
+        ls -l /project/peer/keys;
+        dgtadm node ${C} ${PNM}${N} -t ${PEERING} -cb ${CRYPTO_BACK} ${KYC};ls -l /project/peer/keys;dgtadm keygen -cb ${CRYPTO_BACK};
+        if [ ${G} == 'Y' ]; then rm -f /project/peer/data/*; else echo 'RESTART MODE'; fi; rm -f /project/peer/logs/validator*.log* /project/peer/logs/interc*.log* ;
+        dgt keygen my_key  -cb ${CRYPTO_BACK};
+        echo 'GATEWAY=${SEEDS},PEERING=${PEERING},NETWORK=${NETWORK},SIGNED=${SIGNED}'
+        dgtset proposal create -k /project/peer/keys/validator.priv -o dgtset.batch $$(cat /project/peer/etc/dgt.conf) --crypto_back ${CRYPTO_BACK} 
+        dgtset genesis -k /project/peer/keys/validator.priv -cb ${CRYPTO_BACK} -A /project/${DGT_TOP}/clusters/c1/${PNM}1/keys/validator.pub.${CRYPTO_BACK} -A /project/peer/keys/validator.pub
+        if [ ${G} == 'Y' ]; then dgtadm genesis config-genesis.batch  dgtset.batch;echo 'GENESIS MODE'; else echo 'RESTART MODE'; fi
+        validator-dgt -vv  \
+            --endpoint tcp://validator-${PNM}-${C}-${N}:${NET} \
+            --bind component:tcp://eth0:${COMP} \
+            --bind network:tcp://eth0:${NET} \
+            --bind consensus:tcp://eth0:${CONS} \
+            --max_dag_branch 6 --scheduler parallel ${SIGNED} --peering ${PEERING} ${SEEDS} --maximum-peer-connectivity 70 \
+            ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
+      "
+    stop_signal: SIGTERM
+    #stop_grace_period: 600ms
+
+
+  dgt-api:
+    build:
+      context: ..
+      dockerfile: rest-api/Dockerfile-${DISTR}
+      args:
+        - http_proxy   
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: rest-api-${PNM}:${ISOLATION_ID}
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: api-${PNM}-${C}-${N}
+    networks:
+    - network1
+    ports:
+      - ${API}:${API} 
+    depends_on:
+       - validator-dgt
+    # opentsdb-url-off  -- SWITCH OFF metrics
+    command: |
+      bash -c "
+        cd rest-api;
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/rest-api*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        dgt-rest-api -vv --connect tcp://validator-${PNM}-${C}-${N}:${COMP} --bind api-${PNM}-${C}-${N}:${API} ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
+      "
+    stop_signal: SIGKILL
+
+
+  dgt-pbft:
+    build:
+      context: ..
+      dockerfile: consensus/dgt_pbft/Dockerfile-${DISTR}
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - DGT_TOP=${DGT_TOP}
+    image: pbft-${PNM}:${ISOLATION_ID}
+    networks:
+    - network1
+    environment:
+    - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
+    - PEER_HOME=/project/peer
+    - CRYPTO_BACK=${CRYPTO_BACK}
+    - DGT_TOP=${DGT_TOP}
+    volumes:
+      - ..:/project/${DGT_TOP}
+      - ../../dgt_clust/${C}/${PNM}${N}:/project/peer
+    container_name: pbft-${PNM}-${C}-${N}
+    depends_on:
+      - validator-dgt
+    #  - dgt-registry
+    command: |
+      bash -c "
+        cd consensus/dgt_pbft;
+        dgtadm node ${C} ${PNM}${N} -cb ${CRYPTO_BACK};rm -f /project/peer/logs/pbft*.log*;
+        python3 setup.py clean --all
+        python3 setup.py build
+        dgt-pbft -vv ${SIGNED} --connect tcp://validator-${PNM}-${C}-${N}:${CONS} --component tcp://validator-${PNM}-${C}-${N}:${COMP}
+      "
+    stop_signal: SIGKILL
+
+
+networks:
+  network1:
+     name: ${PNM}1-network
+#name: ${PNM}${N}-network
+#        driver: default
+#        config:
+#          - subnet: "172.16.32.0/24"
+          
+  
