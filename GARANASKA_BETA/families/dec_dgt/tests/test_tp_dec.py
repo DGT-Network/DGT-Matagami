@@ -1,4 +1,4 @@
-# Copyright 2017 Intel Corporation
+# Copyright 2022 DGT NETWORK INC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import cbor
 
 from sawtooth_processor_test.transaction_processor_test_case \
     import TransactionProcessorTestCase
-from dgt_bgt.bgt_message_factory import BgtMessageFactory
+from dec_dgt.bgt_message_factory import DecMessageFactory
 from sawtooth_sdk.protobuf.validator_pb2 import Message
 
 
@@ -37,7 +37,7 @@ class TestBgt(TransactionProcessorTestCase):
             Message.TP_STATE_SET_REQUEST,
             compare_set_request)
 
-        cls.factory = BgtMessageFactory()
+        cls.factory = DecMessageFactory()
 
     # inputs
 

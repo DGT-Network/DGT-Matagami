@@ -127,7 +127,7 @@ def create_parser(prog_name):
 
 
 def add_set_parser(subparsers, parent_parser):
-    message = 'Sends an bgt transaction to set <name> to <value>.'
+    message = 'Create an xcert certificate with params into <value>.'
 
     parser = subparsers.add_parser(
         'set',
@@ -190,7 +190,7 @@ def do_set(args):
 
 
 def add_upd_parser(subparsers, parent_parser):
-    message = 'Sends an bgt transaction to increment <name> by <value>.'
+    message = 'Update xcert certificate with params into <value>.'
 
     parser = subparsers.add_parser(
         'upd',
@@ -250,7 +250,7 @@ def do_upd(args):
     print(response)
 
 def add_crt_parser(subparsers, parent_parser):
-    message = 'Sends an bgt transaction to increment <name> by <value>.'
+    message = 'Create an xcert certificate with params into <value>.'
 
     parser = subparsers.add_parser(
         'crt',
@@ -261,7 +261,7 @@ def add_crt_parser(subparsers, parent_parser):
         'value',
         type=str,
         default=XCERT_PROTO_FILE,
-        help='specify xcert atributes to update')
+        help='specify xcert atributes to create')
     parser.add_argument(
         '--user',
         type=str,
@@ -308,7 +308,7 @@ def do_crt(args):
 
 
 def add_init_parser(subparsers, parent_parser):
-    message = 'Sends an bgt transaction to increment <name> by <value>.'
+    message = 'Init new notary.'
 
     parser = subparsers.add_parser(
         'init',
@@ -375,7 +375,7 @@ def do_init(args):
     print(response)                                                             
                                                                                 
 def add_show_parser(subparsers, parent_parser):
-    message = 'Shows the value of the key <name>.'
+    message = 'Shows the xcert for key <name>.'
 
     parser = subparsers.add_parser(
         'show',
@@ -428,7 +428,7 @@ def do_show(args):
 
 
 def add_list_parser(subparsers, parent_parser):
-    message = 'Shows the values of all keys in bgt state.'
+    message = 'Shows all xcert.'
 
     parser = subparsers.add_parser(
         'list',

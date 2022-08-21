@@ -1,4 +1,4 @@
-# Copyright 2018 Cargill Incorporated
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ RUN apt-get install -y -q \
 
 RUN mkdir -p /var/log/dgt
 
-ENV PATH=$PATH:/project/$DGT_TOP/bin:/project/$DGT_TOP/bgx/bin:
+ENV PATH=$PATH:/project/$DGT_TOP/bin:
 
 WORKDIR /project/$DGT_TOP
 
 #RUN pip3 install asyncio-nats-client
 #RUN pip3 install pyorient
 
-CMD echo "\033[0;32m--- Building bgt-python ---\n\033[0m" \
+CMD echo "\033[0;32m--- Building dec-dgt ---\n\033[0m" \
  && bin/protogen \
  && cd families/bgt_python \
  && python3 setup.py clean --all \

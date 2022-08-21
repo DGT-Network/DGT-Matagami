@@ -1,4 +1,4 @@
-# Copyright 2017 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,21 +36,21 @@ setup(
     name='sawtooth-bgt',
     version=subprocess.check_output(
         ['../../bin/get_version']).decode('utf-8').strip(),
-    description='DGT Bgt Python Example',
-    author='Hyperledger Sawtooth',
-    url='https://github.com/hyperledger/sawtooth-core',
+    description='DEC DGT Python ',
+    author='DGT Network',
+    url='https://github.com/DGT-Network/DGT-Matagami',
     packages=find_packages(),
     install_requires=[
         "cbor",
         "colorlog",
-        "sawtooth-sdk",
-        "sawtooth-signing",
+        "dgt-sdk",
+        "dgt-signing",
         "secp256k1"
     ],
     data_files=data_files,
     entry_points={
         'console_scripts': [
-            'bgt = dgt_bgt.client_cli.bgt_cli:main_wrapper',
-            'bgt-tp-python = dgt_bgt.processor.main:main'
+            'dec = dec_dgt.client_cli.bgt_cli:main_wrapper',
+            'dec-tp-dgt = dec_dgt.processor.main:main'
         ]
     })
