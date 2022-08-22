@@ -203,7 +203,7 @@ class TransactionProcessor:
             # this future.
             LOGGER.debug('TransactionProcessor: CancelledError')
             return
-        LOGGER.debug('TransactionProcessor: _process_future msg=%s',str(msg))
+        #LOGGER.debug('TransactionProcessor: _process_future msg=%s',str(msg))
         if msg is RECONNECT_EVENT:
             if sigint is False:
                 LOGGER.info("reregistering with validator")

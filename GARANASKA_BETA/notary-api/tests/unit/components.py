@@ -21,23 +21,23 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase
 
 from dgt_rest_api.route_handlers import RouteHandler
-from dgt_rest_api.protobuf import client_batch_submit_pb2
-from dgt_rest_api.protobuf.client_state_pb2 import ClientStateListResponse
-from dgt_rest_api.protobuf.client_list_control_pb2 \
+from dgt_notary_api.protobuf import client_batch_submit_pb2
+from dgt_notary_api.protobuf.client_state_pb2 import ClientStateListResponse
+from dgt_notary_api.protobuf.client_list_control_pb2 \
     import ClientPagingControls
-from dgt_rest_api.protobuf.client_list_control_pb2 \
+from dgt_notary_api.protobuf.client_list_control_pb2 \
     import ClientPagingResponse
-from dgt_rest_api.protobuf.client_list_control_pb2 \
+from dgt_notary_api.protobuf.client_list_control_pb2 \
     import ClientSortControls
-from dgt_rest_api.protobuf.block_pb2 import Block
-from dgt_rest_api.protobuf.block_pb2 import BlockHeader
-from dgt_rest_api.protobuf.batch_pb2 import BatchList
-from dgt_rest_api.protobuf.batch_pb2 import Batch
-from dgt_rest_api.protobuf.batch_pb2 import BatchHeader
-from dgt_rest_api.protobuf.transaction_pb2 import Transaction
-from dgt_rest_api.protobuf.transaction_pb2 import TransactionHeader
+from dgt_notary_api.protobuf.block_pb2 import Block
+from dgt_notary_api.protobuf.block_pb2 import BlockHeader
+from dgt_notary_api.protobuf.batch_pb2 import BatchList
+from dgt_notary_api.protobuf.batch_pb2 import Batch
+from dgt_notary_api.protobuf.batch_pb2 import BatchHeader
+from dgt_notary_api.protobuf.transaction_pb2 import Transaction
+from dgt_notary_api.protobuf.transaction_pb2 import TransactionHeader
 
-from dgt_rest_api.protobuf.validator_pb2 import Message
+from dgt_notary_api.protobuf.validator_pb2 import Message
 
 TEST_TIMEOUT = 5
 

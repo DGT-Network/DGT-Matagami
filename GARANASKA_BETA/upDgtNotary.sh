@@ -12,6 +12,10 @@ export BON=""
 export NREST="OFF"
 export SEAL_ADDR="vault-n1:8220"
 export REST_API="--url http://api-dgt-c1-1:8108"
+# -BO - telegram bot enable
+# -NR  - rest api enable ; -RA <url> - dgt rest api url
+# -SA <addr>  - seal addr
+
 while [ -n "$1" ]
 do
 case "$1" in

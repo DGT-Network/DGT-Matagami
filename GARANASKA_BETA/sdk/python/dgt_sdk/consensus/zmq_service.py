@@ -254,7 +254,9 @@ class ZmqService(Service):
 
     def commit_block(self, block_id,seal=None):
         # place for SEAL
-        request = consensus_pb2.ConsensusCommitBlockRequest(block_id=block_id,seal=seal.SerializeToString() if seal is not None else seal)
+        ser_seal = seal.SerializeToString() if seal is not None else seal
+        LOGGER.debug("commit_block: ser_seal={}".format(ser_seal.hex()[:8] if isinstance(ser_seal,bytes) else ser_seal))
+        request = consensus_pb2.ConsensusCommitBlockRequest(block_id=block_id,seal=ser_seal)
 
         response_type = consensus_pb2.ConsensusCommitBlockResponse
 
