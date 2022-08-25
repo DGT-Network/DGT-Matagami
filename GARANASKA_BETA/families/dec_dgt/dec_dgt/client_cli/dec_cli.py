@@ -41,6 +41,8 @@ from dec_dgt.client_cli.exceptions import DecClientException
 from dec_common.protobuf.dec_dgt_token_pb2 import DecTokenInfo
 from dec_dgt.client_cli.dec_attr import *
 
+
+
 DISTRIBUTION_NAME = 'dec-dgt'
 
 
@@ -149,7 +151,7 @@ def create_parser(prog_name):
 
 
 def add_emission_parser(subparsers, parent_parser):
-    message = 'Emission DEC .'
+    message = 'Run emission DEC .'
 
     parser = subparsers.add_parser(
         DEC_EMISSION_OP,
@@ -167,19 +169,19 @@ def add_emission_parser(subparsers, parent_parser):
     parser.add_argument(
         '--name',
         type=str,
-        default=DEC_NAME_DEF,
+        #default=DEC_NAME_DEF,
         help='name of DEC')
 
     parser.add_argument(
         '--total_sum','-ts',
         type=int,
-        default=DEC_TOTAL_SUM_DEF,
-        help='amount of DEC tokens')
+        #default=DEC_TOTAL_SUM_DEF,
+        help='Total amount of DEC tokens')
 
     parser.add_argument(             
         '--granularity','-gran',                 
         type=float,                    
-        default=DEC_GRANULARITY_DEF,       
+        #default=DEC_GRANULARITY_DEF,       
         help='Granularity of DEC token') 
 
     parser.add_argument(     
@@ -192,36 +194,53 @@ def add_emission_parser(subparsers, parent_parser):
         help='URL description'     
         ) 
     parser.add_argument(                      
-        '--nоminal','-nom',              
+        '--nominal','-nom',              
         type=float,                           
-        default=DEC_NОMINAL_DEF,              
+        #default=DEC_NОMINAL_DEF,              
         help='Nominal of DEC token') 
+    parser.add_argument(                
+        '--nominal-name','-nnm',             
+        type=str,                     
+        #default=DEC_NОMINAL_DEF,       
+        help='Nominal name')    
      
     parser.add_argument(                   
         '--corporate_share','-cs',                    
         type=int,                        
-        default=DEC_СORPORATE_SHARE_DEF,           
+        #default=DEC_СORPORATE_SHARE_DEF,           
         help='DGT corporate share ') 
     
     parser.add_argument(                    
         '--minting_share','-ms',          
         type=int,                           
-        default=DEC_MINTING_SHARE_DEF,    
+        #default=DEC_MINTING_SHARE_DEF,    
         help='Nodes minting share ') 
     parser.add_argument(       
         '--mint','-m',         
-        type=str,              
+        type=str,           # json as string   
         help='mint params')    
+    parser.add_argument(                             
+        '--mint-umax','-mmax',                               
+        type=str,           # json as string         
+        help='mint Umax param')                          
+    parser.add_argument(                          
+        '--mint-t1','-mt1',                    
+        type=str,           # json as string      
+        help='mint T1 param')
+    parser.add_argument(                                             
+        '--mint-b2','-mb2',                    
+        type=str,           # json as string      
+        help='mint B2 param')                   
 
     parser.add_argument(                 
        '--num_burn','-nb',         
        type=int,                               
-       default=DEC_NBURN_DEF,  
+       #default=DEC_NBURN_DEF,  
        help='total burn ')  
     parser.add_argument(            
        '--fee',         
-       type=int,                   
-       default=DEC_FEE_DEF,      
+       type=float,                   
+       #default=DEC_FEE_DEF,      
        help='transaction fee')   
    
     parser.add_argument(              

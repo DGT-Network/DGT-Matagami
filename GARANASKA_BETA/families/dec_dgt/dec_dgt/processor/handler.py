@@ -18,6 +18,7 @@ import traceback
 import hashlib
 import base64
 import cbor
+import json
 import time
 import math
 
@@ -27,6 +28,10 @@ from dgt_sdk.processor.exceptions import InternalError
 from dec_common.protobuf.dec_dgt_token_pb2 import DecTokenInfo
 from dgt_signing import CryptoFactory,create_context
 from dec_dgt.client_cli.dec_attr import *
+from dgt_settings.processor.utils import _make_settings_key,SETTINGS_NAMESPACE
+from dgt_settings.protobuf.setting_pb2 import Setting
+from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM,FbftTopology
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -72,7 +77,7 @@ class DecTransactionHandler(TransactionHandler):
         #try:
         verb, name, value, to, out = self._unpack_transaction(transaction)
         LOGGER.debug('APPLY: verb=%s name=%s value=%s to=%s',verb, name, value, to)
-        state = _get_state_data(name,to, context)
+        state,to = _get_state_data(name,to, context)
         #LOGGER.debug('apply: state = {}'.format(state))
         updated_state = self._do_op_dec(verb, name, value, to, state, out)
         
@@ -120,7 +125,20 @@ class DecTransactionHandler(TransactionHandler):
                                                                                                                                         
         if name in state:                                                                                                               
             raise InvalidTransaction('Verb is "{o}", but already exists: Name: {n}, Value {v}'.format(o=DEC_EMISSION_OP,n=name,v=state[name]))            
-                                                                                                                                        
+        if DGT_TOPOLOGY_SET_NM in state:
+            tval = json.loads(state[DGT_TOPOLOGY_SET_NM])
+            #LOGGER.debug('Topology "{}"'.format(tval))
+            fbft = FbftTopology()
+            fbft.get_topology(tval,'','','static')
+            is_peer = fbft.peer_is_leader(value[DEC_EMITTER])
+            pname = fbft.get_scope_peer_attr(value[DEC_EMITTER])
+            peer = fbft.get_peer(value[DEC_EMITTER])
+            LOGGER.debug('Topology is peer={} leader"{}"'.format(peer,is_peer))
+            if not is_peer:
+                raise InvalidTransaction('Verb is "{}", but emitter is not Leader'.format(DEC_EMISSION_OP))
+
+
+            # check key into topology
         updated = {k: v for k, v in state.items() if k in out}                                                                                      
         #owner_key = self._context.sign('DEC_token'.encode(),self._private_key) 
         mint_share = value[DEC_MINTING_SHARE][DATTR_VAL] 
@@ -305,14 +323,28 @@ class DecTransactionHandler(TransactionHandler):
         dtoken = DecTokenInfo()                                                                                                                      
         dtoken.ParseFromString(state[to])                                                                                                          
         LOGGER.debug('_do_send value={}'.format(value))                               
-                                                                                                                                                     
-        if token.decimals < amount:                                                                                
-            raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount))                                         
-                                                                                                                                                     
-        updated = {k: v for k, v in state.items() if k in out}                                                                                                   
-        dtoken.decimals += amount
-        token.decimals -= amount                                                                                                                      
-        #token.dec = cbor.dumps(dec)                                                                                                                  
+        if name == DEC_EMISSION_KEY:
+            # this is case when user ask tokens from сorporate wallet
+            # check who is user 
+            emiss = cbor.loads(token.dec)
+            if value[DEC_EMITTER] != emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]:
+                raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have not access'.format(DEC_SEND_OP))
+            if emiss[DEC_СORPORATE_REST] < amount:
+                amount = emiss[DEC_СORPORATE_REST]
+            emiss[DEC_СORPORATE_REST] -= amount
+            token.dec = cbor.dumps(emiss)
+        else:
+            if value[DEC_EMITTER] != name:
+                raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
+            if token.decimals < amount:                                                                                
+                raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount))                                         
+                                                                                                           
+            token.decimals -= amount 
+        
+        # destination wallet
+        dtoken.decimals += amount                                                                                                                         
+        #token.dec = cbor.dumps(dec)  
+        updated = {k: v for k, v in state.items() if k in out}                                                                                                                
         updated[name] = token.SerializeToString()                                                                                        
         updated[to] = dtoken.SerializeToString()                                                                                                   
                                                                                                                                                      
@@ -720,11 +752,12 @@ class DecTransactionHandler(TransactionHandler):
             if 'To' not in content :
                 raise InvalidTransaction('To is required')
 
-            to = [content['To']]
+            to = [(FAMILY_NAME,content['To'])] # add name space
             out.append(content['To'])
         else:
             to = None
-        if DATTR_INPUTS in content:
+        if DATTR_INPUTS in content and content[DATTR_INPUTS] != []:
+            # with namespace
             to = content[DATTR_INPUTS] if to is None else to + content[DATTR_INPUTS] 
         LOGGER.debug('_decode_transaction verb={} for {}'.format(verb,name))
         return verb, name, value, to, out
@@ -736,7 +769,7 @@ def _validate_verb(verb):
 
 
 def _validate_name(name,verb):
-    if verb not in [DEC_WALLET_OP,DEC_MINT_OP] and (not isinstance(name, str) or len(name) > MAX_NAME_LENGTH):
+    if verb not in [DEC_WALLET_OP,DEC_MINT_OP,DEC_SEND_OP] and (not isinstance(name, str) or len(name) > MAX_NAME_LENGTH):
         raise InvalidTransaction('Name must be a string of no more than {} characters'.format(MAX_NAME_LENGTH))
 
 def _validate_to(name):                                                                                        
@@ -754,25 +787,42 @@ def _validate_value(value):
 def _get_state_data(name,to, context):
     astates = [make_dec_address(name)]
     if to is not None:
-        for addr in to:
-            astates.append(make_dec_address(addr))
+        r_to = []
+        for fam,addr in to:
+            if fam == FAMILY_NAME:
+                astates.append(make_dec_address(addr))
+            else:
+                astates.append(_make_settings_key(addr))
+            r_to.append(addr)
+
+    else:
+        r_to = None
     state_entries = context.get_state(astates)
     try:
         states = {}
         #LOGGER.debug('_get_state_data state_entries={} add={}'.format(state_entries,astates))
-        for entry in state_entries:
-            state = cbor.loads(entry.data)
-            #LOGGER.debug('_get_state_data state=(%s)', state)
-            for key, val in state.items():
-                #LOGGER.debug('_get_state_data add=%s', key)
-                states[key] = val
-        return states
+        for i,entry in enumerate(state_entries):
+            if entry.address[0:6] == SETTINGS_NAMESPACE:
+                # topology info 
+                #LOGGER.debug('_get_state_data add=%s type=%s',r_to[i],type(entry.data))
+                setting = Setting()
+                setting.ParseFromString(entry.data)
+                #LOGGER.debug('_get_state_data add={} type={} data={}'.format(r_to[i],type(entry.data),setting))
+                #val = json.loads(data)
+                states[setting.entries[0].key] = setting.entries[0].value
+            else:
+                state = cbor.loads(entry.data)
+                #LOGGER.debug('_get_state_data entry=({})'.format(entry))
+                for key, val in state.items():
+                    #LOGGER.debug('_get_state_data add=%s', key)
+                    states[key] = val
+        return states,r_to
     except IndexError:
         LOGGER.debug('_get_state_data: IndexError')
-        return {}
-    except:
-        LOGGER.debug('_get_state_data: Failed to load state data')
-        raise InvalidTransaction('Failed to load state data')
+        return {},r_to
+    except Exception as ex:
+        LOGGER.debug('_get_state_data: Failed to load state data ({})'.format(ex))
+        raise InvalidTransaction('Failed to load state data ({})'.format(ex))
 
 
 def _set_state_data( state, context):

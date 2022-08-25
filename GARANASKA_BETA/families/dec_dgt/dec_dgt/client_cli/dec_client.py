@@ -35,7 +35,10 @@ from dec_common.protobuf.dec_dgt_token_pb2 import DecTokenInfo
 
 from dec_dgt.client_cli.exceptions import DecClientException
 from dec_dgt.client_cli.dec_attr import *
+from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM
 
+# settings family
+from dgt_settings.processor.utils import _make_settings_key,SETTINGS_NAMESPACE
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
@@ -52,6 +55,14 @@ def _token_info(val):
     token = DecTokenInfo()
     token.ParseFromString(val)
     return token
+
+def set_param(info,attr,val,def_val):
+    if attr in info:
+        if val:
+            info[attr][DATTR_VAL] = val
+    else:
+        info[attr] = {DATTR_VAL : val if val else def_val}
+
 
 class DecClient:
     def __init__(self, url=None, keyfile=None,signer=None):
@@ -92,12 +103,25 @@ class DecClient:
     # emission cmd parts
     def emission(self,args,wait=None):
         info = self.load_json_proto(args.proto)
-        if args.total_sum :
-            info[DEC_TOTAL_SUM][DATTR_VAL] = args.total_sum
-        if args.name :                                 
-            info[DEC_NAME][DATTR_VAL] = args.name
-        if args.fee :                             
-            info[DEC_FEE][DATTR_VAL] = args.fee 
+        set_param(info,DEC_TOTAL_SUM,args.total_sum,DEC_TOTAL_SUM_DEF)
+        set_param(info,DEC_GRANULARITY,args.granularity,DEC_GRANULARITY_DEF)
+        set_param(info,DEC_NAME,args.name,DEC_NAME_DEF)
+        set_param(info,DEC_FEE,args.fee,DEC_FEE_DEF)
+        set_param(info,DEC_NОMINAL,args.nominal,DEC_NОMINAL_DEF)
+        set_param(info,DEC_NBURN,args.num_burn,DEC_NBURN_DEF)
+        set_param(info,DEC_NОMINAL_NAME,args.nominal_name,DEC_NОMINAL_NAME_DEF)
+        set_param(info,DEC_СORPORATE_SHARE,args.corporate_share,DEC_СORPORATE_SHARE_DEF)
+        set_param(info,DEC_MINTING_SHARE,args.minting_share,DEC_MINTING_SHARE_DEF)
+        # take mint params
+        mint_val = info[DEC_MINT_PARAM][DATTR_VAL] if DEC_MINT_PARAM in info else {DEC_MINT_COEF_UMAX: 10,DEC_MINT_COEF_T1:1 ,DEC_MINT_COEF_B2:1}
+        if args.mint_umax:
+            mint_val[DEC_MINT_COEF_UMAX] = float(args.mint_umax)
+        if args.mint_t1:                               
+            mint_val[DEC_MINT_COEF_T1] = float(args.mint_t1)
+        if args.mint_b2:                               
+            mint_val[DEC_MINT_COEF_B2] = float(args.mint_b2)
+        set_param(info,DEC_MINT_PARAM,args.mint,mint_val)
+
         if args.corporate_pub_key:
             # check when create corporate wallet - only owner this key have responsibilities for operation
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : args.corporate_pub_key}
@@ -105,8 +129,9 @@ class DecClient:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
         info[DEC_TMSTAMP] = time.time()
+        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         print('PROTO',info)
-        self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)
+        self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
     def wallet(self,args,wait=None):   
         info = {}
@@ -237,11 +262,16 @@ class DecClient:
         return token
 
     def send(self,args,wait=None): 
+        # use this cmd for sending token to corporate wallet 
+        # use as name _DEC_EMISSION_KEY_
         info = {DATTR_VAL : args.amount}
         if args.asset_type:
             info[DEC_ASSET_TYPE] = args.asset_type             
         if args.did:                                
             info[DEC_DID_VAL] = args.did
+
+
+        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
 
         return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait,din=DEC_EMISSION_KEY)  
 
@@ -363,7 +393,7 @@ class DecClient:
 
         return result.text
 
-    def _make_transaction(self, verb, name, value, to=None,din=None):                                                                  
+    def _make_transaction(self, verb, name, value, to=None,din=None,din_ext=None):                                                                  
         val = {                                                                                                                                   
             'Verb': verb,                                                                                                                         
             'Name': name,                                                                                                                         
@@ -382,13 +412,24 @@ class DecClient:
         if to is not None:                                                                                                                        
             address_to = self._get_address(to)                                                                                                    
             inputs.append(address_to)                                                                                                             
-            outputs.append(address_to)                                                                                                            
+            outputs.append(address_to) 
+        dinputs = []                                                                                                            
         if din is not None:                                                                                                                       
-            dinputs = din if isinstance(din,list) else [din]                                                                                      
-            val[DATTR_INPUTS] = dinputs                                                                                                           
-            for ain in dinputs:                                                                                                                   
+            for ain in (din if isinstance(din,list) else [din]):                                                                                                                   
                 address_in = self._get_address(ain)                                                                                               
-                inputs.append(address_in)                                                                                                         
+                inputs.append(address_in) 
+                dinputs.append((FAMILY_NAME,ain))
+
+        if din_ext is not None:
+            # external family 
+            dinputs_ext = din_ext if isinstance(din_ext,list) else [din_ext]
+            for fam,ain in dinputs_ext:
+                if fam == SETTINGS_NAMESPACE:
+                    address_in = _make_settings_key(ain)
+                    inputs.append(address_in)
+                    dinputs.append((fam,ain))
+        # input list
+        val[DATTR_INPUTS] = dinputs
                                                                                                                                                   
         print("in={} out={}".format(inputs,outputs))
         payload = cbor.dumps(val)
@@ -421,8 +462,8 @@ class DecClient:
         return transaction                                                                                                                                        
 
 
-    def _send_transaction(self, verb, name, value, to=None, wait=None,din=None):
-        transaction = self._make_transaction(verb,name,value,to,din)
+    def _send_transaction(self, verb, name, value, to=None, wait=None,din=None,din_ext=None):
+        transaction = self._make_transaction(verb,name,value,to,din,din_ext)
         batch_list = self._create_batch_list([transaction])
         batch_id = batch_list.batches[0].header_signature
 

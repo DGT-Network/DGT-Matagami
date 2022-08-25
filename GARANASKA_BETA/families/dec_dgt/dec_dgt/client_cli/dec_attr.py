@@ -22,8 +22,9 @@ DEC_WALLET  = 'DEC_token'
 DEC_INVOICE_DEF = "INVOICE"
 DEC_HEART = "HEARTBEAT"
 DEC_TOTAL_SUM_DEF = 8589869056
-DEC_GRANULARITY_DEF = 0.0001
+DEC_GRANULARITY_DEF = 7
 DEC_NОMINAL_DEF = 0.8
+DEC_NОMINAL_NAME_DEF = "USD"
 DEC_СORPORATE_SHARE_DEF = 10
 DEC_MINTING_SHARE_DEF = 80
 DEC_NBURN_DEF = 3
@@ -77,7 +78,7 @@ DEC_LAST_HEART_TMSTAMP = "last_heart_tstamp"
 DEC_MINT_REWARD      = "mint_reward"
 DEC_PUBKEY           = "dec_pubkey"
 DEC_SIGNATURE        = "dec_sign"
-
+DEC_EMITTER          = "emitter"
 #
 DATTR_VAL  = "val"
 DATTR_COMM = "comm"
@@ -133,4 +134,7 @@ DEC_PROTO = {
     "JURISDICTION_COUNTRY_NAME" : "CA",                                         
     "BUSINESS_CATEGORY"         : "YOUR BUSINESS CATEGORY",                     
     "USER_ID"                   : "000000000000000001"                          
-}                                                                               
+} 
+
+# external family                                                                            
+SETTINGS_NAMESPACE = '000000'                                                                             
