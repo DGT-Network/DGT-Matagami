@@ -321,7 +321,8 @@ class DecTransactionHandler(TransactionHandler):
         amount = value[DATTR_VAL]                                                                                                                      
         # destination token                                                                                                                          
         dtoken = DecTokenInfo()                                                                                                                      
-        dtoken.ParseFromString(state[to])                                                                                                          
+        dtoken.ParseFromString(state[to])   
+        dest = cbor.loads(dtoken.dec)                                                                                                       
         LOGGER.debug('_do_send value={}'.format(value))                               
         if name == DEC_EMISSION_KEY:
             # this is case when user ask tokens from сorporate wallet
@@ -338,12 +339,17 @@ class DecTransactionHandler(TransactionHandler):
                 raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
             if token.decimals < amount:                                                                                
                 raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount))                                         
-                                                                                                           
+            src = cbor.loads(token.dec)                                                                                               
             token.decimals -= amount 
+            src[DEC_TOTAL_SUM] -= amount
+            token.dec = cbor.dumps(src)
         
         # destination wallet
-        dtoken.decimals += amount                                                                                                                         
-        #token.dec = cbor.dumps(dec)  
+        dest = cbor.loads(dtoken.dec)
+        dtoken.decimals += amount  
+        dest[DEC_TOTAL_SUM] += amount                                                                                                                      
+        dtoken.dec = cbor.dumps(dest)
+          
         updated = {k: v for k, v in state.items() if k in out}                                                                                                                
         updated[name] = token.SerializeToString()                                                                                        
         updated[to] = dtoken.SerializeToString()                                                                                                   
