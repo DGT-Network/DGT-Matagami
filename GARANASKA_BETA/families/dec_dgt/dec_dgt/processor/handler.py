@@ -239,7 +239,7 @@ class DecTransactionHandler(TransactionHandler):
         if name not in state:                                                                                                            
             raise InvalidTransaction(                                                                                                    
                 'Verb is "{}" but name "{}" not in state'.format(DEC_CHANGE_MINT_OP,name))                                                      
-                                                                                                                                         
+        
         curr = state[name]                                                                                                               
         token = DecTokenInfo()                                                                                                           
         token.ParseFromString(curr)                                                                                                      
@@ -251,7 +251,9 @@ class DecTransactionHandler(TransactionHandler):
                                                                                                                                          
         if passkey != value[DEC_PASSKEY]:                                                                                                
             raise InvalidTransaction('Verb is "{}", but passkey incorrect'.format(DEC_CHANGE_MINT_OP))                                          
-                                                                                                                                         
+        if value[DEC_EMITTER] != dec[DEC_EMITTER]:
+            raise InvalidTransaction('Verb is "{}", and only emmitter have right to change MINT COEFF'.format(DEC_CHANGE_MINT_OP))
+
         updated = {k: v for k, v in state.items() if k in out}  
         for attr,val in nmint.items():
             if attr in mint and val != mint[attr]:

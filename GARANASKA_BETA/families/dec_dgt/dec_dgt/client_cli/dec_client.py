@@ -130,7 +130,7 @@ class DecClient:
 
         info[DEC_TMSTAMP] = time.time()
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
-        print('PROTO',info)
+        #print('PROTO',info)
         self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
     def wallet(self,args,wait=None):   
@@ -186,6 +186,7 @@ class DecClient:
             except Exception as ex :
                 print('Cant load ({}) - {}'.format(args.mint,ex))
                 return
+            info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
             print('PROTO',info)                                                                      
             self._send_transaction(DEC_CHANGE_MINT_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)          
         else:                                                                                        
