@@ -179,18 +179,33 @@ class DecClient:
 
     def change_mint(self,args,wait=None):
         info = {}                                                                                    
-        if args.passkey and args.mint:                                                                
-            info[DEC_PASSKEY] = args.passkey  
-            try:
-                info[DEC_MINT_PARAM] = json.loads(args.mint) 
-            except Exception as ex :
-                print('Cant load ({}) - {}'.format(args.mint,ex))
-                return
+        if args.passkey:                                                                
+            info[DEC_PASSKEY] = args.passkey 
+            if args.mint:
+                try:
+                    info[DEC_MINT_PARAM] = json.loads(args.mint) 
+                except Exception as ex :
+                    print('Cant load ({}) - {}'.format(args.mint,ex))
+                    return
+            elif args.mint_umax or args.mint_t1 or args.mint_b2:
+                # take mint params 
+                mint_val = {}                                                                                                                                    
+                if args.mint_umax:                                                                                                                                     
+                    mint_val[DEC_MINT_COEF_UMAX] = float(args.mint_umax)                                                                                               
+                if args.mint_t1:                                                                                                                                       
+                    mint_val[DEC_MINT_COEF_T1] = float(args.mint_t1)                                                                                                   
+                if args.mint_b2:                                                                                                                                       
+                    mint_val[DEC_MINT_COEF_B2] = float(args.mint_b2)                                                                                                   
+                info[DEC_MINT_PARAM] = mint_val
+            else:
+                print('Set some mint params')
+                return 
+
             info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
             print('PROTO',info)                                                                      
             self._send_transaction(DEC_CHANGE_MINT_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)          
         else:                                                                                        
-            print('Set  passkey and mint_param argument')                                              
+            print('Set  passkey')                                              
 
 
     def distribute(self,args,wait=None):    

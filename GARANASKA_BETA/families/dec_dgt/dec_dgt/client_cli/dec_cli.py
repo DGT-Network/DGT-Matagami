@@ -478,6 +478,18 @@ def add_change_mint_parser(subparsers, parent_parser):
         '--mint','-m',                                          
         type=str,                                              
         help='mint params')                                       
+    parser.add_argument(                                        
+        '--mint-umax','-mmax',                                  
+        type=str,           # json as string                    
+        help='mint Umax param')                                 
+    parser.add_argument(                                        
+        '--mint-t1','-mt1',                                     
+        type=str,           # json as string                    
+        help='mint T1 param')                                   
+    parser.add_argument(                                        
+        '--mint-b2','-mb2',                                     
+        type=str,           # json as string                    
+        help='mint B2 param')                                   
 
     parser.add_argument(
         '--url',
