@@ -182,7 +182,15 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}", but already exists: Name: {}, Value {}'.format(DEC_WALLET_OP,name,state[name])) 
         #if DEC_EMISSION_KEY not in state:                                                              
         #    raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_WALLET_OP)) 
-        
+        if DEC_DID_VAL not in value:
+            # use default did
+            did_val = {DATTR_VAL : DEFAULT_DID,NOTARY_PUBKEY : ""}
+        else:
+            did_pay = value[DEC_DID_VAL][DEC_DID_VAL]
+            did_val = cbor.loads(did_pay)
+            psign = value[DEC_DID_VAL][DEC_SIGNATURE]
+            # check notary sign
+
                   
         tcurr = value[DEC_TMSTAMP]                                                                                                                              
         updated = {k: v for k, v in state.items() if k in out}                                                                         
@@ -191,7 +199,11 @@ class DecTransactionHandler(TransactionHandler):
                              owner_key = self._signer.sign(DEC_WALLET.encode()), #owner_key,                                          
                              sign = self._public_key.as_hex(),                                                                         
                              decimals = 0,                                                                                    
-                             dec=cbor.dumps({DEC_TMSTAMP: tcurr,DEC_TOTAL_SUM : 0})                                                   
+                             dec=cbor.dumps({DEC_TMSTAMP: tcurr,
+                                             DEC_TOTAL_SUM : 0,
+                                             DEC_DID_VAL   : did_val
+                                             }
+                            )                                                   
                 )                                                                                                                      
         updated[name] = token.SerializeToString()                                                                                      
         #LOGGER.debug('_do_set updated=%s',updated)                                                                                    

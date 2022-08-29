@@ -33,6 +33,7 @@ AVAILABLE_TILL_DEF        = 60*60*100
 DEC_WAIT_TO_DATE_DEF = 60*60*24*3
 DEC_MINT_PERIOD_DEF = 60*2
 DEC_HEART_BEAT_PERIOD_DEF = 60*3
+DEFAULT_DID = "did:notary:30563010:000000000"
 
 # DEC attributes
 DEC_NAME              = "name"              
@@ -77,8 +78,10 @@ DEC_HEART_BEAT_PEERS = "heart_peers"
 DEC_LAST_HEART_TMSTAMP = "last_heart_tstamp"
 DEC_MINT_REWARD      = "mint_reward"
 DEC_PUBKEY           = "dec_pubkey"
+NOTARY_PUBKEY        = "notary_pubkey"
 DEC_SIGNATURE        = "dec_sign"
 DEC_EMITTER          = "emitter"
+#DEC_WALLET_DID       = "wallet_did"
 #
 DATTR_VAL  = "val"
 DATTR_COMM = "comm"

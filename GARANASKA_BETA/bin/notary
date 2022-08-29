@@ -25,7 +25,11 @@ build_str = "lib.{}-{}.{}".format(
 TOP_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, os.path.join(TOP_DIR,'signing'))
 sys.path.insert(0, os.path.join(TOP_DIR,'families', 'x509_cert'))
+sys.path.insert(0, os.path.join(TOP_DIR,'families', 'dec_dgt'))
 sys.path.insert(0, os.path.join(TOP_DIR,'sdk', 'python'))
+sys.path.insert(0, os.path.join(TOP_DIR,'validator'))
+sys.path.insert(0, os.path.join(TOP_DIR, 'families', 'settings'))
+
 
 from x509_cert.client_cli.notary_cli import main_wrapper
 

@@ -65,7 +65,7 @@ def set_param(info,attr,val,def_val):
 
 
 class DecClient:
-    def __init__(self, url=None, keyfile=None,signer=None):
+    def __init__(self, url=None, keyfile=None,signer=None,backend=None):
         self.url = url
 
         if keyfile is not None:
@@ -76,7 +76,7 @@ class DecClient:
             except OSError as err:
                 raise DecClientException(
                     'Failed to read private key: {}'.format(str(err)))
-            context = create_context('secp256k1')
+            context = create_context('secp256k1',backend=backend)
             try:
                 private_key = context.from_hex(private_key_str)
             except ParseError as e:
@@ -133,10 +133,21 @@ class DecClient:
         #print('PROTO',info)
         self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
-    def wallet(self,args,wait=None):   
+    def wallet(self,args,wait=None,nsign=None):   
         info = {}
-        if args.did:                     
-            info[DEC_DID_VAL] = args.did      
+        if nsign is None:
+            nsign = self._signer
+
+        did =  { DATTR_VAL     :  args.did if args.did else DEFAULT_DID,                             
+                 NOTARY_PUBKEY :  nsign.get_public_key().as_hex()       
+                }                                                       
+
+        payload = cbor.dumps(did)                            
+        psign = nsign.sign(payload)                          
+                                                             
+        info[DEC_DID_VAL] = { DEC_DID_VAL   : payload,       
+                              DEC_SIGNATURE : psign          
+                            }                                
         info[DEC_TMSTAMP] = time.time()                                          
         return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY      
 

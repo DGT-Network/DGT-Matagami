@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,9 +26,13 @@ TOP_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, os.path.join(TOP_DIR,'notary-api'))
 sys.path.insert(0, os.path.join(TOP_DIR,'families','smart_bgt_python'))
 sys.path.insert(0, os.path.join(TOP_DIR,'families','bgt_python'))
-sys.path.insert(0, os.path.join(TOP_DIR,'sdk', 'python'))
+sys.path.insert(0, os.path.join(TOP_DIR,'sdk','python'))
 sys.path.insert(0, os.path.join(TOP_DIR,'signing'))
 sys.path.insert(0, os.path.join(TOP_DIR,'families','x509_cert'))
+sys.path.insert(0, os.path.join(TOP_DIR,'families','dec_dgt'))
+sys.path.insert(0, os.path.join(TOP_DIR,'validator'))
+sys.path.insert(0, os.path.join(TOP_DIR, 'families','settings'))
+
 
 from dgt_notary_api.rest_api import main
 

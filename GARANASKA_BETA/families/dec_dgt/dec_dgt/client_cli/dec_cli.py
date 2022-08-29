@@ -294,7 +294,7 @@ def add_wallet_parser(subparsers, parent_parser):
     parser.add_argument(                  
         '--did','-d',                     
         type=str,                         
-        help='DID')                       
+        help="DID - {'sign' : 'notary sign for did structure','did' :{'val' : 'did value','nkey' : 'notary public key'} }")                       
 
                                                                                                    
     parser.add_argument(                                                                         
@@ -307,7 +307,7 @@ def add_wallet_parser(subparsers, parent_parser):
         '--keyfile',                                                                             
         type=str, 
         default="/project/peer/keys/validator.priv",                                                                               
-        help="identify file containing user's private key")                                      
+        help="Identify file containing user's private key (by default - validator key)")                                      
                                                                                                  
     parser.add_argument(                                                                         
         '--wait',                                                                                
