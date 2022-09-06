@@ -8,6 +8,8 @@
 4.1.1.1	[GET] Get Batch List
 ---------------------------------
 This is a test
+
+
 .. code-block:: python
 
     GET /batches
