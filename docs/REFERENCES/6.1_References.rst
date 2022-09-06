@@ -1,8 +1,6 @@
 References
 +++++++++++++++++++++++++++
 
-TEST
-
 [1].	DGT One Pager, official and short DGT Platform Description | Available on corporate site;
 
 [2].	DGT About, official presentation | Available on corporate site;
