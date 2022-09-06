@@ -1163,7 +1163,13 @@ def add_target_parser(subparsers, parent_parser):
     parser.add_argument(                                                                                                  
         '--target','-tg',                                                                                                 
         type=str,                                                                                                         
-        help='Target specification')                                                                                      
+        help='Target specification')
+    parser.add_argument(             
+        '--invoice','-i',            
+        type=str,                    
+        help='Invoice free') 
+    
+                                                                                          
                                                                                                                           
     parser.add_argument(                                                                                                  
         '--url',                                                                                                          

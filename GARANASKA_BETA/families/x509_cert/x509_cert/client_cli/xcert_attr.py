@@ -31,6 +31,8 @@ FAMILY_VERSION ="1.0"
 XCERT_CRT_OP = 'crt'
 XCERT_SET_OP = 'set'
 XCERT_UPD_OP = 'upd'
+XCERT_WALLETS_OP = 'wallets'
+
 NOTARIES_MAP = "notaries"
 DGT_NOTARY_KEYS = 'dgt.notary.authorized_keys'
 

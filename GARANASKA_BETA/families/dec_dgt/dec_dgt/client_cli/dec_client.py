@@ -391,7 +391,9 @@ class DecClient:
         tcurr = time.time()                                                                                                                    
 
         info[DEC_TARGET_INFO] = args.target if args.target else DEC_TARGET_INFO_DEF  
-        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()                                                                              
+        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()   
+        if args.invoice :
+            info[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price}                                                                         
         info[DEC_TMSTAMP] = tcurr                                                                                                              
         return self._send_transaction(DEC_TARGET_OP, args.target_id, info, to=None, wait=wait,din=None)            
     

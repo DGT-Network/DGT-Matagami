@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 DGT NETWORK INC © Stanislav Parsov
+# Copyright 2016, 2022 DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ from x509_cert.client_cli.load import do_load
 
 from x509_cert.client_cli.notary_client import NotaryClient
 from x509_cert.client_cli.exceptions import XcertCliException,XcertClientException
-from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD_OP)
+from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD_OP,XCERT_WALLETS_OP)
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
+# DEC 
+from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT
 
 DISTRIBUTION_NAME = 'x509-cert'
 
@@ -94,7 +96,7 @@ def create_parent_parser(prog_name):
     parent_parser.add_argument(
         '-V', '--version',
         action='version',
-        version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth-DGT) version {}')
+        version=(DISTRIBUTION_NAME + ' (DGT) version {}')
         .format(version),
         help='display version information')
 
@@ -113,6 +115,8 @@ def create_parser(prog_name):
     add_set_parser(subparsers, parent_parser)
     add_upd_parser(subparsers, parent_parser)
     add_crt_parser(subparsers, parent_parser)
+    add_wallet_parser(subparsers, parent_parser)
+    add_wallets_parser(subparsers, parent_parser)
     add_show_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
     add_init_parser(subparsers, parent_parser)
@@ -305,6 +309,121 @@ def do_crt(args):
     client = _get_client(args)                                             
     response = client.crt( value,user,args.before,args.after,wait)         
     print(response)                                                        
+
+def add_wallet_parser(subparsers, parent_parser):                                                                                               
+    message = 'Create wallet for  DEC token.'                                                                                                   
+                                                                                                                                                
+    parser = subparsers.add_parser(                                                                                                             
+        DEC_WALLET_OP,                                                                                                                          
+        parents=[parent_parser],                                                                                                                
+        description=message,                                                                                                                    
+        help='Create wallet and add them into did wallet list')   
+                                                                                                                    
+    parser.add_argument(
+        'pkey',
+        type=str,
+        help='specify wallet owner private key file')
+    
+                                                                                                                                                
+    parser.add_argument(                                                                                                                        
+        '--did','-d',                                                                                                                           
+        type=str,                                                                                                                               
+        help="DID value " # {'sign' : 'notary sign for did structure','did' :{'val' : 'did value','nkey' : 'notary public key'} }")                     
+        )                                                                                                                                        
+    parser.add_argument(                                                                                                              
+        '--cmd','-c',                                                                                                                 
+        type=str,
+        default=DEC_WALLET_OP,                                                                                                                     
+        help="Wallet cmd: wallet|opts (default - wallet)" 
+        )                                                                                                                             
+    parser.add_argument(          
+        '--limit','-l',             
+        type=int,                 
+        #default=DEC_WALLET_LIMIT_DEF,    
+        help="Wallet dec transfer limit "        
+        )                         
+    parser.add_argument(                       
+        '--spend_period','-sp',                        
+        type=int,                              
+        #default=DEC_WALLET_LIMIT_DEF,         
+        help="Wallet spending period"      
+        )   
+    parser.add_argument(                     
+        '--status','-st',              
+        type=str,                            
+        #default=DEC_WALLET_LIMIT_DEF,       
+        help="Wallet status"        
+        )                                                                                                                                                                                                         
+                                                                                                                                               
+    parser.add_argument(                                                                                                                        
+        '--url',                                                                                                                                
+        type=str,                                                                                                                               
+        help='specify URL of REST API',                                                                                                         
+        default='http://api-dgt-c1-1:8108')                                                                                                     
+                                                                                                                                                
+    parser.add_argument(                                                                                                                        
+        '--keyfile',                                                                                                                            
+        type=str,                                                                                                                               
+        default="/project/peer/keys/notary.priv",                                                                                            
+        help="Identify file containing notary's private key (by default - current notary key)")                                                        
+    parser.add_argument(                                      
+        '-cb', '--crypto_back',                              
+        type=str,                                            
+        help='Specify a crypto back openssl/bitcoin',        
+        default=CRYPTO_BACK)                                 
+    
+                                                                                                                                                
+    parser.add_argument(                                                                                                                        
+        '--wait',                                                                                                                               
+        nargs='?',                                                                                                                              
+        const=sys.maxsize,                                                                                                                      
+        type=int,                                                                                                                               
+        help='set time, in seconds, to wait for transaction to commit')                                                                         
+
+
+
+def do_wallet(args):
+    client = _get_client(args) 
+    client.init_dec(args.pkey)   
+    response = client.wallet(args, args.wait)  
+
+    print(response)                                                                              
+
+def add_wallets_parser(subparsers, parent_parser):                                                                                                                  
+    message = 'Create wallet for  DEC token.'                                                                                                                      
+                                                                                                                                                                   
+    parser = subparsers.add_parser(                                                                                                                                
+        XCERT_WALLETS_OP,                                                                                                                                             
+        parents=[parent_parser],                                                                                                                                   
+        description=message,                                                                                                                                       
+        help='Print list wallet relating to DID')                                                                                                                                      
+                                                                                                                                                                   
+    parser.add_argument(                                                                                                                                           
+        'did',                                                                                                                                                    
+        type=str,                                                                                                                                                  
+        help='specify DID owner of wallets')                                                                                                              
+                                                                                                                                                                   
+    parser.add_argument(                                                                                                                                           
+        '--url',                                                                                                                                                   
+        type=str,                                                                                                                                                  
+        help='specify URL of REST API',                                                                                                                            
+        default='http://api-dgt-c1-1:8108')                                                                                                                        
+                                                                                                                                                                   
+    parser.add_argument(                                                                                                                                           
+        '--keyfile',                                                                                                                                               
+        type=str,                                                                                                                                                  
+        default="/project/peer/keys/notary.priv",                                                                                                                  
+        help="Identify file containing notary's private key (by default - current notary key)")                                                                           
+    parser.add_argument(                                                                                                                                           
+        '-cb', '--crypto_back',                                                                                                                                    
+        type=str,                                                                                                                                                  
+        help='Specify a crypto back openssl/bitcoin',                                                                                                              
+        default=CRYPTO_BACK)                                                                                                                                       
+
+def do_wallets(args):                                
+    client = _get_client(args)                      
+    response = client.wallets(args)       
+    print(response)                                 
 
 
 def add_init_parser(subparsers, parent_parser):
@@ -512,6 +631,10 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_upd(args)
     elif args.command == XCERT_CRT_OP:
         do_crt(args)
+    elif args.command == XCERT_WALLETS_OP:
+        do_wallets(args)
+    elif args.command == DEC_WALLET_OP:
+        do_wallet(args)
     elif args.command == 'show':
         do_show(args)
     elif args.command == 'list':

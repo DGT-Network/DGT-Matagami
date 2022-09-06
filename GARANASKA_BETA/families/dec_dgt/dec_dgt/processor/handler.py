@@ -483,7 +483,7 @@ class DecTransactionHandler(TransactionHandler):
             if DEC_INVOICE_OP not in t_val:
                 raise InvalidTransaction('Verb is "{}", but target={} with out invoice'.format(DEC_PAY_OP,target))
             invoice = t_val[DEC_INVOICE_OP]
-            if is_invoice  and value[DEC_PROVEMENT_KEY] != invoice[DEC_PROVEMENT_KEY]:
+            if is_invoice  and DEC_PROVEMENT_KEY in invoice and value[DEC_PROVEMENT_KEY] != invoice[DEC_PROVEMENT_KEY]:
                 raise InvalidTransaction('Verb is "{}", but invoice={} mismatch'.format(DEC_PAY_OP,value[DEC_PROVEMENT_KEY]))
             if DEC_CUSTOMER_KEY not in invoice or (invoice[DEC_CUSTOMER_KEY] is not None and name != invoice[DEC_CUSTOMER_KEY]):
                 raise InvalidTransaction('Verb is "{}", but customer mismatch with invoice'.format(DEC_PAY_OP))
@@ -575,7 +575,9 @@ class DecTransactionHandler(TransactionHandler):
         info = {}                                                                                                                                   
         info[DEC_TARGET_INFO] = value[DEC_TARGET_INFO]                                                                                            
         info[DEC_TARGET_PRICE] = value[DATTR_VAL] if DATTR_VAL in value else 0                                                             
-        info[DEC_EMITTER] = value[DEC_EMITTER]                                                                                                            
+        info[DEC_EMITTER] = value[DEC_EMITTER] 
+        if DEC_INVOICE_OP in value:
+            info[DEC_INVOICE_OP] = value[DEC_INVOICE_OP]                                                                                                          
                                                                                                                                                     
         token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
                              owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               

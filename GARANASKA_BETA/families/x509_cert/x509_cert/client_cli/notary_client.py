@@ -44,10 +44,14 @@ except Exception as ex:
     print(f'Cant load Vault - {ex}')                                      
     Vault = None                                          
 
+# DEC 
+from dec_dgt.client_cli.dec_client import DecClient
+from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,DEC_WALLET_STATUS
+
 LOGGER = logging.getLogger(__name__)
 
 NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
-
+DID_WALLETS = "wallets"
 
                                                                      
 
@@ -60,6 +64,8 @@ class NotaryClient(XcertClient):
         """
         super().__init__(url,keyfile=keyfile,backend=backend)
         self._vault = None
+        self._url = url
+        self._backend = backend
         if Vault:
             if vault_url is None:
                 # client mode 
@@ -74,8 +80,13 @@ class NotaryClient(XcertClient):
             else:
                 # init mode                                                      
                 self._vault = Vault(vault_url,notary=notary,lead_addr=lead_addr) 
+
+        self._cdec = None
         
-        
+    def init_dec(self,keyfile):
+        # for  wallet mode 
+        # keyfile - this is private key wallet owner 
+        self._cdec = DecClient(self._url,keyfile=keyfile,backend=self._backend)
 
     def get_xcert_notary_attr(self,xcert):
         val = self.get_xcert_attributes(xcert,X509_COMMON_NAME)
@@ -108,7 +119,81 @@ class NotaryClient(XcertClient):
                     response = self.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)
                 print(f'INIT NOTARY={name} key={key} info={info} response={response}') 
 
+    def wallet(self,args,wait=None):
+        # use notary key for sign did arguments
+        #   
+        try:
+            uid = self.did2uid(args.did)
+            data = self._vault.get_xcert(uid)
+            if data is None:
+                print(f'Certificate for {args.did} UNDEF')
+                return
+            owner = self._cdec.signer_as_hex
+            secret = data['data']
+            print('Certificate for {} VAL={} owner={}'.format(args.did,secret,owner))
+            # add new wallet into xcert list 
+            if args.cmd == DEC_WALLET_OP:
+                # create wallet and add them into DID wallets list
+                if DID_WALLETS in secret and isinstance(secret[DID_WALLETS],dict) :
+                    wlist = secret[DID_WALLETS]
+                    if owner in wlist:
+                        print('Wallet already in wallets relating to DID={}'.format(args.did)) 
+                        return                                     
+                else:
+                    wlist = {}
+                wlist[owner] = {}
+                secret[DID_WALLETS] = wlist
+                #print('Certificate with wallet={}'.format(secret))
+                dec_wallet = self._cdec.wallet
+            elif args.cmd == DEC_WALLET_OPTS_OP:
+                if DID_WALLETS not in secret or not isinstance(secret[DID_WALLETS],dict) or owner not in secret[DID_WALLETS]:   
+                    print('No such wallet relating to DID={}'.format(args.did))
+                    return
+                opts = secret[DID_WALLETS][owner]
+                print('current OPTS for wallet={} args={}'.format(opts,args))
+                if not (args.spend_period or args.limit or args.status):
+                    print('No new options set(limit,sped period and etc) {} '.format(opts))
+                    return
+                if args.limit is not None:
+                    # set transfer
+                    opts[DEC_WALLET_LIMIT] = args.limit
+                    print('NEW OPTS={}'.format(opts))
+                if args.spend_period:
+                    opts[DEC_SPEND_PERIOD] = args.spend_period
+                if args.status:                          
+                    opts[DEC_WALLET_STATUS] = args.status     
+                dec_wallet = self._cdec.wallet_opts
+            else:
+                print('Undef CMD for wallet operation with wallet={}'.format(secret))
+                return
 
+            if not self._vault.create_or_update_secret(uid,secret=secret):    
+                print('Cant update secret={}'.format(uid))                             
+                return                                                           
+
+            return dec_wallet(args,wait,nsign=self._signer)
+        except Exception as ex:
+            return
+
+
+    def wallets(self,args,wait=None):  
+        # list wallets for DID
+        try:                                                                                         
+            uid = self.did2uid(args.did)                                                             
+            data = self._vault.get_xcert(uid)                                                        
+            if data is None:                                                                         
+                print(f'Certificate for {args.did} UNDEF')                                           
+                return                                                                               
+            secret = data['data']                                                                    
+            # add new wallet into xcert list                                                         
+            if DID_WALLETS in secret and isinstance(secret[DID_WALLETS],list) :                      
+                wlist = secret[DID_WALLETS]                                                          
+                return wlist                                                                          
+            else:                                                                                    
+                print('No wallets relating to DID={}'.format(args.did))
+
+        except Exception as ex:                                                                      
+            return                                                                                   
 
 
     def set_or_upd(self,value,user,before,after):
@@ -217,7 +302,10 @@ class NotaryClient(XcertClient):
     def get_user_did(self,uid):                                    
         did = f"did:notary:{self._public_key.as_hex()[:8]}:{uid}"      
         return did   
- 
+    def did2uid(self,did):                                       
+        uid = did.split(':')
+        return uid[3]                                                    
+
     def make_xcert_prof(self,info,proto_xcert=None):                              
         proto = XCERT_PROTO.copy() if proto_xcert is None else proto_xcert.copy()                                          
         if EMAIL_ATTR in info and info[EMAIL_ATTR]:                                               
