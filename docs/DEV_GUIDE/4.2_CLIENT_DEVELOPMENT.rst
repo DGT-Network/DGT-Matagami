@@ -1,11 +1,8 @@
 4.2 CLIENT DEVELOPMENT
 ++++++++++++++++++++++++++++++++++
 
-Simple Python Client
-====================
-
-Getting Started
----------------
+4.2.1 Getting Started
+===============================
 
 In this document we will explain and describe the BGT client. The client
 is a simple command line application desgined for interacting with a DGT
@@ -30,8 +27,8 @@ Lastly, not that due to the use of the secp256k1 library, the client is
 not supported on Windows at this time. If you have a Windows machine,
 consider setting up a virtual machine ora WSL.
 
-Installation
-------------
+4.2.2 Installation
+========================
 
 To install the client,you can run ``sudo pip install BGT-Client``. If
 root is unavailable, you will have to add the local bins to the path.
@@ -47,8 +44,8 @@ Manual Instaltion
    ‘protobuf==3.20’,‘cryptography’,‘configparser’, and ‘secp256k1’
 3. Run the bgtc.py file, or add it to the path.
 
-Running the Application
------------------------
+4.2.3 Running the Application
+======================================
 
 Assuming you either installed with root or added the local bins to the
 path, the client canbe ran by typing ``$ bgtc [COMMAND] [OPTIONS]``.
@@ -102,8 +99,8 @@ If you want to run multiple commands, you must put
 seperated by lines,each command must be of the same format as if youwere
 passing it into the command line directly.
 
-Under the Hood
---------------
+4.2.4 Under the Hood
+=============================
 
 There are two parts to the bgtc program, the bgtc.py file and the cli.py
 file.
