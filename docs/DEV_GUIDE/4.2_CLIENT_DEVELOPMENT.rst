@@ -1,2 +1,156 @@
 4.2 CLIENT DEVELOPMENT
 ++++++++++++++++++++++++++++++++++
+
+Simple Python Client
+====================
+
+Getting Started
+---------------
+
+In this document we will explain and describe the BGT client. The client
+is a simple command line application desgined for interacting with a DGT
+Node, You must have Python installed as well as the openssl library
+(used to geenrate private keys) or have a pair of public/private keys
+ready[^1].
+
+The `BGT transaction
+family <https://dgt-matagami.readthedocs.io/en/latest/ARCHITECTURE/2.4_DGT_Transactions.html>`__
+is a demo transaction family and so some features of more fully realized
+transactions are lacking (for example: the wallets are named randomly
+instead of being dependant on public keys).
+
+This guide assumes that you already have a functional Node running on a
+server, if not see the
+`documentation <https://dgt-matagami.readthedocs.io/en/latest/ADMIN_GUIDE/2.2_Setup_single_Node.html>`__.
+Addtionally, if you want more detail you can visit the sawtooth
+documentaion
+`here <https://sawtooth.hyperledger.org/docs/1.2/app_developers_guide/python_sdk.html>`__.
+
+Lastly, not that due to the use of the secp256k1 library, the client is
+not supported on Windows at this time. If you have a Windows machine,
+consider setting up a virtual machine ora WSL.
+
+Installation
+------------
+
+To install the client,you can run ``sudo pip install BGT-Client``. If
+root is unavailable, you will have to add the local bins to the path.
+See how to do that
+`here <https://linuxize.com/post/how-to-add-directory-to-path-in-linux/>`__.
+
+Manual Instaltion
+~~~~~~~~~~~~~~~~~
+
+1. Clone the `DGT Matagami
+   repo <'https://github.com/Mishark-dev/DGT-Clien://github.com/DGT-Network/DGT-Matagami.'>`__
+2. Pip Install’requests’,‘ipaddress’,‘cbor’,
+   ‘protobuf==3.20’,‘cryptography’,‘configparser’, and ‘secp256k1’
+3. Run the bgtc.py file, or add it to the path.
+
+Running the Application
+-----------------------
+
+Assuming you either installed with root or added the local bins to the
+path, the client canbe ran by typing ``$ bgtc [COMMAND] [OPTIONS]``.
+There are a few special set-up commands that you must exectue before
+running any of the other ones.
+
+Firstly, you must run ``$ bgtc connect [IP:PORT]`` to connect to a node.
+This command initilizes a config file which is then referenced
+throughout the application. The connect command opens a socket to the
+server, and if the connection doesn’t go through, it sends back the
+errno. Note that it doesn’t *actually* conenct to the node, as in the
+socket doesn’t stay open once the program is closed. The connection is
+essentially a test that ensures the other commands run smoothly. If the
+connection goes through, the IP:Port is written into the config file:
+where the other commands refernce it.
+
+Then, you must also run ``$ bgtc key [PATH]`` with the path to your
+private key file. This is used for signing transactions.
+
+Lastly, if you want the contents to be outputted, you must run
+``$bgtc output [FILENAME]`` with the filename you want the output to be
+wrriten to.
+
+The other commands are listed below.
+
++-----------------------+----------------------------------------------+
+| version               | Prints the current version of the BGT client |
++=======================+==============================================+
+| set WALLETNAME        | Creates a wallet with a specified number of  |
+| [TOKENS] [WAIT]       | tokens.                                      |
++-----------------------+----------------------------------------------+
+| inc WALLETNAME        | Increases the wallet by the specified        |
+| [TOKENS] [WAIT]       | amount.                                      |
++-----------------------+----------------------------------------------+
+| dec WALLETNAME        | Decreases the wallet by the specified amount |
+| [TOKENS] [WAIT]       |                                              |
++-----------------------+----------------------------------------------+
+| trans WAL1 WAL2       | Transfers a given number of tokens from WAL1 |
+| [TOKENS] [WAIT]       | to WAL2                                      |
++-----------------------+----------------------------------------------+
+| show WALLET [WAIT]    | Shows the number of tokens in the wallet.    |
++-----------------------+----------------------------------------------+
+| list [Wait]           | Returns a list of wallets and their coins in |
+|                       | a plaintext format                           |
++-----------------------+----------------------------------------------+
+| exit                  | Exits the client.                            |
++-----------------------+----------------------------------------------+
+
+If you want to run multiple commands, you must put
+``$ bgtc execute [FILE]`` where FILE is a plaintext file with commands
+seperated by lines,each command must be of the same format as if youwere
+passing it into the command line directly.
+
+Under the Hood
+--------------
+
+There are two parts to the bgtc program, the bgtc.py file and the cli.py
+file.
+
+bgtc.py
+~~~~~~~
+
+The bgtc.py file is responsible for parsing user-provided information,
+verifing it, and sending to the cli.py file.
+
+valIP, valPort, valFile, valOut, valWait, valToken and valArgs all work
+together to validate the information the user is supplying into the
+command line. Making sure the command and the paremeters arevalid.
+
+initIP and updateIP handle the “node_ip” section of the config file. The
+former is run when the first time “connect” is ran, and the latter is
+run any time the user uses the “connect command after it’s been
+initially set up. Set output, similarly, adjusts the config file tto
+contain an”output" field. These config fields are used throughout the
+code.
+
+The main method simply checks if the program is in “execute” mode. If it
+is, for each file in the execute file it runs the run() method, which
+does all the heavy lifting. If not, it passes the system arguments into
+the run() method.
+
+The run method checks which command is requested and executes the
+apporpriate function. If the command requires the server it sends it
+over to the appropriate cli method.
+
+cli.py
+~~~~~~
+
+The send_request, \_sha512, get_prefix(), and get_address method are
+helper methods which use various common libraries. The connect method
+simply opens a socket to the IP provided, and returns if it worked
+
+The send method handles all “post” transactions, where we are submitting
+something to the server. First it creates the context and the private
+key, using those two to create a “signer” which is a utility object used
+to help with signing transcations. We then set the payload, that is the
+data the transaction is sending, including what type of transaction it
+is. After that, we create the transaction header, add the transaction
+the the batch and send it to the IP provided.
+
+The show and list send a simple get resquest to the server to return
+their respective results.
+
+[^1] To generate the private key you can use the following:
+``openssl ecparam -name secp255k1 -genkey -noout -out private_key.txt``
