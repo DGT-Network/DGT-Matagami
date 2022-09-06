@@ -89,12 +89,14 @@ class DecTransactionHandler(TransactionHandler):
         verbs = {
             DEC_EMISSION_OP    : self._do_emission,
             DEC_WALLET_OP      : self._do_wallet,
+            DEC_WALLET_OPTS_OP : self._do_wallet_opts,
             DEC_BURN_OP        : self._do_burn,
             DEC_CHANGE_MINT_OP : self._do_change_mint,
             DEC_FAUCET_OP      : self._do_faucet,
             DEC_SEND_OP        : self._do_send,
             DEC_PAY_OP         : self._do_pay,
             DEC_INVOICE_OP     : self._do_invoice,
+            DEC_TARGET_OP      : self._do_target,
             DEC_MINT_OP        : self._do_mint,
             DEC_HEART_BEAT_OP  : self._do_heartbeat,
             DEC_SET_OP         : self._do_set,
@@ -190,8 +192,22 @@ class DecTransactionHandler(TransactionHandler):
             did_val = cbor.loads(did_pay)
             psign = value[DEC_DID_VAL][DEC_SIGNATURE]
             # check notary sign
+            is_correct = self._check_sign(did_val[NOTARY_PUBKEY],psign,did_pay)                                     
+            if not is_correct:                                                                                        
+                raise InvalidTransaction('Verb is "{}", but signature of DID is wrong.'.format(DEC_WALLET_OP))  
 
-                  
+
+
+            
+        # wallet options
+        opts_pay = value[DEC_WALLET_OPTS_OP][DEC_WALLET_OPTS_OP]    
+        opts = cbor.loads(opts_pay)                             
+        psign = value[DEC_WALLET_OPTS_OP][DEC_SIGNATURE]            
+        is_correct = self._check_sign(opts[NOTARY_PUBKEY],psign,opts_pay)                                
+        if not is_correct:                                                                                 
+            raise InvalidTransaction('Verb is "{}", but signature of OPTS is wrong.'.format(DEC_WALLET_OP)) 
+
+
         tcurr = value[DEC_TMSTAMP]                                                                                                                              
         updated = {k: v for k, v in state.items() if k in out}                                                                         
         #owner_key = self._context.sign('DEC_token'.encode(),self._private_key)                                                        
@@ -201,14 +217,53 @@ class DecTransactionHandler(TransactionHandler):
                              decimals = 0,                                                                                    
                              dec=cbor.dumps({DEC_TMSTAMP: tcurr,
                                              DEC_TOTAL_SUM : 0,
-                                             DEC_DID_VAL   : did_val
+                                             DEC_DID_VAL   : did_val,
+                                             DEC_WALLET_OPTS_OP : opts
                                              }
                             )                                                   
                 )                                                                                                                      
         updated[name] = token.SerializeToString()                                                                                      
         #LOGGER.debug('_do_set updated=%s',updated)                                                                                    
         return updated                                                                                                                 
-                                                                                                                                       
+  
+    def _do_wallet_opts(self,name, value, to, state, out):                                                                                        
+        LOGGER.debug('Set wallet opts "{}" to {}'.format(name,value))                                                                                 
+                                                                                                                                             
+                                                                                                                                             
+        if name not in state:                                                                                                                    
+            raise InvalidTransaction('Verb is "{}", but wallet not exists: Name: {}, Value {}'.format(DEC_WALLET_OPTS_OP,name,state[name]))          
+        #if DEC_EMISSION_KEY not in state:                                                                                                   
+        #    raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_WALLET_OP))                                    
+        if DEC_WALLET_OPTS_OP not in value:                                                                                                         
+            # no options    
+            raise InvalidTransaction('Verb is "{}", but no options for update wallet: {}.'.format(DEC_WALLET_OPTS_OP,name)) 
+                                                                                                                        
+        opts_pay = value[DEC_WALLET_OPTS_OP][DEC_WALLET_OPTS_OP]                                                                                        
+        opts_new = cbor.loads(opts_pay)                                                                                                    
+        psign = value[DEC_WALLET_OPTS_OP][DEC_SIGNATURE]                                                                                        
+        # check notary sign                                                                                                              
+        is_correct = self._check_sign(opts_new[NOTARY_PUBKEY],psign,opts_pay)
+        if not is_correct:
+            raise InvalidTransaction('Verb is "{}", but signature of OPTS is wrong.'.format(DEC_WALLET_OPTS_OP))
+        LOGGER.debug('Set wallet opts is sign correct {}'.format(is_correct))
+        wtoken = DecTokenInfo()                          
+        wtoken.ParseFromString(state[name])                
+        wallet = cbor.loads(wtoken.dec)                    
+        opts = wallet[DEC_WALLET_OPTS_OP] if DEC_WALLET_OPTS_OP in wallet else {}
+        if DEC_WALLET_LIMIT in opts_new:
+            opts[DEC_WALLET_LIMIT] = opts_new[DEC_WALLET_LIMIT]
+        if DEC_SPEND_PERIOD in opts_new:                         
+            opts[DEC_SPEND_PERIOD] = opts_new[DEC_SPEND_PERIOD] 
+        if DEC_WALLET_STATUS in opts_new:                          
+            opts[DEC_WALLET_STATUS] = opts_new[DEC_WALLET_STATUS]      
+        wallet[DEC_WALLET_OPTS_OP] = opts   
+        wtoken.dec = cbor.dumps(wallet)                                                                                                                                         
+        updated = {k: v for k, v in state.items() if k in out}    
+        updated[name] = wtoken.SerializeToString()                 
+                                                              
+        return updated                                                                                                                       
+    
+                                                                                                                                         
 
 
 
@@ -351,11 +406,23 @@ class DecTransactionHandler(TransactionHandler):
         else:
             if value[DEC_EMITTER] != name:
                 raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
-            if token.decimals < amount:                                                                                
-                raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount))                                         
-            src = cbor.loads(token.dec)                                                                                               
+            src = cbor.loads(token.dec)
+            total = src[DEC_TOTAL_SUM]
+            if total < amount:                                                                                
+                raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount)) 
+                                                    
+              
+            # check spend period
+            tcurr = value[DEC_TMSTAMP]
+            if DEC_SPEND_TMSTAMP in src :
+                last_tm = src[DEC_SPEND_TMSTAMP]
+                spend_period = src[DEC_WALLET_OPTS_OP][DEC_SPEND_PERIOD] if DEC_WALLET_OPTS_OP in src and DEC_SPEND_PERIOD in src[DEC_WALLET_OPTS_OP] else DEC_SPEND_PERIOD_DEF
+                if tcurr - last_tm < spend_period:
+                    raise InvalidTransaction('Verb is "{}", and operation send too fast < {}sec'.format(DEC_SEND_OP,spend_period))
+
             token.decimals -= amount 
             src[DEC_TOTAL_SUM] -= amount
+            src[DEC_SPEND_TMSTAMP] = tcurr
             token.dec = cbor.dumps(src)
         
         # destination wallet
@@ -371,86 +438,163 @@ class DecTransactionHandler(TransactionHandler):
         return updated                                                                                                                               
 
     def _do_pay(self,name, value, inputs, state, out):                                                                                                      
-        LOGGER.debug('Pay "{}" by {} state={}'.format(name,value,[k for k in state.keys()]))                                                                                                   
+        LOGGER.debug('Pay "{}" by {} inputs={} state={}'.format(name,value,inputs,[k for k in state.keys()]))                                                                                                   
         to = inputs[0] 
+        target = inputs[1] if len(inputs) > 2 else None
         is_invoice = DEC_PROVEMENT_KEY in value                                                                                                                                      
         if name not in state or to not in state:                                                                                                             
             raise InvalidTransaction('Verb is "{}" but name "{}" or "{}" not in state'.format(DEC_PAY_OP,name,to))                                          
         if DEC_EMISSION_KEY not in state:                                                                                                                    
             raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_PAY_OP))                                                       
-        if is_invoice and value[DEC_PROVEMENT_KEY] not in state:
-            raise InvalidTransaction('Verb is "{}" but invoice "{}" not in state'.format(DEC_PAY_OP,value[DEC_PROVEMENT_KEY]))
+        if target is not None and target not in state:
+            raise InvalidTransaction('Verb is "{}" but target "{}" not in state'.format(DEC_PAY_OP,target))
+        if value[DEC_EMITTER] != name:                                                                                     
+            raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_PAY_OP)) 
+
+        # wallet of source
         curr = state[name]                                                                                                                                   
         token = DecTokenInfo()                                                                                                                               
-        token.ParseFromString(curr)                                                                                                                          
+        token.ParseFromString(curr) 
+        src = cbor.loads(token.dec)
+        total = src[DEC_TOTAL_SUM]
+                                                                                                                                 
         #dec = cbor.loads(token.dec)                                                                                                                         
         #total_sum = dec[DEC_TOTAL_SUM][DATTR_VAL]                                                                                                           
         #passkey = dec[DEC_PASSKEY][DATTR_VAL]                                                                                                               
         #sale_share = dec[DEC_SALE_SHARE][DATTR_VAL]                                                                                                         
         #max_sale = total_sum/100*sale_share                                                                                                                 
         #total_sale = dec[DEC_SALE_TOTAL]                                                                                                                    
-        amount = value[DATTR_VAL]                                                                                                                            
+        amount = value[DATTR_VAL]
+        tcurr = value[DEC_TMSTAMP]                                                                                                                            
         # destination token                                                                                                                                  
         dtoken = DecTokenInfo()                                                                                                                              
-        dtoken.ParseFromString(state[to])                                                                                                                    
+        dtoken.ParseFromString(state[to]) 
+        dest = cbor.loads(dtoken.dec)   
+
         LOGGER.debug('_do_send value={}'.format(value))                                                                                                      
-                                                                                                                                                             
-        if token.decimals < amount:                                                                                                                          
-            raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_PAY_OP,amount))    
-                            
-        if is_invoice:
-            # check invoice 
-            itoken = DecTokenInfo()
-            itoken.ParseFromString(state[value[DEC_PROVEMENT_KEY]])
-            invoice = cbor.loads(itoken.dec)
-            if DEC_TARGET in invoice and (DEC_TARGET not in value or value[DEC_TARGET] != invoice[DEC_TARGET]):
-                raise InvalidTransaction('Verb is "{}", but target absent or mismatch '.format(DEC_PAY_OP))
-            if AVAILABLE_TILL in invoice:
+        ttoken = DecTokenInfo()                                                                                                                                                     
+        if target:
+            # check invoice
+            # TODO set marker that payment was done  
+            # TODO check target object
+            ttoken.ParseFromString(state[target])                  
+            t_val = cbor.loads(ttoken.dec)                         
+            LOGGER.debug('_do_send target={}'.format(t_val))  
+            if DEC_INVOICE_OP not in t_val:
+                raise InvalidTransaction('Verb is "{}", but target={} with out invoice'.format(DEC_PAY_OP,target))
+            invoice = t_val[DEC_INVOICE_OP]
+            if is_invoice  and value[DEC_PROVEMENT_KEY] != invoice[DEC_PROVEMENT_KEY]:
+                raise InvalidTransaction('Verb is "{}", but invoice={} mismatch'.format(DEC_PAY_OP,value[DEC_PROVEMENT_KEY]))
+            if DEC_CUSTOMER_KEY not in invoice or (invoice[DEC_CUSTOMER_KEY] is not None and name != invoice[DEC_CUSTOMER_KEY]):
+                raise InvalidTransaction('Verb is "{}", but customer mismatch with invoice'.format(DEC_PAY_OP))
+
+            if AVAILABLE_TILL in invoice and invoice[AVAILABLE_TILL] < tcurr:
                 # check time TODO
-                pass
+                raise InvalidTransaction('Verb is "{}", but invoice already expired'.format(DEC_PAY_OP))
+            # real price 
+            if invoice[DEC_TARGET_PRICE] != amount :
+                raise InvalidTransaction('Verb is "{}", but price mismatch with invoice ({}~{})'.format(DEC_PAY_OP,invoice[DEC_TARGET_PRICE],amount))
+            # change owner and drop invoice
+            del t_val[DEC_INVOICE_OP]
+            t_val[DEC_EMITTER] = name
+            ttoken.dec = cbor.dumps(t_val)
+
+
+        if DEC_SPEND_TMSTAMP in src :                                                                                                                                             
+            last_tm = src[DEC_SPEND_TMSTAMP]                                                                                                                                      
+            spend_period = src[DEC_WALLET_OPTS_OP][DEC_SPEND_PERIOD] if DEC_WALLET_OPTS_OP in src and DEC_SPEND_PERIOD in src[DEC_WALLET_OPTS_OP] else DEC_SPEND_PERIOD_DEF       
+            if tcurr - last_tm < spend_period:                                                                                                                                    
+                raise InvalidTransaction('Verb is "{}", and operation send too fast < {}sec'.format(DEC_PAY_OP,spend_period))                                                    
+
+        if total < amount:                                                                                                             
+            raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_PAY_OP,amount))   
 
         updated = {k: v for k, v in state.items() if k in out}                                                                                               
-        dtoken.decimals += amount                                                                                                                            
-        token.decimals -= amount                                                                                                                             
-        #token.dec = cbor.dumps(dec)                                                                                                                         
+        dtoken.decimals += amount
+        dest[DEC_TOTAL_SUM] += amount
+        dtoken.dec = cbor.dumps(dest) 
+        # update wallet of customer                                                                                                                         
+        token.decimals -= amount
+        src[DEC_TOTAL_SUM] -= amount                
+        src[DEC_SPEND_TMSTAMP] = value[DEC_TMSTAMP] 
+        token.dec = cbor.dumps(src)                 
+
         updated[name] = token.SerializeToString()                                                                                                            
-        updated[to] = dtoken.SerializeToString()                                                                                                             
+        updated[to] = dtoken.SerializeToString() 
+        if target:
+            updated[target] = ttoken.SerializeToString()
                                                                                                                                                              
         return updated                                                                                                                                       
 
     def _do_invoice(self,name, value, inputs, state, out):                                                                                                  
-        LOGGER.debug('INVOICE "{}" by {}'.format(name,value))                                                                                               
-        pub_key = inputs[1]                                                                                                                                  
-        if name in state:                                                                                                        
-            raise InvalidTransaction('Verb is "{}" but prove_key "{}" already in state'.format(DEC_INVOICE_OP,name)) 
+        LOGGER.debug('INVOICE "{}" by {}'.format(name,value)) 
+        customer = inputs[1] if len(inputs) > 1 else None
+
+        if name not in state:                                                                                                        
+            raise InvalidTransaction('Verb is "{}" but target "{}" not exists'.format(DEC_INVOICE_OP,name)) 
                                              
         if DEC_EMISSION_KEY not in state:                                                                                                               
             raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_INVOICE_OP))
-        if pub_key not in state:                                                                 
-            raise InvalidTransaction('Verb is "{}" but pub_key={} not in state'.format(DEC_INVOICE_OP,pub_key))                                                    
-                                                                                                                                                        
+        if customer is not None and customer not in state:                                                                 
+            raise InvalidTransaction('Verb is "{}" but customer pub key={} not in state'.format(DEC_INVOICE_OP,customer))                                                    
+            
+        # target                        
+        curr = state[name]              
+        token = DecTokenInfo()          
+        token.ParseFromString(curr)     
+        target = cbor.loads(token.dec)  
+        if target[DEC_EMITTER] != value[DEC_EMITTER]:
+            raise InvalidTransaction('Verb is "{}" and only owner can add invoice'.format(DEC_INVOICE_OP,target[DEC_EMITTER])) 
+
         info = {}
         if AVAILABLE_TILL in value:
             info[AVAILABLE_TILL] = value[AVAILABLE_TILL]
-        if DEC_TARGET in value:
-            info[DEC_TARGET] = value[DEC_TARGET]
+
         amount = value[DATTR_VAL]
-        token = DecTokenInfo(group_code = DEC_INVOICE_DEF,                                        
-                             owner_key = self._signer.sign(DEC_INVOICE_DEF.encode()),             
-                             sign = self._public_key.as_hex(),                                 
-                             decimals=amount,                                                       
-                             dec = cbor.dumps(info)                                           
-                )                                                                              
+        info[DEC_CUSTOMER_KEY] = customer
+        info[DEC_PROVEMENT_KEY] = value[DEC_PROVEMENT_KEY]
+        info[DEC_TARGET_PRICE] = amount
+        target[DEC_INVOICE_OP] =info  
                                                                                                                                
         # destination token                                                                                                                             
 
         LOGGER.debug('_do_invoice value={}'.format(value))                                                                                                 
                                                                                                                                                         
         updated = {k: v for k, v in state.items() if k in out}                                                                                          
-
+        token.dec = cbor.dumps(target)
         updated[name] = token.SerializeToString()                                                                                                       
                                                                                                                                                         
         return updated                                                                                                                                  
+
+    def _do_target(self,name, value, inputs, state, out):
+        LOGGER.debug('TARGET "{}" by {}'.format(name,value))                                                                                       
+
+        if name in state:                                                                                                                           
+            raise InvalidTransaction('Verb is "{}" target with such name "{}" already in state'.format(DEC_TARGET_OP,name))                                
+
+        info = {}                                                                                                                                   
+        info[DEC_TARGET_INFO] = value[DEC_TARGET_INFO]                                                                                            
+        info[DEC_TARGET_PRICE] = value[DATTR_VAL] if DATTR_VAL in value else 0                                                             
+        info[DEC_EMITTER] = value[DEC_EMITTER]                                                                                                            
+                                                                                                                                                    
+        token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
+                             owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               
+                             sign = self._public_key.as_hex(),                                                                                      
+                             decimals=int(info[DEC_TARGET_PRICE]),                                                                                                       
+                             dec = cbor.dumps(info)                                                                                                 
+                )                                                                                                                                   
+                                                                                                                                                    
+        # destination token                                                                                                                         
+                                                                                                                                                    
+        LOGGER.debug('_do_target value={}'.format(value))                                                                                          
+                                                                                                                                                    
+        updated = {k: v for k, v in state.items() if k in out}                                                                                      
+                                                                                                                                                    
+        updated[name] = token.SerializeToString()                                                                                                   
+                                                                                                                                                    
+        return updated                                                                                                                              
+
+
 
     def _do_mint(self,name, value, to, state, out): 
         """
@@ -735,6 +879,11 @@ class DecTransactionHandler(TransactionHandler):
         LOGGER.debug('_unpack_transaction:{} for {}'.format(verb, name))
         return verb, name, value, to, out
 
+    def _check_sign(self,pubkey,signature,payload):
+        public_key = self._context.pub_from_hex(pubkey)                             
+        ret = self._signer.verify(signature, payload,public_key )        
+        return ret
+
 
     def _decode_transaction(self,transaction):
         try:
@@ -771,9 +920,11 @@ class DecTransactionHandler(TransactionHandler):
         if verb in VALID_VERBS_WITH_TO :
             if 'To' not in content :
                 raise InvalidTransaction('To is required')
-
-            to = [(FAMILY_NAME,content['To'])] # add name space
-            out.append(content['To'])
+            to_list = content['To'] if isinstance(content['To'],list) else [content['To']]
+            to = []
+            for to_val in to_list:
+                to.append((FAMILY_NAME,to_val)) # add name space
+                out.append(to_val)
         else:
             to = None
         if DATTR_INPUTS in content and content[DATTR_INPUTS] != []:
@@ -789,7 +940,7 @@ def _validate_verb(verb):
 
 
 def _validate_name(name,verb):
-    if verb not in [DEC_WALLET_OP,DEC_MINT_OP,DEC_SEND_OP] and (not isinstance(name, str) or len(name) > MAX_NAME_LENGTH):
+    if verb not in [DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_MINT_OP,DEC_SEND_OP,DEC_PAY_OP] and (not isinstance(name, str) or len(name) > MAX_NAME_LENGTH):
         raise InvalidTransaction('Name must be a string of no more than {} characters'.format(MAX_NAME_LENGTH))
 
 def _validate_to(name):                                                                                        
