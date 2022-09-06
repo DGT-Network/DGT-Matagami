@@ -16,7 +16,7 @@ FEATURES OF THE SOLUTION:
 
     •	The initial version of DGT is a fork of the **Hyperledger Sawtooth framework**. This implies the inheritance of the basic architectural solutions of the base layer, the use of common technological components (such as Zero-MQ) after Sawtooth and limited backward compatibility.
 
-    •	The DGT functions as a **node-to-node** network. In fact, DGT software is the **software of a typical Node** that facilitates the interaction with other nodes, data verification, and insertion of new data into storage (registry) also called DAG or State.
+    •	DGT functions as a **node-to-node** network. In fact, DGT software is the **software of a typical Node** that facilitates the interaction with other nodes, data verification, and insertion of new data into storage (registry) also called DAG or State.
 
     •	Each node consists of a set of services, some of which are mandatory (for example, those responsible for the cryptography and DAG storage), while others are optional (for example, the monitoring Dashboard). A node represents a virtual supercomputer that is one whole from the point of view of the network; the components of which form its own inter-network and may be located on different servers. 
 

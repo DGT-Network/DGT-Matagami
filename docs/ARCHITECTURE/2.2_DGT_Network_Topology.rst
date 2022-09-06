@@ -5,7 +5,7 @@
 2.2.1	Network Architecture in General
 =============================================
 
-Most blockchain platforms organize interaction between nodes base don the P2P paradigm, a peer-to-peer network in which a node initially gains access to some dedicated nodes and then propagates the network through the GOSSIP protocol (interacting with randomly selected nodes). DGT uses cluster networking, in which individual groups of nodes are connected by permalinks, a dynamic network over the Internet. Specific features of the DGT network organization include: 
+Most blockchain platforms organize interaction between nodes based on the P2P paradigm, a peer-to-peer network in which a node initially gains access to some dedicated nodes and then propagates the network through the GOSSIP protocol (interacting with randomly selected nodes). DGT uses cluster networking, in which individual groups of nodes are connected by permalinks, a dynamic network over the Internet. Specific features of the DGT network organization include: 
 
  •	The network consists of independently functioning nodes, each of which has a full set of functions common to the network (first and foremost, the ability to receive and process transactions, saving them in the local ledger).
 
