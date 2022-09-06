@@ -62,7 +62,6 @@ Please, visit `our website`_ to find more
    :caption: 4. DEVELOPER GUIDE
 
    DEV_GUIDE/4.1_REST_API
-   DEV_GUIDE/4.2_CLIENT_DEVELOPMENT
 .. toctree::
    :maxdepth: 2
    :caption: 5. COMMUNITY
