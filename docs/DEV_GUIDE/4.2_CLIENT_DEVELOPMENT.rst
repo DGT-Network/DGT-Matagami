@@ -39,7 +39,7 @@ Manual Instaltion
 ~~~~~~~~~~~~~~~~~
 
 1. Clone the `DGT Matagami
-   repo <'https://github.com/Mishark-dev/DGT-Clien://github.com/DGT-Network/DGT-Matagami.'>`__
+   repo <'https://github.com/DGT-Network/DGT-Matagami.'>`__
 2. Pip Install’requests’,‘ipaddress’,‘cbor’,
    ‘protobuf==3.20’,‘cryptography’,‘configparser’, and ‘secp256k1’
 3. Run the bgtc.py file, or add it to the path.
