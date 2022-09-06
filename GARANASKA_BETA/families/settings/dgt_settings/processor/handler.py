@@ -33,13 +33,13 @@ from dgt_settings.protobuf.settings_pb2 import SettingCandidates
 from dgt_settings.protobuf.settings_pb2 import SettingTopology
 from dgt_settings.protobuf.setting_pb2 import Setting
 from dgt_validator.gossip.fbft_topology import PeerSync,PeerRole,PeerAtr,FbftTopology,DGT_NESTS_NAME,DGT_PING_COUNTER,DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,TOPO_MAP
+from dgt_settings.processor.utils import SETTINGS_NAMESPACE,_make_settings_key
 
 LOGGER = logging.getLogger(__name__)
 # DGT_PING_COUNTER - could do not all peers
 # allow to set DGT_NESTS_NAME without restriction - for doing nests
 NO_RESTRICTIONS_PARAMS = [DGT_NESTS_NAME]
 # The config namespace is special: it is not derived from a hash.
-SETTINGS_NAMESPACE = '000000'
 
 # Number of seconds to wait for state operations to succeed
 STATE_TIMEOUT_SEC = 10
@@ -481,9 +481,6 @@ def _get_settings_entry(context, address):
     return settings                                                                             
 
 
-def _to_hash(value):
-    return hashlib.sha256(value.encode()).hexdigest()
-
 
 def _first(a_list, pred):
     return next((x for x in a_list if pred(x)), None)
@@ -494,18 +491,4 @@ def _index_of(iterable, obj):
 
 
 
-_MAX_KEY_PARTS = 4
-_ADDRESS_PART_SIZE = 16
-_EMPTY_PART = _to_hash('')[:_ADDRESS_PART_SIZE]
 
-
-@lru_cache(maxsize=128)
-def _make_settings_key(key):
-    # split the key into 4 parts, maximum
-    key_parts = key.split('.', maxsplit=_MAX_KEY_PARTS - 1)
-    # compute the short hash of each part
-    addr_parts = [_to_hash(x)[:_ADDRESS_PART_SIZE] for x in key_parts]
-    # pad the parts with the empty hash, if needed
-    addr_parts.extend([_EMPTY_PART] * (_MAX_KEY_PARTS - len(addr_parts)))
-
-    return SETTINGS_NAMESPACE + ''.join(addr_parts)
