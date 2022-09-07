@@ -39,7 +39,7 @@ from x509_cert.client_cli.exceptions import XcertCliException,XcertClientExcepti
 from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD_OP,XCERT_WALLETS_OP)
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 # DEC 
-from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT
+from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,DEC_OPTS_PROTO_FILE_NM
 
 DISTRIBUTION_NAME = 'x509-cert'
 
@@ -408,6 +408,12 @@ def add_wallets_parser(subparsers, parent_parser):
         type=str,                                                                                                                                                  
         help='specify URL of REST API',                                                                                                                            
         default='http://api-dgt-c1-1:8108')                                                                                                                        
+    parser.add_argument(                                    
+        '--opts_proto',                                     
+        type=str,                                           
+        default=DEC_OPTS_PROTO_FILE_NM,                     
+        help='Proto file with wallet permisions params')    
+    
                                                                                                                                                                    
     parser.add_argument(                                                                                                                                           
         '--keyfile',                                                                                                                                               
