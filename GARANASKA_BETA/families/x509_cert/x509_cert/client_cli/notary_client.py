@@ -185,8 +185,9 @@ class NotaryClient(XcertClient):
                 print(f'Certificate for {args.did} UNDEF')                                           
                 return                                                                               
             secret = data['data']                                                                    
-            # add new wallet into xcert list                                                         
-            if DID_WALLETS in secret and isinstance(secret[DID_WALLETS],list) :                      
+            # add new wallet into xcert list 
+            #print('secret',secret)                                                        
+            if DID_WALLETS in secret and isinstance(secret[DID_WALLETS],dict) :                      
                 wlist = secret[DID_WALLETS]                                                          
                 return wlist                                                                          
             else:                                                                                    
