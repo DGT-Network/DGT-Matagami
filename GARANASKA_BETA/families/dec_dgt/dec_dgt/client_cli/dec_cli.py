@@ -334,7 +334,14 @@ def add_wallet_parser(subparsers, parent_parser):
         type=int,                            
         #default=DEC_WALLET_LIMIT_DEF,       
         help="Wallet spending period"        
-        )                                    
+        ) 
+    parser.add_argument(                 
+        '--status','-st',                
+        type=str,                        
+        help="Wallet status"             
+        )                                
+                                         
+                                       
     parser.add_argument(                                      
         '-cb', '--crypto_back',                               
         type=str,                                             

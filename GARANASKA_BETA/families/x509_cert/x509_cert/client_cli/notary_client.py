@@ -141,7 +141,8 @@ class NotaryClient(XcertClient):
                         return                                     
                 else:
                     wlist = {}
-                wlist[owner] = {}
+
+                wlist[owner] = self._cdec.get_wallet_opts(args,self._signer,only_opts=True)
                 secret[DID_WALLETS] = wlist
                 #print('Certificate with wallet={}'.format(secret))
                 dec_wallet = self._cdec.wallet

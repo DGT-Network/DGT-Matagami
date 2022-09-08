@@ -153,26 +153,37 @@ class DecClient:
         info[DEC_DID_VAL] = { DEC_DID_VAL   : payload,       
                               DEC_SIGNATURE : psign          
                             } 
-        # load default options
-        opts = self.load_json_proto(args.opts_proto) 
-        if args.limit is not None:                       
-            # set transfer                               
-            opts[DEC_WALLET_LIMIT] = args.limit          
-        if args.spend_period:                            
-            opts[DEC_SPEND_PERIOD] = args.spend_period 
-              
-        opts[NOTARY_PUBKEY] =  nsign.get_public_key().as_hex()  
-        payload = cbor.dumps(opts)                                    
-        psign = nsign.sign(payload)                                   
                                                                       
-        info[DEC_WALLET_OPTS_OP] = { DEC_WALLET_OPTS_OP   : payload,  
-                                     DEC_SIGNATURE : psign            
-                                   }                                  
+        info[DEC_WALLET_OPTS_OP] = self.get_wallet_opts(args,nsign)
         
                                      
-        info[DEC_TMSTAMP] = time.time()                                          
-        return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY    
-                                                                                                                                 #   
+        info[DEC_TMSTAMP] = time.time() 
+        print("DEC.wallet {}".format(info))                                        
+        return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY 
+                                                                                                                                 #    
+    def get_wallet_opts(self,args,nsign,only_opts=False):
+        # load default options
+        opts = self.load_json_proto(args.opts_proto)                      
+        if args.limit is not None:                                        
+            # set transfer                                                
+            opts[DEC_WALLET_LIMIT] = args.limit                           
+        if args.spend_period:                                             
+            opts[DEC_SPEND_PERIOD] = args.spend_period                    
+        if args.status:                              
+            opts[DEC_WALLET_STATUS] = args.status       
+            
+        if only_opts:
+            return opts
+
+        opts[NOTARY_PUBKEY] =  nsign.get_public_key().as_hex()            
+        payload = cbor.dumps(opts)                                        
+        psign = nsign.sign(payload)                                       
+                                                                          
+        return  { DEC_WALLET_OPTS_OP   : payload, DEC_SIGNATURE : psign  }                                      
+                                                                          
+        
+        
+                                                                                                                                       
     def wallet_opts(self,args,wait=None,nsign=None):                                                                                                                
         # nsign - notary key for sign did info                                                                                                                 
         # in case nsign is None we use owner wallet key                                                                                                        
