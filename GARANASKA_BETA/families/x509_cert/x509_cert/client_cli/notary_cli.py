@@ -354,6 +354,12 @@ def add_wallet_parser(subparsers, parent_parser):
         #default=DEC_WALLET_LIMIT_DEF,       
         help="Wallet status"        
         )                                                                                                                                                                                                         
+    parser.add_argument(                                 
+        '--opts_proto',                                  
+        type=str,                                        
+        default=DEC_OPTS_PROTO_FILE_NM,                  
+        help='Proto file with wallet permisions params') 
+    
                                                                                                                                                
     parser.add_argument(                                                                                                                        
         '--url',                                                                                                                                
