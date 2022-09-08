@@ -231,7 +231,7 @@ class DecTransactionHandler(TransactionHandler):
                                                                                                                                              
                                                                                                                                              
         if name not in state:                                                                                                                    
-            raise InvalidTransaction('Verb is "{}", but wallet not exists: Name: {}, Value {}'.format(DEC_WALLET_OPTS_OP,name,state[name]))          
+            raise InvalidTransaction('Verb is "{}", but wallet not exists: Name: {}'.format(DEC_WALLET_OPTS_OP,name))          
         #if DEC_EMISSION_KEY not in state:                                                                                                   
         #    raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_WALLET_OP))                                    
         if DEC_WALLET_OPTS_OP not in value:                                                                                                         
