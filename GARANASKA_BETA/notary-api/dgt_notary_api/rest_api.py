@@ -45,7 +45,7 @@ from dgt_notary_api.config import RestApiConfig
 
 LOGGER = logging.getLogger(__name__)
 DISTRIBUTION_NAME = 'dgt-notary-api'
-
+NOTARY_PRIV_KEY = '/project/peer/keys/notary.priv'
 
 def parse_args(args):
     """Parse command line flags added to `rest_api` command.
@@ -127,6 +127,8 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
     app.router.add_get('/crt', handler.crt_xcert)
     app.router.add_get('/upd', handler.upd_xcert)
     app.router.add_get('/wallets', handler.wallets)
+    app.router.add_get('/balanceof', handler.balanceof)
+
 
     if False:
         app.router.add_post('/batches', handler.submit_batches)
@@ -280,8 +282,9 @@ def main():
                 username=rest_api_config.opentsdb_username,
                 password=rest_api_config.opentsdb_password)
             reporter.start()
-        # notary client 
-        vault = NotaryClient(opts.url,'/project/peer/keys/notary.priv',opts.crypto_back)
+        # notary client add dec api
+        vault = NotaryClient(opts.url,NOTARY_PRIV_KEY,opts.crypto_back)
+        vault.init_dec(NOTARY_PRIV_KEY)
         start_rest_api(
             host,
             port,

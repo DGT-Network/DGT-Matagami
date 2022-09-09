@@ -236,6 +236,36 @@ class NotaryRouteHandler(RouteHandler):
                 data="Cant show wallets for DID={}".format(did),                                                              
                 metadata=None)                                                                                                                                                      
 
+    
+    async def balanceof(self, request):                                        
+        """                                                                  
+        show wallet balance                                                    
+        """                                                                  
+        pkey = request.url.query.get(WALLET_PKEY,None)                           
+        LOGGER.debug('print wallet ballance  for PUB KEY={}'.format(pkey))                
+        if pkey:                                                              
+            try:                                                             
+                balance = self._vault.get_balance_of(pkey)                       
+                return self._wrap_response(                                  
+                    request,                                                 
+                    data="Wallet balance={}".format(balance.decimals),        
+                    metadata=None)                                           
+                                                                             
+                                                                             
+            except  VaultNotReady:                                           
+                return self._wrap_response(request,data="Notary not ready")  
+                                                                             
+        else:                                                                
+                                                                             
+            return self._wrap_response(                                      
+                request,                                                     
+                data="Cant show wallet balance for KEY={}".format(pkey),             
+                metadata=None)                                               
+
+
+
+
+
 
 
     def _create_batch(self, transactions):

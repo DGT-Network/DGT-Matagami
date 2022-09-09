@@ -342,9 +342,12 @@ class DecClient:
                                                     
     #
     # banking cmd parts  
-    #                              
-    def balance_of(self,args,wait=None):  
-        token = self.show(args.pubkey)  
+    # 
+    def balance_of(self,args,wait=None):
+        return self.get_balance_of(args.pubkey,wait)
+
+    def get_balance_of(self,pubkey,wait=None):  
+        token = self.show(pubkey)  
         return token
 
     def send(self,args,wait=None): 

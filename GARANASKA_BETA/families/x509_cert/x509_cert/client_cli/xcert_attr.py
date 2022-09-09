@@ -49,6 +49,7 @@ XCERT_PROTO = {
     "BUSINESS_CATEGORY"         : "YOUR BUSINESS CATEGORY",                     
     "USER_ID"                   : "000000000000000001"                          
 }                                                                               
+WALLET_PKEY = "pkey"
 DID_ATTR = 'did'                                                                
 UID_ATTR = 'uid'                                                                
 CID_ATTR = 'chat_id'                                                            

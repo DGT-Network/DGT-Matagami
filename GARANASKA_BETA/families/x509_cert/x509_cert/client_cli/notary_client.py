@@ -200,6 +200,8 @@ class NotaryClient(XcertClient):
         except Exception as ex:                                                                      
             return                                                                                   
 
+    def get_balance_of(self,pkey):
+        return self._cdec.get_balance_of(pkey)
 
     def set_or_upd(self,value,user,before,after):
         if isinstance(value,dict):
