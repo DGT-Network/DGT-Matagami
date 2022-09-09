@@ -126,6 +126,8 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
     app.router.add_get('/list', handler.list_xcert)
     app.router.add_get('/crt', handler.crt_xcert)
     app.router.add_get('/upd', handler.upd_xcert)
+    app.router.add_get('/wallets', handler.wallets)
+
     if False:
         app.router.add_post('/batches', handler.submit_batches)
         app.router.add_get('/batch_statuses', handler.list_statuses)

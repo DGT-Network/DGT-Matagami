@@ -176,14 +176,17 @@ class NotaryClient(XcertClient):
         except Exception as ex:
             return
 
+    def wallets(self,args,wait=None):           
+        # list wallets for DID                  
+        return self.get_wallets(args.did)
 
-    def wallets(self,args,wait=None):  
+    def get_wallets(self,did,wait=None):  
         # list wallets for DID
         try:                                                                                         
-            uid = self.did2uid(args.did)                                                             
+            uid = self.did2uid(did)                                                             
             data = self._vault.get_xcert(uid)                                                        
             if data is None:                                                                         
-                print(f'Certificate for {args.did} UNDEF')                                           
+                print(f'Certificate for {did} UNDEF')                                           
                 return                                                                               
             secret = data['data']                                                                    
             # add new wallet into xcert list 
@@ -192,7 +195,7 @@ class NotaryClient(XcertClient):
                 wlist = secret[DID_WALLETS]                                                          
                 return wlist                                                                          
             else:                                                                                    
-                print('No wallets relating to DID={}'.format(args.did))
+                print('No wallets relating to DID={}'.format(did))
 
         except Exception as ex:                                                                      
             return                                                                                   
@@ -306,7 +309,7 @@ class NotaryClient(XcertClient):
         return did   
     def did2uid(self,did):                                       
         uid = did.split(':')
-        return uid[3]                                                    
+        return uid[3]  if len(uid) > 3 else did                                                  
 
     def make_xcert_prof(self,info,proto_xcert=None):                              
         proto = XCERT_PROTO.copy() if proto_xcert is None else proto_xcert.copy()                                          

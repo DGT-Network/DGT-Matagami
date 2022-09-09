@@ -211,8 +211,33 @@ class NotaryRouteHandler(RouteHandler):
             data="Update secret KYC={} UID={}".format(kyc,uid) if kyc else "Cant update xcert for {}".format(uid),                              
             metadata=None)                                                                                                    
 
+    async def wallets(self, request):                                                                                                                                         
+        """  
+        show wallets list                                                                                                                                                                   
+        """                                                                                                                                                                     
+        did = request.url.query.get(DID_ATTR,None)                                                                                                                              
+        LOGGER.debug('print wallets  for DID={}'.format(did))                                                                                                                         
+        if did:                                                                                                                                                                 
+            try:                                                                                                                                                                
+                wallets = self._vault.get_wallets(did)  
+                return self._wrap_response(                                                                   
+                    request,                                                                                  
+                    data="Wallets={} for DID={}".format(wallets,did), 
+                    metadata=None)                                                                            
+                                                                                                              
+                                                                                                                                         
+            except  VaultNotReady:                                                                                                                                              
+                return self._wrap_response(request,data="Notary not ready")                                                                                                     
+            
+        else:
+                                                                                                                                                                                
+            return self._wrap_response(                                                                                                                                             
+                request,                                                                                                                                                            
+                data="Cant show wallets for DID={}".format(did),                                                              
+                metadata=None)                                                                                                                                                      
 
-    
+
+
     def _create_batch(self, transactions):
         """
         Create batch for transactions
