@@ -1007,7 +1007,6 @@ def add_send_parser(subparsers, parent_parser):
     parser.add_argument(                
        '--role','-r',                   
        type=str,                        
-       default=DEC_ROLE_DEF,            
        help="Wallet role name"          
        )                                
     
@@ -1086,7 +1085,6 @@ def add_pay_parser(subparsers, parent_parser):
     parser.add_argument(                
        '--role','-r',                   
        type=str,                        
-       default=DEC_ROLE_DEF,            
        help="Wallet role name"          
        )                                   
     parser.add_argument(

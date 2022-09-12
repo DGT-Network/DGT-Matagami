@@ -404,6 +404,8 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}" but name "{}" or "{}" not in state'.format(DEC_SEND_OP,name,to))                                                              
         if DEC_EMISSION_KEY not in state:                                                                                                            
             raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_SEND_OP))  
+        if DEC_WALLET_ROLE in value and value[DEC_WALLET_ROLE] not in state:
+            raise InvalidTransaction('Verb is "{}" but role "{}" not in state'.format(DEC_SEND_OP,value[DEC_WALLET_ROLE]))
                                                                         
         curr = state[name]                                                                                                               
         token = DecTokenInfo()                                                                                                                       
@@ -437,7 +439,11 @@ class DecTransactionHandler(TransactionHandler):
             total = src[DEC_TOTAL_SUM]
             if total < amount:                                                                                
                 raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount)) 
-                                                    
+            if DEC_WALLET_ROLE in value:
+                role = value[DEC_WALLET_ROLE]
+                if DEC_WALLET_ROLE in src[DEC_WALLET_OPTS_OP] and role not in src[DEC_WALLET_OPTS_OP][DEC_WALLET_ROLE]:
+                    raise InvalidTransaction('Verb is "{}" but role "{}" not granted'.format(DEC_SEND_OP,role))
+
               
             # check spend period
             tcurr = value[DEC_TMSTAMP]

@@ -361,15 +361,20 @@ class DecClient:
         # use this cmd for sending token to corporate wallet 
         # use as name _DEC_EMISSION_KEY_
         info = {DATTR_VAL : args.amount}
+        din = [DEC_EMISSION_KEY]
         if args.asset_type:
             info[DEC_ASSET_TYPE] = args.asset_type             
         if args.did:                                
             info[DEC_DID_VAL] = args.did
+        if args.role:                             
+            info[DEC_WALLET_ROLE] = args.role     
+            din.append(args.role)                 
+
 
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
-        return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait,din=DEC_EMISSION_KEY)  
+        return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait,din=din)  
 
     def pay(self,args,wait=None):      
         info = {DATTR_VAL : args.amount}                                                                         
@@ -379,6 +384,7 @@ class DecClient:
             info[DEC_DID_VAL] = args.did                                                                         
 
         to = [args.to]
+        din = [DEC_EMISSION_KEY]
         if args.target :
             # target with invoice
             to.append(args.target)
@@ -386,11 +392,14 @@ class DecClient:
         if args.provement_key:      
             # invoice ID for controle                  
             info[DEC_PROVEMENT_KEY] = args.provement_key 
-            
+        if args.role:
+            info[DEC_WALLET_ROLE] = args.role
+            din.append(args.role)
+
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
         print('emmiter',info[DEC_EMITTER])
-        return self._send_transaction(DEC_PAY_OP, args.name, info, to=to, wait=wait,din=[DEC_EMISSION_KEY])  
+        return self._send_transaction(DEC_PAY_OP, args.name, info, to=to, wait=wait,din=din)  
     
      
     def invoice(self,args,wait=None):   
