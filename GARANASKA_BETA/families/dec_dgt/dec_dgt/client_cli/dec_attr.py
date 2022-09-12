@@ -21,6 +21,7 @@ DEC_NAME_DEF = "DEC"
 DEC_WALLET  = 'DEC_token'
 DEC_INVOICE_DEF = "INVOICE"
 DEC_TARGET_GRP = "TARGET"
+DEC_ROLE_GRP   = "ROLE"
 DEC_HEART = "HEARTBEAT"
 DEC_TOTAL_SUM_DEF = 8589869056
 DEC_GRANULARITY_DEF = 7
@@ -39,6 +40,7 @@ DEC_WALLET_LIMIT_DEF  = 1000
 DEC_SPEND_PERIOD_DEF = 60*2
 DEC_TARGET_DEF = "any target"
 DEC_TARGET_INFO_DEF = "empty target"
+DEC_ROLE_DEF        = "def_role"
 # DEC attributes
 DEC_NAME              = "name"              
 DEC_SYMBOL            = "symbol"            
@@ -89,10 +91,12 @@ DEC_EMITTER          = "emitter"
 DEC_SPEND_TMSTAMP      = "spend_timestamp"
 DEC_SPEND_PERIOD      = "spend_period"
 DEC_WALLET_STATUS     = "status"
+DEC_WALLET_ROLE       = "role"
 DEC_WALLET_STATUS_ON     = "on"
 DEC_WALLET_STATUS_OFF     = "off"
 DEC_TARGET_INFO     = "target_info"
 DEC_TARGET_PRICE     = "target_price"
+DEC_ROLE_TYPE        = "role_type"
 
 #DEC_WALLET_DID       = "wallet_did"
 # wallet properties
@@ -105,6 +109,7 @@ DATTR_INPUTS = 'data_inputs'
 DEC_EMISSION_OP     = 'emission'
 DEC_WALLET_OP       = 'wallet'
 DEC_WALLET_OPTS_OP  = "opts"
+DEC_ROLE_OP         = 'role'
 DEC_BIRTH_OP        = 'birth'
 DEC_TOTAL_SUPPLY_OP = 'totalsupply'
 DEC_TOKEN_INFO_OP   = 'tokeninfo'
@@ -131,9 +136,9 @@ DEC_INC_OP = 'inc'
 DEC_DEC_OP = 'dec'
 DEC_TRANS_OP = 'trans'
 
-VALID_VERBS = DEC_EMISSION_OP, DEC_WALLET_OP, DEC_WALLET_OPTS_OP, DEC_BURN_OP, DEC_CHANGE_MINT_OP, DEC_FAUCET_OP, DEC_SEND_OP, DEC_PAY_OP, DEC_INVOICE_OP, DEC_TARGET_OP, DEC_MINT_OP, DEC_HEART_BEAT_OP, DEC_SET_OP, DEC_INC_OP, DEC_DEC_OP, DEC_TRANS_OP
+VALID_VERBS = DEC_EMISSION_OP, DEC_WALLET_OP, DEC_WALLET_OPTS_OP, DEC_BURN_OP, DEC_CHANGE_MINT_OP, DEC_FAUCET_OP, DEC_SEND_OP, DEC_PAY_OP, DEC_INVOICE_OP, DEC_TARGET_OP, DEC_ROLE_OP, DEC_MINT_OP, DEC_HEART_BEAT_OP, DEC_SET_OP, DEC_INC_OP, DEC_DEC_OP, DEC_TRANS_OP
 VALID_VERBS_WITH_TO = DEC_TRANS_OP, DEC_FAUCET_OP, DEC_SEND_OP, DEC_PAY_OP, DEC_MINT_OP
-DEC_TYPES = DEC_NAME_DEF,DEC_INVOICE_DEF,DEC_WALLET,DEC_HEART,DEC_TARGET_GRP
+DEC_TYPES = DEC_NAME_DEF,DEC_INVOICE_DEF,DEC_WALLET,DEC_HEART,DEC_TARGET_GRP,DEC_ROLE_GRP
 MIN_VALUE = 0
 MAX_VALUE = 4294967295
 
@@ -142,6 +147,7 @@ MAX_NAME_LENGTH = 20
 DEC_PROTO_FILE_NM = "/project/dgt/etc/dec/emission.json"
 DEC_COMM_FILE_NM = "/project/dgt/etc/dec/comment.json" 
 DEC_OPTS_PROTO_FILE_NM = "/project/dgt/etc/dec/wallet_opts.json"
+DEC_ROLE_PROTO_FILE_NM = "/project/dgt/etc/dec/role.json"
 
 DEC_PROTO = {                                                                 
     "COUNTRY_NAME"              : "CA",                                         

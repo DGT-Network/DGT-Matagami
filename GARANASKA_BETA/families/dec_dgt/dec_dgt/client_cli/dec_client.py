@@ -170,8 +170,11 @@ class DecClient:
         if args.spend_period:                                             
             opts[DEC_SPEND_PERIOD] = args.spend_period                    
         if args.status:                              
-            opts[DEC_WALLET_STATUS] = args.status       
+            opts[DEC_WALLET_STATUS] = args.status   
+        if args.role:                                   
+            opts[DEC_WALLET_ROLE] = args.role           
             
+
         if only_opts:
             return opts
 
@@ -199,7 +202,11 @@ class DecClient:
         if args.spend_period:                          
             opts[DEC_SPEND_PERIOD] = args.spend_period 
         if args.status:                            
-            opts[DEC_WALLET_STATUS] = args.status  
+            opts[DEC_WALLET_STATUS] = args.status 
+        if args.role:                                
+            opts[DEC_WALLET_ROLE] = args.role      
+            
+             
         payload = cbor.dumps(opts)                                                                                                                              
         psign = nsign.sign(payload)                                                                                                                            
                                                                                                                                                                
@@ -409,9 +416,26 @@ class DecClient:
         if args.invoice :
             info[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price}                                                                         
         info[DEC_TMSTAMP] = tcurr                                                                                                              
-        return self._send_transaction(DEC_TARGET_OP, args.target_id, info, to=None, wait=wait,din=None)            
-    
-    
+        return self._send_transaction(DEC_TARGET_OP, args.target_id, info, to=None, wait=wait,din=None) 
+               
+    def role(self,args,wait=None):                                                                                      
+        
+        tcurr = time.time()  
+        info = {}                                                                                             
+        role = self.load_json_proto(args.role_proto)        
+        if args.limit is not None:                         
+            # set transfer                                 
+            role[DEC_WALLET_LIMIT] = args.limit 
+        if args.type is not None:               
+            # set transfer                           
+            role[DEC_ROLE_TYPE] = args.type      
+            
+        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()                                                        
+
+        info[DEC_TMSTAMP] = tcurr 
+        info[DEC_ROLE_OP] = role                                                                                      
+        return self._send_transaction(DEC_ROLE_OP, args.role_id, info, to=None, wait=wait,din=None)                   
+                                                                                                                          
         
     
     def bank_list(self,args,wait=None):                                                

@@ -133,6 +133,7 @@ def create_parser(prog_name):
     add_pay_parser(subparsers, parent_parser)
     add_invoice_parser(subparsers, parent_parser)
     add_target_parser(subparsers, parent_parser)
+    add_role_parser(subparsers, parent_parser)
     add_bank_list_parser(subparsers, parent_parser)
 
     #
@@ -340,6 +341,13 @@ def add_wallet_parser(subparsers, parent_parser):
         type=str,                        
         help="Wallet status"             
         )                                
+    parser.add_argument(                
+       '--role','-r',               
+       type=str, 
+       default=DEC_ROLE_DEF,                      
+       help="Wallet role name"            
+       )                               
+    
                                          
                                        
     parser.add_argument(                                      
@@ -408,8 +416,12 @@ def add_wallet_opts_parser(subparsers, parent_parser):
         type=str,                                
         help="Wallet status"                     
         )                                        
-                                                 
-                                                                                                                                                                                  
+    parser.add_argument(              
+       '--role','-r',                 
+       type=str,                      
+       default=DEC_ROLE_DEF,          
+       help="Wallet role name"                                                      
+       )                                                                                                                                                                                                            
     parser.add_argument(                                                                                                                                                                 
         '-cb', '--crypto_back',                                                                                                                                                          
         type=str,                                                                                                                                                                        
@@ -985,6 +997,13 @@ def add_send_parser(subparsers, parent_parser):
         type=str,
         default=DEC_NAME_DEF,                                              
         help='Asset type (DEC as default)')                  
+    parser.add_argument(                
+       '--role','-r',                   
+       type=str,                        
+       default=DEC_ROLE_DEF,            
+       help="Wallet role name"          
+       )                                
+    
                                           
     parser.add_argument(
         '--url',
@@ -1056,7 +1075,13 @@ def add_pay_parser(subparsers, parent_parser):
     parser.add_argument(     
         '--provement_key','-prov',  
         type=str,            
-        help='Provement key refer to prov key from invoice')      
+        help='Provement key refer to prov key from invoice')   
+    parser.add_argument(                
+       '--role','-r',                   
+       type=str,                        
+       default=DEC_ROLE_DEF,            
+       help="Wallet role name"          
+       )                                   
     parser.add_argument(
         '--url',
         type=str,
@@ -1120,6 +1145,12 @@ def add_invoice_parser(subparsers, parent_parser):
         type=str,
         default = AVAILABLE_TILL_DEF,                                              
         help='available_till')                  
+    parser.add_argument(                
+       '--role','-r',                   
+       type=str,                        
+       default=DEC_ROLE_DEF,            
+       help="Wallet role name"          
+       )                                
 
     parser.add_argument(
         '--url',
@@ -1207,6 +1238,67 @@ def do_target(args):
     client = _get_client(args)                                
     response = client.target(args, args.wait)                  
     print(response)
+
+def add_role_parser(subparsers, parent_parser):                                                                
+    message = 'Role with <role_id>'                                                                     
+    parser = subparsers.add_parser(                                                                              
+        DEC_ROLE_OP,                                                                                           
+        parents=[parent_parser],                                                                                 
+        description=message,                                                                                     
+        help='Create role for wallet')                                                                           
+                                                                                                                 
+    parser.add_argument(                                                                                         
+        'role_id',                                                                                             
+        type=str,                                                                                                
+        help='Role ID')                                                                                        
+                                                                                                                 
+    parser.add_argument(                                                                                         
+        '--type',                                                                                                 
+        type=str,                                                                                              
+        help='Role type')  
+    
+    parser.add_argument(                                   
+        '--role_proto',                                    
+        type=str,                                          
+        default=DEC_ROLE_PROTO_FILE_NM,                    
+        help='Role proto file')                                                                                      
+                                                                                                                 
+    parser.add_argument(                                                                                         
+        '--limit','-l',                                                                                        
+        type=str,                                                                                                
+        help='Send limit')                                                                             
+
+                                                                                                                 
+    parser.add_argument(                                                                                         
+        '--url',                                                                                                 
+        type=str,                                                                                                
+        help='specify URL of REST API',                                                                          
+        default='http://api-dgt-c1-1:8108')                                                                      
+    parser.add_argument(                                                                                         
+        '--keyfile',                                                                                             
+        type=str,                                                                                                
+        default="/project/peer/keys/validator.priv",                                                             
+        help="Identify file containing owner private key")                                                       
+    parser.add_argument(                                                                                         
+        '-cb', '--crypto_back',                                                                                  
+        type=str,                                                                                                
+        help='Specify a crypto back openssl/bitcoin',                                                            
+        default=CRYPTO_BACK)                                                                                     
+                                                                                                                 
+                                                                                                                 
+    parser.add_argument(                                                                                         
+        '--wait',                                                                                                
+        nargs='?',                                                                                               
+        const=sys.maxsize,                                                                                       
+        type=int,                                                                                                
+        help='set time, in seconds, to wait for transaction to commit')                                          
+                                                                                                                 
+                                                                                                                 
+def do_role(args):                                                                                             
+    client = _get_client(args)                                                                                   
+    response = client.role(args, args.wait)                                                                    
+    print(response)                                                                                              
+
 
 def add_bank_list_parser(subparsers, parent_parser):
     message = 'Bank list .'
@@ -1663,7 +1755,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_invoice(args)                  
     elif args.command == DEC_TARGET_OP:       
         do_target(args)                       
-                
+    elif args.command == DEC_ROLE_OP:   
+        do_role(args)                      
+                                                        
     elif args.command == DEC_BANK_LIST_OP:           
         do_bank_list(args)                          
         

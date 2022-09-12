@@ -97,6 +97,7 @@ class DecTransactionHandler(TransactionHandler):
             DEC_PAY_OP         : self._do_pay,
             DEC_INVOICE_OP     : self._do_invoice,
             DEC_TARGET_OP      : self._do_target,
+            DEC_ROLE_OP        : self._do_role,
             DEC_MINT_OP        : self._do_mint,
             DEC_HEART_BEAT_OP  : self._do_heartbeat,
             DEC_SET_OP         : self._do_set,
@@ -255,7 +256,10 @@ class DecTransactionHandler(TransactionHandler):
         if DEC_SPEND_PERIOD in opts_new:                         
             opts[DEC_SPEND_PERIOD] = opts_new[DEC_SPEND_PERIOD] 
         if DEC_WALLET_STATUS in opts_new:                          
-            opts[DEC_WALLET_STATUS] = opts_new[DEC_WALLET_STATUS]      
+            opts[DEC_WALLET_STATUS] = opts_new[DEC_WALLET_STATUS]
+        if DEC_WALLET_ROLE in opts_new:                             
+            opts[DEC_WALLET_ROLE] = opts_new[DEC_WALLET_ROLE]     
+                  
         wallet[DEC_WALLET_OPTS_OP] = opts   
         wtoken.dec = cbor.dumps(wallet)                                                                                                                                         
         updated = {k: v for k, v in state.items() if k in out}    
@@ -595,6 +599,34 @@ class DecTransactionHandler(TransactionHandler):
         updated[name] = token.SerializeToString()                                                                                                   
                                                                                                                                                     
         return updated                                                                                                                              
+
+    def _do_role(self,name, value, inputs, state, out):                                                                                
+        LOGGER.debug('NEW ROLE "{}" by {}'.format(name,value))                                                                             
+                                                                                                                                         
+        if name in state:                                                                                                                
+            raise InvalidTransaction('Verb is "{}" role with such name "{}" already exists'.format(DEC_ROLE_OP,name))              
+                                                                                                                                         
+        info = {}                                                                                                                        
+        info[DEC_ROLE_OP] = value[DEC_ROLE_OP]                                                                                   
+        info[DEC_EMITTER] = value[DEC_EMITTER]                                                                                           
+        
+                                                                                                                                         
+        token = DecTokenInfo(group_code = DEC_ROLE_GRP,                                                                                
+                             owner_key = self._signer.sign(DEC_ROLE_GRP.encode()),                                                     
+                             sign = self._public_key.as_hex(),                                                                           
+                             decimals=0,                                                                       
+                             dec = cbor.dumps(info)                                                                                      
+                )                                                                                                                        
+                                                                                                                                         
+        # destination token                                                                                                              
+                                                                                                                                         
+        LOGGER.debug('_do_role value={}'.format(value))                                                                                
+                                                                                                                                         
+        updated = {k: v for k, v in state.items() if k in out}                                                                           
+                                                                                                                                         
+        updated[name] = token.SerializeToString()                                                                                        
+                                                                                                                                         
+        return updated                                                                                                                   
 
 
 
