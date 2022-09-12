@@ -1,5 +1,5 @@
 {
-    "type"        : "admin",
+    "role_type"   : "admin",
     "limit"       : 10001
 
 }
