@@ -257,8 +257,31 @@ class DecTransactionHandler(TransactionHandler):
             opts[DEC_SPEND_PERIOD] = opts_new[DEC_SPEND_PERIOD] 
         if DEC_WALLET_STATUS in opts_new:                          
             opts[DEC_WALLET_STATUS] = opts_new[DEC_WALLET_STATUS]
-        if DEC_WALLET_ROLE in opts_new:                             
-            opts[DEC_WALLET_ROLE] = opts_new[DEC_WALLET_ROLE]     
+        if DEC_WALLET_ROLE in opts_new:
+            role = opts_new[DEC_WALLET_ROLE]
+            revoke = role[0:1] == '-'
+            if DEC_WALLET_ROLE in opts:
+                if revoke:
+                    if isinstance(opts[DEC_WALLET_ROLE],list):
+                        rval = role[1:]
+                        if rval not in opts[DEC_WALLET_ROLE]:
+                            raise InvalidTransaction('Verb is "{}", no such role={} in list.'.format(DEC_WALLET_OPTS_OP,rval))
+                        opts[DEC_WALLET_ROLE].remove(rval)
+
+                else:
+                    # add role
+                    if isinstance(opts[DEC_WALLET_ROLE],list):
+                        if role in opts[DEC_WALLET_ROLE]:
+                            raise InvalidTransaction('Verb is "{}", role={} already in list.'.format(DEC_WALLET_OPTS_OP,role))
+                        opts[DEC_WALLET_ROLE].append(role)
+                    else:
+                        if opts[DEC_WALLET_ROLE] == role:
+                            raise InvalidTransaction('Verb is "{}", role={} already in list.'.format(DEC_WALLET_OPTS_OP,role))
+                        opts[DEC_WALLET_ROLE] = [opts[DEC_WALLET_ROLE],role]
+
+
+            elif not revoke:
+                opts[DEC_WALLET_ROLE] = [role]
                   
         wallet[DEC_WALLET_OPTS_OP] = opts   
         wtoken.dec = cbor.dumps(wallet)                                                                                                                                         

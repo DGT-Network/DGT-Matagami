@@ -421,7 +421,14 @@ def add_wallet_opts_parser(subparsers, parent_parser):
        type=str,                      
        default=DEC_ROLE_DEF,          
        help="Wallet role name"                                                      
-       )                                                                                                                                                                                                            
+       )   
+    parser.add_argument(                 
+       '--revoke',                    
+       action='count',                          
+       default=0,             
+       help="Revoke role"           
+       )                                 
+                                                                                                                                                                                                             
     parser.add_argument(                                                                                                                                                                 
         '-cb', '--crypto_back',                                                                                                                                                          
         type=str,                                                                                                                                                                        

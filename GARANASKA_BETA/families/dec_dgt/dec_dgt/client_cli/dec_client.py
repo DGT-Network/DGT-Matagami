@@ -204,7 +204,7 @@ class DecClient:
         if args.status:                            
             opts[DEC_WALLET_STATUS] = args.status 
         if args.role:                                
-            opts[DEC_WALLET_ROLE] = args.role      
+            opts[DEC_WALLET_ROLE] = '-'+args.role  if args.revoke > 0 else  args.role   
             
              
         payload = cbor.dumps(opts)                                                                                                                              
