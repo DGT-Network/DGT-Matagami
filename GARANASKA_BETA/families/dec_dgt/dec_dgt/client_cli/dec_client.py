@@ -138,7 +138,7 @@ class DecClient:
     def wallet(self,args,wait=None,nsign=None):  
         # nsign - notary key for sign did info 
         # in case nsign is None we use owner wallet key 
-        print("DEC.wallet...")
+        #print("DEC.wallet...")
         info = {}
         if nsign is None:
             nsign = self._signer
@@ -158,10 +158,10 @@ class DecClient:
         
                                      
         info[DEC_TMSTAMP] = time.time() 
-        print("DEC.wallet {}".format(info))                                        
+        #print("DEC.wallet {}".format(info))                                        
         return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY 
                                                                                                                                  #    
-    def get_wallet_opts(self,args,nsign,only_opts=False):
+    def get_only_wallet_opts(self,args):
         # load default options
         opts = self.load_json_proto(args.opts_proto)                      
         if args.limit is not None:                                        
@@ -172,12 +172,14 @@ class DecClient:
         if args.status:                              
             opts[DEC_WALLET_STATUS] = args.status   
         if args.role:                                   
-            opts[DEC_WALLET_ROLE] = args.role           
+            opts[DEC_WALLET_ROLE] = [args.role]           
             
+        print("DEC.wallet opts{}".format(opts))
+        return opts
 
-        if only_opts:
-            return opts
+    def get_wallet_opts(self,args,nsign):
 
+        opts = self.get_only_wallet_opts(args)
         opts[NOTARY_PUBKEY] =  nsign.get_public_key().as_hex()            
         payload = cbor.dumps(opts)                                        
         psign = nsign.sign(payload)                                       
@@ -203,7 +205,8 @@ class DecClient:
             opts[DEC_SPEND_PERIOD] = args.spend_period 
         if args.status:                            
             opts[DEC_WALLET_STATUS] = args.status 
-        if args.role:                                
+        if args.role:
+            # grand or revoke                                
             opts[DEC_WALLET_ROLE] = '-'+args.role  if args.revoke > 0 else  args.role   
             
              

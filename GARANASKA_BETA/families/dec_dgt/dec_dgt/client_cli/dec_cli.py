@@ -318,12 +318,16 @@ def add_wallet_parser(subparsers, parent_parser):
         '--keyfile',                                                                             
         type=str, 
         default="/project/peer/keys/validator.priv",                                                                               
-        help="Identify file containing user's private key (by default - validator key)")                                      
+        help="Identify file containing user's private key (by default - validator key)"
+        ) 
+                                         
     parser.add_argument(                                             
         '--opts_proto',                                                   
         type=str,                                                    
         default=DEC_OPTS_PROTO_FILE_NM,                                   
-        help='Proto file with wallet permisions params')     
+        help='Proto file with wallet permisions params'
+        )  
+       
     parser.add_argument(                     
         '--limit','-l',                      
         type=int,                            
@@ -344,25 +348,23 @@ def add_wallet_parser(subparsers, parent_parser):
     parser.add_argument(                
        '--role','-r',               
        type=str, 
-       default=DEC_ROLE_DEF,                      
        help="Wallet role name"            
        )                               
-    
-                                         
                                        
     parser.add_argument(                                      
         '-cb', '--crypto_back',                               
         type=str,                                             
         help='Specify a crypto back openssl/bitcoin',         
-        default="openssl")                                  
+        default="openssl"
+        )                                  
     
-                                                                                                 
     parser.add_argument(                                                                         
         '--wait',                                                                                
         nargs='?',                                                                               
         const=sys.maxsize,                                                                       
         type=int,                                                                                
-        help='set time, in seconds, to wait for transaction to commit')                          
+        help='set time, in seconds, to wait for transaction to commit'
+        )                          
                                                                                                  
 def do_wallet(args):                                                                               
     client = _get_client(args)                                                                   
@@ -419,7 +421,6 @@ def add_wallet_opts_parser(subparsers, parent_parser):
     parser.add_argument(              
        '--role','-r',                 
        type=str,                      
-       default=DEC_ROLE_DEF,          
        help="Wallet role name"                                                      
        )   
     parser.add_argument(                 
