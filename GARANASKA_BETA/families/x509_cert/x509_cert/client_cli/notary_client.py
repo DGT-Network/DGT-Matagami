@@ -52,6 +52,7 @@ LOGGER = logging.getLogger(__name__)
 
 NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
 DID_WALLETS = "wallets"
+DID_ROLES   = "roles"
 
                                                                      
 
@@ -142,7 +143,7 @@ class NotaryClient(XcertClient):
                 else:
                     wlist = {}
 
-                wlist[owner] = self._cdec.get_wallet_opts(args,self._signer,only_opts=True)
+                wlist[owner] = self._cdec.get_only_wallet_opts(args)
                 secret[DID_WALLETS] = wlist
                 #print('Certificate with wallet={}'.format(secret))
                 dec_wallet = self._cdec.wallet
@@ -152,17 +153,10 @@ class NotaryClient(XcertClient):
                     return
                 opts = secret[DID_WALLETS][owner]
                 print('current OPTS for wallet={} args={}'.format(opts,args))
-                if not (args.spend_period or args.limit or args.status):
-                    print('No new options set(limit,sped period and etc) {} '.format(opts))
+                if not self._cdec.upd_wallet_opts(opts,args):
+                    print('No new options set(limit,sped period,role and etc) {} '.format(opts))
                     return
-                if args.limit is not None:
-                    # set transfer
-                    opts[DEC_WALLET_LIMIT] = args.limit
-                    print('NEW OPTS={}'.format(opts))
-                if args.spend_period:
-                    opts[DEC_SPEND_PERIOD] = args.spend_period
-                if args.status:                          
-                    opts[DEC_WALLET_STATUS] = args.status     
+                    
                 dec_wallet = self._cdec.wallet_opts
             else:
                 print('Undef CMD for wallet operation with wallet={}'.format(secret))
@@ -198,7 +192,65 @@ class NotaryClient(XcertClient):
                 print('No wallets relating to DID={}'.format(did))
 
         except Exception as ex:                                                                      
-            return                                                                                   
+            return   
+                                                                                        
+    def role(self,args,wait=None):
+        # create role 
+        try:                                                                                  
+            uid = self.did2uid(args.did)                                                           
+            data = self._vault.get_xcert(uid)                                                 
+            if data is None:                                                                  
+                print('Certificate for {} UNDEF'.format(args.did))                                         
+                return                                                                        
+            secret = data['data']                                                             
+            # add new role into DID role list                                                  
+            if DID_ROLES in secret and isinstance(secret[DID_ROLES],dict) :               
+                rlist = secret[DID_ROLES]  
+                if args.role_id in rlist:
+                    print('Role {} already in list for {}.'.format(args.role_id,args.did))
+                    #return  
+                # add new role                                                                  
+            else:                                                                             
+                # new role list
+                rlist = {}                            
+            # add new role
+            role = self._cdec.get_role_opts(args)
+            rlist[args.role_id] = role 
+            secret[DID_ROLES] = rlist
+            if not self._vault.create_or_update_secret(uid,secret=secret):      
+                print('Cant update secret={}'.format(uid))                      
+                return                                                          
+            return self._cdec.role(args) 
+                                                                                        
+        except Exception as ex: 
+            print('Create role ={} for {} err {}'.format(args.role_id,args.did,ex))                                                              
+            return                                                                            
+
+    def get_roles(self,did,wait=None):                                                                    
+        # list wallets for DID                                                                              
+        try:                                                                                                
+            uid = self.did2uid(did)                                                                         
+            data = self._vault.get_xcert(uid)                                                               
+            if data is None:                                                                                
+                print(f'Certificate for {did} UNDEF')                                                       
+                return                                                                                      
+            secret = data['data']                                                                           
+            # add new wallet into xcert list                                                                
+            #print('secret',secret)                                                                         
+            if DID_ROLES in secret and isinstance(secret[DID_ROLES],dict) :                             
+                rlist = secret[DID_ROLES]                                                                 
+                return rlist                                                                                
+            else:                                                                                           
+                print('No roles relating to DID={}'.format(did))                                          
+                                                                                                            
+        except Exception as ex: 
+            print('Cant get roles for {} err {}'.format(did,ex))                                                                             
+            return                                                                                          
+
+
+    def roles(self,args,wait=None):
+        return self.get_roles(args.did,wait=wait)
+
 
     def get_balance_of(self,pkey):
         return self._cdec.get_balance_of(pkey)

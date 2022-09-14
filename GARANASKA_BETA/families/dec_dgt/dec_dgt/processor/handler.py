@@ -637,7 +637,10 @@ class DecTransactionHandler(TransactionHandler):
                                                                                                                                          
         info = {}                                                                                                                        
         info[DEC_ROLE_OP] = value[DEC_ROLE_OP]                                                                                   
-        info[DEC_EMITTER] = value[DEC_EMITTER]                                                                                           
+        info[DEC_EMITTER] = value[DEC_EMITTER] 
+        if DEC_DID_VAL  in value:
+            # for notary mode
+            info[DEC_DID_VAL] = value[DEC_DID_VAL]
         
                                                                                                                                          
         token = DecTokenInfo(group_code = DEC_ROLE_GRP,                                                                                

@@ -110,6 +110,7 @@ DEC_EMISSION_OP     = 'emission'
 DEC_WALLET_OP       = 'wallet'
 DEC_WALLET_OPTS_OP  = "opts"
 DEC_ROLE_OP         = 'role'
+DEC_ROLES_OP        = "roles"
 DEC_BIRTH_OP        = 'birth'
 DEC_TOTAL_SUPPLY_OP = 'totalsupply'
 DEC_TOKEN_INFO_OP   = 'tokeninfo'

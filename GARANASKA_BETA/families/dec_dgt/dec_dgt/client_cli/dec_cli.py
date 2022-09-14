@@ -1273,7 +1273,10 @@ def add_role_parser(subparsers, parent_parser):
         '--limit','-l',                                                                                        
         type=str,                                                                                                
         help='Send limit')                                                                             
-
+    parser.add_argument(            
+        '--did','-d',               
+        type=str,                   
+        help='DID')                 
                                                                                                                  
     parser.add_argument(                                                                                         
         '--url',                                                                                                 

@@ -160,7 +160,44 @@ class DecClient:
         info[DEC_TMSTAMP] = time.time() 
         #print("DEC.wallet {}".format(info))                                        
         return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY 
-                                                                                                                                 #    
+
+    def upd_wallet_opts(self,opts,args): 
+        if not (args.spend_period or args.limit or args.status or args.role):             
+            print('No new options set(limit,sped period and etc) {} '.format(opts))       
+            return  False                                                                      
+        if args.limit is not None:                                                        
+            # set transfer                                                                
+            opts[DEC_WALLET_LIMIT] = args.limit                                           
+            print('NEW OPTS={}'.format(opts))                                             
+        if args.spend_period:                                                             
+            opts[DEC_SPEND_PERIOD] = args.spend_period                                    
+        if args.status:                                                                   
+            opts[DEC_WALLET_STATUS] = args.status                                         
+        if args.role:                                                                     
+            # add or revoke role                                                          
+            is_revoke = args.revoke is not None                                           
+            if is_revoke:                                                                 
+                # drop role                                                               
+                if DEC_WALLET_ROLE in opts and role in opts[DEC_WALLET_ROLE]: 
+                    opts[DEC_WALLET_ROLE].remove(role)
+                else:
+                    print('This role ={} was not granted yet'.format(role))
+                    return False
+                
+            else:                                                                         
+                # grant role 
+                if DEC_WALLET_ROLE in opts: 
+                    if role in opts[DEC_WALLET_ROLE]: 
+                        print('This role ={} already was granted'.format(role))    
+                        return False 
+                    opts[DEC_WALLET_ROLE].append(role)
+                else:
+                    opts[DEC_WALLET_ROLE] = [role]
+
+
+        return True
+
+
     def get_only_wallet_opts(self,args):
         # load default options
         opts = self.load_json_proto(args.opts_proto)                      
@@ -429,23 +466,31 @@ class DecClient:
             info[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price}                                                                         
         info[DEC_TMSTAMP] = tcurr                                                                                                              
         return self._send_transaction(DEC_TARGET_OP, args.target_id, info, to=None, wait=wait,din=None) 
-               
+     
+    def get_role_opts(self,args):
+        role = self.load_json_proto(args.role_proto)   
+        if args.limit is not None:                     
+            # set transfer                             
+            role[DEC_WALLET_LIMIT] = args.limit        
+        if args.type is not None:                      
+            # set transfer                             
+            role[DEC_ROLE_TYPE] = args.type
+        return role            
+
+
+
     def role(self,args,wait=None):                                                                                      
         
         tcurr = time.time()  
         info = {}                                                                                             
-        role = self.load_json_proto(args.role_proto)        
-        if args.limit is not None:                         
-            # set transfer                                 
-            role[DEC_WALLET_LIMIT] = args.limit 
-        if args.type is not None:               
-            # set transfer                           
-            role[DEC_ROLE_TYPE] = args.type      
+        role = self.get_role_opts(args)
             
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()                                                        
-
         info[DEC_TMSTAMP] = tcurr 
-        info[DEC_ROLE_OP] = role                                                                                      
+        info[DEC_ROLE_OP] = role 
+        if args.did:
+            # refer to DID owner
+            info[DEC_DID_VAL] = args.did
         return self._send_transaction(DEC_ROLE_OP, args.role_id, info, to=None, wait=wait,din=None)                   
                                                                                                                           
         
