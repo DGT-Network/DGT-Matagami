@@ -1251,7 +1251,7 @@ def add_role_parser(subparsers, parent_parser):
         DEC_ROLE_OP,                                                                                           
         parents=[parent_parser],                                                                                 
         description=message,                                                                                     
-        help='Create role for wallet')                                                                           
+        help='Create role.')                                                                           
                                                                                                                  
     parser.add_argument(                                                                                         
         'role_id',                                                                                             

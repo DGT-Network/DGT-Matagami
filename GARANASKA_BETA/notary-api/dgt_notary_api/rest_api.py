@@ -127,6 +127,7 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
     app.router.add_get('/crt', handler.crt_xcert)
     app.router.add_get('/upd', handler.upd_xcert)
     app.router.add_get('/wallets', handler.wallets)
+    app.router.add_get('/roles', handler.roles)
     app.router.add_get('/balanceof', handler.balanceof)
 
 
