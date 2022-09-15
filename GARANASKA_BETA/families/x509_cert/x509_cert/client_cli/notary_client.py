@@ -53,6 +53,7 @@ LOGGER = logging.getLogger(__name__)
 NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
 DID_WALLETS = "wallets"
 DID_ROLES   = "roles"
+DID_GOODS   = "goods"
 
                                                                      
 
@@ -71,7 +72,7 @@ class NotaryClient(XcertClient):
             if vault_url is None:
                 # client mode 
                 ninfo = self.get_notary_info(NOTARY_LEADER_ID)
-                print(f'notary info={ninfo}')
+                #print(f'notary info={ninfo}')
                 if NOTARY_TOKEN in ninfo and NOTARY_URL in ninfo:
                     self._vault = Vault(ninfo[NOTARY_URL],token=ninfo[NOTARY_TOKEN])
                 else:
@@ -250,6 +251,30 @@ class NotaryClient(XcertClient):
 
     def roles(self,args,wait=None):
         return self.get_roles(args.did,wait=wait)
+
+    def get_goods(self,did,wait=None):                                                     
+        # list goods for DID                                                             
+        try:                                                                               
+            uid = self.did2uid(did)                                                        
+            data = self._vault.get_xcert(uid)                                              
+            if data is None:                                                               
+                print(f'Certificate for {did} UNDEF')                                      
+                return                                                                     
+            secret = data['data']                                                          
+            # add new wallet into xcert list                                               
+            #print('secret',secret)                                                        
+            if DID_GOODS in secret and isinstance(secret[DID_GOODS],dict) :                
+                glist = secret[DID_GOODS]                                                  
+                return glist                                                               
+            else:                                                                          
+                print('No goods relating to DID={}'.format(did))                           
+                                                                                           
+        except Exception as ex:                                                            
+            print('Cant get goods for {} err {}'.format(did,ex))                           
+            return                                                                         
+                                                                                           
+    def goods(self,args,wait=None):               
+        return self.get_goods(args.did,wait=wait) 
 
 
     def get_balance_of(self,pkey):

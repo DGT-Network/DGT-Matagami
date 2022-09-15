@@ -39,7 +39,7 @@ from x509_cert.client_cli.exceptions import XcertCliException,XcertClientExcepti
 from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD_OP,XCERT_WALLETS_OP)
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 # DEC 
-from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP
+from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP,DEC_GOODS_OP
 
 DISTRIBUTION_NAME = 'x509-cert'
 
@@ -119,6 +119,7 @@ def create_parser(prog_name):
     add_wallets_parser(subparsers, parent_parser)
     add_role_parser(subparsers, parent_parser)
     add_roles_parser(subparsers, parent_parser)
+    add_goods_parser(subparsers, parent_parser)
     add_show_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
     add_init_parser(subparsers, parent_parser)
@@ -561,6 +562,57 @@ def do_roles(args):
     print(response)                      
 
 
+def add_goods_parser(subparsers, parent_parser):                                                 
+    message = 'Get goods list for <did>'                                                             
+    parser = subparsers.add_parser(                                                              
+        DEC_GOODS_OP,                                                                            
+        parents=[parent_parser],                                                                 
+        description=message,                                                                     
+        help='Get goods for did')                                                                        
+                                                                                                 
+    parser.add_argument(                                                                         
+        'did',                                                                                   
+        type=str,                                                                                
+        help='specify DID owner of goods')                                                       
+                                                                                                 
+                                                                                                 
+    parser.add_argument(                                                                         
+        '--url',                                                                                 
+        type=str,                                                                                
+        help='specify URL of REST API',                                                          
+        default='http://api-dgt-c1-1:8108')                                                      
+                                                                                                 
+    parser.add_argument(                                                                         
+        '--keyfile',                                                                             
+        type=str,                                                                                
+        default="/project/peer/keys/notary.priv",                                                
+        help="Identify file containing owner private key")                                       
+                                                                                                 
+    parser.add_argument(                                                                         
+        '-cb', '--crypto_back',                                                                  
+        type=str,                                                                                
+        help='Specify a crypto back openssl/bitcoin',                                            
+        default=CRYPTO_BACK)                                                                     
+                                                                                                 
+                                                                                                 
+    parser.add_argument(                                                                         
+        '--wait',                                                                                
+        nargs='?',                                                                               
+        const=sys.maxsize,                                                                       
+        type=int,                                                                                
+        help='Set time, in seconds, to wait for transaction to commit')                          
+
+
+
+
+def do_goods(args):                               
+    client = _get_client(args)                    
+    #client.init_dec(args.keyfile)                
+    response = client.goods(args)                 
+    print(response)                               
+
+
+
 def add_init_parser(subparsers, parent_parser):
     message = 'Init new notary.'
 
@@ -774,8 +826,10 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
     elif args.command == DEC_ROLE_OP:  
         do_role(args)  
     elif args.command == DEC_ROLES_OP:        
-        do_roles(args)                                        
-
+        do_roles(args)                     
+    elif args.command == DEC_GOODS_OP:         
+        do_goods(args)                          
+                           
     elif args.command == 'show':
         do_show(args)
     elif args.command == 'list':
