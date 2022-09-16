@@ -511,7 +511,8 @@ class DecTransactionHandler(TransactionHandler):
             # TODO set marker that payment was done  
             # TODO check target object
             ttoken.ParseFromString(state[target])                  
-            t_val = cbor.loads(ttoken.dec)                         
+            target_val = cbor.loads(ttoken.dec)  
+            t_val =  target_val[DEC_TARGET_OP]                      
             LOGGER.debug('_do_send target={}'.format(t_val))  
             if DEC_INVOICE_OP not in t_val:
                 raise InvalidTransaction('Verb is "{}", but target={} with out invoice'.format(DEC_PAY_OP,target))
@@ -530,7 +531,7 @@ class DecTransactionHandler(TransactionHandler):
             # change owner and drop invoice
             del t_val[DEC_INVOICE_OP]
             t_val[DEC_EMITTER] = name
-            ttoken.dec = cbor.dumps(t_val)
+            ttoken.dec = cbor.dumps(target_val)
 
 
         if DEC_SPEND_TMSTAMP in src :                                                                                                                                             
@@ -587,7 +588,7 @@ class DecTransactionHandler(TransactionHandler):
         info[DEC_CUSTOMER_KEY] = customer
         info[DEC_PROVEMENT_KEY] = value[DEC_PROVEMENT_KEY]
         info[DEC_TARGET_PRICE] = amount
-        target[DEC_INVOICE_OP] =info  
+        target[DEC_TARGET_OP][DEC_INVOICE_OP] = info  
                                                                                                                                
         # destination token                                                                                                                             
 
@@ -605,23 +606,23 @@ class DecTransactionHandler(TransactionHandler):
         if name in state:                                                                                                                           
             raise InvalidTransaction('Verb is "{}" target with such name "{}" already in state'.format(DEC_TARGET_OP,name))                                
 
-        info = {}                                                                                                                                   
-        info[DEC_TARGET_INFO] = value[DEC_TARGET_INFO]                                                                                            
-        info[DEC_TARGET_PRICE] = value[DATTR_VAL] if DATTR_VAL in value else 0                                                             
-        info[DEC_EMITTER] = value[DEC_EMITTER] 
-        if DEC_INVOICE_OP in value:
-            info[DEC_INVOICE_OP] = value[DEC_INVOICE_OP]                                                                                                          
+        info = {}  
+        info[DEC_TARGET_OP] = value[DEC_TARGET_OP]                                                                                                                                 
+        if DEC_DID_VAL  in value:                      
+            # for notary mode                          
+            info[DEC_DID_VAL] = value[DEC_DID_VAL]     
+
                                                                                                                                                     
         token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
                              owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               
                              sign = self._public_key.as_hex(),                                                                                      
-                             decimals=int(info[DEC_TARGET_PRICE]),                                                                                                       
+                             decimals=int(info[DEC_TARGET_OP][DEC_TARGET_PRICE]),                                                                                                       
                              dec = cbor.dumps(info)                                                                                                 
                 )                                                                                                                                   
                                                                                                                                                     
         # destination token                                                                                                                         
                                                                                                                                                     
-        LOGGER.debug('_do_target value={}'.format(value))                                                                                          
+        LOGGER.debug('_do_target value={}'.format(info))                                                                                          
                                                                                                                                                     
         updated = {k: v for k, v in state.items() if k in out}                                                                                      
                                                                                                                                                     

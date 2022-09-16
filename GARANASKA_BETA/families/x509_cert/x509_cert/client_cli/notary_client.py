@@ -276,6 +276,38 @@ class NotaryClient(XcertClient):
     def goods(self,args,wait=None):               
         return self.get_goods(args.did,wait=wait) 
 
+    def target(self,args,wait=None):
+        # create target                                                                                   
+        try:                                                                                            
+            uid = self.did2uid(args.did)                                                                
+            data = self._vault.get_xcert(uid)                                                           
+            if data is None:                                                                            
+                print('Certificate for {} UNDEF'.format(args.did))                                      
+                return                                                                                  
+            secret = data['data']                                                                       
+            # add new role into DID role list                                                           
+            if DID_GOODS in secret and isinstance(secret[DID_GOODS],dict) :                             
+                glist = secret[DID_GOODS]                                                               
+                if args.target_id in glist:                                                               
+                    print('Target {} already in list for {}.'.format(args.target_id,args.did))              
+                    #return                                                                             
+                # add new target                                                                          
+            else:                                                                                       
+                # new goods list                                                                         
+                glist = {}                                                                              
+            # add new role                                                                              
+            target = self._cdec.get_target_opts(args)                                                       
+            glist[args.target_id] = target                                                                 
+            secret[DID_GOODS] = glist                                                                   
+            if not self._vault.create_or_update_secret(uid,secret=secret):                              
+                print('Cant update secret={}'.format(uid))                                              
+                return                                                                                  
+            return self._cdec.target(args)                                                                
+                                                                                                        
+        except Exception as ex:                                                                         
+            print('Create target ={} for {} err {}'.format(args.target_id,args.did,ex))                     
+            return                                                                                      
+
 
     def get_balance_of(self,pkey):
         return self._cdec.get_balance_of(pkey)

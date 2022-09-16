@@ -261,7 +261,31 @@ class NotaryRouteHandler(RouteHandler):
                 data="Cant show roles for DID={}".format(did),                             
                 metadata=None)                                                               
                                                                                              
-
+    async def goods(self, request):                                                               
+        """                                                                                       
+        show role list                                                                            
+        """                                                                                       
+        did = request.url.query.get(DID_ATTR,None)                                                
+        LOGGER.debug('print goods  for DID={}'.format(did))                                       
+        if did:                                                                                   
+            try:                                                                                  
+                goods = self._vault.get_goods(did)                                                
+                return self._wrap_response(                                                       
+                    request,                                                                      
+                    data="Goods={} for DID={}".format(goods,did),                                 
+                    metadata=None)                                                                
+                                                                                                  
+                                                                                                  
+            except  VaultNotReady:                                                                
+                return self._wrap_response(request,data="Notary not ready")                       
+                                                                                                  
+        else:                                                                                     
+                                                                                                  
+            return self._wrap_response(                                                           
+                request,                                                                          
+                data="Cant show goods for DID={}".format(did),                                    
+                metadata=None)                                                                    
+                                                                                                  
 
     
     async def balanceof(self, request):                                        

@@ -1187,7 +1187,7 @@ def do_invoice(args):
     print(response) 
 
 def add_target_parser(subparsers, parent_parser):                                                                        
-    message = 'Target for sale <target_id> '                                                                   
+    message = 'Target for sale <target_id> <price>'                                                                   
     parser = subparsers.add_parser(                                                                                       
         DEC_TARGET_OP,                                                                                                   
         parents=[parent_parser],                                                                                          
@@ -1210,10 +1210,14 @@ def add_target_parser(subparsers, parent_parser):
         help='Target specification')
     parser.add_argument(             
         '--invoice','-i',            
-        type=str,                    
+        action='count', 
+        default=0,                   
         help='Invoice free') 
-    
-                                                                                          
+    parser.add_argument(          
+        '--did','-d',              
+        type=str,                 
+        help='DID')               
+                                                                                         
                                                                                                                           
     parser.add_argument(                                                                                                  
         '--url',                                                                                                          
