@@ -40,7 +40,7 @@ from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 # DEC 
 from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,
-                                         DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP,DEC_GOODS_OP,DEC_TARGET_OP
+                                         DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP,DEC_GOODS_OP,DEC_TARGET_OP,DEC_PAY_OP
                                          )
 
 DISTRIBUTION_NAME = 'x509-cert'
@@ -123,6 +123,7 @@ def create_parser(prog_name):
     add_roles_parser(subparsers, parent_parser)
     add_goods_parser(subparsers, parent_parser)
     add_target_parser(subparsers, parent_parser)
+    add_pay_parser(subparsers, parent_parser)
     add_show_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
     add_init_parser(subparsers, parent_parser)
@@ -683,6 +684,84 @@ def do_goods(args):
     response = client.goods(args)                 
     print(response)                               
 
+def add_pay_parser(subparsers, parent_parser):                                                                                                
+    message = 'Pay DEC <from> <to> <amount> [for --target <target>].'                                                                                                
+    parser = subparsers.add_parser(                                                                                                           
+        DEC_PAY_OP,                                                                                                                           
+        parents=[parent_parser],                                                                                                              
+        description=message,                                                                                                                  
+        help='Pay token for target')                                                                                                                 
+    parser.add_argument(                                                                                                                      
+        'name',                                                                                                                               
+        type=str,                                                                                                                             
+        help='From wallet')                                                                                                                   
+    parser.add_argument(                                                                                                                      
+        'to',                                                                                                                                 
+        type=str,                                                                                                                             
+        help='to wallet')                                                                                                                     
+    parser.add_argument(                                                                                                                      
+        'amount',                                                                                                                             
+        type=int,                                                                                                                             
+        help='number token for transfer')                                                                                                     
+                                                                                                                                              
+    parser.add_argument(                                                                                                                      
+        '--did','-d',                                                                                                                         
+        type=str,                                                                                                                             
+        help='DID of owner <from wallet>')                                                                                                                           
+    # with out target works like send                                                                                                         
+    parser.add_argument(                                                                                                                      
+        '--target','-tg',                                                                                                                     
+        type=str,                                                                                                                             
+        help='Target object')                                                                                                                 
+    parser.add_argument(                                                                                                                      
+        '--asset_type','-at',                                                                                                                 
+        type=str,                                                                                                                             
+        help='passkey for special operation')                                                                                                 
+    parser.add_argument(                                                                                                                      
+        '--pub_key','-pub',                                                                                                                   
+        type=str,                                                                                                                             
+        help='pub key')  
+                                                                                                                         
+    parser.add_argument(                                                                                                                      
+        '--provement_key','-prov',                                                                                                            
+        type=str,                                                                                                                             
+        help='Provement key refer to prov key from invoice')                                                                                  
+    parser.add_argument(                                                                                                                      
+       '--role','-r',                                                                                                                         
+       type=str,                                                                                                                              
+       help="Wallet role name"                                                                                                                
+       )                                                                                                                                      
+    parser.add_argument(                                                                                                                      
+        '--url',                                                                                                                              
+        type=str,                                                                                                                             
+        help='specify URL of REST API',                                                                                                       
+        default='http://api-dgt-c1-1:8108')                                                                                                   
+    parser.add_argument(                                                                                                                      
+        '--keyfile',                                                                                                                          
+        type=str,
+        default="/project/peer/keys/notary.priv",                                                                                                                             
+        help="identify file containing user's private key")                                                                                   
+    parser.add_argument(                                                                                                                      
+        '-cb', '--crypto_back',                                                                                                               
+        type=str,                                                                                                                             
+        help='Specify a crypto back openssl/bitcoin',                                                                                         
+        default=CRYPTO_BACK)                                                                                                                  
+                                                                                                                                              
+                                                                                                                                              
+                                                                                                                                              
+    parser.add_argument(                                                                                                                      
+        '--wait',                                                                                                                             
+        nargs='?',                                                                                                                            
+        const=sys.maxsize,                                                                                                                    
+        type=int,                                                                                                                             
+        help='set time, in seconds, to wait for transaction to commit')                                                                       
+                                                                                                                                              
+def do_pay(args):                                                                                                                             
+    client = _get_client(args)   
+    client.init_dec(args.keyfile if args.pub_key is None else args.pub_key)                                                                                                             
+    response = client.pay(args, args.wait)                                                                                                    
+    print(response)                                                                                                                           
+
 
 
 def add_init_parser(subparsers, parent_parser):
@@ -905,7 +984,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
 
     elif args.command == DEC_GOODS_OP:         
         do_goods(args)                          
-                           
+    elif args.command == DEC_PAY_OP:    
+        do_pay(args)                       
+                              
     elif args.command == 'show':
         do_show(args)
     elif args.command == 'list':

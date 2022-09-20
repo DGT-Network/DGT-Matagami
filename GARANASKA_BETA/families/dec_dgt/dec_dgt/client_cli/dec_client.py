@@ -69,6 +69,7 @@ class DecClient:
         self.url = url
 
         if keyfile is not None:
+            print("use keyfile {}".format(keyfile))
             try:
                 with open(keyfile) as fd:
                     private_key_str = fd.read().strip()
@@ -416,7 +417,7 @@ class DecClient:
         info[DEC_TMSTAMP] = time.time()
         return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait,din=din)  
 
-    def pay(self,args,wait=None):      
+    def pay(self,args,wait=None,control=False):      
         info = {DATTR_VAL : args.amount}                                                                         
         if args.asset_type:                                                                                      
             info[DEC_ASSET_TYPE] = args.asset_type                                                               
@@ -439,7 +440,12 @@ class DecClient:
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
         print('emmiter',info[DEC_EMITTER])
-        return self._send_transaction(DEC_PAY_OP, args.name, info, to=to, wait=wait,din=din)  
+        if wait is None and control:
+            # wait transaction commit
+            wait = 10
+        resp =  self._send_transaction(DEC_PAY_OP, args.name, info, to=to, wait=wait,din=din) 
+        return resp
+         
     
      
     def invoice(self,args,wait=None):   
@@ -678,17 +684,19 @@ class DecClient:
                 "batches", batch_list.SerializeToString(),
                 'application/octet-stream',
             )
+            #print("RESPONSE={}".format(response))
+            status = 'PENDING'
             while wait_time < wait:
                 status = self._get_status(
                     batch_id,
                     wait - int(wait_time),
                 )
                 wait_time = time.time() - start_time
-
+                #print("STATUS={}".format(status))
                 if status != 'PENDING':
-                    return response
+                    return status #response
 
-            return response
+            return status # response
 
         return self._send_request(
             "batches", batch_list.SerializeToString(),
@@ -711,3 +719,5 @@ class DecClient:
             header_signature=signature,
             timestamp=int(time.time()))
         return BatchList(batches=[batch])
+
+

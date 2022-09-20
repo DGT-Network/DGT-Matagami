@@ -530,7 +530,7 @@ class DecTransactionHandler(TransactionHandler):
                 raise InvalidTransaction('Verb is "{}", but price mismatch with invoice ({}~{})'.format(DEC_PAY_OP,invoice[DEC_TARGET_PRICE],amount))
             # change owner and drop invoice
             del t_val[DEC_INVOICE_OP]
-            t_val[DEC_EMITTER] = name
+            t_val[DEC_EMITTER] = to
             ttoken.dec = cbor.dumps(target_val)
 
 
@@ -611,7 +611,7 @@ class DecTransactionHandler(TransactionHandler):
         if DEC_DID_VAL  in value:                      
             # for notary mode                          
             info[DEC_DID_VAL] = value[DEC_DID_VAL]     
-
+        info[DEC_EMITTER] = value[DEC_EMITTER]
                                                                                                                                                     
         token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
                              owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               

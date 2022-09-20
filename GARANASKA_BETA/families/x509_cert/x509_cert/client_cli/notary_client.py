@@ -46,7 +46,7 @@ except Exception as ex:
 
 # DEC 
 from dec_dgt.client_cli.dec_client import DecClient
-from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,DEC_WALLET_STATUS
+from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,DEC_WALLET_STATUS,DEC_DID_VAL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -121,6 +121,14 @@ class NotaryClient(XcertClient):
                     response = self.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)
                 print(f'INIT NOTARY={name} key={key} info={info} response={response}') 
 
+    def crt_secret_wallet(self,key,opts,did):
+        opts[DEC_DID_VAL] = did                                                  
+        if not self._vault.create_or_update_secret(key,secret=opts):                
+            print('Cant update secret={}'.format(key))                               
+            return False
+        return True                                                                    
+
+
     def wallet(self,args,wait=None):
         # use notary key for sign did arguments
         #   
@@ -140,12 +148,21 @@ class NotaryClient(XcertClient):
                     wlist = secret[DID_WALLETS]
                     if owner in wlist:
                         print('Wallet already in wallets relating to DID={}'.format(args.did)) 
+                        # check secret for wallet - DROP OUT LATER 
+                        wallet = self._vault.get_secret(owner)
+                        if wallet is None:
+                            self.crt_secret_wallet(owner,wlist[owner],args.did)
+
                         return                                     
                 else:
                     wlist = {}
-
-                wlist[owner] = self._cdec.get_only_wallet_opts(args)
+                wopts = self._cdec.get_only_wallet_opts(args)
+                wlist[owner] = wopts
                 secret[DID_WALLETS] = wlist
+                #
+                # create secret with wallet options 
+                if self.crt_secret_wallet(owner,wopts,args.did):
+                    return
                 #print('Certificate with wallet={}'.format(secret))
                 dec_wallet = self._cdec.wallet
             elif args.cmd == DEC_WALLET_OPTS_OP:
@@ -276,15 +293,25 @@ class NotaryClient(XcertClient):
     def goods(self,args,wait=None):               
         return self.get_goods(args.did,wait=wait) 
 
+    def get_did_info(self,did):
+        uid = self.did2uid(did)                                     
+        data = self._vault.get_xcert(uid)                                
+        if data is None:                                                 
+            print('Certificate for {} UNDEF'.format(did))           
+            return                                                       
+        secret = data['data'] 
+        return secret,uid                                           
+
+
+
+
     def target(self,args,wait=None):
         # create target                                                                                   
         try:                                                                                            
-            uid = self.did2uid(args.did)                                                                
-            data = self._vault.get_xcert(uid)                                                           
-            if data is None:                                                                            
-                print('Certificate for {} UNDEF'.format(args.did))                                      
-                return                                                                                  
-            secret = data['data']                                                                       
+            secret,uid = self.get_did_info(args.did)
+            if secret is None:
+                return                                                    
+
             # add new role into DID role list                                                           
             if DID_GOODS in secret and isinstance(secret[DID_GOODS],dict) :                             
                 glist = secret[DID_GOODS]                                                               
@@ -300,14 +327,82 @@ class NotaryClient(XcertClient):
             glist[args.target_id] = target                                                                 
             secret[DID_GOODS] = glist                                                                   
             if not self._vault.create_or_update_secret(uid,secret=secret):                              
-                print('Cant update secret={}'.format(uid))                                              
+                print('Cant update secret={}'.format(args.did))                                              
                 return                                                                                  
             return self._cdec.target(args)                                                                
                                                                                                         
         except Exception as ex:                                                                         
             print('Create target ={} for {} err {}'.format(args.target_id,args.did,ex))                     
-            return                                                                                      
+            return  
+          
+    def get_did_via_wallet(self,key):
+        # take did from wallet                                                       
+        try:                                                                         
+            wallet = self._vault.get_secret(key)                                
+            if wallet is None:                                                        
+                print('Wallet for {} UNDEF'.format(key))                       
+                return                                                               
+            did = wallet[DEC_DID_VAL]                                                
+            #print("wallet: {}".format(wfrom)) 
+            return did                                      
+        except Exception as ex:                                                      
+            print('Cant get walllet {} err {}'.format(key,ex))                 
+            return                                                                   
 
+
+    def pay(self,args,wait=None):
+        if args.did is None:
+            # take did from wallet
+            fdid = self.get_did_via_wallet(args.name)
+            if fdid is None:
+                return None
+        else:
+            fdid = args.did
+        print("from wallet: did={}".format(fdid))
+        tdid = self.get_did_via_wallet(args.to)   
+        print("to wallet: did={}".format(tdid))  
+        if tdid is None: 
+            return None   
+        if args.target:
+            # check target 
+            fsecret,fuid = self.get_did_info(fdid)
+            if fsecret is None :
+                return
+            elif DID_GOODS not in fsecret or args.target not in fsecret[DID_GOODS]:
+                print("No target={} in goods".format(args.target))
+                return
+            tsecret,tuid = self.get_did_info(tdid)          
+            if tsecret is None:                        
+                return                                 
+
+            print("from: {} to {}".format(fsecret[DID_GOODS],tsecret))
+            # do transaction pay and update goods list in case of success
+            resp = self._cdec.pay(args,control=True)
+            #print("resp = {}".format(resp))
+            if resp in ['PENDING','INVALID']  :
+                print("PAY status = {}".format(resp))
+                return
+
+            # in case success 
+            if fdid != tdid:
+                target = fsecret[DID_GOODS].pop(args.target)
+                tsecret[DID_GOODS][args.target] = target
+                if not self._vault.create_or_update_secret(fuid,secret=fsecret):      
+                    print('Cant update FROM secret={}'.format(fdid))                 
+                    return 
+                if not self._vault.create_or_update_secret(tuid,secret=tsecret):                                                            
+                    print('Cant update TO secret={}'.format(tdid))  
+                    fsecret[DID_GOODS][args.target] = target
+                    if not self._vault.create_or_update_secret(fuid,secret=fsecret):      
+                        print('Cant restore FROM secret={}'.format(fdid))                 
+                    return 
+            else:
+                print("Target owner and buyer the same for {} done".format(args.target))
+
+            print("pay for {} done".format(args.target)) 
+        else:
+            # only dec transfer
+            pass
 
     def get_balance_of(self,pkey):
         return self._cdec.get_balance_of(pkey)
