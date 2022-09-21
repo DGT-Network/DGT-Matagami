@@ -1076,9 +1076,10 @@ def add_pay_parser(subparsers, parent_parser):
         type=str,                                              
         help='passkey for special operation')                  
     parser.add_argument(                                       
-        '--pub_key','-pub',                                          
+        '--priv_key','-priv',                                          
         type=str,                                              
-        help='pub key')                                       
+        help='Private key')  
+                                         
     parser.add_argument(     
         '--provement_key','-prov',  
         type=str,            
@@ -1096,21 +1097,20 @@ def add_pay_parser(subparsers, parent_parser):
     parser.add_argument(
         '--keyfile',
         type=str,
-        help="identify file containing user's private key")
+        help="Identify file containing  private key")
+
     parser.add_argument(                                     
         '-cb', '--crypto_back',                              
         type=str,                                            
         help='Specify a crypto back openssl/bitcoin',        
         default=CRYPTO_BACK)                                 
                                                              
-
-
     parser.add_argument(
         '--wait',
         nargs='?',
         const=sys.maxsize,
         type=int,
-        help='set time, in seconds, to wait for transaction to commit')
+        help='Set time, in seconds, to wait for transaction to commit')
 
 def do_pay(args):                                  
     client = _get_client(args)                      

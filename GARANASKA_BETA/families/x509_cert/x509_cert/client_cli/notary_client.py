@@ -363,19 +363,18 @@ class NotaryClient(XcertClient):
         print("to wallet: did={}".format(tdid))  
         if tdid is None: 
             return None   
+
         if args.target:
             # check target 
             fsecret,fuid = self.get_did_info(fdid)
-            if fsecret is None :
+            tsecret,tuid = self.get_did_info(tdid)
+            if fsecret is None or tsecret is None:
                 return
-            elif DID_GOODS not in fsecret or args.target not in fsecret[DID_GOODS]:
-                print("No target={} in goods".format(args.target))
+            elif DID_GOODS not in tsecret or args.target not in tsecret[DID_GOODS]:
+                print("No target={} in target list".format(args.target))
                 return
-            tsecret,tuid = self.get_did_info(tdid)          
-            if tsecret is None:                        
-                return                                 
 
-            print("from: {} to {}".format(fsecret[DID_GOODS],tsecret))
+            print("from: {} to {}".format(tsecret[DID_GOODS],fsecret[DID_GOODS]))
             # do transaction pay and update goods list in case of success
             resp = self._cdec.pay(args,control=True)
             #print("resp = {}".format(resp))
@@ -385,16 +384,16 @@ class NotaryClient(XcertClient):
 
             # in case success 
             if fdid != tdid:
-                target = fsecret[DID_GOODS].pop(args.target)
-                tsecret[DID_GOODS][args.target] = target
-                if not self._vault.create_or_update_secret(fuid,secret=fsecret):      
-                    print('Cant update FROM secret={}'.format(fdid))                 
+                target = tsecret[DID_GOODS].pop(args.target)
+                fsecret[DID_GOODS][args.target] = target
+                if not self._vault.create_or_update_secret(fuid,secret=tsecret):      
+                    print('Cant update Owner secret={}'.format(tdid))                 
                     return 
-                if not self._vault.create_or_update_secret(tuid,secret=tsecret):                                                            
-                    print('Cant update TO secret={}'.format(tdid))  
-                    fsecret[DID_GOODS][args.target] = target
-                    if not self._vault.create_or_update_secret(fuid,secret=fsecret):      
-                        print('Cant restore FROM secret={}'.format(fdid))                 
+                if not self._vault.create_or_update_secret(tuid,secret=fsecret):                                                            
+                    print('Cant update Customer secret={}'.format(fdid))  
+                    tsecret[DID_GOODS][args.target] = target
+                    if not self._vault.create_or_update_secret(fuid,secret=tsecret):      
+                        print('Cant restore Owner secret={}'.format(tdid))                 
                     return 
             else:
                 print("Target owner and buyer the same for {} done".format(args.target))
@@ -402,7 +401,11 @@ class NotaryClient(XcertClient):
             print("pay for {} done".format(args.target)) 
         else:
             # only dec transfer
-            pass
+            resp = self._cdec.pay(args,control=True)                   
+            if resp in ['PENDING','INVALID']  :                        
+                print("PAY status = {}".format(resp))                  
+                return                                                 
+            print("PAY status = {} OK".format(resp))
 
     def get_balance_of(self,pkey):
         return self._cdec.get_balance_of(pkey)

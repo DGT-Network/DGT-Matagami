@@ -530,7 +530,7 @@ class DecTransactionHandler(TransactionHandler):
                 raise InvalidTransaction('Verb is "{}", but price mismatch with invoice ({}~{})'.format(DEC_PAY_OP,invoice[DEC_TARGET_PRICE],amount))
             # change owner and drop invoice
             del t_val[DEC_INVOICE_OP]
-            t_val[DEC_EMITTER] = to
+            t_val[DEC_EMITTER] = name
             ttoken.dec = cbor.dumps(target_val)
 
 

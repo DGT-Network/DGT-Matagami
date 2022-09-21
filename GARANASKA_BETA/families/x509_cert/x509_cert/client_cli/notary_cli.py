@@ -718,9 +718,9 @@ def add_pay_parser(subparsers, parent_parser):
         type=str,                                                                                                                             
         help='passkey for special operation')                                                                                                 
     parser.add_argument(                                                                                                                      
-        '--pub_key','-pub',                                                                                                                   
+        '--priv_key','-priv',                                                                                                                   
         type=str,                                                                                                                             
-        help='pub key')  
+        help='Private key of customer')  
                                                                                                                          
     parser.add_argument(                                                                                                                      
         '--provement_key','-prov',                                                                                                            
