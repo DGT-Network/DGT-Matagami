@@ -758,7 +758,7 @@ def add_pay_parser(subparsers, parent_parser):
                                                                                                                                               
 def do_pay(args):                                                                                                                             
     client = _get_client(args)   
-    client.init_dec(args.keyfile if args.pub_key is None else args.pub_key)                                                                                                             
+    client.init_dec(args.keyfile if args.priv_key is None else args.priv_key)                                                                                                             
     response = client.pay(args, args.wait)                                                                                                    
     print(response)                                                                                                                           
 

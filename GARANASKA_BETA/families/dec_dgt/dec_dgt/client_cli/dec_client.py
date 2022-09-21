@@ -555,9 +555,13 @@ class DecClient:
 
     def _get_status(self, batch_id, wait):
         try:
-            result = self._send_request(
-                'batch_statuses?id={}&wait={}'.format(batch_id, wait),)
-            return yaml.safe_load(result)['data'][0]['status']
+            result = self._send_request('batch_statuses?id={}&wait={}'.format(batch_id, wait),)
+            vres = yaml.safe_load(result)
+            data = vres['data'][0]
+            status = data['status']
+            if status == 'INVALID':
+                print("Transaction invalid={}".format(data['invalid_transactions'][0]['message']))
+            return status
         except BaseException as err:
             raise DecClientException(err)
 
