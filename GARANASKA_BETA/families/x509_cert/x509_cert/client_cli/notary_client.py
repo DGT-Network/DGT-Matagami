@@ -54,7 +54,7 @@ NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
 DID_WALLETS = "wallets"
 DID_ROLES   = "roles"
 DID_GOODS   = "goods"
-
+WAIT_DEF = 10
                                                                      
 
 class NotaryClient(XcertClient):
@@ -232,13 +232,17 @@ class NotaryClient(XcertClient):
                 # new role list
                 rlist = {}                            
             # add new role
+            resp = self._cdec.role(args,wait=WAIT_DEF)
+            if resp in ['PENDING','INVALID']  :             
+                print("ROLE status = {}".format(resp))       
+                return                                      
             role = self._cdec.get_role_opts(args)
             rlist[args.role_id] = role 
             secret[DID_ROLES] = rlist
             if not self._vault.create_or_update_secret(uid,secret=secret):      
                 print('Cant update secret={}'.format(uid))                      
                 return                                                          
-            return self._cdec.role(args) 
+            return resp 
                                                                                         
         except Exception as ex: 
             print('Create role ={} for {} err {}'.format(args.role_id,args.did,ex))                                                              
@@ -326,7 +330,7 @@ class NotaryClient(XcertClient):
                 # new goods list                                                                         
                 glist = {}                                                                              
             # add new role   
-            resp = self._cdec.target(args,wait=10)  
+            resp = self._cdec.target(args,wait=WAIT_DEF)  
             if resp in ['PENDING','INVALID']  :                         
                 print("TARGET status error = {}".format(resp))                  
                 return                                                 
@@ -419,7 +423,7 @@ class NotaryClient(XcertClient):
             print("pay for {} done".format(args.target)) 
         else:
             # only dec transfer
-            resp = self._cdec.pay(args,control=True)                   
+            resp = self._cdec.pay(args,wait=WAIT_DEF)                   
             if resp in ['PENDING','INVALID']  :                        
                 print("PAY status = {}".format(resp))                  
                 return                                                 
