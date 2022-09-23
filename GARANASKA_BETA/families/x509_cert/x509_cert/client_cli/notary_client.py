@@ -121,7 +121,7 @@ class NotaryClient(XcertClient):
                     response = self.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)
                 print(f'INIT NOTARY={name} key={key} info={info} response={response}') 
 
-    def crt_secret_wallet(self,key,opts,did):
+    def crt_obj_secret(self,key,opts,did):
         opts[DEC_DID_VAL] = did                                                  
         if not self._vault.create_or_update_secret(key,secret=opts):                
             print('Cant update secret={}'.format(key))                               
@@ -151,7 +151,7 @@ class NotaryClient(XcertClient):
                         # check secret for wallet - DROP OUT LATER 
                         wallet = self._vault.get_secret(owner)
                         if wallet is None:
-                            self.crt_secret_wallet(owner,wlist[owner],args.did)
+                            self.crt_obj_secret(owner,wlist[owner],args.did)
 
                         return                                     
                 else:
@@ -161,7 +161,7 @@ class NotaryClient(XcertClient):
                 secret[DID_WALLETS] = wlist
                 #
                 # create secret with wallet options 
-                if self.crt_secret_wallet(owner,wopts,args.did):
+                if self.crt_obj_secret(owner,wopts,args.did):
                     return
                 #print('Certificate with wallet={}'.format(secret))
                 dec_wallet = self._cdec.wallet
@@ -311,7 +311,10 @@ class NotaryClient(XcertClient):
             secret,uid = self.get_did_info(args.did)
             if secret is None:
                 return                                                    
-
+            val = self._vault.get_secret(args.target_id)
+            if val is not None:
+                print('Target {} already exist.'.format(args.target_id)) 
+                return
             # add new role into DID role list                                                           
             if DID_GOODS in secret and isinstance(secret[DID_GOODS],dict) :                             
                 glist = secret[DID_GOODS]                                                               
@@ -323,7 +326,11 @@ class NotaryClient(XcertClient):
                 # new goods list                                                                         
                 glist = {}                                                                              
             # add new role                                                                              
-            target = self._cdec.get_target_opts(args)                                                       
+            target = self._cdec.get_target_opts(args) 
+            if not self.crt_obj_secret(args.target_id,target,args.did): 
+                print('Cant create target={}'.format(args.target_id)) 
+                return
+                                                                   
             glist[args.target_id] = target                                                                 
             secret[DID_GOODS] = glist                                                                   
             if not self._vault.create_or_update_secret(uid,secret=secret):                              
@@ -395,6 +402,11 @@ class NotaryClient(XcertClient):
                     if not self._vault.create_or_update_secret(fuid,secret=tsecret):      
                         print('Cant restore Owner secret={}'.format(tdid))                 
                     return 
+                if not self.crt_obj_secret(args.target_id,target,fdid): 
+                    print('Cant update target={} did={}'.format(args.target_id,fdid)) 
+                    return
+
+
             else:
                 print("Target owner and buyer the same for {} done".format(args.target))
 
