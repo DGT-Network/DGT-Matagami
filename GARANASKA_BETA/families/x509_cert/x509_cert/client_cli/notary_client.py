@@ -325,7 +325,13 @@ class NotaryClient(XcertClient):
             else:                                                                                       
                 # new goods list                                                                         
                 glist = {}                                                                              
-            # add new role                                                                              
+            # add new role   
+            resp = self._cdec.target(args,wait=10)  
+            if resp in ['PENDING','INVALID']  :                         
+                print("TARGET status error = {}".format(resp))                  
+                return                                                 
+            
+            #                                                                         
             target = self._cdec.get_target_opts(args) 
             if not self.crt_obj_secret(args.target_id,target,args.did): 
                 print('Cant create target={}'.format(args.target_id)) 
@@ -336,7 +342,7 @@ class NotaryClient(XcertClient):
             if not self._vault.create_or_update_secret(uid,secret=secret):                              
                 print('Cant update secret={}'.format(args.did))                                              
                 return                                                                                  
-            return self._cdec.target(args)                                                                
+            return resp                                                               
                                                                                                         
         except Exception as ex:                                                                         
             print('Create target ={} for {} err {}'.format(args.target_id,args.did,ex))                     
