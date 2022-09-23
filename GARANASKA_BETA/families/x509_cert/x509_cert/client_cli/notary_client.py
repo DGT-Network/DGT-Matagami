@@ -156,15 +156,22 @@ class NotaryClient(XcertClient):
                         return                                     
                 else:
                     wlist = {}
+
+                resp = self._cdec.wallet(args,wait=WAIT_DEF,nsign=self._signer)
+                if resp in ['PENDING','INVALID']  :               
+                    print("WALLET status = {}".format(resp))        
+                    return                                        
+
                 wopts = self._cdec.get_only_wallet_opts(args)
                 wlist[owner] = wopts
                 secret[DID_WALLETS] = wlist
                 #
                 # create secret with wallet options 
                 if self.crt_obj_secret(owner,wopts,args.did):
+                    print('Cant create Wallet for DID={}'.format(args.did))
                     return
                 #print('Certificate with wallet={}'.format(secret))
-                dec_wallet = self._cdec.wallet
+                
             elif args.cmd == DEC_WALLET_OPTS_OP:
                 if DID_WALLETS not in secret or not isinstance(secret[DID_WALLETS],dict) or owner not in secret[DID_WALLETS]:   
                     print('No such wallet relating to DID={}'.format(args.did))
@@ -174,8 +181,12 @@ class NotaryClient(XcertClient):
                 if not self._cdec.upd_wallet_opts(opts,args):
                     print('No new options set(limit,sped period,role and etc) {} '.format(opts))
                     return
+                resp = self._cdec.wallet_opts(args,wait=WAIT_DEF,nsign=self._signer)             
+                if resp in ['PENDING','INVALID']  :                                         
+                    print("WALLET OPTS status = {}".format(resp))                                
+                    return                                                                  
                     
-                dec_wallet = self._cdec.wallet_opts
+
             else:
                 print('Undef CMD for wallet operation with wallet={}'.format(secret))
                 return
@@ -184,7 +195,8 @@ class NotaryClient(XcertClient):
                 print('Cant update secret={}'.format(uid))                             
                 return                                                           
 
-            return dec_wallet(args,wait,nsign=self._signer)
+            return resp
+
         except Exception as ex:
             return
 
