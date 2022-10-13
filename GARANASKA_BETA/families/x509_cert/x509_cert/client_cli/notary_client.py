@@ -22,6 +22,8 @@ import yaml
 import cbor
 import json
 import logging
+import traceback
+
 from dgt_signing import create_context
 from dgt_signing import CryptoFactory
 from dgt_signing import ParseError
@@ -32,6 +34,7 @@ from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
 from dgt_sdk.protobuf.batch_pb2 import BatchHeader
 from dgt_sdk.protobuf.batch_pb2 import Batch
+from dgt_sdk.protobuf.notary_pb2 import NotaryRequest
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 
 from x509_cert.client_cli.exceptions import XcertClientException,XcertClientKeyfileException
@@ -46,7 +49,10 @@ except Exception as ex:
 
 # DEC 
 from dec_dgt.client_cli.dec_client import DecClient
-from dec_dgt.client_cli.dec_attr import DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,DEC_WALLET_STATUS,DEC_DID_VAL
+from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,
+                                         DEC_WALLET_STATUS,DEC_DID_VAL,DEC_APPROVALS,DEC_APPROVAL,DEC_NOTARY_REQ,DEC_NOTARY_KEY,DEC_NOTARY_REQ_SIGN,
+                                         DEC_HEADER_PAYLOAD,DEC_PAYLOAD,DEC_HEADER_SIGN,DEC_CMD_OPTS,DEC_TRANS_OPTS,DEC_EMITTER   
+                                         )
 
 LOGGER = logging.getLogger(__name__)
 
@@ -84,6 +90,7 @@ class NotaryClient(XcertClient):
                 self._vault = Vault(vault_url,notary=notary,lead_addr=lead_addr) 
 
         self._cdec = None
+        
         
     def init_dec(self,keyfile):
         # for  wallet mode 
@@ -341,7 +348,17 @@ class NotaryClient(XcertClient):
             else:                                                                                       
                 # new goods list                                                                         
                 glist = {}                                                                              
-            # add new role   
+            # add new role  
+            if args.notary > 0:
+                # send notary request 
+                if args.notary_url is None:
+                    print("Set notary rest api url")
+                    return None
+                # send request batch_list.SerializeToString()
+                nreq = self._cdec.target_req(args)
+                return self.send_notary_req(nreq,args)
+
+
             resp = self._cdec.target(args,wait=WAIT_DEF)  
             if resp in ['PENDING','INVALID']  :                         
                 print("TARGET status error = {}".format(resp))                  
@@ -567,7 +584,94 @@ class NotaryClient(XcertClient):
             proto["COUNTRY_NAME"] = info[COUNTRY_ATTR]                       
         return proto                                                         
     
-                                                         
+    def notary_sign(self,req):                                                                    
+        notary_hdr = {                                                                                
+                    DEC_NOTARY_KEY : self._signer.get_public_key().as_hex(),                               
+                    DEC_NOTARY_REQ_SIGN : req.signature 
+                 }                                                                                    
+        hpayload = cbor.dumps(notary_hdr)                                                             
+        hsignature = self._signer.sign(hpayload)                                                      
+        sreq = NotaryRequest(                                                                         
+                signer_public_key = notary_hdr[DEC_NOTARY_KEY],                                       
+                signature = hsignature,                                                               
+                payload = cbor.dumps({DEC_HEADER_PAYLOAD: hpayload,
+                                      DEC_PAYLOAD: req.payload
+                                      })                   
+            )                                                                                         
+        return sreq                                                                                   
+
+
+    def approvals(self,args): 
+
+        result = self._send_request(DEC_APPROVALS,rest_url=args.notary_url)                   
+        print("approvals",result)                                                                                            
+        try:                                                                                         
+            encoded_entries = yaml.safe_load(result)["data"]                                         
+                                                                                                     
+            return [                                                                                 
+                entry #cbor.loads(base64.b64decode(entry["data"]))                                          
+                for entry in encoded_entries                                                         
+            ]                                                                                        
+                                                                                                     
+        except BaseException:                                                                        
+            return None                                                                              
+    
+    def approval(self,args):                                                                                
+          
+        #if args.approve == 0 :
+        # just show off request
+        # content_type = None if args.approve == 0 else 'application/octet-stream'
+        result = self._send_request("{}?akey={}&approve={}&status={}".format(DEC_APPROVAL,args.name,args.approve,args.status), rest_url=args.notary_url)                                      
+        #print("approvals",result)                                                                                
+        try:                                                                                                     
+            entry = yaml.safe_load(result)["data"]                                                     
+            if args.approve == 0 or args.status > 0:
+                # just show off request
+                return entry
+            # approve request with name  
+            #                            
+            val = bytes.fromhex(entry)
+            data_val = cbor.loads(val) 
+            opts = data_val[DEC_CMD_OPTS] 
+            if DEC_HEADER_SIGN in opts:
+                print('Request "{}" already approved'.format(args.name))
+                return
+            ret = self._signer.verify(opts[DEC_NOTARY_REQ_SIGN], opts[DEC_PAYLOAD],self._context.pub_from_hex(opts[DEC_EMITTER])) 
+            #print('approval check sign={} data={}'.format(ret,data_val))
+            
+            if ret:
+                sreq = self._cdec.notary_req_sign(opts, self._signer) #self.notary_sign(nreq)
+                data_val = {DEC_CMD_OPTS : sreq,DEC_TRANS_OPTS : data_val[DEC_TRANS_OPTS]}
+                res = self.send_notary_approve(args.name,data_val, args)
+
+                print('approval check sign={} data={}'.format(ret,data_val))
+                return res
+                                                                                                                 
+        except BaseException as ex :
+                                                                                                
+            print('approve {} - error {} TB={}'.format(args.name,ex, traceback.format_exc()))
+            return None
+        
+        # approve request with name 
+        #  
+        
+    def send_notary_req(self,data,args):                                                                                              
+        # data.SerializeToString()                                                                                                             
+        result = self._send_request("{}".format(DEC_NOTARY_REQ),data=cbor.dumps(data),content_type='application/octet-stream',rest_url=args.notary_url)             
+        #print("send_notary_req",result)
+        return result                                                                                    
+    
+    def send_notary_approve(self,key,data,args):                                                                                                                                  
+                                                                                                                                                                              
+        result = self._send_request("{}?akey={}".format("notary_approve",key),data=cbor.dumps(data),content_type='application/octet-stream',rest_url=args.notary_url) 
+        return result       
+          
+                                                                                                                                                 
+    def notary_approve(self,req):
+        LOGGER.debug("NOTARY_APPROVE: REQ={}".format(req))
+        return self._cdec.notary_approve(req,3)
+    
+                                                             
     """
     def upd_meta_xcert(self,info,key,init=False):                                                                                             
         # meta cert for keykeeper and raft node                                                                                               

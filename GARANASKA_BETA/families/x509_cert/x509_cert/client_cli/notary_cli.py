@@ -40,7 +40,8 @@ from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 # DEC 
 from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,
-                                         DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP,DEC_GOODS_OP,DEC_TARGET_OP,DEC_PAY_OP
+                                         DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP,DEC_GOODS_OP,DEC_TARGET_OP,DEC_PAY_OP,
+                                         DEC_APPROVALS,DEC_APPROVAL
                                          )
 
 DISTRIBUTION_NAME = 'x509-cert'
@@ -124,6 +125,8 @@ def create_parser(prog_name):
     add_goods_parser(subparsers, parent_parser)
     add_target_parser(subparsers, parent_parser)
     add_pay_parser(subparsers, parent_parser)
+    add_approvals_parser(subparsers, parent_parser)
+    add_approval_parser(subparsers, parent_parser)
     add_show_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
     add_init_parser(subparsers, parent_parser)
@@ -596,19 +599,33 @@ def add_target_parser(subparsers, parent_parser):
     parser.add_argument(                                                                                    
         '--target','-tg',                                                                                   
         type=str,                                                                                           
-        help='Target specification')                                                                        
+        help='Target specification') 
+                                                                           
     parser.add_argument(                                                                   
         '--invoice','-i',                                                                  
         action='count',                                                                    
         default=0,                                                                         
-        help='Invoice free')                                                               
-                                                                                                            
-                                                                                                            
+        help='Invoice free')
+     
+    parser.add_argument(              
+        '--notary',             
+        action='count',               
+        default=0,                    
+        help='Use Notary for control operation') 
+                                                                           
+    parser.add_argument(                          
+        '--notary_url',                               
+        type=str, 
+        help='Specify URL of NOTARY REST API',                                
+        default='http://telebot-dgt:8203'            
+        )    
+                                                                                                                                              
     parser.add_argument(                                                                                    
         '--url',                                                                                            
         type=str,                                                                                           
         help='specify URL of REST API',                                                                     
-        default='http://api-dgt-c1-1:8108')                                                                 
+        default='http://api-dgt-c1-1:8108') 
+                                                                    
     parser.add_argument(                                                                                    
         '--keyfile',                                                                                        
         type=str,                                                                                           
@@ -922,6 +939,104 @@ def do_list(args):
             print(f'{name}: valid={xcert.not_valid_before}/{xcert.not_valid_after} {xcert}')
 
 
+def add_approvals_parser(subparsers, parent_parser):                                          
+    message = 'Shows all approvals.'                                                         
+                                                                                         
+    parser = subparsers.add_parser(                                                      
+        DEC_APPROVALS,                                                                          
+        parents=[parent_parser],                                                         
+        description=message,                                                             
+        help='Displays all notary approvals')                                           
+                                                                                         
+    parser.add_argument(                                                                 
+        '--url',                                                                         
+        type=str,                                                                       
+        default='api-dgt-c1-1:8108',                                              
+        help='specify URL of DGT REST API') 
+    parser.add_argument(                         
+        '--notary_url',                                 
+        type=str,                                
+        default='http://telebot-dgt:8203',       
+        help='specify URL of NOTARY REST API')   
+                                                     
+    parser.add_argument(                                                                 
+        '--keyfile',                                                                     
+        type=str,                                                                        
+        help="identify file containing user's private key")                              
+                                                                                         
+                                                                                         
+    parser.add_argument(                                                                 
+        '-cb', '--crypto_back',                                                          
+        type=str,                                                                        
+        help='Specify a crypto back openssl/bitcoin',                                    
+        default=CRYPTO_BACK)                                                             
+
+
+
+def do_approvals(args):
+    client = _get_client(args)
+    results = client.approvals(args)
+    print("approvals={}".format(results))
+
+def add_approval_parser(subparsers, parent_parser):            
+    message = 'Show approval with name.'                            
+                                                                
+    parser = subparsers.add_parser(                             
+        DEC_APPROVAL,                                          
+        parents=[parent_parser],                                
+        description=message,                                    
+        help='Displays  notary approval with name') 
+                      
+    parser.add_argument(                     
+        'name',                              
+        type=str,                            
+        help='Name of approval') 
+      
+    parser.add_argument(                                  
+        '--approve',                                       
+        action='count',                                   
+        default=0,                                        
+        help='Approve notary request with name')   
+    parser.add_argument(                            
+        '--status',                                
+        action='count',                             
+        default=0,                                  
+        help='Check request status with name')           
+
+    parser.add_argument(                                        
+        '--url',                                                
+        type=str,                                               
+        default='api-dgt-c1-1:8108',                            
+        help='specify URL of DGT REST API')                     
+    parser.add_argument(                                        
+        '--notary_url',                                         
+        type=str,                                               
+        default='http://telebot-dgt:8203',                      
+        help='specify URL of NOTARY REST API')                  
+                                                                
+    parser.add_argument(                                        
+        '--keyfile',                                            
+        type=str, 
+        default="/project/peer/keys/notary.priv",                                              
+        help="identify file containing notary's private key")     
+                                                                
+                                                                
+    parser.add_argument(                                        
+        '-cb', '--crypto_back',                                 
+        type=str,                                               
+        help='Specify a crypto back openssl/bitcoin',           
+        default=CRYPTO_BACK)                                    
+                                                                
+                                                                
+                                                                
+def do_approval(args):                                         
+    client = _get_client(args) 
+    if args.approve > 0:
+        client.init_dec(args.keyfile)# if args.pkey is None else args.pkey)                                 
+    results = client.approval(args)                            
+    print("approval={}".format(results))                       
+
+
 def _get_client(args,init=False):
     url     = DEFAULT_URL if args.url is None else args.url
     keyfile = _get_keyfile(args)
@@ -986,7 +1101,12 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_goods(args)                          
     elif args.command == DEC_PAY_OP:    
         do_pay(args)                       
-                              
+    elif  args.command == DEC_APPROVALS:
+        do_approvals(args)
+
+    elif args.command == DEC_APPROVAL:
+        do_approval(args)
+
     elif args.command == 'show':
         do_show(args)
     elif args.command == 'list':

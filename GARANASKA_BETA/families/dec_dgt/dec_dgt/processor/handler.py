@@ -607,11 +607,11 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}" target with such name "{}" already in state'.format(DEC_TARGET_OP,name))                                
 
         info = {}  
-        info[DEC_TARGET_OP] = value[DEC_TARGET_OP]                                                                                                                                 
+        info[DEC_TARGET_OP] = value[DEC_PAYLOAD][DEC_TARGET_OP]                                                                                                                                 
         if DEC_DID_VAL  in value:                      
             # for notary mode                          
             info[DEC_DID_VAL] = value[DEC_DID_VAL]     
-        info[DEC_EMITTER] = value[DEC_EMITTER]
+        info[DEC_EMITTER] = value[DEC_EMITTER] # pubkey of owner 
                                                                                                                                                     
         token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
                              owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               
@@ -958,12 +958,14 @@ class DecTransactionHandler(TransactionHandler):
             # if True:
             # check sign 
             content = cbor.loads(payload[DATTR_VAL])
+            
             try:
                 public_key = self._context.pub_from_hex(payload[DEC_PUBKEY])
                 ret = self._signer.verify(payload[DEC_SIGNATURE], payload[DATTR_VAL],public_key )
                 LOGGER.debug('_decode_transaction check sign={} key={}'.format(ret,payload[DEC_PUBKEY]))
             except Exception as ex:
                 LOGGER.debug('_decode_transaction check sign error {}'.format(ex))
+
         except:
             raise InvalidTransaction('Invalid payload serialization')
 
@@ -980,6 +982,31 @@ class DecTransactionHandler(TransactionHandler):
 
         try:
             value = content['Value']
+            if DEC_HEADER_PAYLOAD in value and DEC_HEADER_SIGN in value:                                          
+                """                                                                                                   
+                signed with notary transaction                                                                        
+                """                                                                                                   
+                hpayload = value[DEC_HEADER_PAYLOAD]                                                                
+                hsignature = value[DEC_HEADER_SIGN]
+                                                                                 
+                hdr = cbor.loads(hpayload)                                                                            
+                public_key = self._context.pub_from_hex(hdr[DEC_NOTARY_KEY])                                          
+                ret = self._signer.verify(hsignature, hpayload,public_key ) 
+                if not ret:
+                    LOGGER.debug('_decode_transaction Notary sign={} incorrect'.format(ret))
+                    raise AttributeError
+                LOGGER.debug('_decode_transaction check Notary sign={} HDR={}'.format(ret,hdr)) 
+                rsignature = hdr[DEC_NOTARY_REQ_SIGN]                      
+                rpayload = value[DEC_PAYLOAD]
+                val = cbor.loads(rpayload)
+                public_key = self._context.pub_from_hex(val[DEC_EMITTER])
+                ret = self._signer.verify(rsignature, rpayload,public_key ) 
+                if not ret:   
+                    LOGGER.debug('_decode_transaction User sign={} incorrect'.format(ret))           
+                    raise AttributeError 
+                LOGGER.debug('_decode_transaction check User sign={} REQ={}'.format(ret,val))
+                value = val
+
         except AttributeError:
             raise InvalidTransaction('Value is required')
         out = [name]

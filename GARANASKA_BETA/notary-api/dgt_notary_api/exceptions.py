@@ -321,3 +321,15 @@ class NotEnoughFunds(_ApiError):
     status_code = 400
     title = "Not enough funds in user's wallet"
     message = ''
+
+class BadRequestSign(_ApiError):                                                     
+    api_code = 93                                                                          
+    status_code = 400                                                                      
+    title = 'Request signature incorrect'                                                       
+    message = ('Request signature incorrect - request declined.')    
+    
+class BadRequestStatus(_ApiError):                                                                                               
+    api_code = 94                                                                                                                                                
+    status_code = 400                                                 
+    title = 'Request status incorrect'                             
+    message = ('Request status incorrect - request declined.')     

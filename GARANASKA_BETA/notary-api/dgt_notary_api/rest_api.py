@@ -42,10 +42,22 @@ from dgt_notary_api.config import load_toml_rest_api_config
 from dgt_notary_api.config import merge_rest_api_config
 from dgt_notary_api.config import RestApiConfig
 
+from dgt_validator.database.indexed_database import IndexedDatabase
+import cbor 
 
 LOGGER = logging.getLogger(__name__)
 DISTRIBUTION_NAME = 'dgt-notary-api'
 NOTARY_PRIV_KEY = '/project/peer/keys/notary.priv'
+
+NOTARY_DB_SIZE= 1024*1024*4
+NOTARY_DB_FILENAME = '/project/peer/data/notary.lmdb'
+def deserialize_data(encoded):
+    return cbor.loads(encoded)
+
+
+def serialize_data(value):
+    return cbor.dumps(value, sort_keys=True)
+
 
 def parse_args(args):
     """Parse command line flags added to `rest_api` command.
@@ -111,16 +123,39 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
+def _query_index_keys(req):     
+    LOGGER.info('_query_index_keys=%s',req)                                        
+    keys = [val.encode() for key,val in req.items() if key == 'qid']
+    return keys                              
+
 def start_rest_api(host, port, connection, timeout, registry,client_max_size=None,vault=None):
     """Builds the web app, adds route handlers, and finally starts the app.
     """
+    notary_db = IndexedDatabase(                                                                                                     
+            NOTARY_DB_FILENAME,                                                                                                      
+            serialize_data,                                                                                                        
+            deserialize_data,                                                                                                      
+            indexes={'query': _query_index_keys},                   
+            flag='c',                                                                                                              
+            _size=NOTARY_DB_SIZE,                                                                                                 
+            dupsort=True                                                                                                           
+            )
+    if "ROOT" in notary_db:
+        LOGGER.info('LIST REQUEST {}...\n'.format(notary_db.keys()))
+        with notary_db.cursor() as curs:        
+            for val in curs.iter():           
+                LOGGER.info('VALUES=%s',val) 
+        #notary_db.delete("ROOT")
+    else:
+        notary_db.put("ROOT", {'qid' : 'xxx'}) 
+
     loop = asyncio.get_event_loop()
     connection.open()
     app = web.Application(loop=loop, client_max_size=client_max_size)
     app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    handler = NotaryRouteHandler(loop, connection, timeout, registry,vault=vault)
+    handler = NotaryRouteHandler(loop, connection, timeout, registry,vault=vault,db=notary_db)
     LOGGER.info('Creating handlers for validator at %s', connection.url)
     app.router.add_get('/show', handler.show_xcert)
     app.router.add_get('/list', handler.list_xcert)
@@ -130,7 +165,10 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
     app.router.add_get('/roles', handler.roles)
     app.router.add_get('/goods', handler.goods)
     app.router.add_get('/balanceof', handler.balanceof)
-
+    app.router.add_get('/approvals', handler.approvals)
+    app.router.add_get('/approval', handler.approval)
+    app.router.add_post('/notary_req', handler.notary_req)
+    app.router.add_post('/notary_approve', handler.notary_approve)
 
     if False:
         app.router.add_post('/batches', handler.submit_batches)

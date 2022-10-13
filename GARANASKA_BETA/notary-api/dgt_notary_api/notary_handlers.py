@@ -50,6 +50,7 @@ from dgt_sdk.protobuf import client_status_pb2
 from dgt_sdk.protobuf.block_pb2 import BlockHeader
 from dgt_sdk.protobuf.batch_pb2 import Batch,BatchHeader,BatchList
 from dgt_sdk.protobuf.transaction_pb2 import Transaction,TransactionHeader
+from dgt_sdk.protobuf.notary_pb2 import NotaryRequest
 
 from dgt_notary_api.route_handlers import RouteHandler,DEFAULT_TIMEOUT
 import cbor
@@ -67,12 +68,23 @@ from dgt_bgt.processor.handler import make_bgt_address, make_bgt_prefix
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo  
 from x509_cert.client_cli.xcert_attr import *
 from x509_cert.client_cli.exceptions import VaultNotReady
-                                    
+from dec_dgt.client_cli.dec_attr import (DEC_HEADER_PAYLOAD,DEC_PAYLOAD,DEC_HEADER_SIGN,DEC_CMD_OPTS,DEC_TRANS_OPTS,DEC_EMITTER,DEC_NOTARY_REQ_SIGN) 
+                                                                                                                        
+                                                                                                                        
+                                   
 import time
 LOGGER = logging.getLogger(__name__)
 
 TRANSACTION_FEE = 0.1
-
+APPROVAL_KEY = "akey"
+APPROVE_MODE = "approve"
+STATUS_MODE = "status"
+REQ_PAYLOAD = 'payload'
+REQ_STATUS =  'req_status'
+REQ_DGT_LINK      =  'dgt_link'
+REQ_STATUS_QUEUE  = 'QUEUE'
+REQ_STATUS_PENDING  = 'PENDING'
+REQ_STATUS_DGT_PENDING  = 'DGT_PENDING'
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
@@ -105,7 +117,7 @@ class NotaryRouteHandler(RouteHandler):
             cancel a request and report that the validator is unavailable.
     """
 
-    def __init__(self, loop, connection,timeout=DEFAULT_TIMEOUT, metrics_registry=None,vault=None):
+    def __init__(self, loop, connection,timeout=DEFAULT_TIMEOUT, metrics_registry=None,vault=None,db=None):
 
         super().__init__(loop,connection,timeout,metrics_registry)
         # BGX init
@@ -115,7 +127,11 @@ class NotaryRouteHandler(RouteHandler):
         self._crypto_factory = CryptoFactory(self._context)
         self._signer = self._crypto_factory.new_signer(self._private_key)
         self._vault = vault
-        LOGGER.debug('NotaryRouteHandler: _signer PUBLIC_KEY=%s',self._public_key.as_hex()[:8])
+        self._db = db
+        """
+        keep user request for notary
+        """
+        LOGGER.debug('NotaryRouteHandler: _signer PUBLIC_KEY={} DB={}'.format(self._public_key.as_hex()[:8],self._db))
 
     async def show_xcert(self, request):                                                                
         """                                    
@@ -286,7 +302,74 @@ class NotaryRouteHandler(RouteHandler):
                 data="Cant show goods for DID={}".format(did),                                    
                 metadata=None)                                                                    
                                                                                                   
+    async def approvals(self, request):
+        """                           
+        show list for  approvals                
+        """ 
+        LOGGER.debug('print APPROVALS INFO')
+        alist = self._db.keys() 
+        """                         
+        with self._db.cursor() as curs:            
+            for val in curs.iter():                 
+                alist.append(val)
+        """
+        return self._wrap_response(                                  
+                  request,                                                 
+                  data=alist,            
+                  metadata=None
+            )    
+                                           
+    async def approval(self, request):                                                             
+        """                                                                                     
+        show approval info                                                                          
+        """                                                                                     
+        akey = request.url.query.get(APPROVAL_KEY,None) 
+        is_approve = request.url.query.get(APPROVE_MODE,"0") != "0"  
+        is_status = request.url.query.get(STATUS_MODE,"0") != "0"                                          
+        LOGGER.debug('print APPROVAL INFO  for {} approve={} status={}'.format(akey,is_approve,is_status))                                     
+        if akey:   
+            aval = self._db.get(akey)
+             
+            if aval :
+                if akey == 'ROOT':
+                    data_val = aval
+                elif REQ_PAYLOAD in aval:
+                    if is_approve:
+                        status = aval[REQ_STATUS]
+                        if status != REQ_STATUS_QUEUE:
+                            raise errors.BadRequestStatus()
 
+                        data_val = aval[REQ_PAYLOAD].hex() 
+                        LOGGER.debug('approve={}'.format(data_val))                                         # 
+                    else:
+                        # check status or send info 
+                        nreq = cbor.loads(aval[REQ_PAYLOAD])
+                        nreq = cbor.loads(nreq[DEC_CMD_OPTS][DEC_PAYLOAD])
+                        dgt_link = aval[REQ_DGT_LINK] if REQ_DGT_LINK in aval else None
+                        if dgt_link and is_status and aval[REQ_STATUS] == REQ_STATUS_PENDING:
+                            # check transaction status 
+                            status = self._vault._get_status(dgt_link,1)
+                            LOGGER.debug('check transaction url={} status={}'.format(dgt_link,status))
+                            if aval[REQ_STATUS] != status:
+                                aval[REQ_STATUS] = status
+                                self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : aval[REQ_PAYLOAD], REQ_STATUS : status,REQ_DGT_LINK:dgt_link})],[])
+                                # update info 
+                        data_val = {REQ_STATUS: aval[REQ_STATUS],REQ_PAYLOAD: nreq,REQ_DGT_LINK: dgt_link }
+
+                else:
+                    data_val = "No {} approval for={}".format(REQ_PAYLOAD,akey)
+
+            else :
+                data_val = "No such approval for={}".format(akey) 
+                                                                                       
+                                                                                                
+        else:
+            data_val = "Set argument 'akey'"                                                                                   
+                                                                                                
+        return self._wrap_response(                                                         
+            request,                                                                        
+            data=data_val,                                  
+            metadata=None)                                                                  
     
     async def balanceof(self, request):                                        
         """                                                                  
@@ -884,3 +967,99 @@ class NotaryRouteHandler(RouteHandler):
         #     metadata=link,
         #     status=200)
 
+    async def notary_req(self, request):  
+        """
+        User ask notary sign
+        """                                                                                                                  
+        if request.headers['Content-Type'] != 'application/octet-stream':                                           
+            LOGGER.debug('Submission headers had wrong Content-Type: %s',request.headers['Content-Type'])                                                                    
+            raise errors.SubmissionWrongContentType()                                                               
+                                                                                                                    
+        body = await request.read()                                                                                 
+        if not body:                                                                                                
+            LOGGER.debug('Submission contained an empty body')                                                      
+            raise errors.NoBatchesSubmitted()                                                                       
+                                                                                                                    
+        try:                                                                                                        
+            nreq = cbor.loads(body)
+            opts = nreq[DEC_CMD_OPTS]
+            ret = self._signer.verify(opts[DEC_NOTARY_REQ_SIGN], opts[DEC_PAYLOAD],self._context.pub_from_hex(opts[DEC_EMITTER]) )
+            if not ret:
+                LOGGER.debug('Wrong sign for request={}'.format(opts))        
+                raise errors.BadRequestSign()                                   
+
+
+            tstamp = datetime.now().__str__() 
+
+            LOGGER.debug('{} : CHECK={} Request {}'.format(tstamp,ret,nreq)) 
+            data = {'key' : tstamp,REQ_STATUS : REQ_STATUS_QUEUE}
+            self._db.put(tstamp, {'qid' : tstamp,REQ_PAYLOAD : body,REQ_STATUS : REQ_STATUS_QUEUE}) 
+                                                                                
+        except DecodeError:                                                                                         
+            LOGGER.debug('Submission body could not be decoded: %s', body)                                          
+            raise errors.BadProtobufSubmitted()                                                                     
+
+
+                                                                                                                                                             
+        return self._wrap_response(                                                                                                                             
+            request,
+            data=data,                                                                                                                                            
+            metadata=None,                                                                                                                                        
+            status=200)   
+    
+    async def notary_approve(self, request): 
+        
+        akey = request.url.query.get(APPROVAL_KEY,None) 
+
+        LOGGER.debug('APPROVE  for {}'.format(akey))
+        if akey:                                                                          
+            aval = self._db.get(akey)                                                     
+            data_val = "Request status {} incorrect for={}".format(aval[REQ_STATUS],akey) if aval and aval[REQ_STATUS] != REQ_STATUS_QUEUE else "No such approval request for={}".format(akey)           
+                                                                                          
+        else:                                                                             
+            data_val = "Set argument 'akey'" 
+            aval = None                                             
+
+
+        if aval is None:
+            # error
+            return self._wrap_response(           
+                request,                          
+                data=data_val,                    
+                metadata=None)                    
+
+        # take request from queue
+        #nreq = NotaryRequest()                       
+        #nreq.ParseFromString(aval[REQ_PAYLOAD])      
+        #data_val = cbor.loads(nreq.payload)          
+                                                     
+
+        if request.headers['Content-Type'] != 'application/octet-stream':        
+            LOGGER.debug('Submission headers had wrong Content-Type: %s',request.headers['Content-Type'])                                 
+            raise errors.SubmissionWrongContentType()                            
+                                                                                 
+        body = await request.read()                                              
+        if not body:                                                             
+            LOGGER.debug('Submission contained an empty body')                   
+            raise errors.NoBatchesSubmitted()                                    
+                                                                                 
+        try:                                                                     
+            #areq = NotaryRequest()                                               
+            #areq.ParseFromString(body)   
+            areq_val = cbor.loads(body) #areq.payload)                                        
+                              
+            res = self._vault.notary_approve(areq_val) 
+            LOGGER.debug('{} : Approve Request REQ={} RES={}'.format(akey,areq_val,res))                                                                    
+            self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : body, REQ_STATUS : res[0],REQ_DGT_LINK:res[1]})],[])   # REQ_STATUS_DGT_PENDING         
+                                                                                 
+        except DecodeError:                                                      
+            LOGGER.debug('Submission body could not be decoded: %s', body)       
+            raise errors.BadProtobufSubmitted()                                  
+                                                                                 
+                                                                                 
+                                                                                 
+        return self._wrap_response(                                              
+            request,  
+            data=res,                                                           
+            metadata=None,                                                       
+            status=200)                                                          

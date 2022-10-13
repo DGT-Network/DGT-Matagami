@@ -31,11 +31,21 @@ from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
 from dgt_sdk.protobuf.batch_pb2 import BatchHeader
 from dgt_sdk.protobuf.batch_pb2 import Batch
+from dgt_sdk.protobuf.notary_pb2 import NotaryRequest
+
 from dec_common.protobuf.dec_dgt_token_pb2 import DecTokenInfo
 
 from dec_dgt.client_cli.exceptions import DecClientException
 from dec_dgt.client_cli.dec_attr import *
 from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM
+
+DEC_CMD         = 'Verb' 
+DEC_CMD_ARG     = 'Name'
+DEC_CMD_TO      = 'To'
+DEC_CMD_DIN     = 'Din' 
+DEC_CMD_DIN_EXT = 'DinExt' 
+
+
 
 # settings family
 from dgt_settings.processor.utils import _make_settings_key,SETTINGS_NAMESPACE
@@ -85,8 +95,10 @@ class DecClient:
                     'Unable to load private key: {}'.format(str(e)))
 
             self._signer = CryptoFactory(context).new_signer(private_key)
+            self._context = context
         elif signer:
             self._signer = signer
+            self._context = signer.context
 
     def load_json_proto(self,value):
         if isinstance(value,dict):                        
@@ -150,7 +162,7 @@ class DecClient:
 
         payload = cbor.dumps(did)                            
         psign = nsign.sign(payload)                          
-                                                             
+        # notary sign                                                     
         info[DEC_DID_VAL] = { DEC_DID_VAL   : payload,       
                               DEC_SIGNATURE : psign          
                             } 
@@ -470,18 +482,85 @@ class DecClient:
             target[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price} 
         return target
 
+    def target_info(self,args,signer=None):                                            
+        info = {}                                                               
+        tcurr = time.time()                                                     
+        info[DEC_TARGET_OP] = self.get_target_opts(args)                        
+        #info[DEC_EMITTER] = signer.get_public_key().as_hex()              
+        info[DEC_TMSTAMP] = tcurr                                               
+        if args.did:                                                            
+            # refer to DID owner                                                
+            info[DEC_DID_VAL] = args.did  
+        opts = {
+                 DEC_CMD_OPTS   : info,
+                 DEC_TRANS_OPTS : { DEC_CMD    : DEC_TARGET_OP,
+                                    DEC_CMD_ARG: args.target_id
+                                  }
+                }                                      
+        return opts
 
     def target(self,args,wait=None):                                                                                                          
-        info = {}                                                                                                       
-        tcurr = time.time()                                                                                                                    
-        info[DEC_TARGET_OP] = self.get_target_opts(args)
-        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()   
-        info[DEC_TMSTAMP] = tcurr   
-        if args.did:                         
-            # refer to DID owner             
-            info[DEC_DID_VAL] = args.did                                                                                                                
-        return self._send_transaction(DEC_TARGET_OP, args.target_id, info, to=None, wait=wait,din=None) 
-     
+        info = self.target_info(args) 
+        topts = info[DEC_TRANS_OPTS] 
+        req = self.dec_req_sign(info[DEC_CMD_OPTS])
+        # for notary less mode user sign with his own key                                                                                                     
+        sign_req = self.notary_req_sign(req,self._signer)
+        print('SREQ',sign_req,topts)
+        #return 
+        return self._send_sign_transaction(topts,sign_req,wait=wait) 
+
+    def target_req(self,args): 
+        info = self.target_info(args)                 
+        topts = info[DEC_TRANS_OPTS]                  
+        req = self.dec_req_sign(info[DEC_CMD_OPTS])   
+        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]}
+        
+
+    def dec_req_sign(self,info):  
+        # sign dec request 
+        # info - data relating to dec operation
+        #  
+
+        # this is header of request 
+        req_header = {
+                DEC_EMITTER     : self._signer.get_public_key().as_hex(),
+                DEC_PAYLOAD     : info,
+            
+        }                                                                           
+        payload = cbor.dumps(req_header)                                                                           
+        psignature = self._signer.sign(payload)   
+        # 
+        #  NotaryRequest is body of request with signed header  
+        #  
+        req = {
+                DEC_EMITTER          : req_header[DEC_EMITTER],
+                DEC_NOTARY_REQ_SIGN  : psignature,
+                DEC_PAYLOAD          : payload
+            }
+        #ret = self._signer.verify(psign, payload,self._context.pub_from_hex(info[DEC_EMITTER]) )            
+        #if not ret:                                                                                         
+        #    print('BAD SIGN')                                                                               
+        return req                                                                            
+
+    def notary_req_sign(self,req,nsigner):
+        # this is header of notary signed request
+        notary_hdr = {
+                    DEC_NOTARY_KEY      : nsigner.get_public_key().as_hex(),
+                    DEC_NOTARY_REQ_SIGN : req[DEC_NOTARY_REQ_SIGN] 
+                 }
+        hpayload = cbor.dumps(notary_hdr)
+        hsignature = nsigner.sign(hpayload)
+        # this is user request signed twice - user and notary
+        notary_request_sign = {
+                                DEC_HEADER_PAYLOAD : hpayload, # keep signature for user signed request
+                                DEC_HEADER_SIGN    : hsignature,
+                                DEC_PAYLOAD        : req[DEC_PAYLOAD] # keep user public key 
+                              }
+        return notary_request_sign
+
+    def notary_approve(self,req,wait=None):
+        return self._send_sign_transaction(req[DEC_TRANS_OPTS],req[DEC_CMD_OPTS],wait=wait)
+
     def get_role_opts(self,args):
         role = self.load_json_proto(args.role_proto)   
         if args.limit is not None:                     
@@ -608,12 +687,12 @@ class DecClient:
 
     def _make_transaction(self, verb, name, value, to=None,din=None,din_ext=None):                                                                  
         val = {                                                                                                                                   
-            'Verb': verb,                                                                                                                         
-            'Name': name,                                                                                                                         
-            'Value': value,                                                                                                                       
-        }                                                                                                                                         
-        if to is not None:                                                                                                                        
-            val['To'] = to                                                                                                                        
+            DEC_CMD: verb,                                                                          
+            DEC_CMD_ARG: name,                                                                                                                             
+            'Value': value, # sign twice                                                                                                                            
+        }                                                                                                                                        
+        if to is not None:                                                                                                                       
+            val[DEC_CMD_TO] = to                                                                                                                        
                                                                                                                                                   
         hex_pubkey =  self._signer.get_public_key().as_hex()                                                                                                                                       
         sign_val = {} 
@@ -647,10 +726,10 @@ class DecClient:
                                                                                                                                                   
         #print("in={} out={}".format(inputs,outputs))
         payload = cbor.dumps(val)
-        psign = self._signer.sign(payload)
+        psign = self._signer.sign(payload) # for fool notary mode this is notary node sign 
         sign_val[DEC_SIGNATURE] =  psign
-        sign_val[DEC_PUBKEY] = hex_pubkey
-        sign_val[DATTR_VAL] =  payload                                                                                         
+        sign_val[DEC_PUBKEY]    = hex_pubkey
+        sign_val[DATTR_VAL]     =  payload                                                                                         
         spayload = cbor.dumps(sign_val)  
         
         #print("PSIGN={}".format(psign))                                                                                                               
@@ -698,14 +777,21 @@ class DecClient:
                 wait_time = time.time() - start_time
                 #print("STATUS={}".format(status))
                 if status != 'PENDING':
-                    return status #response
+                    return (status,batch_id) #response
 
-            return status # response
+            return (status,batch_id) # response
 
         return self._send_request(
             "batches", batch_list.SerializeToString(),
             'application/octet-stream',
         )
+
+    def _send_sign_transaction(self, topts, info,wait=None): 
+        to      = topts[DEC_CMD_TO] if DEC_CMD_TO in topts else None
+        din     = topts[DEC_CMD_DIN] if DEC_CMD_DIN in topts else None
+        din_ext = topts[DEC_CMD_DIN_EXT] if DEC_CMD_DIN_EXT in topts else None
+        return self._send_transaction(topts[DEC_CMD], topts[DEC_CMD_ARG], info, to=to, wait=wait,din=din,din_ext=din_ext)
+
 
     def _create_batch_list(self, transactions):
         transaction_signatures = [t.header_signature for t in transactions]
