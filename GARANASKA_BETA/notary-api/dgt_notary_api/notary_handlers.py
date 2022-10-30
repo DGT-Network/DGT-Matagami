@@ -79,12 +79,15 @@ TRANSACTION_FEE = 0.1
 APPROVAL_KEY = "akey"
 APPROVE_MODE = "approve"
 STATUS_MODE = "status"
+DELETE_MODE = "delete"
 REQ_PAYLOAD = 'payload'
 REQ_STATUS =  'req_status'
 REQ_DGT_LINK      =  'dgt_link'
 REQ_STATUS_QUEUE  = 'QUEUE'
+REQ_STATUS_DEL  = 'DROPPED'
 REQ_STATUS_PENDING  = 'PENDING'
 REQ_STATUS_DGT_PENDING  = 'DGT_PENDING'
+DGT_COMMIT = 'COMMITTED'
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
@@ -325,8 +328,10 @@ class NotaryRouteHandler(RouteHandler):
         """                                                                                     
         akey = request.url.query.get(APPROVAL_KEY,None) 
         is_approve = request.url.query.get(APPROVE_MODE,"0") != "0"  
-        is_status = request.url.query.get(STATUS_MODE,"0") != "0"                                          
-        LOGGER.debug('print APPROVAL INFO  for {} approve={} status={}'.format(akey,is_approve,is_status))                                     
+        is_status = request.url.query.get(STATUS_MODE,"0") != "0"
+        is_delete = request.url.query.get(DELETE_MODE,"0") != "0"
+                                                  
+        LOGGER.debug('print APPROVAL INFO  for {} approve={} status={} delete={}'.format(akey,is_approve,is_status,is_delete))                                     
         if akey:   
             aval = self._db.get(akey)
              
@@ -340,18 +345,26 @@ class NotaryRouteHandler(RouteHandler):
                             raise errors.BadRequestStatus()
 
                         data_val = aval[REQ_PAYLOAD].hex() 
-                        LOGGER.debug('approve={}'.format(data_val))                                         # 
+                        LOGGER.debug('approve={}'.format(data_val)) 
+                    elif is_delete :
+                        self._db.update([],[akey])
+                        data_val = {REQ_STATUS: REQ_STATUS_DEL }
                     else:
                         # check status or send info 
-                        nreq = cbor.loads(aval[REQ_PAYLOAD])
-                        nreq = cbor.loads(nreq[DEC_CMD_OPTS][DEC_PAYLOAD])
+                        freq = cbor.loads(aval[REQ_PAYLOAD])
+                        nreq = cbor.loads(freq[DEC_CMD_OPTS][DEC_PAYLOAD])
                         dgt_link = aval[REQ_DGT_LINK] if REQ_DGT_LINK in aval else None
+                        #self._vault.notary_approve_vault(freq,nreq)
+
                         if dgt_link and is_status and aval[REQ_STATUS] == REQ_STATUS_PENDING:
                             # check transaction status 
                             status = self._vault._get_status(dgt_link,1)
                             LOGGER.debug('check transaction url={} status={}'.format(dgt_link,status))
                             if aval[REQ_STATUS] != status:
                                 aval[REQ_STATUS] = status
+                                if status == DGT_COMMIT:
+                                    self._vault.notary_approve_vault(aval[REQ_PAYLOAD])
+
                                 self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : aval[REQ_PAYLOAD], REQ_STATUS : status,REQ_DGT_LINK:dgt_link})],[])
                                 # update info 
                         data_val = {REQ_STATUS: aval[REQ_STATUS],REQ_PAYLOAD: nreq,REQ_DGT_LINK: dgt_link }
@@ -1049,7 +1062,11 @@ class NotaryRouteHandler(RouteHandler):
             areq_val = cbor.loads(body) #areq.payload)                                        
                               
             res = self._vault.notary_approve(areq_val) 
-            LOGGER.debug('{} : Approve Request REQ={} RES={}'.format(akey,areq_val,res))                                                                    
+            LOGGER.debug('{} : Approve Request REQ={} RES={}'.format(akey,areq_val,res))  
+            if res[0] == DGT_COMMIT:
+                # was commited 
+                self._vault.notary_approve_vault(areq_val)
+
             self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : body, REQ_STATUS : res[0],REQ_DGT_LINK:res[1]})],[])   # REQ_STATUS_DGT_PENDING         
                                                                                  
         except DecodeError:                                                      

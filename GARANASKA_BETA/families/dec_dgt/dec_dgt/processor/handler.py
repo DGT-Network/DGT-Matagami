@@ -178,38 +178,49 @@ class DecTransactionHandler(TransactionHandler):
         return updated                                                                                                                  
 
     def _do_wallet(self,name, value, to, state, out):                                                                                     
-        LOGGER.debug('Wallet "{}" to {}'.format(name,value))                                                                                                              
-                                                                                                                                       
-                                                                                                                                       
+        LOGGER.debug('Wallet "{}" value={}'.format(name,value))                                                                                                              
+        #value = {DEC_EMITTER,DEC_PAYLOAD}
+        
+
         if name in state:                                                                                                              
             raise InvalidTransaction('Verb is "{}", but already exists: Name: {}, Value {}'.format(DEC_WALLET_OP,name,state[name])) 
         #if DEC_EMISSION_KEY not in state:                                                              
         #    raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_WALLET_OP)) 
-        if DEC_DID_VAL not in value:
-            # use default did
-            did_val = {DATTR_VAL : DEFAULT_DID,NOTARY_PUBKEY : ""}
+        if False:
+            if DEC_DID_VAL not in value:
+                # use default did
+                did_val = {DATTR_VAL : DEFAULT_DID,NOTARY_PUBKEY : ""}
+            else:
+                did_pay = value[DEC_DID_VAL][DEC_DID_VAL]
+                did_val = cbor.loads(did_pay)
+                psign = value[DEC_DID_VAL][DEC_SIGNATURE]
+                # check notary sign
+                is_correct = self._check_sign(did_val[NOTARY_PUBKEY],psign,did_pay)                                     
+                if not is_correct:                                                                                        
+                    raise InvalidTransaction('Verb is "{}", but signature of DID is wrong.'.format(DEC_WALLET_OP))  
+
+
+
+        if False:
+            # wallet options
+            opts_pay = value[DEC_WALLET_OPTS_OP][DEC_WALLET_OPTS_OP]    
+            opts = cbor.loads(opts_pay)                             
+            psign = value[DEC_WALLET_OPTS_OP][DEC_SIGNATURE]            
+            is_correct = self._check_sign(opts[NOTARY_PUBKEY],psign,opts_pay)                                
+            if not is_correct:                                                                                 
+                raise InvalidTransaction('Verb is "{}", but signature of OPTS is wrong.'.format(DEC_WALLET_OP)) 
+
+
+            tcurr = value[DEC_TMSTAMP] 
         else:
-            did_pay = value[DEC_DID_VAL][DEC_DID_VAL]
-            did_val = cbor.loads(did_pay)
-            psign = value[DEC_DID_VAL][DEC_SIGNATURE]
-            # check notary sign
-            is_correct = self._check_sign(did_val[NOTARY_PUBKEY],psign,did_pay)                                     
-            if not is_correct:                                                                                        
-                raise InvalidTransaction('Verb is "{}", but signature of DID is wrong.'.format(DEC_WALLET_OP))  
+            # 
+            payload = value[DEC_PAYLOAD]
+            opts = payload[DEC_WALLET_OP]
+            tcurr = payload[DEC_TMSTAMP]
+            did_val = payload[DEC_DID_VAL] if DEC_DID_VAL in payload else DEFAULT_DID
+            if payload[DEC_EMITTER] == name:
+                LOGGER.debug('owner WALLET and signer the same')
 
-
-
-            
-        # wallet options
-        opts_pay = value[DEC_WALLET_OPTS_OP][DEC_WALLET_OPTS_OP]    
-        opts = cbor.loads(opts_pay)                             
-        psign = value[DEC_WALLET_OPTS_OP][DEC_SIGNATURE]            
-        is_correct = self._check_sign(opts[NOTARY_PUBKEY],psign,opts_pay)                                
-        if not is_correct:                                                                                 
-            raise InvalidTransaction('Verb is "{}", but signature of OPTS is wrong.'.format(DEC_WALLET_OP)) 
-
-
-        tcurr = value[DEC_TMSTAMP]                                                                                                                              
         updated = {k: v for k, v in state.items() if k in out}                                                                         
         #owner_key = self._context.sign('DEC_token'.encode(),self._private_key)                                                        
         token = DecTokenInfo(group_code = DEC_WALLET,                                                                                  
@@ -474,7 +485,8 @@ class DecTransactionHandler(TransactionHandler):
         LOGGER.debug('Pay "{}" by {} inputs={} state={}'.format(name,value,inputs,[k for k in state.keys()]))                                                                                                   
         to = inputs[0] 
         target = inputs[1] if len(inputs) > 2 else None
-        is_invoice = DEC_PROVEMENT_KEY in value                                                                                                                                      
+        pinfo = value[DEC_PAYLOAD][DEC_PAY_OP]
+        is_invoice = DEC_PROVEMENT_KEY in pinfo                                                                                                                                      
         if name not in state or to not in state:                                                                                                             
             raise InvalidTransaction('Verb is "{}" but name "{}" or "{}" not in state'.format(DEC_PAY_OP,name,to))                                          
         if DEC_EMISSION_KEY not in state:                                                                                                                    
@@ -497,8 +509,8 @@ class DecTransactionHandler(TransactionHandler):
         #sale_share = dec[DEC_SALE_SHARE][DATTR_VAL]                                                                                                         
         #max_sale = total_sum/100*sale_share                                                                                                                 
         #total_sale = dec[DEC_SALE_TOTAL]                                                                                                                    
-        amount = value[DATTR_VAL]
-        tcurr = value[DEC_TMSTAMP]                                                                                                                            
+        amount = pinfo[DATTR_VAL]
+        tcurr = value[DEC_PAYLOAD][DEC_TMSTAMP]                                                                                                                            
         # destination token                                                                                                                                  
         dtoken = DecTokenInfo()                                                                                                                              
         dtoken.ParseFromString(state[to]) 
@@ -517,8 +529,8 @@ class DecTransactionHandler(TransactionHandler):
             if DEC_INVOICE_OP not in t_val:
                 raise InvalidTransaction('Verb is "{}", but target={} with out invoice'.format(DEC_PAY_OP,target))
             invoice = t_val[DEC_INVOICE_OP]
-            if is_invoice  and DEC_PROVEMENT_KEY in invoice and value[DEC_PROVEMENT_KEY] != invoice[DEC_PROVEMENT_KEY]:
-                raise InvalidTransaction('Verb is "{}", but invoice={} mismatch'.format(DEC_PAY_OP,value[DEC_PROVEMENT_KEY]))
+            if is_invoice  and DEC_PROVEMENT_KEY in invoice and pinfo[DEC_PROVEMENT_KEY] != invoice[DEC_PROVEMENT_KEY]:
+                raise InvalidTransaction('Verb is "{}", but invoice={} mismatch'.format(DEC_PAY_OP,pinfo[DEC_PROVEMENT_KEY]))
             if DEC_CUSTOMER_KEY not in invoice or (invoice[DEC_CUSTOMER_KEY] is not None and name != invoice[DEC_CUSTOMER_KEY]):
                 raise InvalidTransaction('Verb is "{}", but customer mismatch with invoice'.format(DEC_PAY_OP))
 
@@ -989,7 +1001,8 @@ class DecTransactionHandler(TransactionHandler):
                 hpayload = value[DEC_HEADER_PAYLOAD]                                                                
                 hsignature = value[DEC_HEADER_SIGN]
                                                                                  
-                hdr = cbor.loads(hpayload)                                                                            
+                hdr = cbor.loads(hpayload)   
+                # NOTARY KEY                                                                          
                 public_key = self._context.pub_from_hex(hdr[DEC_NOTARY_KEY])                                          
                 ret = self._signer.verify(hsignature, hpayload,public_key ) 
                 if not ret:
@@ -999,6 +1012,7 @@ class DecTransactionHandler(TransactionHandler):
                 rsignature = hdr[DEC_NOTARY_REQ_SIGN]                      
                 rpayload = value[DEC_PAYLOAD]
                 val = cbor.loads(rpayload)
+                # OWNER KEY
                 public_key = self._context.pub_from_hex(val[DEC_EMITTER])
                 ret = self._signer.verify(rsignature, rpayload,public_key ) 
                 if not ret:   

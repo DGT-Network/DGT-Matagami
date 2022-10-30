@@ -39,12 +39,6 @@ from dec_dgt.client_cli.exceptions import DecClientException
 from dec_dgt.client_cli.dec_attr import *
 from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM
 
-DEC_CMD         = 'Verb' 
-DEC_CMD_ARG     = 'Name'
-DEC_CMD_TO      = 'To'
-DEC_CMD_DIN     = 'Din' 
-DEC_CMD_DIN_EXT = 'DinExt' 
-
 
 
 # settings family
@@ -148,7 +142,7 @@ class DecClient:
         #print('PROTO',info)
         self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
-    def wallet(self,args,wait=None,nsign=None):  
+    def wallet_(self,args,wait=None,nsign=None):  
         # nsign - notary key for sign did info 
         # in case nsign is None we use owner wallet key 
         #print("DEC.wallet...")
@@ -173,6 +167,43 @@ class DecClient:
         info[DEC_TMSTAMP] = time.time() 
         #print("DEC.wallet {}".format(info))                                        
         return self._send_transaction(DEC_WALLET_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY 
+
+    def wallet(self,args,wait=None):                                   
+        info = self.wallet_info(args)                                  
+        topts = info[DEC_TRANS_OPTS] 
+        opts = info[DEC_CMD_OPTS]                                  
+        req = self.dec_req_sign(opts)                    
+        # for notary less mode user sign with his own key              
+        sign_req = self.notary_req_sign(req,self._signer)              
+        print('WALLET OPTS={} TOPTS={} REQ={}'.format(opts,topts,sign_req))                                   
+        #return                                                        
+        return self._send_sign_transaction(topts,sign_req,wait=wait)   
+
+
+
+    def wallet_info(self,args,signer=None):                                          
+        info = {}                                                                    
+        tcurr = time.time()                                                          
+        info[DEC_WALLET_OP] = self.get_only_wallet_opts(args)                             
+        #info[DEC_EMITTER] = signer.get_public_key().as_hex()                        
+        info[DEC_TMSTAMP] = tcurr                                                    
+        if args.did:                                                                 
+            # refer to DID owner                                                     
+            info[DEC_DID_VAL] = args.did                                             
+        opts = {                                                                     
+                 DEC_CMD_OPTS   : info,                                              
+                 DEC_TRANS_OPTS : { DEC_CMD    : DEC_WALLET_OP,                      
+                                    DEC_CMD_ARG: self._signer.get_public_key().as_hex()                      
+                                  }                                                  
+                }                                                                    
+        return opts                                                                  
+
+    def wallet_req(self,args):                                             
+        info = self.wallet_info(args)                                      
+        topts = info[DEC_TRANS_OPTS]                                       
+        req = self.dec_req_sign(info[DEC_CMD_OPTS])                        
+        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]}  
+
 
     def upd_wallet_opts(self,opts,args): 
         if not (args.spend_period or args.limit or args.status or args.role):             
@@ -429,7 +460,16 @@ class DecClient:
         info[DEC_TMSTAMP] = time.time()
         return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait,din=din)  
 
-    def pay(self,args,wait=None,control=False):      
+    def pay(self,args,wait=None,control=False):
+        info = self.pay_info(args)                                  
+        topts = info[DEC_TRANS_OPTS]                                   
+        req = self.dec_req_sign(info[DEC_CMD_OPTS])                    
+        # for notary less mode user sign with his own key              
+        sign_req = self.notary_req_sign(req,self._signer)              
+        print('PREQ',sign_req,topts)                                   
+        #return    
+        return self._send_sign_transaction(topts,sign_req,wait= 10 if wait is None and control else wait)   
+        
         info = {DATTR_VAL : args.amount}                                                                         
         if args.asset_type:                                                                                      
             info[DEC_ASSET_TYPE] = args.asset_type                                                               
@@ -457,7 +497,57 @@ class DecClient:
             wait = 10
         resp =  self._send_transaction(DEC_PAY_OP, args.name, info, to=to, wait=wait,din=din) 
         return resp
-         
+
+    def pay_info(self,args):
+        pay_opts = {}
+        pay_opts = {DATTR_VAL : args.amount}                                   
+        if args.asset_type:                                                
+            pay_opts[DEC_ASSET_TYPE] = args.asset_type                         
+        #if args.did:                                                       
+        #    pay_opts[DEC_DID_VAL] = args.did                                   
+                                                                           
+        to = [args.to]                                                     
+        din = [DEC_EMISSION_KEY]                                           
+        if args.target :                                                   
+            # target with invoice 
+            pay_opts[DEC_TARGET_INFO] = args.target                                          
+            to.append(args.target)                                         
+                                                                           
+        if args.provement_key:                                             
+            # invoice ID for controle                                      
+            pay_opts[DEC_PROVEMENT_KEY] = args.provement_key                   
+        if args.role:                                                      
+            pay_opts[DEC_WALLET_ROLE] = args.role                              
+            din.append(args.role)                                          
+                                                                           
+        info = {
+                 DEC_PAY_OP  : pay_opts,
+                 DEC_TMSTAMP : time.time()
+               }                                                                   
+        if args.did:                                                                
+            # refer to DID owner                                                    
+            info[DEC_DID_VAL] = args.did 
+                                                       
+        opts = {                                                                    
+                 DEC_CMD_OPTS   : info,                                             
+                 DEC_TRANS_OPTS : { DEC_CMD    : DEC_PAY_OP,                     
+                                    DEC_CMD_ARG: args.name ,
+                                    DEC_CMD_TO : to,
+                                    DEC_CMD_DIN: din                    
+                                  }                                                 
+                }                                                                   
+        return opts                                                                                                   
+
+
+
+
+
+    def pay_req(self,args): 
+        # make pay request                                            
+        info = self.pay_info(args)                                     
+        topts = info[DEC_TRANS_OPTS]                                      
+        req = self.dec_req_sign(info[DEC_CMD_OPTS])                       
+        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]} 
     
      
     def invoice(self,args,wait=None):   
@@ -482,7 +572,8 @@ class DecClient:
             target[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price} 
         return target
 
-    def target_info(self,args,signer=None):                                            
+    def target_info(self,args,signer=None):
+        # full info for target                                             
         info = {}                                                               
         tcurr = time.time()                                                     
         info[DEC_TARGET_OP] = self.get_target_opts(args)                        
@@ -517,11 +608,11 @@ class DecClient:
         
 
     def dec_req_sign(self,info):  
-        # sign dec request 
+        # sign dec request by owner 
         # info - data relating to dec operation
         #  
 
-        # this is header of request 
+        # this is header of request with owner sign
         req_header = {
                 DEC_EMITTER     : self._signer.get_public_key().as_hex(),
                 DEC_PAYLOAD     : info,

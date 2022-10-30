@@ -51,7 +51,8 @@ except Exception as ex:
 from dec_dgt.client_cli.dec_client import DecClient
 from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,
                                          DEC_WALLET_STATUS,DEC_DID_VAL,DEC_APPROVALS,DEC_APPROVAL,DEC_NOTARY_REQ,DEC_NOTARY_KEY,DEC_NOTARY_REQ_SIGN,
-                                         DEC_HEADER_PAYLOAD,DEC_PAYLOAD,DEC_HEADER_SIGN,DEC_CMD_OPTS,DEC_TRANS_OPTS,DEC_EMITTER   
+                                         DEC_HEADER_PAYLOAD,DEC_PAYLOAD,DEC_HEADER_SIGN,DEC_CMD_OPTS,DEC_TRANS_OPTS,DEC_EMITTER,
+                                         DEC_CMD,DEC_CMD_ARG,  DEC_CMD_TO ,DEC_TARGET_INFO, DEC_PAY_OP
                                          )
 
 LOGGER = logging.getLogger(__name__)
@@ -135,6 +136,26 @@ class NotaryClient(XcertClient):
             return False
         return True                                                                    
 
+    def wallet_vault_done(self,opts):
+        did = opts[DEC_PAYLOAD][DEC_DID_VAL]
+        uid = self.did2uid(did)
+        secret = self._vault.get_secret(uid)
+        wlist = secret[DID_WALLETS] if DID_WALLETS in secret else {} 
+        owner = opts[DEC_EMITTER]  
+        wopts = opts[DEC_PAYLOAD][DEC_WALLET_OP]
+        wlist[owner] = wopts                                                          
+        secret[DID_WALLETS] = wlist                                                   
+        #                                                                             
+        # create secret with wallet options
+        #                                            
+        if self.crt_obj_secret(owner,wopts,did):                                 
+            print('Cant create Wallet for DID={}'.format(did))                   
+            return 
+        if not self._vault.create_or_update_secret(uid,secret=secret):    
+            print('Cant update secret={}'.format(uid))                    
+            return                                                        
+        
+                                                                           
 
     def wallet(self,args,wait=None):
         # use notary key for sign did arguments
@@ -163,6 +184,15 @@ class NotaryClient(XcertClient):
                         return                                     
                 else:
                     wlist = {}
+
+                if args.notary > 0:                                             
+                    # send notary request                                       
+                    if args.notary_url is None:                                 
+                        print("Set notary rest api url")                        
+                        return None                                             
+                    nreq = self._cdec.wallet_req(args)                          
+                    return self.send_notary_req(nreq,args)                      
+
 
                 resp = self._cdec.wallet(args,wait=WAIT_DEF,nsign=self._signer)
                 if resp in ['PENDING','INVALID']  :               
@@ -325,6 +355,26 @@ class NotaryClient(XcertClient):
         secret = data['data'] 
         return secret,uid                                           
 
+    def target_vault_done(self,opts,topts):                                     
+        did = opts[DEC_PAYLOAD][DEC_DID_VAL]                              
+        uid = self.did2uid(did)                                           
+        secret = self._vault.get_secret(uid) 
+        target_id = topts[DEC_CMD_ARG] 
+        target = opts[DEC_PAYLOAD][DEC_TARGET_OP]                            
+        glist = secret[DID_GOODS] if DID_GOODS in secret else {}      
+        owner = opts[DEC_EMITTER]                                         
+        #                                                                 
+        # create secret with target options                               
+        #                                                                 
+        if not self.crt_obj_secret(target_id,target,did):             
+            print('Cant create target={}'.format(target_id))               
+            return                                                              
+        # add new target into secret target list                                                                        
+        glist[target_id] = target                                          
+        secret[DID_GOODS] = glist                                               
+        if not self._vault.create_or_update_secret(uid,secret=secret):          
+            print('Cant update secret={}'.format(did))                                                                           
+            return                                                              
 
 
 
@@ -395,6 +445,39 @@ class NotaryClient(XcertClient):
             print('Cant get walllet {} err {}'.format(key,ex))                 
             return                                                                   
 
+    def pay_vault_done(self,opts,topts):
+        # get buyer uid
+        fdid = opts[DEC_DID_VAL] if DEC_DID_VAL in opts else self.get_did_via_wallet(topts[DEC_CMD_ARG])
+        fuid = self.did2uid(fdid)
+        tdid = self.get_did_via_wallet(topts[DEC_CMD_TO][0])
+        pinfo = cbor.loads(opts[DEC_PAYLOAD])
+        is_diff = fdid != tdid
+        print('pay_vault_done DIFF={} DID={}->{} {}'.format(is_diff,fdid,tdid,pinfo)) 
+        if DEC_TARGET_INFO in pinfo[DEC_PAYLOAD][DEC_PAY_OP]:
+            tname = pinfo[DEC_PAYLOAD][DEC_PAY_OP][DEC_TARGET_INFO]
+            fsecret,fuid = self.get_did_info(fdid)
+            tsecret,tuid = self.get_did_info(tdid)
+            
+            #return
+            target = tsecret[DID_GOODS].pop(tname)    # take from old owner                                        
+            fsecret[DID_GOODS][tname] = target   
+            print('pay_vault_done TARGET={} list={}'.format(tname,fsecret[DID_GOODS]))  
+            # return                                           
+            if not self._vault.create_or_update_secret(fuid,secret=tsecret):                       
+                print('Cant update Owner secret={}'.format(tdid))                                  
+                return                                                                             
+            if not self._vault.create_or_update_secret(tuid,secret=fsecret):                       
+                print('Cant update Customer secret={}'.format(fdid))                               
+                tsecret[DID_GOODS][tname] = target                                           
+                if not self._vault.create_or_update_secret(fuid,secret=tsecret):                   
+                    print('Cant restore Owner secret={}'.format(tdid))                             
+                return    
+            # save target and update its DID  -                                                                        
+            if not self.crt_obj_secret(tname,target,fdid):                                
+                print('Cant update target={} did={}'.format(tname,fdid))                  
+                return                                                                             
+
+
 
     def pay(self,args,wait=None):
         if args.did is None:
@@ -421,11 +504,23 @@ class NotaryClient(XcertClient):
                 return
 
             print("from: {} to {}".format(tsecret[DID_GOODS],fsecret[DID_GOODS]))
+            if args.notary > 0:                                  
+                # send notary request                            
+                if args.notary_url is None:                      
+                    print("Set notary rest api url")             
+                    return None                                  
+
+                nreq = self._cdec.pay_req(args)
+                print("NOTARY REQ = {}".format(nreq))
+                self.pay_vault_done(nreq[DEC_CMD_OPTS],nreq[DEC_TRANS_OPTS])                                    
+                return                                                              
+                return self.send_notary_req(nreq,args)           
+
             # do transaction pay and update goods list in case of success
-            resp = self._cdec.pay(args,control=True)
-            #print("resp = {}".format(resp))
+            resp,_ = self._cdec.pay(args,control=True)
+            #print("PAY resp = {}".format(resp))
             if resp in ['PENDING','INVALID']  :
-                print("PAY status = {}".format(resp))
+                print("PAY status = {} ".format(resp))
                 return
 
             # in case success 
@@ -441,8 +536,8 @@ class NotaryClient(XcertClient):
                     if not self._vault.create_or_update_secret(fuid,secret=tsecret):      
                         print('Cant restore Owner secret={}'.format(tdid))                 
                     return 
-                if not self.crt_obj_secret(args.target_id,target,fdid): 
-                    print('Cant update target={} did={}'.format(args.target_id,fdid)) 
+                if not self.crt_obj_secret(args.target,target,fdid): 
+                    print('Cant update target={} did={}'.format(args.target,fdid)) 
                     return
 
 
@@ -621,7 +716,7 @@ class NotaryClient(XcertClient):
         #if args.approve == 0 :
         # just show off request
         # content_type = None if args.approve == 0 else 'application/octet-stream'
-        result = self._send_request("{}?akey={}&approve={}&status={}".format(DEC_APPROVAL,args.name,args.approve,args.status), rest_url=args.notary_url)                                      
+        result = self._send_request("{}?akey={}&approve={}&status={}&delete={}".format(DEC_APPROVAL,args.name,args.approve,args.status,args.delete), rest_url=args.notary_url)                                      
         #print("approvals",result)                                                                                
         try:                                                                                                     
             entry = yaml.safe_load(result)["data"]                                                     
@@ -668,10 +763,27 @@ class NotaryClient(XcertClient):
           
                                                                                                                                                  
     def notary_approve(self,req):
+        # approve operation and fix result into notary VAULT DB
         LOGGER.debug("NOTARY_APPROVE: REQ={}".format(req))
         return self._cdec.notary_approve(req,3)
     
-                                                             
+    def notary_approve_vault(self,req,opts):
+        LOGGER.debug("NOTARY_APPROVE_VAULT: REQ={}".format(req))
+        if DEC_CMD_OPTS in req and DEC_TRANS_OPTS in req:
+            # continue with approve
+            topts = req[DEC_TRANS_OPTS] 
+            LOGGER.debug("NOTARY_APPROVE_VAULT: CMD={} OPTS={}".format(topts,opts))
+            verb = topts[DEC_CMD]
+            if verb == DEC_WALLET_OP:
+                # fix new wallet
+                self.wallet_vault_done(opts)
+            elif verb == DEC_TARGET_OP:
+                self.target_vault_done(opts,topts)
+            elif verb == DEC_PAY_OP:
+                self.pay_vault_done(opts,topts)
+            else:
+                pass
+
     """
     def upd_meta_xcert(self,info,key,init=False):                                                                                             
         # meta cert for keykeeper and raft node                                                                                               

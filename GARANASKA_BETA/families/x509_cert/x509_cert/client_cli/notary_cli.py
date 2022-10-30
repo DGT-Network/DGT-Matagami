@@ -332,7 +332,7 @@ def add_wallet_parser(subparsers, parent_parser):
     parser.add_argument(
         'pkey',
         type=str,
-        help='specify wallet owner private key file')
+        help='Specify wallet owner private key file')
     
                                                                                                                                                 
     parser.add_argument(                                                                                                                        
@@ -388,7 +388,21 @@ def add_wallet_parser(subparsers, parent_parser):
         '--keyfile',                                                                                                                            
         type=str,                                                                                                                               
         default="/project/peer/keys/notary.priv",                                                                                            
-        help="Identify file containing notary's private key (by default - current notary key)")                                                        
+        help="Identify file containing notary's private key (by default - current notary key)")   
+
+    parser.add_argument(                                
+        '--notary',                                     
+        action='count',                                 
+        default=0,                                      
+        help='Use Notary for control operation')        
+                                                        
+    parser.add_argument(                                
+        '--notary_url',                                 
+        type=str,                                       
+        help='Specify URL of NOTARY REST API',          
+        default='http://telebot-dgt:8203'               
+        )                                               
+    
     parser.add_argument(                                      
         '-cb', '--crypto_back',                              
         type=str,                                            
@@ -757,7 +771,21 @@ def add_pay_parser(subparsers, parent_parser):
         '--keyfile',                                                                                                                          
         type=str,
         default="/project/peer/keys/notary.priv",                                                                                                                             
-        help="identify file containing user's private key")                                                                                   
+        help="identify file containing user's private key")
+    
+    parser.add_argument(                              
+        '--notary',                                   
+        action='count',                               
+        default=0,                                    
+        help='Use Notary for control operation')      
+                                                      
+    parser.add_argument(                              
+        '--notary_url',                               
+        type=str,                                     
+        help='Specify URL of NOTARY REST API',        
+        default='http://telebot-dgt:8203'             
+        )                                             
+                                                                                      
     parser.add_argument(                                                                                                                      
         '-cb', '--crypto_back',                                                                                                               
         type=str,                                                                                                                             
@@ -1001,7 +1029,14 @@ def add_approval_parser(subparsers, parent_parser):
         '--status',                                
         action='count',                             
         default=0,                                  
-        help='Check request status with name')           
+        help='Check request status with name')
+    parser.add_argument(                       
+        '-del','--delete',                            
+        action='count',                        
+        default=0,                             
+        help='Delete notary approve request') 
+    
+               
 
     parser.add_argument(                                        
         '--url',                                                

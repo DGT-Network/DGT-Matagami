@@ -104,6 +104,14 @@ DEC_PAYLOAD        = "payload"
 DEC_HEADER_SIGN    = "header_sign"
 DEC_CMD_OPTS       = "opts"
 DEC_TRANS_OPTS     = "topts"
+DEC_CMD            = 'Verb'   
+DEC_CMD_ARG        = 'Name'   
+DEC_CMD_TO         = 'To'     
+DEC_CMD_DIN        = 'Din'    
+DEC_CMD_DIN_EXT    = 'DinExt' 
+
+
+
 #DEC_WALLET_DID       = "wallet_did"
 # wallet properties
 DEC_WALLET_LIMIT  = "limit"

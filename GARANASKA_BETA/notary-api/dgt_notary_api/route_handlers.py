@@ -56,6 +56,8 @@ from dgt_bgt.client_cli.bgt_client import _token_info as bgt_token_info
 
 DEFAULT_TIMEOUT = 300
 LOGGER = logging.getLogger(__name__)
+
+
 MALICIOUS_LIST = {'ok' : ClientPeersGetRequest.OK,'ma' : ClientPeersGetRequest.MALICIOUS,'ma1' : ClientPeersGetRequest.MALICIOUS1,'ma2' : ClientPeersGetRequest.MALICIOUS2 }
 
 TX_FAMILIES = {
