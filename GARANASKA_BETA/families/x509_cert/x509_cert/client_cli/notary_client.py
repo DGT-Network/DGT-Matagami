@@ -34,7 +34,9 @@ from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
 from dgt_sdk.protobuf.batch_pb2 import BatchHeader
 from dgt_sdk.protobuf.batch_pb2 import Batch
+"""
 from dgt_sdk.protobuf.notary_pb2 import NotaryRequest
+"""
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 
 from x509_cert.client_cli.exceptions import XcertClientException,XcertClientKeyfileException
@@ -678,7 +680,7 @@ class NotaryClient(XcertClient):
         if COUNTRY_ATTR in info and info[COUNTRY_ATTR]:                                             
             proto["COUNTRY_NAME"] = info[COUNTRY_ATTR]                       
         return proto                                                         
-    
+    """
     def notary_sign(self,req):                                                                    
         notary_hdr = {                                                                                
                     DEC_NOTARY_KEY : self._signer.get_public_key().as_hex(),                               
@@ -695,7 +697,7 @@ class NotaryClient(XcertClient):
             )                                                                                         
         return sreq                                                                                   
 
-
+    """
     def approvals(self,args): 
 
         result = self._send_request(DEC_APPROVALS,rest_url=args.notary_url)                   

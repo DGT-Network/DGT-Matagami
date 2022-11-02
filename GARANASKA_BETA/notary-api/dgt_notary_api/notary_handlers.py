@@ -50,8 +50,9 @@ from dgt_sdk.protobuf import client_status_pb2
 from dgt_sdk.protobuf.block_pb2 import BlockHeader
 from dgt_sdk.protobuf.batch_pb2 import Batch,BatchHeader,BatchList
 from dgt_sdk.protobuf.transaction_pb2 import Transaction,TransactionHeader
+"""
 from dgt_sdk.protobuf.notary_pb2 import NotaryRequest
-
+"""
 from dgt_notary_api.route_handlers import RouteHandler,DEFAULT_TIMEOUT
 import cbor
 

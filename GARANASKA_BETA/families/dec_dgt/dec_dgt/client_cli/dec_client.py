@@ -31,8 +31,9 @@ from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
 from dgt_sdk.protobuf.batch_pb2 import BatchHeader
 from dgt_sdk.protobuf.batch_pb2 import Batch
+"""
 from dgt_sdk.protobuf.notary_pb2 import NotaryRequest
-
+"""
 from dec_common.protobuf.dec_dgt_token_pb2 import DecTokenInfo
 
 from dec_dgt.client_cli.exceptions import DecClientException
