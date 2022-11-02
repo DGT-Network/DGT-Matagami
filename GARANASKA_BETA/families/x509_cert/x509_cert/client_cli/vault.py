@@ -283,6 +283,11 @@ class Vault(object):
         except Exception as ex:
             LOGGER.info(f"READ SECRET err={ex}")
             raise VaultNotReady
+
+    def get_secret(self,key):
+        data = self.get_xcert(key)
+        return data['data'] if data else None
+
     """
     def create_xcert(self,args,proto,uid='456125525'):
         LOGGER.info(f"CREATE XCERT[{uid}]={args}")

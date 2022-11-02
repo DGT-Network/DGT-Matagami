@@ -140,6 +140,7 @@ class XcertClient:
         else:
             self._private_key = None
             self._public_key = None
+        
 
     def get_signer(self,keyfile):
         try:                                                                                          
@@ -270,22 +271,24 @@ class XcertClient:
         game_address = _sha512(name.encode('utf-8'))[64:]
         return prefix + game_address
 
-    def _send_request(self, suffix, data=None, content_type=None, name=None):
-        if self.url.startswith("http://"):
-            url = "{}/{}".format(self.url, suffix)
+    def _send_request(self, suffix, data=None, content_type=None, name=None,rest_url=None):
+        rest_url = rest_url if rest_url else self.url
+        if rest_url.startswith("http://"):
+            url = "{}/{}".format(rest_url, suffix)
         else:
-            url = "http://{}/{}".format(self.url, suffix)
+            url = "http://{}/{}".format(rest_url, suffix)
 
         headers = {}
 
         if content_type is not None:
             headers['Content-Type'] = content_type
-
+        #print('_send_request',url)
         try:
             if data is not None:
                 result = requests.post(url, headers=headers, data=data)
             else:
                 result = requests.get(url, headers=headers)
+                
 
             if result.status_code == 404:
                 raise XcertClientException("No such key: {}".format(name))
