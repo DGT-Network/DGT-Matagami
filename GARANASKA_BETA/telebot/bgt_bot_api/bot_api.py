@@ -173,6 +173,7 @@ def start_bot_api(host, port, connection, vtimeout, registry,connects=None,clien
     """
     bot_token = conf.bot_token if conf and conf.bot_token else TOKEN
     #tele_db = LMDBNoLockDatabase(TELE_DB_FILENAME, 'c')
+
     tele_db = IndexedDatabase(
             TELE_DB_FILENAME,
             serialize_data,
