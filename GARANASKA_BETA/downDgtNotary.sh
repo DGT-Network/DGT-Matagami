@@ -5,6 +5,7 @@
 mode="down" #"up -d"
 export PNM="dgt"
 export CRYPTO_BACK="bitcoin"
+export LADDR=""
 while [ -n "$1" ]
 do
 case "$1" in
@@ -24,7 +25,7 @@ function downNotary {
     echo "STOP $node"
     case $node in
         1)
-          export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1   N=1 V=1 COMP=4104 VPORT=8200;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 NAPI=8103 COMP=4104 VPORT=8220 CPORT=8221 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         2)                                                        
           export COMPOSE_PROJECT_NAME=2 G=$GENESIS C=c1   N=1 V=2 COMP=4204 VPORT=8300;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
