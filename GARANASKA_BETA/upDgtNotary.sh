@@ -47,7 +47,7 @@ function upNotary {
     echo "START $node"
     case $node in
         1)
-          export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 NAPI=8103 COMP=4104 VPORT=8220 CPORT=8221 SADDR=$SEAL_ADDR ONBOT=$BON ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 NAPI=8103 COMP=4104 VPORT=8220 CPORT=8221 SADDR=$SEAL_ADDR ONBOT=$BON ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode vault
         ;;                                                        
         2)                                                        
           export COMPOSE_PROJECT_NAME=2 LA=$LADDR C=c1   N=1 V=2 NAPI=8203 COMP=4104 VPORT=8320 CPORT=8321 SADDR=$SEAL_ADDR ONBOT=$BON;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $rmode
@@ -113,5 +113,4 @@ case $cluster in
           echo "Enter notary number or all."
           ;;
 esac
-
 
