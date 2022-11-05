@@ -218,7 +218,7 @@ class DecTransactionHandler(TransactionHandler):
             opts = payload[DEC_WALLET_OP]
             tcurr = payload[DEC_TMSTAMP]
             did_val = payload[DEC_DID_VAL] if DEC_DID_VAL in payload else DEFAULT_DID
-            if payload[DEC_EMITTER] == name:
+            if value[DEC_EMITTER] == name:
                 LOGGER.debug('owner WALLET and signer the same')
 
         updated = {k: v for k, v in state.items() if k in out}                                                                         
