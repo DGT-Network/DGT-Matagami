@@ -28,13 +28,13 @@ function downNotary {
           export COMPOSE_PROJECT_NAME=1 LA=$LADDR C=c1   N=1 V=1 NAPI=8103 COMP=4104 VPORT=8220 CPORT=8221 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         2)                                                        
-          export COMPOSE_PROJECT_NAME=2 G=$GENESIS C=c1   N=1 V=2 COMP=4204 VPORT=8300;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=2 LA=$LADDR C=c1   N=1 V=2 NAPI=8203 COMP=4104 VPORT=8320 CPORT=8321 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         3)                                                        
-          export COMPOSE_PROJECT_NAME=3 G=$GENESIS C=c1   N=1 V=3 COMP=4304 VPORT=8400;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=3 LA=$LADDR C=c1   N=1 V=3 NAPI=8303 COMP=4104 VPORT=8420 CPORT=8421 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;                                                        
         4)                                                        
-          export COMPOSE_PROJECT_NAME=4 G=$GENESIS C=c1   N=1 V=4 COMP=4404 VPORT=8500;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
+          export COMPOSE_PROJECT_NAME=4 LA=$LADDR C=c1   N=1 V=4 NAPI=8403 COMP=4104 VPORT=8520 CPORT=8521 ;docker-compose -f docker/docker-compose-notary-raft-dgt.yaml $mode
         ;;
         *)
           echo "Undefined notary."
