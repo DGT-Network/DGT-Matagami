@@ -196,7 +196,7 @@ class NotaryClient(XcertClient):
                     return self.send_notary_req(nreq,args)                      
 
 
-                resp = self._cdec.wallet(args,wait=WAIT_DEF,nsign=self._signer)
+                resp,_ = self._cdec.wallet(args,wait=WAIT_DEF)
                 if resp in ['PENDING','INVALID']  :               
                     print("WALLET status = {}".format(resp))        
                     return                                        
