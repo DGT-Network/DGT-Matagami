@@ -411,7 +411,7 @@ class NotaryClient(XcertClient):
                 return self.send_notary_req(nreq,args)
 
 
-            resp = self._cdec.target(args,wait=WAIT_DEF)  
+            resp,_ = self._cdec.target(args,wait=WAIT_DEF)  
             if resp in ['PENDING','INVALID']  :                         
                 print("TARGET status error = {}".format(resp))                  
                 return                                                 
