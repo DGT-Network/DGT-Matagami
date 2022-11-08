@@ -170,7 +170,7 @@ class NotaryClient(XcertClient):
                 return
             owner = self._cdec.signer_as_hex
             secret = data['data']
-            print('Certificate for {} VAL={} owner={}'.format(args.did,secret,owner))
+            #print('Certificate for {} VAL={} owner={}'.format(args.did,secret,owner))
             # add new wallet into xcert list 
             if args.cmd == DEC_WALLET_OP:
                 # create wallet and add them into DID wallets list
@@ -198,7 +198,7 @@ class NotaryClient(XcertClient):
 
                 resp,_ = self._cdec.wallet(args,wait=WAIT_DEF)
                 if resp in ['PENDING','INVALID']  :               
-                    print("WALLET status = {}".format(resp))        
+                    print("WALLET status = {} cancel operation".format(resp))        
                     return                                        
 
                 wopts = self._cdec.get_only_wallet_opts(args)
@@ -206,8 +206,8 @@ class NotaryClient(XcertClient):
                 secret[DID_WALLETS] = wlist
                 #
                 # create secret with wallet options 
-                if self.crt_obj_secret(owner,wopts,args.did):
-                    print('Cant create Wallet for DID={}'.format(args.did))
+                if not self.crt_obj_secret(owner,wopts,args.did):
+                    print('Cant create/update Wallet info into VAULT for DID={}'.format(args.did))
                     return
                 #print('Certificate with wallet={}'.format(secret))
                 
@@ -277,15 +277,15 @@ class NotaryClient(XcertClient):
                 rlist = secret[DID_ROLES]  
                 if args.role_id in rlist:
                     print('Role {} already in list for {}.'.format(args.role_id,args.did))
-                    #return  
+                    return  
                 # add new role                                                                  
             else:                                                                             
                 # new role list
                 rlist = {}                            
             # add new role
-            resp = self._cdec.role(args,wait=WAIT_DEF)
+            resp,_ = self._cdec.role(args,wait=WAIT_DEF)
             if resp in ['PENDING','INVALID']  :             
-                print("ROLE status = {}".format(resp))       
+                print("ROLE transaction status = {} - cancel".format(resp))       
                 return                                      
             role = self._cdec.get_role_opts(args)
             rlist[args.role_id] = role 

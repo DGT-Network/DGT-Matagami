@@ -111,7 +111,7 @@ class DecTransactionHandler(TransactionHandler):
         except KeyError:
             # This would be a programming error.
             tb = traceback.format_exc()
-            raise InternalError('Unhandled verb: {} TB={}'.format(verb,tb))
+            raise InvalidTransaction('Unhandled verb: {} TB={}'.format(verb,tb))
         #except InvalidTransaction:   
         #    raise InvalidTransaction 
 
