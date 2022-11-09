@@ -80,8 +80,16 @@ class NotaryClient(XcertClient):
         if Vault:
             if vault_url is None:
                 # client mode 
-                ninfo = self.get_notary_info(NOTARY_LEADER_ID)
-                #print(f'notary info={ninfo}')
+                # wait until info about leader will be commit into DGT 
+                ninfo = None
+                attempt = 100 
+                while ninfo is None and attempt > 0:
+                    attempt -= 1
+                    ninfo = self.get_notary_info(NOTARY_LEADER_ID)
+                    if ninfo is None:
+                        LOGGER.debug("NOTARY CLIENT try to get LEADER info: {}".format(attempt))
+                        time.sleep(1)
+                        #print(f'notary info={ninfo}')
                 if NOTARY_TOKEN in ninfo and NOTARY_URL in ninfo:
                     self._vault = Vault(ninfo[NOTARY_URL],token=ninfo[NOTARY_TOKEN])
                 else:
