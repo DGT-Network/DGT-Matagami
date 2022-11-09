@@ -116,7 +116,10 @@ class NotaryClient(XcertClient):
         return key in NOTARY_TYPES
 
     def get_notary_info(self,key):
-        value = self.show(key)    
+        value = self.show(key) 
+        if value is None:
+            return
+
         token = X509CertInfo()       
         token.ParseFromString(value) 
         xcert = self.load_xcert(token.xcert)

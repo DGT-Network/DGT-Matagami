@@ -247,8 +247,10 @@ class XcertClient:
 
     def show(self, name):
         address = self._get_address(name)
-
-        result = self._send_request("state/{}".format(address), name=name,)
+        try:
+            result = self._send_request("state/{}".format(address), name=name,)
+        except XcertClientException:
+            return None
 
         try:
             return cbor.loads(base64.b64decode(yaml.safe_load(result)["data"]))[name]
@@ -294,12 +296,10 @@ class XcertClient:
                 raise XcertClientException("No such key: {}".format(name))
 
             elif not result.ok:
-                raise XcertClientException("Error {}: {}".format(
-                    result.status_code, result.reason))
+                raise XcertClientException("Error {}: {}".format(result.status_code, result.reason))
 
         except requests.ConnectionError as err:
-            raise XcertClientException(
-                'Failed to connect to REST API: {}'.format(err))
+            raise XcertClientException('Failed to connect to REST API: {}'.format(err))
 
         except BaseException as err:
             raise XcertClientException(err)
