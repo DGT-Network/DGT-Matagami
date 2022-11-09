@@ -80,8 +80,13 @@ def create_console_handler(verbose_level):
 
 def setup_loggers(verbose_level):
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(verbose_level)
     logger.addHandler(create_console_handler(verbose_level))
+    #console_out = logging.StreamHandler()                                                                                                 
+    #thandler = TimedRotatingFileHandler(opts.log_file,when="D",interval=2,backupCount=30)                                                 
+    #logging.basicConfig(handlers=(console_out,),level=verbose_level)  
+
+
 
 
 def create_parent_parser(prog_name):
@@ -1108,7 +1113,7 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
     else:
         verbose_level = args.verbose
     setup_loggers(verbose_level=verbose_level)
-
+    
     if not args.command:
         parser.print_help()
         sys.exit(1)
@@ -1160,7 +1165,7 @@ def main_wrapper():
     try:
         main()
     except (XcertCliException, XcertClientException) as err:
-        print("Error: {}".format(err), file=sys.stderr)
+        logging.info("Error: {}".format(err))
         sys.exit(1)
     except KeyboardInterrupt:
         pass

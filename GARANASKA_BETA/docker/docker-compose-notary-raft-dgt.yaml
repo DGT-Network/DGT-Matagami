@@ -45,15 +45,15 @@ services:
     command: |
       bash -c "
         bin/protogen;echo TELEGA LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK} UN=${USER_NOTARY} BT=${BOT_TOKEN} NREST=${NREST};
-        dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR} ${LA} ${REST_API}
+        echo ##dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR} ${LA} ${REST_API}
         rm -f /project/peer/logs/bgt-bot*.log;
-        echo notary init n${V}  -va http://vault-n${V}:${VPORT} ${LA}
+        notary init n${V}  -va http://vault-n${V}:${VPORT} ${LA}
         if [ ${NREST} == 'ON' ]; then (cd notary-api;dgt-notary-api -vv  --bind telebot-dgt-n${V}:${NAPI} ${REST_API} -cb ${CRYPTO_BACK}); else echo 'OFF NOTARY REST '; fi;
         cd telebot
         python3 setup.py clean --all
         python3 setup.py build
         echo dgt-telebot -vv  -nn n${V} --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204 ${BOT_TOKEN} ${ONBOT} ;
-        dgt-telebot -vv  -nn n${V} --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204  ${ONBOT}  ${REST_API} -cb ${CRYPTO_BACK} ${BOT_TOKEN} ${USER_NOTARY} ${LA} --vault-url http://vault-n${V}:${VPORT} --vault-on 
+        if [ ${V} == '1' ]; then echo 'OFF NOTARY BOT '; else dgt-telebot -vv  -nn n${V} --connect tcp://validator-${PNM}-${C}-${N}:${COMP} tcp://validator-dgt-c2-1:4204  ${ONBOT}  ${REST_API} -cb ${CRYPTO_BACK} ${BOT_TOKEN} ${USER_NOTARY} ${LA} --vault-url http://vault-n${V}:${VPORT} --vault-on; fi; 
       "
     stop_signal: SIGKILL
 

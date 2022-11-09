@@ -1,8 +1,8 @@
 # Copyright 2021 DGT NETWORK INC © Stanislav Parsov
 # START DGT NOTARY
 #docker-compose -f docker/docker-compose-notary-dgt.yaml up #-d
-mode="up" #"up -d"
-rmode="up"
+mode="up -d"
+rmode="up -d"
 export PNM="dgt"
 export CRYPTO_BACK="bitcoin"
 export USER_NOTARY=""

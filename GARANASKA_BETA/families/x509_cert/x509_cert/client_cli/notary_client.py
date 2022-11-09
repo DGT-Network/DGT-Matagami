@@ -130,7 +130,7 @@ class NotaryClient(XcertClient):
         # Notary init
         
         if self._vault:
-            print(f'INIT NOTARY={name}')
+            logging.info('INIT NOTARY={} SYNC WITH DGT'.format(name))
             
             _meta_xcert = self._vault.init()
             key = _meta_xcert[0]
@@ -140,7 +140,9 @@ class NotaryClient(XcertClient):
                     response = self.set(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM) 
                 else:                                                                  
                     response = self.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)
-                print(f'INIT NOTARY={name} key={key} info={info} response={response}') 
+                ilog = 'INIT NOTARY={} key={} info={} response={}'.format(name,key,info,response)
+                #print(ilog)
+                LOGGER.info(ilog) 
 
     def crt_obj_secret(self,key,opts,did):
         opts[DEC_DID_VAL] = did                                                  
