@@ -22,7 +22,7 @@ import traceback
 import pkg_resources
 import cbor
 from colorlog import ColoredFormatter
-
+from dgt_sdk.processor.log import log_configuration
 from x509_cert.client_cli.generate import add_generate_parser
 from x509_cert.client_cli.generate import do_generate
 from x509_cert.client_cli.populate import add_populate_parser
@@ -82,6 +82,7 @@ def setup_loggers(verbose_level):
     logger = logging.getLogger()
     logger.setLevel(verbose_level)
     logger.addHandler(create_console_handler(verbose_level))
+    log_configuration(log_dir="/project/peer/logs", name="notary")
     #console_out = logging.StreamHandler()                                                                                                 
     #thandler = TimedRotatingFileHandler(opts.log_file,when="D",interval=2,backupCount=30)                                                 
     #logging.basicConfig(handlers=(console_out,),level=verbose_level)  
