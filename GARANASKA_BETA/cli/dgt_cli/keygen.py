@@ -94,7 +94,7 @@ def do_keygen(args):
             raise CliException(
                 'files exist, rerun with --force to overwrite existing files')
 
-    create_new_key(priv_filename,pub_filename,quiet=args.quiet)
+    create_new_key(priv_filename,pub_filename,quiet=args.quiet,backend=args.crypto_back)
 
 def create_new_key(priv_filename,pub_filename,quiet=True,backend='bitcoin'):
 
