@@ -49,7 +49,7 @@ DISTRIBUTION_NAME = 'x509-cert'
 CRYPTO_BACK = 'openssl'
 DEFAULT_URL = 'http://127.0.0.1:8008'
 
-DGT_TOP = os.environ.get('DGT_TOP')
+DGT_TOP = os.environ.get('DGT_TOP','dgt')
 XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
@@ -270,23 +270,31 @@ def do_upd(args):
     print(response)
 
 def add_crt_parser(subparsers, parent_parser):
-    message = 'Create an xcert certificate with params into <value>.'
+    message = 'Create an xcert certificate for user-id with params into <--proto>.'
 
     parser = subparsers.add_parser(
         'crt',
         parents=[parent_parser],
         description=message,
         help='Update xcert atributes')
+
+    parser.add_argument(          
+        'user_id',              
+        type=str,                 
+        help='Specify user ID')   
+
     parser.add_argument(
-        'value',
+        '--proto',
         type=str,
         default=XCERT_PROTO_FILE,
         help='specify xcert atributes to create')
+
+
     parser.add_argument(
         '--user',
         type=str,
         default="/project/peer/keys/notary.priv",
-        help='specify User name')
+        help='Specify private key for user who ask operation')
 
     parser.add_argument(
         '--url',
@@ -294,10 +302,24 @@ def add_crt_parser(subparsers, parent_parser):
         default="http://api-dgt-c1-1:8108",
         help='specify URL of REST API')
 
+    parser.add_argument(                                    
+        '--notary_url',                                     
+        type=str,                                           
+        help='Specify URL of NOTARY REST API',              
+        default='http://telebot-dgt:8203'                   
+        )
+      
+    parser.add_argument(                                
+        '--notary',                                     
+        action='count',                                 
+        default=0,                                      
+        help='Use Notary for control operation')   
+    
     parser.add_argument(
         '--keyfile',
         type=str,
-        help="identify file containing user's private key")
+        default="/project/peer/keys/notary.priv",
+        help="Identify file containing notary's private key")
 
     parser.add_argument(
         '--wait',
@@ -305,11 +327,13 @@ def add_crt_parser(subparsers, parent_parser):
         const=sys.maxsize,
         type=int,
         help='set time, in seconds, to wait for transaction to commit')
+
     parser.add_argument(                            
         '-cb', '--crypto_back',                     
         type=str,                                   
         help='Specify a crypto back openssl/bitcoin',               
         default=CRYPTO_BACK)
+
     parser.add_argument(                                   
         '--before',                                       
         type=int,                                         
@@ -321,9 +345,9 @@ def add_crt_parser(subparsers, parent_parser):
         help='set time, in day - cert is valid after')    
 
 def do_crt(args):                                                          
-    value, wait, user = args.value, args.wait, args.user                   
+                  
     client = _get_client(args)                                             
-    response = client.crt( value,user,args.before,args.after,wait)         
+    response = client.crt(args, args.wait) # ( value,user_id,args.before,args.after,wait)         
     print(response)                                                        
 
 def add_wallet_parser(subparsers, parent_parser):                                                                                               
@@ -921,7 +945,10 @@ def add_show_parser(subparsers, parent_parser):
 def do_show(args):
     name = args.name
     client = _get_client(args)
-    value = client.show(name)
+    value = client.show_secret(name)
+    if value is None :
+        print("NO XCERT FOR KEY={}".format(name))
+        return
     token = X509CertInfo()
     token.ParseFromString(value)
     #xcert = cbor.loads(token.xcert)

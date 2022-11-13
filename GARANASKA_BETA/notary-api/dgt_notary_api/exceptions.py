@@ -327,7 +327,14 @@ class BadRequestSign(_ApiError):
     status_code = 400                                                                      
     title = 'Request signature incorrect'                                                       
     message = ('Request signature incorrect - request declined.')    
+ 
+class BadRequestPayload(_ApiError):                                        
+    api_code = 95                                                        
+    status_code = 400                                                    
+    title = 'Request payload incorrect'                                
+    message = ('Request payload incorrect - request declined.')        
     
+       
 class BadRequestStatus(_ApiError):                                                                                               
     api_code = 94                                                                                                                                                
     status_code = 400                                                 

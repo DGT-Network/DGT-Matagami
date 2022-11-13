@@ -50,7 +50,8 @@ XCERT_PROTO = {
     "USER_ID"                   : "000000000000000001"                          
 }                                                                               
 WALLET_PKEY = "pkey"
-DID_ATTR = 'did'                                                                
+DID_ATTR = 'did'
+DID_UKEY_ATTR = "usr_key"                                                             
 UID_ATTR = 'uid'                                                                
 CID_ATTR = 'chat_id'                                                            
 UFN_ATTR = 'user_first_name'                                                    

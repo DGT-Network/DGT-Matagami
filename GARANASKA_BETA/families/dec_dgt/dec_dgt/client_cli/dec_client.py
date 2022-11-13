@@ -200,11 +200,8 @@ class DecClient:
         return opts                                                                  
 
     def wallet_req(self,args):                                             
-        info = self.wallet_info(args)                                      
-        topts = info[DEC_TRANS_OPTS]                                       
-        req = self.dec_req_sign(info[DEC_CMD_OPTS])                        
-        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]}  
-
+        info = self.wallet_info(args) 
+        return self.user_sign_req(info)                                     
 
     def upd_wallet_opts(self,opts,args): 
         if not (args.spend_period or args.limit or args.status or args.role):             
@@ -545,10 +542,8 @@ class DecClient:
 
     def pay_req(self,args): 
         # make pay request                                            
-        info = self.pay_info(args)                                     
-        topts = info[DEC_TRANS_OPTS]                                      
-        req = self.dec_req_sign(info[DEC_CMD_OPTS])                       
-        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]} 
+        info = self.pay_info(args)  
+        return self.user_sign_req(info)                                   
     
      
     def invoice(self,args,wait=None):   
@@ -601,11 +596,16 @@ class DecClient:
         #return 
         return self._send_sign_transaction(topts,sign_req,wait=wait) 
 
+
+    def user_sign_req(self,info):                                                  
+        topts = info[DEC_TRANS_OPTS]                                            
+        req = self.dec_req_sign(info[DEC_CMD_OPTS])                             
+        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]}       
+
     def target_req(self,args): 
-        info = self.target_info(args)                 
-        topts = info[DEC_TRANS_OPTS]                  
-        req = self.dec_req_sign(info[DEC_CMD_OPTS])   
-        return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]}
+        info = self.target_info(args) 
+        return self.user_sign_req(info)                
+        
         
 
     def dec_req_sign(self,info):  

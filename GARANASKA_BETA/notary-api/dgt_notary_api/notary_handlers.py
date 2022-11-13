@@ -89,6 +89,7 @@ REQ_STATUS_DEL  = 'DROPPED'
 REQ_STATUS_PENDING  = 'PENDING'
 REQ_STATUS_DGT_PENDING  = 'DGT_PENDING'
 DGT_COMMIT = 'COMMITTED'
+DGT_ERROR  = 'ERROR'
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
@@ -332,7 +333,7 @@ class NotaryRouteHandler(RouteHandler):
         is_status = request.url.query.get(STATUS_MODE,"0") != "0"
         is_delete = request.url.query.get(DELETE_MODE,"0") != "0"
                                                   
-        LOGGER.debug('print APPROVAL INFO  for {} approve={} status={} delete={}'.format(akey,is_approve,is_status,is_delete))                                     
+        LOGGER.debug('APPROVAL INFO  for {} approve={} status={} delete={}'.format(akey,is_approve,is_status,is_delete))                                     
         if akey:   
             aval = self._db.get(akey)
              
@@ -342,7 +343,7 @@ class NotaryRouteHandler(RouteHandler):
                 elif REQ_PAYLOAD in aval:
                     if is_approve:
                         status = aval[REQ_STATUS]
-                        if status != REQ_STATUS_QUEUE:
+                        if status not in [REQ_STATUS_QUEUE,DGT_ERROR]:
                             raise errors.BadRequestStatus()
 
                         data_val = aval[REQ_PAYLOAD].hex() 
@@ -355,19 +356,29 @@ class NotaryRouteHandler(RouteHandler):
                         freq = cbor.loads(aval[REQ_PAYLOAD])
                         nreq = cbor.loads(freq[DEC_CMD_OPTS][DEC_PAYLOAD])
                         dgt_link = aval[REQ_DGT_LINK] if REQ_DGT_LINK in aval else None
+                        curr_status = aval[REQ_STATUS]
+                        LOGGER.debug('Curr status={}'.format(curr_status))
                         #self._vault.notary_approve_vault(freq,nreq)
 
-                        if dgt_link and is_status and aval[REQ_STATUS] == REQ_STATUS_PENDING:
-                            # check transaction status 
-                            status = self._vault._get_status(dgt_link,1)
-                            LOGGER.debug('check transaction url={} status={}'.format(dgt_link,status))
-                            if aval[REQ_STATUS] != status:
-                                aval[REQ_STATUS] = status
-                                if status == DGT_COMMIT:
-                                    self._vault.notary_approve_vault(aval[REQ_PAYLOAD])
+                        if dgt_link is not None and is_status:
+                            if curr_status == REQ_STATUS_PENDING:
+                                # check DGT transaction status
+                                status = self._vault._get_status(dgt_link,1)
+                                LOGGER.debug('check transaction url={} status={}'.format(dgt_link,status))
+                                if aval[REQ_STATUS] != status:
+                                    aval[REQ_STATUS] = status
+                                    if status == DGT_COMMIT:
+                                        self._vault.notary_approve_vault(aval[REQ_PAYLOAD])
 
-                                self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : aval[REQ_PAYLOAD], REQ_STATUS : status,REQ_DGT_LINK:dgt_link})],[])
-                                # update info 
+                                    self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : aval[REQ_PAYLOAD], REQ_STATUS : status,REQ_DGT_LINK:dgt_link})],[])
+                            elif curr_status == DGT_ERROR:
+                                # send again into DGT 
+                                LOGGER.debug('Send request again into DGT={}'.format(akey))
+                                res = self.ask_dgt_approve(akey,aval[REQ_PAYLOAD])
+                                aval[REQ_STATUS] = res[0]
+                                dgt_link = res[1]
+
+                                    # update info 
                         data_val = {REQ_STATUS: aval[REQ_STATUS],REQ_PAYLOAD: nreq,REQ_DGT_LINK: dgt_link }
 
                 else:
@@ -996,6 +1007,10 @@ class NotaryRouteHandler(RouteHandler):
                                                                                                                     
         try:                                                                                                        
             nreq = cbor.loads(body)
+            if not isinstance(nreq,dict) or DEC_CMD_OPTS not in nreq:
+                LOGGER.debug('Wrong payload  request={}'.format(nreq))      
+                raise errors.BadRequestPayload()                               
+
             opts = nreq[DEC_CMD_OPTS]
             ret = self._signer.verify(opts[DEC_NOTARY_REQ_SIGN], opts[DEC_PAYLOAD],self._context.pub_from_hex(opts[DEC_EMITTER]) )
             if not ret:
@@ -1034,7 +1049,6 @@ class NotaryRouteHandler(RouteHandler):
             data_val = "Set argument 'akey'" 
             aval = None                                             
 
-
         if aval is None:
             # error
             return self._wrap_response(           
@@ -1043,10 +1057,6 @@ class NotaryRouteHandler(RouteHandler):
                 metadata=None)                    
 
         # take request from queue
-        #nreq = NotaryRequest()                       
-        #nreq.ParseFromString(aval[REQ_PAYLOAD])      
-        #data_val = cbor.loads(nreq.payload)          
-                                                     
 
         if request.headers['Content-Type'] != 'application/octet-stream':        
             LOGGER.debug('Submission headers had wrong Content-Type: %s',request.headers['Content-Type'])                                 
@@ -1058,18 +1068,8 @@ class NotaryRouteHandler(RouteHandler):
             raise errors.NoBatchesSubmitted()                                    
                                                                                  
         try:                                                                     
-            #areq = NotaryRequest()                                               
-            #areq.ParseFromString(body)   
-            areq_val = cbor.loads(body) #areq.payload)                                        
-                              
-            res = self._vault.notary_approve(areq_val) 
-            LOGGER.debug('{} : Approve Request REQ={} RES={}'.format(akey,areq_val,res))  
-            if res[0] == DGT_COMMIT:
-                # was commited 
-                self._vault.notary_approve_vault(areq_val)
-
-            self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : body, REQ_STATUS : res[0],REQ_DGT_LINK:res[1]})],[])   # REQ_STATUS_DGT_PENDING         
-                                                                                 
+            res = self.ask_dgt_approve(akey,body)
+            
         except DecodeError:                                                      
             LOGGER.debug('Submission body could not be decoded: %s', body)       
             raise errors.BadProtobufSubmitted()                                  
@@ -1080,4 +1080,22 @@ class NotaryRouteHandler(RouteHandler):
             request,  
             data=res,                                                           
             metadata=None,                                                       
-            status=200)                                                          
+            status=200)        
+    
+    def ask_dgt_approve(self,akey,body):
+        #LOGGER.debug('ask_dgt_approve: body={}'.format(type(body)))
+        try:
+            areq_val = cbor.loads(body)
+            res = self._vault.notary_approve(areq_val)                                                                                            
+            LOGGER.debug('{} : Approve Request RES={}'.format(akey,res))                                                          
+            if res[0] == DGT_COMMIT:                                                                                                              
+                # was commited                                                                                                                    
+                self._vault.notary_approve_vault(areq_val)                                                                                        
+            elif res[0] == DGT_ERROR:                                                                                                             
+                # already signed but not accepted DGT net                                                                                         
+                LOGGER.debug('{} : Approve Request ERROR'.format(akey))                                                                           
+            self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : body, REQ_STATUS : res[0],REQ_DGT_LINK:res[1]})],[])   # REQ_STATUS_DGT_PENDING 
+            return res
+        except Exception as ex:
+            LOGGER.debug('ask_dgt_approve: body={} - error={}'.format(type(body),ex))
+            return (DGT_ERROR,'')

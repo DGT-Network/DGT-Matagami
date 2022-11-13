@@ -37,8 +37,8 @@ TIMEOUT_VAULT_READY=8
 RECOVERY_SHARES=1
 RECOVERY_THRESHOLD=1
 SEAL_NODE_NM = 'n1'
-
-
+SECRET_PATH="secret/data/"
+SECRET_VAULT_PATH="/vault/data/"
 policy = '''
 path "secret/*" {
     capabilities = ["create", "update", "delete", "list", "read"]
@@ -138,7 +138,7 @@ class Vault(object):
                 kv_enable = False
                 for n in range(CONNECT_ATTEMPT):
                     self.create_policy(policy=policy,name=policy_nm)    
-                    kv_enable = self.enable_secrets_engine('kv',"secret/data/")  
+                    kv_enable = self.enable_secrets_engine('kv',SECRET_PATH)  
                     if kv_enable:
                         LOGGER.info(f"KV  SECRETS ENABLE")
                         break
@@ -286,6 +286,7 @@ class Vault(object):
 
     def get_secret(self,key):
         data = self.get_xcert(key)
+        #print("get_secret",data)
         return data['data'] if data else None
 
     """
@@ -334,3 +335,6 @@ class Vault(object):
         except Exception as ex:
             LOGGER.info(f"CANT CREATE key={name} err={ex}") 
 
+    def list_secrets(self):
+        secrets = self._client.secrets.kv.v2.list_secrets(path="")
+        print('secrets',secrets)
