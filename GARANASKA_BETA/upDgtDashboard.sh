@@ -11,4 +11,4 @@ esac
 shift
 done
 
-docker-compose -f docker/docker-compose-dashboard-dgt.yaml up #-d
+docker-compose -f docker/docker-compose-dashboard-dgt.yaml up -d
