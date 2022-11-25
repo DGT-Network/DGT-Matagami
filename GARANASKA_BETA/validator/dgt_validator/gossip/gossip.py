@@ -1160,7 +1160,9 @@ class Gossip(object):
             self.notify_peer_connected(self.validator_id,assemble=True,mode=mode)
 
         with self._lock:
-            return copy.copy(self._peers)
+            curr_peer =  copy.copy(self._peers)
+        curr_peer["own"] = self.endpoint
+        return curr_peer
 
     def is_peers(self):
         """
