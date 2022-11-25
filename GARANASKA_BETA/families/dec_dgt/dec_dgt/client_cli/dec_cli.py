@@ -272,6 +272,12 @@ def add_emission_parser(subparsers, parent_parser):
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
+    parser.add_argument(                            
+        '--info',                                 
+        action='count',                             
+        default=0,                                  
+        help='Just show all params for emission')    
+
 
     parser.add_argument(
         '--wait',

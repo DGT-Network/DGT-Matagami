@@ -138,6 +138,9 @@ class DecClient:
         else:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
+        if args.info > 0:
+            print("Emission's params={}".format(info))
+            return
         info[DEC_TMSTAMP] = time.time()
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         #print('PROTO',info)
