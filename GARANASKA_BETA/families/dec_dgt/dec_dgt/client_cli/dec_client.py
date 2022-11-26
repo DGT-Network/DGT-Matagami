@@ -322,9 +322,10 @@ class DecClient:
         info = {}    
         if token.group_code == DEC_NAME_DEF :
             dec = cbor.loads(token.dec)
+            #print('DEC=',dec[])
             for attr,aval in dec.items():
                 if attr not in [DEC_PASSKEY,DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL,DEC_TMSTAMP]:
-                    info[attr] = aval[DATTR_VAL]
+                    info[attr] = aval
                 
             
         return info
