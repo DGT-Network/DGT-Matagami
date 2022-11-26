@@ -271,6 +271,7 @@ def add_emission_parser(subparsers, parent_parser):
     parser.add_argument(
         '--keyfile',
         type=str,
+        default="/project/dgt/clusters/c1/dgt1/keys/validator.priv.openssl",
         help="identify file containing user's private key")
     parser.add_argument(                            
         '--info',                                 
@@ -284,6 +285,7 @@ def add_emission_parser(subparsers, parent_parser):
         nargs='?',
         const=sys.maxsize,
         type=int,
+        default=4,
         help='set time, in seconds, to wait for transaction to commit')
     parser.add_argument(                                   
         '-cb', '--crypto_back',                            

@@ -40,7 +40,7 @@ from dec_dgt.client_cli.exceptions import DecClientException
 from dec_dgt.client_cli.dec_attr import *
 from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM
 
-
+TRANS_TOUT = 4
 
 # settings family
 from dgt_settings.processor.utils import _make_settings_key,SETTINGS_NAMESPACE
@@ -144,7 +144,7 @@ class DecClient:
         info[DEC_TMSTAMP] = time.time()
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         #print('PROTO',info)
-        self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
+        return self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait if wait else TRANS_TOUT,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
     def wallet_(self,args,wait=None,nsign=None):  
         # nsign - notary key for sign did info 
@@ -768,12 +768,10 @@ class DecClient:
                 raise DecClientException("No such key: {}".format(name))
 
             elif not result.ok:
-                raise DecClientException("Error {}: {}".format(
-                    result.status_code, result.reason))
+                raise DecClientException("Error {}: {}".format(result.status_code, result.reason))
 
         except requests.ConnectionError as err:
-            raise DecClientException(
-                'Failed to connect to REST API: {}'.format(err))
+            raise DecClientException('Failed to connect to REST API: {}'.format(err))
 
         except BaseException as err:
             raise DecClientException(err)
