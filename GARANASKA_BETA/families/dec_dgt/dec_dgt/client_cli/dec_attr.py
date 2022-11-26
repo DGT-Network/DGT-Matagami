@@ -41,6 +41,7 @@ DEC_SPEND_PERIOD_DEF = 60*2
 DEC_TARGET_DEF = "any target"
 DEC_TARGET_INFO_DEF = "empty target"
 DEC_ROLE_DEF        = "def_role"
+DEC_ADMIN_PUB_KEY_DEF = "12345"
 # DEC attributes
 DEC_NAME              = "name"              
 DEC_SYMBOL            = "symbol"            

@@ -186,6 +186,12 @@ def add_emission_parser(subparsers, parent_parser):
         type=float,                    
         #default=DEC_GRANULARITY_DEF,       
         help='Granularity of DEC token') 
+    parser.add_argument(               
+        '--admin_pub_key','-apk',       
+        type=str,                      
+        #default=DEC_NОMINAL_DEF,      
+        help='Admin public key')           
+
 
     parser.add_argument(     
         '--passkey','-pk',              
