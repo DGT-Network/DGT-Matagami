@@ -42,6 +42,7 @@ DEC_TARGET_DEF = "any target"
 DEC_TARGET_INFO_DEF = "empty target"
 DEC_ROLE_DEF        = "def_role"
 DEC_ADMIN_PUB_KEY_DEF = "12345"
+DEC_TSTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 # DEC attributes
 DEC_NAME              = "name"              
 DEC_SYMBOL            = "symbol"            
