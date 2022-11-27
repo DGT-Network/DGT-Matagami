@@ -326,8 +326,15 @@ class DecClient:
             #print('DEC=',dec[])
             for attr,aval in dec.items():
                 if attr not in [DEC_PASSKEY,DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
+                    val = aval
+                    if attr == DEC_TMSTAMP:
+                        val = time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval))
+                    elif attr == DEC_NBURN:
+                        if DEC_TMSTAMP in aval:
+                            aval[DEC_TMSTAMP] = time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval[DEC_TMSTAMP]))
 
-                    info[attr] = aval if attr != DEC_TMSTAMP else time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval))
+                    
+                    info[attr] = val 
 
                 
             
@@ -338,6 +345,7 @@ class DecClient:
         if args.passkey and args.sum:
             info[DEC_PASSKEY] = args.passkey
             info[DEC_TOTAL_SUM] = args.sum
+            info[DEC_TMSTAMP] = time.time()
             print('PROTO',info)                                                                 
             self._send_transaction(DEC_BURN_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)
         else:

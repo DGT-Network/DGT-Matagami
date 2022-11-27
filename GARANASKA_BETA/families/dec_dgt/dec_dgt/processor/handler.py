@@ -112,8 +112,8 @@ class DecTransactionHandler(TransactionHandler):
             # This would be a programming error.
             tb = traceback.format_exc()
             raise InvalidTransaction('Unhandled verb: {} TB={}'.format(verb,tb))
-        #except InvalidTransaction:   
-        #    raise InvalidTransaction 
+        except InvalidTransaction as ex:   
+            raise InvalidTransaction(ex) 
 
         except Exception as ex:
             tb = traceback.format_exc()                                      
@@ -127,7 +127,7 @@ class DecTransactionHandler(TransactionHandler):
                                                                                                                                         
                                                                                                                                         
         if name in state:                                                                                                               
-            raise InvalidTransaction('Verb is "{o}", but already exists: Name: {n}, Value {v}'.format(o=DEC_EMISSION_OP,n=name,v=state[name]))            
+            raise InvalidTransaction('Verb is "{o}", but emission {n} already was made.'.format(o=DEC_EMISSION_OP,n=name))            
         if DGT_TOPOLOGY_SET_NM in state:
             tval = json.loads(state[DGT_TOPOLOGY_SET_NM])
             #LOGGER.debug('Topology "{}"'.format(tval))
@@ -332,6 +332,7 @@ class DecTransactionHandler(TransactionHandler):
 
         updated = {k: v for k, v in state.items() if k in out}                                                                   
         dec[DEC_NBURN][DATTR_VAL] = nburn - 1 
+        dec[DEC_NBURN][DEC_TMSTAMP] = value[DEC_TMSTAMP] if DEC_TMSTAMP in value else time.time()
         dec[DEC_TOTAL_SUM][DATTR_VAL] = total_sum - burn_sum
         token.dec = cbor.dumps(dec)                                                                                       
         updated[name] = token.SerializeToString()                                                                    
