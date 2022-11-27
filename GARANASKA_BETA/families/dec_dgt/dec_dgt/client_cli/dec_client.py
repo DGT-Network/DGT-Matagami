@@ -325,8 +325,10 @@ class DecClient:
             dec = cbor.loads(token.dec)
             #print('DEC=',dec[])
             for attr,aval in dec.items():
-                if attr not in [DEC_PASSKEY,DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL,DEC_TMSTAMP]:
-                    info[attr] = aval
+                if attr not in [DEC_PASSKEY,DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
+
+                    info[attr] = aval if attr != DEC_TMSTAMP else time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(aval))
+
                 
             
         return info
