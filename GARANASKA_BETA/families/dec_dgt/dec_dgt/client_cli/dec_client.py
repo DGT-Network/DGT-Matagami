@@ -499,7 +499,7 @@ class DecClient:
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
-        return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait,din=din)  
+        return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait if wait else TRANS_TOUT,din=din)  
 
     def pay(self,args,wait=None,control=False):
         info = self.pay_info(args)                                  

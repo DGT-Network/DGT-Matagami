@@ -993,7 +993,11 @@ def do_balance_of(args):
     token = client.balance_of(args, args.wait) 
     if token:
         dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
-        print("{}: {}={} : ".format(args.pubkey,args.asset_type,token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM]))
+        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM][DATTR_VAL],
+         DEC_СORPORATE_REST : dec[DEC_СORPORATE_REST],
+         DEC_SALE_REST : dec[DEC_SALE_REST]
+         }
+        print("{}: {}={} : ".format(args.pubkey,args.asset_type,inf))
     else:
         print("{} - undefined".format(args.pubkey))
     
