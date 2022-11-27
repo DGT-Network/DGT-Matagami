@@ -94,6 +94,29 @@ class DecClient:
         elif signer:
             self._signer = signer
             self._context = signer.context
+        else:
+            self._context = create_context('secp256k1',backend=backend)
+
+    def get_pub_key(self,vkey):
+        # try first open file with private key
+        try:                                                        
+            with open(vkey) as fd:                               
+                private_key_str = fd.read().strip()                 
+                fd.close() 
+                                                     
+        except OSError as err:
+            # use value as pub key                                      
+            return vkey 
+        try:                                                      
+            private_key = self._context.from_hex(private_key_str) 
+            signer = CryptoFactory(self._context).new_signer(private_key)  
+            return signer.get_public_key().as_hex()   
+        except ParseError as e:                                   
+            print('Unable to load private key: {} use param is key'.format(str(e)))
+            return vkey  
+
+
+
 
     def load_json_proto(self,value):
         if isinstance(value,dict):                        
@@ -135,7 +158,7 @@ class DecClient:
 
         if args.corporate_pub_key:
             # check when create corporate wallet - only owner this key have responsibilities for operation
-            info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : args.corporate_pub_key}
+            info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self.get_pub_key(args.corporate_pub_key)}
         else:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
@@ -727,6 +750,9 @@ class DecClient:
             return None
 
     def show(self, name):
+        if name.startswith('/') or name.startswith('./'):
+            # take public key from file 
+            name = self.get_pub_key(name)
         address = self._get_address(name)
 
         result = self._send_request("state/{}".format(address), name=name,)

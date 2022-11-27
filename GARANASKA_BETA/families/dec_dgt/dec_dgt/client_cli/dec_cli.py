@@ -1652,6 +1652,7 @@ def add_show_parser(subparsers, parent_parser):
         type=str,
         help='specify URL of REST API',
         default='http://api-dgt-c1-1:8108')
+
     parser.add_argument(                                     
         '-cb', '--crypto_back',                              
         type=str,                                            
