@@ -364,6 +364,13 @@ def add_wallet_parser(subparsers, parent_parser):
        type=str, 
        help="Wallet role name"            
        )                               
+    
+    parser.add_argument(                           
+        '--info',                                  
+        action='count',                            
+        default=0,                                 
+        help='Just show all params for wallet')  
+    
                                        
     parser.add_argument(                                      
         '-cb', '--crypto_back',                               

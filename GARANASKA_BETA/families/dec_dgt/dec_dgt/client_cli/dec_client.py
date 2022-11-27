@@ -190,7 +190,9 @@ class DecClient:
                             } 
                                                                       
         info[DEC_WALLET_OPTS_OP] = self.get_wallet_opts(args,nsign)
-        
+        if args.info > 0:
+            print("Wallet info={}".format(info))
+            return
                                      
         info[DEC_TMSTAMP] = time.time() 
         #print("DEC.wallet {}".format(info))                                        
@@ -199,13 +201,16 @@ class DecClient:
     def wallet(self,args,wait=None):                                   
         info = self.wallet_info(args)                                  
         topts = info[DEC_TRANS_OPTS] 
-        opts = info[DEC_CMD_OPTS]                                  
+        opts = info[DEC_CMD_OPTS] 
+        if args.info > 0:                           
+            print("Wallet info={}".format(opts))    
+            return                                                                   
         req = self.dec_req_sign(opts)                    
         # for notary less mode user sign with his own key              
         sign_req = self.notary_req_sign(req,self._signer)              
-        print('WALLET OPTS={} TOPTS={} REQ={}'.format(opts,topts,sign_req))                                   
+        #print('WALLET OPTS={} TOPTS={} REQ={}'.format(opts,topts,sign_req))                                   
         #return                                                        
-        return self._send_sign_transaction(topts,sign_req,wait=wait)   
+        return self._send_sign_transaction(topts,sign_req,wait=wait if wait else 4)   
 
 
 
@@ -280,7 +285,7 @@ class DecClient:
         if args.role:                                   
             opts[DEC_WALLET_ROLE] = [args.role]           
             
-        print("DEC.wallet opts{}".format(opts))
+        #print("DEC.wallet opts{}".format(opts))
         return opts
 
     def get_wallet_opts(self,args,nsign):
