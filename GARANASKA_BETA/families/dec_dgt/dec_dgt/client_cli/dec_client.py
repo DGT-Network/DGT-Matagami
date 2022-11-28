@@ -68,6 +68,8 @@ def set_param(info,attr,val,def_val):
     else:
         info[attr] = {DATTR_VAL : val if val else def_val}
 
+def tmstamp2str(val):
+    return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
 
 class DecClient:
     def __init__(self, url=None, keyfile=None,signer=None,backend=None):
@@ -135,16 +137,19 @@ class DecClient:
         return self._signer.get_public_key().as_hex()
     # emission cmd parts
     def emission(self,args,wait=None):
+        def do_verbose(dec):
+            if args.verbose is None or args.verbose == 0:
+                for k,v in dec.items():                  
+                    if isinstance(v,dict):               
+                        dec[k] = v[DATTR_VAL] 
+            return dec           
+
+
         if args.info > 0:
             # show current emission params
             token = self.show(DEC_EMISSION_KEY)
             dec = cbor.loads(token.dec)  
-            print("V",args.verbose)
-            if args.verbose is None or args.verbose == 0:
-                for k,v in dec.items():
-                    if isinstance(v,dict):
-                        dec[k] = v[DATTR_VAL]
-
+            dec = do_verbose(dec)
             return {DEC_EMISSION_KEY:token.group_code,"INFO":dec}
 
         info = self.load_json_proto(args.proto)
@@ -175,7 +180,7 @@ class DecClient:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
         if args.check > 0:
-            print("Emission's params={}".format(info)) #json.dumps(info, sort_keys=True, indent=4)))
+            print("Emission's params={}".format(do_verbose(info))) #json.dumps(info, sort_keys=True, indent=4)))
             return
         info[DEC_TMSTAMP] = time.time()
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
@@ -348,7 +353,7 @@ class DecClient:
         token = self.show(DEC_EMISSION_KEY)
         dec = cbor.loads(token.dec) if token.group_code == DEC_NAME_DEF else {}   
         tmstamp = dec[DEC_TMSTAMP] if DEC_TMSTAMP in dec else 0
-        return tmstamp
+        return tmstamp2str(tmstamp)
 
 
     def total_supply(self,args,wait=None):  
@@ -368,10 +373,10 @@ class DecClient:
                 if attr not in [DEC_PASSKEY,DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
                     val = aval
                     if attr == DEC_TMSTAMP:
-                        val = time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval))
+                        val = tmstamp2str(aval) #time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval))
                     elif attr == DEC_NBURN:
                         if DEC_TMSTAMP in aval:
-                            aval[DEC_TMSTAMP] = time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval[DEC_TMSTAMP]))
+                            aval[DEC_TMSTAMP] = tmstamp2str(aval[DEC_TMSTAMP]) #time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval[DEC_TMSTAMP]))
 
                     
                     info[attr] = val 
