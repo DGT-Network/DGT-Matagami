@@ -135,6 +135,18 @@ class DecClient:
         return self._signer.get_public_key().as_hex()
     # emission cmd parts
     def emission(self,args,wait=None):
+        if args.info > 0:
+            # show current emission params
+            token = self.show(DEC_EMISSION_KEY)
+            dec = cbor.loads(token.dec)  
+            print("V",args.verbose)
+            if args.verbose is None or args.verbose == 0:
+                for k,v in dec.items():
+                    if isinstance(v,dict):
+                        dec[k] = v[DATTR_VAL]
+
+            return {DEC_EMISSION_KEY:token.group_code,"INFO":dec}
+
         info = self.load_json_proto(args.proto)
         set_param(info,DEC_TOTAL_SUM,args.total_sum,DEC_TOTAL_SUM_DEF)
         set_param(info,DEC_GRANULARITY,args.granularity,DEC_GRANULARITY_DEF)
@@ -162,7 +174,7 @@ class DecClient:
         else:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
-        if args.info > 0:
+        if args.check > 0:
             print("Emission's params={}".format(info)) #json.dumps(info, sort_keys=True, indent=4)))
             return
         info[DEC_TMSTAMP] = time.time()
@@ -202,7 +214,7 @@ class DecClient:
         info = self.wallet_info(args)                                  
         topts = info[DEC_TRANS_OPTS] 
         opts = info[DEC_CMD_OPTS] 
-        if args.info > 0:                           
+        if args.check > 0:                           
             print("Wallet info={}".format(opts))    
             return                                                                   
         req = self.dec_req_sign(opts)                    

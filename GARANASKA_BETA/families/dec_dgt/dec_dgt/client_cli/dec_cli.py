@@ -280,12 +280,22 @@ def add_emission_parser(subparsers, parent_parser):
         default="/project/dgt/clusters/c1/dgt1/keys/validator.priv.openssl",
         help="identify file containing user's private key")
     parser.add_argument(                            
-        '--info',                                 
+        '--check',                                 
         action='count',                             
         default=0,                                  
         help='Just show all params for emission')    
-
-
+    parser.add_argument(                               
+        '--info',                                     
+        action='count',                                
+        default=0,                                     
+        help='Show emission status')      
+    """
+    parser.add_argument(               
+        '-vv','--verbose',                      
+        action='count',                
+        default=0,                     
+        help='Show more info')   
+    """                                   
     parser.add_argument(
         '--wait',
         nargs='?',
@@ -366,7 +376,7 @@ def add_wallet_parser(subparsers, parent_parser):
        )                               
     
     parser.add_argument(                           
-        '--info',                                  
+        '--check',                                  
         action='count',                            
         default=0,                                 
         help='Just show all params for wallet')  
@@ -1409,6 +1419,7 @@ def add_mint_parser(subparsers, parent_parser):
         '--keyfile',                                                                      
         type=str,                                                                         
         help="identify file containing user's private key") 
+
     parser.add_argument(                                     
         '-cb', '--crypto_back',                              
         type=str,                                            
