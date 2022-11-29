@@ -994,7 +994,13 @@ def add_info_parser(subparsers, parent_parser):
         action='count',                 
         default=0,                      
         help='Show seal keeper info') 
-                                            
+    parser.add_argument(                 
+        '--list',                       
+        action='count',                 
+        default=0,                      
+        help='Show list of secrets')   
+    
+                                           
     parser.add_argument(                                                         
         '--keyfile',                                                             
         type=str,                                                                
@@ -1017,6 +1023,10 @@ def do_info(args):
     if args.raft > 0:
         value = client.show_raft_info(args)                                                                             
         print("RAFT CONGIG: {}".format(value)) 
+    if args.list > 0:                           
+        value = client._vault.get_sys_info(info="ls")     
+        print("SECRETS LIST: {}".format(value))  
+
     if args.seal > 0:
         stat = client.show_seal_status()
         print("SEAL STATUS: {}".format(stat))

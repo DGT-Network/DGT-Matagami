@@ -226,7 +226,7 @@ class Vault(object):
 
     def get_raft_config(self):
         #print("get raft conf",dir(self._client.sys))
-        print(">>>>",self.get_sys_info(info="ls")) # list_namespaces list_policies list_mounted_secrets_engines
+        #print(">>>>",self.get_sys_info(info="ls")) # list_namespaces list_policies list_mounted_secrets_engines
         raft_config = self._client.sys.read_raft_config()
         return raft_config
 
@@ -246,7 +246,7 @@ class Vault(object):
         elif info == "kv":
             stat = [func for func in dir(self._client.secrets.kv.v2) if callable(getattr(self._client.secrets.kv.v2, func))]
         elif info == "ls":
-            stat = self._client.secrets.kv.v1.list_secrets(path="sys") #SECRET_PATH)
+            stat = self._client.secrets.kv.v1.list_secrets(path="data/")['data']['keys'] #SECRET_PATH)
             #stat = self._client.secrets.kv.v2.configure()
         else:
             stat = "--"
