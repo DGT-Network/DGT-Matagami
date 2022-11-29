@@ -42,6 +42,9 @@ from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 from x509_cert.client_cli.exceptions import XcertClientException,XcertClientKeyfileException
 from x509_cert.client_cli.xcert_attr import *
 from x509_cert.client_cli.xcert_client import XcertClient,_sha512
+# 
+from sha3 import keccak_256
+KECCAK_MODE = "keccak"
 
 try:                                                            
     from x509_cert.client_cli.vault import Vault  
@@ -54,7 +57,7 @@ from dec_dgt.client_cli.dec_client import DecClient
 from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT,DEC_SPEND_PERIOD,
                                          DEC_WALLET_STATUS,DEC_DID_VAL,DEC_APPROVALS,DEC_APPROVAL,DEC_NOTARY_REQ,DEC_NOTARY_KEY,DEC_NOTARY_REQ_SIGN,
                                          DEC_HEADER_PAYLOAD,DEC_PAYLOAD,DEC_HEADER_SIGN,DEC_CMD_OPTS,DEC_TRANS_OPTS,DEC_EMITTER,
-                                         DEC_CMD,DEC_CMD_ARG,  DEC_CMD_TO ,DEC_TARGET_INFO, DEC_PAY_OP
+                                         DEC_CMD,DEC_CMD_ARG,  DEC_CMD_TO ,DEC_TARGET_INFO, DEC_PAY_OP,DEC_TARGET_OP
                                          )
 
 LOGGER = logging.getLogger(__name__)
@@ -103,7 +106,20 @@ class NotaryClient(XcertClient):
         self._cdec = None
         self._user_signer = None
         
-        
+    def get_user_key(self,user_key_file):
+        try:                                                  
+            # use user key                                    
+            self._user_signer = self.get_signer(user_key_file)                    
+        except XcertClientKeyfileException:                   
+            #use as default notary key                        
+            self._user_signer = self._signer                             
+
+        self._user_pubkey = self._user_signer.get_public_key().as_hex()
+
+    def pubkey2addr(self,pubkey,lng=20):
+        # self._user_signer.pubkey2addr(pubkey,lng)
+        return keccak_256(pubkey.encode()).digest()[-lng:].hex()
+
     def init_dec(self,keyfile):
         # for  wallet mode 
         # keyfile - this is private key wallet owner 
@@ -161,19 +177,33 @@ class NotaryClient(XcertClient):
             pkey = secret[DID_UKEY_ATTR] if DID_UKEY_ATTR in secret else None
             print('User[{}] PUBKEY={}'.format(uid,pkey))
             # take from DGT 
-            return self.show(pkey)
+            return self.show(uid)
         else:
             if self.is_notary_info(uid):
                 print('THIS IS NOTARY ID={}'.format(uid))
                 return self.show(uid)
             else:
                 print('NO xcert for user with ID={}'.format(uid))
-        
+
+    def show_raft_info(self,opts):
+        try:
+            rconf = self._vault.get_raft_config()['data']['config']
+        except Exception as ex:
+            return "Notary not ready - {}".format(ex)
+        return rconf
+
+    def show_seal_status(self):                                              
+        try:                                                                    
+            stat = self._vault.get_seal_status()             
+        except Exception as ex:                                                 
+            return "Notary not ready - {}".format(ex)                           
+        return stat
+
     def get_user_sign_req(self,info):                                         
         # this is header of request with owner sign                                      
         req_header = {                                                                   
                 DEC_EMITTER     : self._user_signer.get_public_key().as_hex(),                
-                DEC_PAYLOAD     : info,                                                  
+                DEC_PAYLOAD     : info[DEC_CMD_OPTS],                                                  
                                                                                          
         }                                                                                
         payload = cbor.dumps(req_header)                                                 
@@ -189,45 +219,85 @@ class NotaryClient(XcertClient):
         
                                          
         return {DEC_CMD_OPTS : req, DEC_TRANS_OPTS: info[DEC_TRANS_OPTS]}             
+    
+    def _send_sign_xcert_transaction(self, topts, info,wait=None): 
+        #to      = topts[DEC_CMD_TO] if DEC_CMD_TO in topts else None           
+        #din     = topts[DEC_CMD_DIN] if DEC_CMD_DIN in topts else None         
+        #din_ext = topts[DEC_CMD_DIN_EXT] if DEC_CMD_DIN_EXT in topts else None 
+        return self._send_transaction(topts[DEC_CMD],topts[DEC_CMD_ARG], info[DEC_PAYLOAD], to=None, wait=wait if wait is not None else 4)
+        
                 
     def xcert_notary_approve(self,req,wait=None):  
         LOGGER.debug("xcert_notary_approve: REQ={}".format(req)) 
-        return ("ERROR","") 
+        #return ("ERROR","") 
+        return self._send_sign_xcert_transaction(req[DEC_TRANS_OPTS],req[DEC_CMD_OPTS],wait=wait)
+
      
-    def crt_req(self,args):
-        info =self.crt_info(args)
+    def crt_req(self,args,uid=None):
+        info =self.crt_info(args,uid=uid)
         #print('REQ',info)
         req = self.get_user_sign_req(info)
         #print('REQ',req)
         return req
 
-    def crt_info(self,args):
-        pubkey,cert,info = self.set_or_upd(args.proto,args.user,args.before,args.after,user_id=args.user_id)
-        info = {}                                                                 
+    def crt_info(self,args,uid=None):
+        user_id = uid if uid is not None else args.user_id
+        pubkey,cert,info = self.set_or_upd(args.proto,args.user,args.before,args.after,user_id=user_id)
         tcurr = time.time() 
-        #info[DEC_TMSTAMP] = tcurr                                                      
-        info[XCERT_CRT_OP] = cert.hex()                          
+        #info[DEC_TMSTAMP] = tcurr   
+        print("XCERT={} ".format(info))                                                   
+        info[XCERT_ATTR] = cert.hex()                          
         opts = {                                                                  
                  DEC_CMD_OPTS   : info,                                           
                  DEC_TRANS_OPTS : { DEC_CMD    : XCERT_CRT_OP,                   
-                                    DEC_CMD_ARG: pubkey                   
+                                    DEC_CMD_ARG: user_id     # special key for notary or addr which was generated from pubkey               
                                   }                                               
                 }
         return opts                                                                 
 
     def crt_vault_done(self,opts,topts):
-        print('crt_vault_done',opts,topts)
+        # finish xcert operation
+        info = cbor.loads(opts[DEC_PAYLOAD])
+        uid = info[DEC_PAYLOAD][X509_USER_ID]
+        LOGGER.debug('crt_vault_done UID={} info={} {}'.format(uid,info,topts))
+        oper = ''
+        #if self._vault and not self.is_notary_info(user_id):                                
+        # usual user certificate                                                        
+        if oper == XCERT_SET_OP :                                                       
+            try:                                                                        
+                val = self._vault.get_xcert(uid)                                    
+                print(f'Certificate for {pubkey} already exist')                        
+                return                                                                  
+            except Exception as ex:                                                     
+                pass 
+        pubkey = info[DEC_EMITTER]                                                                   
+        secret = info.copy()                                                            
+        secret[DID_ATTR]      = self.get_user_did(uid)                              
+        secret[DID_UKEY_ATTR] = pubkey     # keep user pub key                          
+        if not self._vault.create_or_update_secret(uid,secret=secret):              
+            LOGGER.debug('Cant write secret={}'.format(uid))                                       
+            return                                                                      
+        LOGGER.debug('write secret for did={} key={}'.format(secret[DID_ATTR],pubkey))            
+
+
 
     def crt(self,args,wait=None):
         # create user xcert using notary approve 
         # value, wait, user_id = args.value, args.wait, args.user_id
         uid = args.user_id
+        if uid == KECCAK_MODE:
+            # keccak_256(public_key).digest()[-20:]
+            self.get_user_key(args.user)
+            addr = self.pubkey2addr(self._user_pubkey)
+            print("ADDR",addr)
+            uid = addr
+            #return 
         secret = self._vault.get_secret(uid)
         if secret:
             print('User cert with ID={} already created'.format(uid))
             return
         else:
-            print('Create user cert for ID={}'.format(uid))
+            print('Create user cert with ID={}'.format(uid))
 
         if args.notary > 0:                                      
             # send notary request                                
@@ -235,7 +305,7 @@ class NotaryClient(XcertClient):
                 print("Set notary rest api url")                 
                 return None                                      
             # send request batch_list.SerializeToString()        
-            nreq = self.crt_req(args)                   
+            nreq = self.crt_req(args,uid=uid)                   
             return self.send_notary_req(nreq,args)               
 
 
@@ -872,7 +942,7 @@ class NotaryClient(XcertClient):
         #  
         
     def send_notary_req(self,data,args):                                                                                              
-        # data.SerializeToString()                                                                                                             
+        print("send_notary_req to",args.notary_url)                                                                                                             
         result = self._send_request("{}".format(DEC_NOTARY_REQ),data=cbor.dumps(data),content_type='application/octet-stream',rest_url=args.notary_url)             
         #print("send_notary_req",result)
         return result                                                                                    
@@ -895,11 +965,12 @@ class NotaryClient(XcertClient):
         else:
             return self._cdec.notary_approve(req,wait=3)
     
-    def notary_approve_vault(self,req,opts):
+    def notary_approve_vault(self,req):
         LOGGER.debug("NOTARY_APPROVE_VAULT: REQ={}".format(req))
         if DEC_CMD_OPTS in req and DEC_TRANS_OPTS in req:
             # continue with approve
             topts = req[DEC_TRANS_OPTS] 
+            opts = req[DEC_CMD_OPTS]
             LOGGER.debug("NOTARY_APPROVE_VAULT: CMD={} OPTS={}".format(topts,opts))
             verb = topts[DEC_CMD]
             if verb == DEC_WALLET_OP:

@@ -82,7 +82,7 @@ class Vault(object):
         self.init_client()
         
     def init(self):
-        print('Init notary')
+        LOGGER.info('Init notary')
         self.do_meta_xcert({},None)
         for n in range(CONNECT_ATTEMPT):
             try:
@@ -223,6 +223,15 @@ class Vault(object):
             LOGGER.info(f"JOIN CLUSTER {lead_addr} ret={ret}")        
         except Exception as ex:                                                         
             LOGGER.info(f"CANT JOIN CLUSTER {lead_addr} err={ex}")                                 
+
+    def get_raft_config(self):
+        #print("get raft conf")
+        raft_config = self._client.sys.read_raft_config()
+        return raft_config
+    def get_seal_status(self):                                   
+        #print("get seal status")                                   
+        stat = self._client.sys.read_seal_status()#['sealed']        
+        return stat                                       
 
 
     def list_policies(self):

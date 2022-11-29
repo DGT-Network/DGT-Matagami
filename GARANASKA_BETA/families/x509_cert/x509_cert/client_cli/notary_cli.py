@@ -36,7 +36,7 @@ from x509_cert.client_cli.load import do_load
 
 from x509_cert.client_cli.notary_client import NotaryClient
 from x509_cert.client_cli.exceptions import XcertCliException,XcertClientException
-from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD_OP,XCERT_WALLETS_OP)
+from x509_cert.client_cli.xcert_attr import (XCERT_CRT_OP,XCERT_SET_OP,XCERT_UPD_OP,XCERT_WALLETS_OP,KEYKEEPER_ID)
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 # DEC 
 from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,
@@ -134,6 +134,7 @@ def create_parser(prog_name):
     add_approvals_parser(subparsers, parent_parser)
     add_approval_parser(subparsers, parent_parser)
     add_show_parser(subparsers, parent_parser)
+    add_info_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
     add_init_parser(subparsers, parent_parser)
     """
@@ -278,7 +279,7 @@ def add_crt_parser(subparsers, parent_parser):
         description=message,
         help='Update xcert atributes')
 
-    parser.add_argument(          
+    parser.add_argument(   # 03aefd25cc96f9b4a55d8ca9e196037571c9a7d696022919964c6eff5676d7b9e4       
         'user_id',              
         type=str,                 
         help='Specify user ID')   
@@ -962,6 +963,77 @@ def do_show(args):
     print('{}:valid={}->{} {}'.format(name,xcert.not_valid_before,xcert.not_valid_after,xcert))
 
 
+def add_info_parser(subparsers, parent_parser):                                  
+    message = 'Show notary info.'                                  
+                                                                                 
+    parser = subparsers.add_parser(                                              
+        'info',                                                                  
+        parents=[parent_parser],                                                 
+        description=message,                                                     
+        help='Display notary raft config')        
+                                                                                 
+                                                                                 
+    parser.add_argument(                                                         
+        '--url',                                                                 
+        type=str,                                                                
+        default="http://api-dgt-c1-1:8108",                                      
+        help='specify URL of REST API')   
+    parser.add_argument(                                  
+        '--notary_url',                                  
+        type=str,                                        
+        help='Specify URL of NOTARY REST API',           
+        default='http://telebot-dgt:8203'                
+        ) 
+    parser.add_argument(                         
+        '--raft',                              
+        action='count',                          
+        default=0,                                                                              
+        help='Show notary raft config')
+    parser.add_argument(                
+        '--seal',                       
+        action='count',                 
+        default=0,                      
+        help='Show seal keeper info') 
+                                            
+    parser.add_argument(                                                         
+        '--keyfile',                                                             
+        type=str,                                                                
+        help="identify file containing user's private key")                      
+                                                                                 
+                                                                                 
+    parser.add_argument(                                                         
+        '-cb', '--crypto_back',                                                  
+        type=str,                                                                
+        help='Specify a crypto back',                                            
+        default=CRYPTO_BACK)                                                     
+                                                                                 
+
+
+
+
+def do_info(args):                                                                                               
+    client = _get_client(args) 
+
+    if args.raft > 0:
+        value = client.show_raft_info(args)                                                                             
+        print("RAFT CONGIG: {}".format(value)) 
+    if args.seal > 0:
+        stat = client.show_seal_status()
+        print("SEAL STATUS: {}".format(stat))
+        return
+        value = client.show(KEYKEEPER_ID)
+        if value is None :                                               
+            print("SEAL KEEPER NOT REGISTRED")                    
+            return                                                       
+        token = X509CertInfo()                                           
+        token.ParseFromString(value)                                     
+        xcert = client.load_xcert(token.xcert) 
+        val = client.get_xcert_notary_attr(xcert)        
+        nkey = client.get_pub_key(xcert)                 
+        print("SEAL KEY={} DATA={}".format(nkey,val))  
+                                  
+                 
+
 def add_list_parser(subparsers, parent_parser):
     message = 'Shows all xcert.'
 
@@ -996,8 +1068,12 @@ def do_list(args):
     for pair in results:
         for name, value in pair.items():
             token.ParseFromString(value)
-            xcert = client.load_xcert(token.xcert)
-            print(f'{name}: valid={xcert.not_valid_before}/{xcert.not_valid_after} {xcert}')
+            try:    
+                xcert = client.load_xcert(token.xcert)
+                print(f'load xcert token={token.xcert}')
+                print(f'{name}: valid={xcert.not_valid_before}/{xcert.not_valid_after} {xcert}')
+            except Exception as ex:
+                print(f'Cant load xcert {name}: token={token.xcert}')
 
 
 def add_approvals_parser(subparsers, parent_parser):                                          
@@ -1177,6 +1253,8 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
 
     elif args.command == 'show':
         do_show(args)
+    elif args.command == 'info':      
+        do_info(args)                 
     elif args.command == 'list':
         do_list(args)
     elif args.command == 'init':    
