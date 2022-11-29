@@ -225,14 +225,32 @@ class Vault(object):
             LOGGER.info(f"CANT JOIN CLUSTER {lead_addr} err={ex}")                                 
 
     def get_raft_config(self):
-        #print("get raft conf")
+        #print("get raft conf",dir(self._client.sys))
+        print(">>>>",self.get_sys_info(info="ls")) # list_namespaces list_policies list_mounted_secrets_engines
         raft_config = self._client.sys.read_raft_config()
         return raft_config
+
     def get_seal_status(self):                                   
         #print("get seal status")                                   
         stat = self._client.sys.read_seal_status()#['sealed']        
-        return stat                                       
+        return stat 
 
+    def get_sys_info(self,info="engines"):                                                  
+        #print("get seal status") 
+        if info == "le":
+            stat = [k for k in self._client.sys.list_mounted_secrets_engines().keys() if k.find('/') >= 0]#['sealed'] 
+        elif info == "ln":
+            stat = self._client.sys.list_namespaces()
+        elif info == "leases":
+            stat = self._client.sys.list_leases(prefix="_k")
+        elif info == "kv":
+            stat = [func for func in dir(self._client.secrets.kv.v2) if callable(getattr(self._client.secrets.kv.v2, func))]
+        elif info == "ls":
+            stat = self._client.secrets.kv.v1.list_secrets(path="sys") #SECRET_PATH)
+            #stat = self._client.secrets.kv.v2.configure()
+        else:
+            stat = "--"
+        return stat                                                            
 
     def list_policies(self):
         try:                                                                           

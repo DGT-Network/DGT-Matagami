@@ -43,7 +43,10 @@ from x509_cert.client_cli.exceptions import XcertClientException,XcertClientKeyf
 from x509_cert.client_cli.xcert_attr import *
 from x509_cert.client_cli.xcert_client import XcertClient,_sha512
 # 
-from sha3 import keccak_256
+try:
+    from sha3 import keccak_256
+except Exception as ex:
+    pass
 KECCAK_MODE = "keccak"
 
 try:                                                            
@@ -177,7 +180,7 @@ class NotaryClient(XcertClient):
             pkey = secret[DID_UKEY_ATTR] if DID_UKEY_ATTR in secret else None
             print('User[{}] PUBKEY={}'.format(uid,pkey))
             # take from DGT 
-            return self.show(uid)
+            return self.show(pkey)
         else:
             if self.is_notary_info(uid):
                 print('THIS IS NOTARY ID={}'.format(uid))
@@ -224,7 +227,7 @@ class NotaryClient(XcertClient):
         #to      = topts[DEC_CMD_TO] if DEC_CMD_TO in topts else None           
         #din     = topts[DEC_CMD_DIN] if DEC_CMD_DIN in topts else None         
         #din_ext = topts[DEC_CMD_DIN_EXT] if DEC_CMD_DIN_EXT in topts else None 
-        return self._send_transaction(topts[DEC_CMD],topts[DEC_CMD_ARG], info[DEC_PAYLOAD], to=None, wait=wait if wait is not None else 4)
+        return self._send_transaction(topts[DEC_CMD],topts[DEC_CMD_ARG], info[DEC_PAYLOAD], to=None, wait=wait if wait is not None else WAIT_DEF)
         
                 
     def xcert_notary_approve(self,req,wait=None):  
@@ -270,18 +273,22 @@ class NotaryClient(XcertClient):
                 return                                                                  
             except Exception as ex:                                                     
                 pass 
-        pubkey = info[DEC_EMITTER]                                                                   
-        secret = info.copy()                                                            
-        secret[DID_ATTR]      = self.get_user_did(uid)                              
-        secret[DID_UKEY_ATTR] = pubkey     # keep user pub key                          
-        if not self._vault.create_or_update_secret(uid,secret=secret):              
-            LOGGER.debug('Cant write secret={}'.format(uid))                                       
-            return                                                                      
-        LOGGER.debug('write secret for did={} key={}'.format(secret[DID_ATTR],pubkey))            
+        self.crt_fix_secret(info,uid)
+
+
+    def crt_fix_secret(self,info,uid):
+        pubkey = info[DEC_EMITTER]                                                           
+        secret = info.copy()                                                                 
+        secret[DID_ATTR]      = self.get_user_did(uid)                                       
+        secret[DID_UKEY_ATTR] = pubkey     # keep user pub key                               
+        if not self._vault.create_or_update_secret(uid,secret=secret):                       
+            LOGGER.debug('Cant write secret={}'.format(uid))                                 
+            return                                                                           
+        LOGGER.debug('write secret for did={} key={}'.format(secret[DID_ATTR],pubkey))       
 
 
 
-    def crt(self,args,wait=None):
+    def crt(self,args,wait=WAIT_DEF):
         # create user xcert using notary approve 
         # value, wait, user_id = args.value, args.wait, args.user_id
         uid = args.user_id
@@ -289,7 +296,7 @@ class NotaryClient(XcertClient):
             # keccak_256(public_key).digest()[-20:]
             self.get_user_key(args.user)
             addr = self.pubkey2addr(self._user_pubkey)
-            print("ADDR",addr)
+            print("XCERT ADDR",addr)
             uid = addr
             #return 
         secret = self._vault.get_secret(uid)
@@ -311,7 +318,11 @@ class NotaryClient(XcertClient):
 
 
         value, wait = args.proto, args.wait
-        return self._do_oper(XCERT_CRT_OP,value,args.user,args.before,args.after, wait=wait,user_id=uid)
+        ret =  self._do_oper(XCERT_CRT_OP,value,args.user,args.before,args.after, wait=wait,user_id=uid)
+        if ret[0] == "COMMITTED":
+            # fix secret
+            info =self.crt_info(args,uid=uid)[DEC_CMD_OPTS]
+            self.crt_fix_secret(info,uid)
 
     def wallet_vault_done(self,opts):
         did = opts[DEC_PAYLOAD][DEC_DID_VAL]

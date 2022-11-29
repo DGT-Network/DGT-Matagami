@@ -1070,7 +1070,7 @@ def do_list(args):
             token.ParseFromString(value)
             try:    
                 xcert = client.load_xcert(token.xcert)
-                print(f'load xcert token={token.xcert}')
+                #print(f'load xcert token={token.xcert}')
                 print(f'{name}: valid={xcert.not_valid_before}/{xcert.not_valid_after} {xcert}')
             except Exception as ex:
                 print(f'Cant load xcert {name}: token={token.xcert}')
