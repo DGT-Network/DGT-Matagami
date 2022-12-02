@@ -590,6 +590,11 @@ def add_token_info_parser(subparsers, parent_parser):
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
+    parser.add_argument(                     
+        '-n','--name',                             
+        type=str,                            
+        help='specify token name (DEC/..)',      
+        default='DEC')  
 
     parser.add_argument(
         '--wait',

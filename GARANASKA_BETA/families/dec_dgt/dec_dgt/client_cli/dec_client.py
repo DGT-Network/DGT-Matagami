@@ -367,7 +367,7 @@ class DecClient:
        
            
     def token_info(self,args,wait=None):    
-        token = self.show(DEC_EMISSION_KEY)
+        token = self.show(ANY_EMISSION_KEY.format(args.name))
         info = {}    
         
         if token.group_code == DEC_NAME_DEF :
