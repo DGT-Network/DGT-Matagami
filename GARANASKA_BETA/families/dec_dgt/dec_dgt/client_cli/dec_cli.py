@@ -515,8 +515,11 @@ def add_birth_parser(subparsers, parent_parser):
         type=str,                                          
         help='Specify a crypto back openssl/bitcoin',      
         default=CRYPTO_BACK)                               
-
-
+    parser.add_argument(                         
+        '-n','--name',                           
+        type=str,                                
+        help='specify token name (DEC/..)',      
+        default='DEC')                           
 
 
     parser.add_argument(
@@ -556,8 +559,11 @@ def add_total_supply_parser(subparsers, parent_parser):
         type=str,                                          
         help='Specify a crypto back openssl/bitcoin',      
         default=CRYPTO_BACK)                               
-
-
+    parser.add_argument(                           
+        '-n','--name',                             
+        type=str,                                  
+        help='specify token name (DEC/..)',        
+        default='DEC')                             
 
     parser.add_argument(
         '--wait',

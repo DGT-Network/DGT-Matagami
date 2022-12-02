@@ -353,14 +353,14 @@ class DecClient:
 
 
     def birth(self,args,wait=None):
-        token = self.show(DEC_EMISSION_KEY)
+        token = self.show(ANY_EMISSION_KEY.format(args.name))
         dec = cbor.loads(token.dec) if token.group_code == DEC_NAME_DEF else {}   
         tmstamp = dec[DEC_TMSTAMP] if DEC_TMSTAMP in dec else 0
         return tmstamp2str(tmstamp)
 
 
     def total_supply(self,args,wait=None):  
-        token = self.show(DEC_EMISSION_KEY)                                     
+        token = self.show(ANY_EMISSION_KEY.format(args.name))                                     
         dec = cbor.loads(token.dec) if token.group_code == DEC_NAME_DEF else {} 
         return dec[DEC_TOTAL_SUM] if DEC_TOTAL_SUM in dec else 0
     
