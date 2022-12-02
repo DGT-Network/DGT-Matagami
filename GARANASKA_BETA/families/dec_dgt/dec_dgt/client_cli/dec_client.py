@@ -652,15 +652,15 @@ class DecClient:
                 }                                      
         return opts
 
-    def target(self,args,wait=None):                                                                                                          
+    def target(self,args,wait=5):                                                                                                          
         info = self.target_info(args) 
         topts = info[DEC_TRANS_OPTS] 
         req = self.dec_req_sign(info[DEC_CMD_OPTS])
         # for notary less mode user sign with his own key                                                                                                     
         sign_req = self.notary_req_sign(req,self._signer)
-        print('SREQ',sign_req,topts)
+        #print('SREQ',sign_req,topts)
         #return 
-        return self._send_sign_transaction(topts,sign_req,wait=wait) 
+        return self._send_sign_transaction(topts,sign_req,wait=wait if wait else 4) 
 
 
     def user_sign_req(self,info):                                                  
