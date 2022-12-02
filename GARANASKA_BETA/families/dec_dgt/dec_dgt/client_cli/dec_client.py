@@ -223,8 +223,8 @@ class DecClient:
         topts = info[DEC_TRANS_OPTS] 
         opts = info[DEC_CMD_OPTS] 
         if args.check > 0:                           
-            print("Wallet info={}".format(opts))    
-            return                                                                   
+            #print("Wallet info={}".format(opts))    
+            return opts                                                                  
         req = self.dec_req_sign(opts)                    
         # for notary less mode user sign with his own key              
         sign_req = self.notary_req_sign(req,self._signer)              

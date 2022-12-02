@@ -409,7 +409,9 @@ def add_wallet_parser(subparsers, parent_parser):
                                                                                                  
 def do_wallet(args):                                                                               
     client = _get_client(args)                                                                   
-    response = client.wallet(args, args.wait)                                                      
+    response = client.wallet(args, args.wait)
+    if isinstance(response,dict):
+        response = do_yaml(response)
     print(response)                                                                              
 
 def add_wallet_opts_parser(subparsers, parent_parser):                                                                                                                                        
