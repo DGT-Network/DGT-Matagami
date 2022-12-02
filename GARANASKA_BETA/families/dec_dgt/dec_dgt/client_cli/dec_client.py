@@ -140,7 +140,7 @@ class DecClient:
         # 
         if verbose is None or verbose == 0:          
             for k,v in dec.items():                            
-                if isinstance(v,dict):                         
+                if isinstance(v,dict) and DATTR_VAL in v:                         
                     dec[k] = v[DATTR_VAL]                      
         return dec                                             
 

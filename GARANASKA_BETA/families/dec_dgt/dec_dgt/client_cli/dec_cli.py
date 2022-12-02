@@ -1711,6 +1711,8 @@ def do_show(args):
     client = _get_client(args)
     token = client.show(name)
     dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
+    
+    dec =  client.do_verbose(dec,args.verbose)
     if args.yaml > 0:                                                              
         dec = do_yaml(dec) 
 
