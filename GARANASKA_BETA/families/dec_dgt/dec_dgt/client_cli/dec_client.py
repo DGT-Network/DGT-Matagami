@@ -135,21 +135,24 @@ class DecClient:
     @property
     def signer_as_hex(self):
         return self._signer.get_public_key().as_hex()
+
+    def do_verbose(self,dec,verbose):
+        # 
+        if verbose is None or verbose == 0:          
+            for k,v in dec.items():                            
+                if isinstance(v,dict):                         
+                    dec[k] = v[DATTR_VAL]                      
+        return dec                                             
+
+
     # emission cmd parts
     def emission(self,args,wait=None):
-        def do_verbose(dec):
-            if args.verbose is None or args.verbose == 0:
-                for k,v in dec.items():                  
-                    if isinstance(v,dict):               
-                        dec[k] = v[DATTR_VAL] 
-            return dec           
-
 
         if args.info > 0:
             # show current emission params
             token = self.show(DEC_EMISSION_KEY)
             dec = cbor.loads(token.dec)  
-            dec = do_verbose(dec)
+            dec = self.do_verbose(dec,args.verbose)
             return {DEC_EMISSION_KEY:token.group_code,"INFO":dec}
 
         info = self.load_json_proto(args.proto)
@@ -180,7 +183,7 @@ class DecClient:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
 
         if args.check > 0:
-            print("Emission's params={}".format(do_verbose(info))) #json.dumps(info, sort_keys=True, indent=4)))
+            print("Emission's params={}".format(self.do_verbose(info,args.verbose))) #json.dumps(info, sort_keys=True, indent=4)))
             return
         info[DEC_TMSTAMP] = time.time()
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
@@ -366,6 +369,7 @@ class DecClient:
     def token_info(self,args,wait=None):    
         token = self.show(DEC_EMISSION_KEY)
         info = {}    
+        
         if token.group_code == DEC_NAME_DEF :
             dec = cbor.loads(token.dec)
             #print('DEC=',dec[])
@@ -377,11 +381,13 @@ class DecClient:
                     elif attr == DEC_NBURN:
                         if DEC_TMSTAMP in aval:
                             aval[DEC_TMSTAMP] = tmstamp2str(aval[DEC_TMSTAMP]) #time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval[DEC_TMSTAMP]))
-
+                    elif attr == DEC_WAIT_TO_DATE:
+                        if DATTR_VAL in aval:                                
+                            aval[DATTR_VAL] = tmstamp2str(aval[DATTR_VAL]) 
                     
                     info[attr] = val 
 
-                
+        info = self.do_verbose(info,args.verbose)
             
         return info
         

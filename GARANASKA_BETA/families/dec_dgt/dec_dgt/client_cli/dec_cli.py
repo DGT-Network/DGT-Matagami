@@ -21,6 +21,7 @@ import sys
 import traceback
 import pkg_resources
 import cbor
+import yaml
 
 from colorlog import ColoredFormatter
 
@@ -88,6 +89,11 @@ def create_parent_parser(prog_name):
         '-v', '--verbose',
         action='count',
         help='enable more verbose output')
+    parent_parser.add_argument(        
+        '-y', '--yaml',                
+        action='count',                
+        default=1,                     
+        help='enable yaml  output')    
 
     try:
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
@@ -152,6 +158,8 @@ def create_parser(prog_name):
 
     return parser
 
+def do_yaml(data):
+    return yaml.dump(data,explicit_start=True,indent=4,default_flow_style=False) 
 
 def add_emission_parser(subparsers, parent_parser):
     message = 'Run emission DEC .'
@@ -314,7 +322,9 @@ def add_emission_parser(subparsers, parent_parser):
 
 def do_emission(args):
     client = _get_client(args)                                
-    response = client.emission(args, args.wait)                  
+    response = client.emission(args, args.wait) 
+    if args.yaml > 0:                                                              
+        response = do_yaml(response)                  
     print(response)                                           
 
 def add_wallet_parser(subparsers, parent_parser):                                                  
@@ -596,7 +606,10 @@ def add_token_info_parser(subparsers, parent_parser):
 
 def do_token_info(args):
     client = _get_client(args)                                
-    response = client.token_info(args, args.wait)                  
+    response = client.token_info(args, args.wait)
+    if args.yaml > 0:                                                              
+        response = do_yaml(response) 
+                      
     print(response)                                           
 
 def add_burn_parser(subparsers, parent_parser):
@@ -1687,6 +1700,11 @@ def do_show(args):
     client = _get_client(args)
     token = client.show(name)
     dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
+    if args.yaml > 0:                                                              
+        dec = do_yaml(dec) 
+
+
+
     print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
 
