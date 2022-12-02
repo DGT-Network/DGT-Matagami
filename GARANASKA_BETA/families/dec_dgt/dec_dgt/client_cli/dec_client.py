@@ -721,6 +721,8 @@ class DecClient:
         if args.type is not None:                      
             # set transfer                             
             role[DEC_ROLE_TYPE] = args.type
+        if args.did is not None:
+            role[DEC_DID_VAL] = args.did
         return role            
 
 

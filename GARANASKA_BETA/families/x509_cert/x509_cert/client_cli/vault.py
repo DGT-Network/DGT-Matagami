@@ -235,7 +235,7 @@ class Vault(object):
         stat = self._client.sys.read_seal_status()#['sealed']        
         return stat 
 
-    def get_sys_info(self,info="engines"):                                                  
+    def get_sys_info(self,info="engines",path=None):                                                  
         #print("get seal status") 
         if info == "le":
             stat = [k for k in self._client.sys.list_mounted_secrets_engines().keys() if k.find('/') >= 0]#['sealed'] 
@@ -246,7 +246,10 @@ class Vault(object):
         elif info == "kv":
             stat = [func for func in dir(self._client.secrets.kv.v2) if callable(getattr(self._client.secrets.kv.v2, func))]
         elif info == "ls":
-            stat = self._client.secrets.kv.v1.list_secrets(path="data/")['data']['keys'] #SECRET_PATH)
+            try:
+                stat = self._client.secrets.kv.v1.list_secrets(path="data/{}".format(path if path else ""))['data']['keys'] #SECRET_PATH)
+            except hvac.exceptions.InvalidPath:
+                stat = []
             #stat = self._client.secrets.kv.v2.configure()
         else:
             stat = "--"
@@ -316,16 +319,6 @@ class Vault(object):
         #print("get_secret",data)
         return data['data'] if data else None
 
-    """
-    def create_xcert(self,args,proto,uid='456125525'):
-        LOGGER.info(f"CREATE XCERT[{uid}]={args}")
-        #args['uid'] = uid
-        did = args['did'] if 'did' in args else uid
-        if self.create_or_update_secret(f"{uid}",args):
-            # 
-            #self.upd_user_xcert(proto,str(uid))
-            return did
-    """    
 
     def create_or_update_secret(self,path,secret=None):                                            
         LOGGER.info(f"create_or_update_secret [{path}]={secret}")                                          
@@ -334,12 +327,46 @@ class Vault(object):
                  path=path,                                                                  
                  secret=secret,                                                               
             )                                                                               
-            LOGGER.info(f"SUCCESSFULLY CREATE SECRET={path}")                                   
+            LOGGER.info(f"SUCCESSFULLY CREATE SECRET={path}")
+            print("SECRET={} WAS CREATED".format(path))                                   
             return True                                                                      
         except Exception as ex:                                                             
             LOGGER.info(f"CANT CREATE SECRET={path} err={ex}")
             print(f"CANT CREATE SECRET={path} err={ex}") 
         return False
+    
+    def delete_secret(self,path,versions=None):                                
+        LOGGER.info(f"delete_secret [{path}]={versions}")                      
+        try:
+            #path_metadata = self._client.secrets.kv.v2.read_secret_metadata(path=path)                                                                          
+            #LOGGER.info("META SECRET={} {}".format(path,path_metadata)) 
+            self._client.secrets.kv.v2.delete_metadata_and_all_versions( # v1.delete_secret(
+               path=path,
+               #versions=[1,2]
+            )
+
+
+            return True                                                                
+        except Exception as ex:                                                        
+            LOGGER.info(f"CANT DELETE SECRET={path} err={ex}")                         
+            print(f"CANT DELETE SECRET={path} err={ex}")                               
+        return False  
+                                                                     
+    def get_secret_vers(self,path):                                             
+        LOGGER.info("get_secret_vers [{}]".format(path))                                   
+        try:                                                                                
+            path_metadata = self._client.secrets.kv.v2.read_secret_metadata(                
+                 path=path                                                                  
+            )                                                                               
+            LOGGER.info("META SECRET={} {}".format(path,path_metadata))                     
+            return True                                                                     
+        except Exception as ex:                                                             
+            LOGGER.info(f"CANT GET SECRET META={path} err={ex}")                              
+            print(f"CANT GET SECRET META={path} err={ex}")                                    
+        return False                                                                        
+    
+    
+    
             
     def create_key(self,name='unseal_key',ktype='aes256-gcm96'):
         try:

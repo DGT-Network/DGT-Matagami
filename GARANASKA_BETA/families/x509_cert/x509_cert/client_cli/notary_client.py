@@ -70,7 +70,12 @@ DID_WALLETS = "wallets"
 DID_ROLES   = "roles"
 DID_GOODS   = "goods"
 WAIT_DEF = 10
-                                                                     
+TARGET_PATH = "{}/target/{}"
+ROLES_PATH = "{}/roles/{}"
+WALLETS_PATH = "{}/wallets/{}"                                                                     
+
+
+
 
 class NotaryClient(XcertClient):
     def __init__(self, url, keyfile=None,backend=None,vault_url=None,notary=None,lead_addr=None):
@@ -105,6 +110,8 @@ class NotaryClient(XcertClient):
             else:
                 # init mode                                                      
                 self._vault = Vault(vault_url,notary=notary,lead_addr=lead_addr) 
+        else:
+            print('No vault')
 
         self._cdec = None
         self._user_signer = None
@@ -201,6 +208,36 @@ class NotaryClient(XcertClient):
         except Exception as ex:                                                 
             return "Notary not ready - {}".format(ex)                           
         return stat
+
+    def get_info_list(self,opts):
+        is_meta = opts.meta > 0
+        is_recursive = opts.recursive > 0
+        def do_yaml(t_dir,c_yaml):
+            c_dir = self._vault.get_sys_info(info="ls",path=t_dir)
+            for fnm in c_dir:
+                fpath = t_dir + '/' + fnm
+                mdata = self._vault.get_secret(fpath) if opts.meta > 0 else None
+                if mdata:
+                    for dk in [XCERT_ATTR]:
+                        if dk in mdata:
+                            del mdata[dk]
+                if fnm[-1] == '/': 
+                    if opts.recursive > 0:
+                        c_yaml[fnm] = do_yaml(fpath,{} if fnm not in ["roles/","target/","wallets/"] or  is_meta else [])
+                    else:
+                        c_yaml[fnm] = "-Dir"
+                else:  
+                    f_val = "-Cert" if mdata is None else mdata
+                    if isinstance(c_yaml,dict):
+                        c_yaml[fnm] = f_val
+                    else:
+                        c_yaml.append(fnm)
+            return c_yaml   
+                                           
+        to_yaml = do_yaml(opts.list,{})
+        #print(yaml.dump([1.1, [2.1, 2.2], [[3.1, 3.2, 3.3]]],indent=4,default_flow_style=False))
+        return yaml.dump(to_yaml,explicit_start=True,indent=4,default_flow_style=False)
+
 
     def get_user_sign_req(self,info):                                         
         # this is header of request with owner sign                                      
@@ -324,42 +361,54 @@ class NotaryClient(XcertClient):
             info =self.crt_info(args,uid=uid)[DEC_CMD_OPTS]
             self.crt_fix_secret(info,uid)
 
-    def wallet_vault_done(self,opts):
-        did = opts[DEC_PAYLOAD][DEC_DID_VAL]
+    def wallet_vault_done(self,opts,topts=None):
+        payload = cbor.loads(opts[DEC_PAYLOAD])
+        did = payload[DEC_PAYLOAD][DEC_DID_VAL]
         uid = self.did2uid(did)
+        """
         secret = self._vault.get_secret(uid)
         wlist = secret[DID_WALLETS] if DID_WALLETS in secret else {} 
-        owner = opts[DEC_EMITTER]  
-        wopts = opts[DEC_PAYLOAD][DEC_WALLET_OP]
+        """
+        owner = payload[DEC_EMITTER]  
+        wopts = payload[DEC_PAYLOAD][DEC_WALLET_OP]
+        wallet_path = WALLETS_PATH.format(uid,owner)
+        """
         wlist[owner] = wopts                                                          
-        secret[DID_WALLETS] = wlist                                                   
+        secret[DID_WALLETS] = wlist  
+        """                                                 
         #                                                                             
         # create secret with wallet options
         #                                            
-        if self.crt_obj_secret(owner,wopts,did):                                 
-            print('Cant create Wallet for DID={}'.format(did))                   
+        if not self.crt_obj_secret(wallet_path,wopts,did):                                 
+            print('Cant create Wallet={} for DID={}'.format(wallet_path,did))                   
             return 
+        """
         if not self._vault.create_or_update_secret(uid,secret=secret):    
             print('Cant update secret={}'.format(uid))                    
             return                                                        
-        
+        """
                                                                            
 
     def wallet(self,args,wait=None):
         # use notary key for sign did arguments
         #   
         try:
-            uid = self.did2uid(args.did)
-            data = self._vault.get_xcert(uid)
-            if data is None:
-                print(f'Certificate for {args.did} UNDEF')
-                return
+            secret,uid = self.get_did_info(args.did)                          
+            if secret is None:                                                
+                print('Certificate for {} not exist'.format(uid))             
+                return                                                        
             owner = self._cdec.signer_as_hex
-            secret = data['data']
+            wallet_path = WALLETS_PATH.format(uid,owner)
             #print('Certificate for {} VAL={} owner={}'.format(args.did,secret,owner))
             # add new wallet into xcert list 
             if args.cmd == DEC_WALLET_OP:
                 # create wallet and add them into DID wallets list
+                data = self._vault.get_xcert(wallet_path)                         
+                if data is not None:                                            
+                    print('Wallet {} already exist'.format(wallet_path))            
+                    return                                                      
+
+                """
                 if DID_WALLETS in secret and isinstance(secret[DID_WALLETS],dict) :
                     wlist = secret[DID_WALLETS]
                     if owner in wlist:
@@ -372,30 +421,37 @@ class NotaryClient(XcertClient):
                         return                                     
                 else:
                     wlist = {}
-
+                """
+                nreq = self._cdec.wallet_req(args)
                 if args.notary > 0:                                             
                     # send notary request                                       
                     if args.notary_url is None:                                 
                         print("Set notary rest api url")                        
                         return None                                             
-                    nreq = self._cdec.wallet_req(args)                          
+                    #nreq = self._cdec.wallet_req(args)                          
                     return self.send_notary_req(nreq,args)                      
 
-
-                resp,_ = self._cdec.wallet(args,wait=WAIT_DEF)
+                #print('Create wallet {}'.format(wallet_path))
+                sreq = self._cdec.notary_req_sign(nreq[DEC_CMD_OPTS], self._signer)        
+                #print("S",sreq)                                                           
+                nreq[DEC_CMD_OPTS] = sreq                                                  
+                resp,_ =  self._cdec.notary_approve(nreq,wait=WAIT_DEF)                    
+                #resp,_ = self._cdec.wallet(args,wait=WAIT_DEF)
                 if resp in ['PENDING','INVALID']  :               
                     print("WALLET status = {} cancel operation".format(resp))        
                     return                                        
-
+                self.wallet_vault_done(nreq[DEC_CMD_OPTS],nreq[DEC_TRANS_OPTS])
+                """
                 wopts = self._cdec.get_only_wallet_opts(args)
-                wlist[owner] = wopts
-                secret[DID_WALLETS] = wlist
+                #wlist[owner] = wopts
+                #secret[DID_WALLETS] = wlist
                 #
                 # create secret with wallet options 
-                if not self.crt_obj_secret(owner,wopts,args.did):
-                    print('Cant create/update Wallet info into VAULT for DID={}'.format(args.did))
+                if not self.crt_obj_secret(wallet_path,wopts,args.did):
+                    print('Cant create/update Wallet={} info into VAULT for DID={}'.format(wallet_path,args.did))
                     return
-                #print('Certificate with wallet={}'.format(secret))
+                """
+                #print('New wallet={} was created'.format(wallet_path))
                 
             elif args.cmd == DEC_WALLET_OPTS_OP:
                 if DID_WALLETS not in secret or not isinstance(secret[DID_WALLETS],dict) or owner not in secret[DID_WALLETS]:   
@@ -415,24 +471,31 @@ class NotaryClient(XcertClient):
             else:
                 print('Undef CMD for wallet operation with wallet={}'.format(secret))
                 return
-
+            """
             if not self._vault.create_or_update_secret(uid,secret=secret):    
                 print('Cant update secret={}'.format(uid))                             
                 return                                                           
-
+            """
             return resp
 
         except Exception as ex:
+            print('wallet operation({}) fault={}'.format(args.cmd,ex))
             return
 
     def wallets(self,args,wait=None):           
         # list wallets for DID                  
-        return self.get_wallets(args.did)
+        val = self.get_wallets(args.did)
+        if args.yaml > 0:                                                                       
+            val = yaml.dump(val,explicit_start=True,indent=4,default_flow_style=False)          
+        return val                                                                              
+
 
     def get_wallets(self,did,wait=None):  
         # list wallets for DID
         try:                                                                                         
-            uid = self.did2uid(did)                                                             
+            uid = self.did2uid(did)  
+            return self._vault.get_sys_info(info="ls",path=WALLETS_PATH.format(uid,"/")) 
+            """                                                          
             data = self._vault.get_xcert(uid)                                                        
             if data is None:                                                                         
                 print(f'Certificate for {did} UNDEF')                                           
@@ -445,18 +508,24 @@ class NotaryClient(XcertClient):
                 return wlist                                                                          
             else:                                                                                    
                 print('No wallets relating to DID={}'.format(did))
-
+            """
         except Exception as ex:                                                                      
             return   
                                                                                         
     def role(self,args,wait=None):
         # create role 
         try:                                                                                  
-            uid = self.did2uid(args.did)                                                           
-            data = self._vault.get_xcert(uid)                                                 
-            if data is None:                                                                  
-                print('Certificate for {} UNDEF'.format(args.did))                                         
-                return                                                                        
+            secret,uid = self.get_did_info(args.did)        
+            if secret is None:
+                print('Certificate for {} not exist'.format(uid))                              
+                return                                      
+
+            role_path = ROLES_PATH.format(uid,args.role_id)                                                          
+            data = self._vault.get_xcert(role_path)                                                 
+            if data is not None:                                                                  
+                print('Role {} already exist'.format(role_path))                                         
+                return 
+            """                                                                       
             secret = data['data']                                                             
             # add new role into DID role list                                                  
             if DID_ROLES in secret and isinstance(secret[DID_ROLES],dict) :               
@@ -467,17 +536,18 @@ class NotaryClient(XcertClient):
                 # add new role                                                                  
             else:                                                                             
                 # new role list
-                rlist = {}                            
+                rlist = {} 
+            """                           
             # add new role
             resp,_ = self._cdec.role(args,wait=WAIT_DEF)
             if resp in ['PENDING','INVALID']  :             
                 print("ROLE transaction status = {} - cancel".format(resp))       
                 return                                      
             role = self._cdec.get_role_opts(args)
-            rlist[args.role_id] = role 
-            secret[DID_ROLES] = rlist
-            if not self._vault.create_or_update_secret(uid,secret=secret):      
-                print('Cant update secret={}'.format(uid))                      
+            #rlist[args.role_id] = role 
+            #secret[DID_ROLES] = rlist
+            if not self._vault.create_or_update_secret(role_path,secret=role):      
+                print('Cant update role={}'.format(role_path))                      
                 return                                                          
             return resp 
                                                                                         
@@ -488,7 +558,9 @@ class NotaryClient(XcertClient):
     def get_roles(self,did,wait=None):                                                                    
         # list wallets for DID                                                                              
         try:                                                                                                
-            uid = self.did2uid(did)                                                                         
+            uid = self.did2uid(did)  
+            return self._vault.get_sys_info(info="ls",path=ROLES_PATH.format(uid,"/")) 
+            """                                                                      
             data = self._vault.get_xcert(uid)                                                               
             if data is None:                                                                                
                 print(f'Certificate for {did} UNDEF')                                                       
@@ -500,7 +572,8 @@ class NotaryClient(XcertClient):
                 rlist = secret[DID_ROLES]                                                                 
                 return rlist                                                                                
             else:                                                                                           
-                print('No roles relating to DID={}'.format(did))                                          
+                print('No roles relating to DID={}'.format(did)) 
+            """                                         
                                                                                                             
         except Exception as ex: 
             print('Cant get roles for {} err {}'.format(did,ex))                                                                             
@@ -508,12 +581,19 @@ class NotaryClient(XcertClient):
 
 
     def roles(self,args,wait=None):
-        return self.get_roles(args.did,wait=wait)
+        val = self.get_roles(args.did,wait=wait)
+        if args.yaml > 0:                                                              
+            val = yaml.dump(val,explicit_start=True,indent=4,default_flow_style=False) 
+        return val
+
+
 
     def get_goods(self,did,wait=None):                                                     
         # list goods for DID                                                             
         try:                                                                               
-            uid = self.did2uid(did)                                                        
+            uid = self.did2uid(did)  
+            return self._vault.get_sys_info(info="ls",path=TARGET_PATH.format(uid,"/"))  
+            """                                                    
             data = self._vault.get_xcert(uid)                                              
             if data is None:                                                               
                 print(f'Certificate for {did} UNDEF')                                      
@@ -525,14 +605,18 @@ class NotaryClient(XcertClient):
                 glist = secret[DID_GOODS]                                                  
                 return glist                                                               
             else:                                                                          
-                print('No goods relating to DID={}'.format(did))                           
+                print('No goods relating to DID={}'.format(did)) 
+            """                          
                                                                                            
         except Exception as ex:                                                            
             print('Cant get goods for {} err {}'.format(did,ex))                           
             return                                                                         
                                                                                            
     def goods(self,args,wait=None):               
-        return self.get_goods(args.did,wait=wait) 
+        val = self.get_goods(args.did,wait=wait) 
+        if args.yaml > 0:
+            val = yaml.dump(val,explicit_start=True,indent=4,default_flow_style=False)
+        return val
 
     def get_did_info(self,did):
         uid = self.did2uid(did)                                     
@@ -543,27 +627,33 @@ class NotaryClient(XcertClient):
         secret = data['data'] 
         return secret,uid                                           
 
-    def target_vault_done(self,opts,topts):                                     
-        did = opts[DEC_PAYLOAD][DEC_DID_VAL]                              
+    def target_vault_done(self,opts,topts):  
+        payload = cbor.loads(opts[DEC_PAYLOAD]) 
+        #print('P',payload)                                  
+        did = payload[DEC_PAYLOAD][DEC_DID_VAL] #if DEC_DID_VAL in payload else "_DID_"                             
         uid = self.did2uid(did)                                           
-        secret = self._vault.get_secret(uid) 
+        #secret = self._vault.get_secret(uid) 
         target_id = topts[DEC_CMD_ARG] 
-        target = opts[DEC_PAYLOAD][DEC_TARGET_OP]                            
+        target = payload[DEC_PAYLOAD][DEC_TARGET_OP] 
+        owner = payload[DEC_EMITTER]
+        targ_path =  TARGET_PATH.format(uid,target_id)                           
+        """
         glist = secret[DID_GOODS] if DID_GOODS in secret else {}      
-        owner = opts[DEC_EMITTER]                                         
+        """                                        
         #                                                                 
         # create secret with target options                               
         #                                                                 
-        if not self.crt_obj_secret(target_id,target,did):             
+        if not self.crt_obj_secret(targ_path,target,did):             
             print('Cant create target={}'.format(target_id))               
             return                                                              
-        # add new target into secret target list                                                                        
+        # add new target into secret target list   
+        """                                                                     
         glist[target_id] = target                                          
         secret[DID_GOODS] = glist                                               
         if not self._vault.create_or_update_secret(uid,secret=secret):          
             print('Cant update secret={}'.format(did))                                                                           
             return                                                              
-
+        """
 
 
     def target(self,args,wait=None):
@@ -571,12 +661,14 @@ class NotaryClient(XcertClient):
         try:                                                                                            
             secret,uid = self.get_did_info(args.did)
             if secret is None:
-                return                                                    
-            val = self._vault.get_secret(args.target_id)
+                return  
+            targ_path =  TARGET_PATH.format(uid,args.target_id)                                                 
+            val = self._vault.get_secret(targ_path)
             if val is not None:
                 print('Target {} already exist.'.format(args.target_id)) 
                 return
-            # add new role into DID role list                                                           
+            # add new role into DID role list 
+            """                                                          
             if DID_GOODS in secret and isinstance(secret[DID_GOODS],dict) :                             
                 glist = secret[DID_GOODS]                                                               
                 if args.target_id in glist:                                                               
@@ -585,34 +677,30 @@ class NotaryClient(XcertClient):
                 # add new target                                                                          
             else:                                                                                       
                 # new goods list                                                                         
-                glist = {}                                                                              
+                glist = {}  
+            """                                                                            
             # add new role  
+            nreq = self._cdec.target_req(args)
             if args.notary > 0:
                 # send notary request 
                 if args.notary_url is None:
                     print("Set notary rest api url")
                     return None
                 # send request batch_list.SerializeToString()
-                nreq = self._cdec.target_req(args)
+                #nreq = self._cdec.target_req(args)
                 return self.send_notary_req(nreq,args)
-
-
-            resp,_ = self._cdec.target(args,wait=WAIT_DEF)  
+            #print("N",nreq)
+            sreq = self._cdec.notary_req_sign(nreq[DEC_CMD_OPTS], self._signer)
+            #print("S",sreq)
+            nreq[DEC_CMD_OPTS] = sreq
+            resp,_ =  self._cdec.notary_approve(nreq,wait=WAIT_DEF)
+            #print("R",resp)
+            #return
+            #resp,_ = self._cdec.target(args,wait=WAIT_DEF)  
             if resp in ['PENDING','INVALID']  :                         
                 print("TARGET status error = {}".format(resp))                  
                 return                                                 
-            
-            #                                                                         
-            target = self._cdec.get_target_opts(args) 
-            if not self.crt_obj_secret(args.target_id,target,args.did): 
-                print('Cant create target={}'.format(args.target_id)) 
-                return
-                                                                   
-            glist[args.target_id] = target                                                                 
-            secret[DID_GOODS] = glist                                                                   
-            if not self._vault.create_or_update_secret(uid,secret=secret):                              
-                print('Cant update secret={}'.format(args.did))                                              
-                return                                                                                  
+            self.target_vault_done(nreq[DEC_CMD_OPTS],nreq[DEC_TRANS_OPTS])
             return resp                                                               
                                                                                                         
         except Exception as ex:                                                                         
@@ -941,7 +1029,7 @@ class NotaryClient(XcertClient):
                 data_val = {DEC_CMD_OPTS : sreq,DEC_TRANS_OPTS : data_val[DEC_TRANS_OPTS]}
                 res = self.send_notary_approve(args.name,data_val, args)
 
-                print('approval check sign={} data={}'.format(ret,data_val))
+                #print('approval check sign={} data={}'.format(ret,data_val))
                 return res
                                                                                                                  
         except BaseException as ex :

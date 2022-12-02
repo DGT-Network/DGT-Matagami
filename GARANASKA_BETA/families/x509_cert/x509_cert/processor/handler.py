@@ -22,11 +22,13 @@ import cbor
 from dgt_sdk.processor.handler import TransactionHandler
 from dgt_sdk.processor.exceptions import InvalidTransaction
 from dgt_sdk.processor.exceptions import InternalError
+from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 
 from dgt_signing import CryptoFactory,create_context
 from dgt_signing.core import X509_COMMON_NAME
 from x509_cert.client_cli.xcert_attr import *
+from x509_cert.xcert_addr_util import make_xcert_address,XCERT_ADDRESS_PREFIX
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,15 +38,7 @@ VALID_VERBS = XCERT_SET_OP, XCERT_UPD_OP, XCERT_CRT_OP
 MIN_VALUE = 0
 MAX_VALUE = 4294967295
 MAX_NAME_LENGTH = 20
-
-#FAMILY_NAME = 'xcert'
-#FAMILY_VERSION = '1.0'
-XCERT_ADDRESS_PREFIX = hashlib.sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
-
-
-def make_xcert_address(name):
-    return XCERT_ADDRESS_PREFIX + hashlib.sha512(name.encode('utf-8')).hexdigest()[-64:]
-
+CERT_MARKER = '-----BEGIN CERTIFICATE-----\n'
 
 class XcertTransactionHandler(TransactionHandler):
     def __init__(self):
@@ -55,6 +49,7 @@ class XcertTransactionHandler(TransactionHandler):
         self._public_key = self._context.get_public_key(self._private_key)
         crypto_factory = CryptoFactory(self._context)
         self._signer = crypto_factory.new_signer(self._private_key)
+        self._trans_signer_key = None
         #self._signer = CryptoFactory(self._context).new_signer(self.private_key)
         LOGGER.debug('_do_set: public_key=%s  ',self._public_key.as_hex())
         LOGGER.info('XcertTransactionHandler init DONE')
@@ -71,8 +66,31 @@ class XcertTransactionHandler(TransactionHandler):
     def namespaces(self):
         return [XCERT_ADDRESS_PREFIX]
 
+    def _get_trans_signer(self,transaction): 
+        self._trans_signer_key = transaction.header.signer_public_key                                                                               
+        LOGGER.debug('_transaction signer={}'.format(self._trans_signer_key))             
+
+    def _get_xcert_value(self,value):
+        try:                                                                  
+            sval = cbor.loads(value)                                          
+            LOGGER.debug('extract data - "{}"'.format(sval))                  
+            xvalue = bytes.fromhex(sval[XCERT_PAYLOAD][XCERT_ATTR])           
+        except Exception as ex:                                               
+            LOGGER.debug('set cant extract data - "{}"'.format(ex))           
+            xvalue = value 
+        return xvalue                                                   
+
     def apply(self, transaction, context):
-        LOGGER.debug('apply:....\n')
+        """
+        transaction = message TpProcessRequest {
+            TransactionHeader header = 1;  // The transaction header
+            bytes payload = 2;  // The transaction payload
+            string signature = 3;  // The transaction header_signature
+            string context_id = 4; // The context_id for state requests.
+        }
+        """
+        LOGGER.debug('apply: trans={}...\n'.format(type(transaction)))
+        self._get_trans_signer(transaction)
         verb, owner, value  = _unpack_transaction(transaction)
         LOGGER.debug('apply:verb={} owner={} value={}'.format(verb,owner,value))
         
@@ -141,8 +159,8 @@ class XcertTransactionHandler(TransactionHandler):
 
 
     def _do_set(self,owner, value, state,crt=False):
-        msg = 'Setting "{n}" to {v}'.format(n=owner, v=value)
-        LOGGER.debug(msg)
+
+        LOGGER.debug('Setting "{}" to {}'.format(owner,value))
         """
         check owner key - in notary mode it shoud be from static list of notary
         TODO
@@ -158,11 +176,12 @@ class XcertTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Xcert already exists: Name: {n}, Value {v} curr={t}'.format(n=owner,v=xcert,t=type(curr)))
 
         updated = {k: v for k, v in state.items()}
-        
+
+        xvalue = self._get_xcert_value(value)
         try:
             token = X509CertInfo(
                              owner_key = owner, 
-                             xcert = value
+                             xcert = xvalue
                 )
             updated[owner] = token.SerializeToString()
             LOGGER.debug('_do_set updated=%s',updated)
@@ -178,7 +197,7 @@ class XcertTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Undefined xcert name "{}" not in state'.format(owner))
 
         updated = {k: v for k, v in state.items()}                           
-                                                                             
+        xvalue = self._get_xcert_value(value)                                                                     
         try:                                                                 
             token = X509CertInfo(                                            
                              owner_key = owner,                              
@@ -205,6 +224,7 @@ def _unpack_transaction(transaction):
 
 
 def _decode_transaction(transaction):
+
     try:
         content = cbor.loads(transaction.payload)
     except:

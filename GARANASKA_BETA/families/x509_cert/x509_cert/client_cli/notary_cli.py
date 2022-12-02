@@ -21,6 +21,7 @@ import sys
 import traceback
 import pkg_resources
 import cbor
+import yaml
 from colorlog import ColoredFormatter
 from dgt_sdk.processor.log import log_configuration
 from x509_cert.client_cli.generate import add_generate_parser
@@ -96,6 +97,12 @@ def create_parent_parser(prog_name):
         '-v', '--verbose',
         action='count',
         help='enable more verbose output')
+    parent_parser.add_argument(             
+        '-y', '--yaml',                  
+        action='count',
+        default=1,                     
+        help='enable yaml  output')  
+
 
     try:
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
@@ -425,7 +432,14 @@ def add_wallet_parser(subparsers, parent_parser):
         '--notary',                                     
         action='count',                                 
         default=0,                                      
-        help='Use Notary for control operation')        
+        help='Use Notary for control operation')    
+    parser.add_argument(                             
+        '--check',                                  
+        action='count',                              
+        default=0,                                   
+        help='Just show wallet options')     
+    
+        
                                                         
     parser.add_argument(                                
         '--notary_url',                                 
@@ -958,7 +972,13 @@ def do_show(args):
     if client.is_notary_info(name):
         val = client.get_xcert_notary_attr(xcert) 
         nkey = client.get_pub_key(xcert)
+
+        if args.yaml > 0:
+            val = yaml.dump(val,explicit_start=True,indent=4,default_flow_style=False)
+            
         print("NOTARY KEY={} DATA={}".format(nkey,val))
+    if args.yaml > 0:                                                             
+        xcert = yaml.dump(xcert,explicit_start=True,indent=4,default_flow_style=False)
 
     print('{}:valid={}->{} {}'.format(name,xcert.not_valid_before,xcert.not_valid_after,xcert))
 
@@ -996,10 +1016,22 @@ def add_info_parser(subparsers, parent_parser):
         help='Show seal keeper info') 
     parser.add_argument(                 
         '--list',                       
-        action='count',                 
-        default=0,                      
+        #action='count',
+        nargs='?', 
+        type=str,                
+        #default=0,                      
         help='Show list of secrets')   
-    
+    parser.add_argument(                    
+        '-r','--recursive',                          
+        action='count',                    
+        default=0,                         
+        help='Show List recursively')      
+    parser.add_argument(                  
+        '-m','--meta',               
+        action='count',                   
+        default=0,                        
+        help='Show meta info for secrets')     
+
                                            
     parser.add_argument(                                                         
         '--keyfile',                                                             
@@ -1023,9 +1055,13 @@ def do_info(args):
     if args.raft > 0:
         value = client.show_raft_info(args)                                                                             
         print("RAFT CONGIG: {}".format(value)) 
-    if args.list > 0:                           
-        value = client._vault.get_sys_info(info="ls")     
-        print("SECRETS LIST: {}".format(value))  
+    if args.list:  
+        if False and args.meta > 0 :
+            #
+            client._vault.delete_secret(args.list)
+        else:
+            value = client.get_info_list(args)     
+            print("SECRETS LIST:{}: \n{}".format(args.list,value))  
 
     if args.seal > 0:
         stat = client.show_seal_status()
