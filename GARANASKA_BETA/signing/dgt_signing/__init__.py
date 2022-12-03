@@ -119,7 +119,7 @@ def create_context(algorithm_name,backend='bitcoin'):
         backend = CRYPTO_BACK
     #if backend is None:
 
-    print(f"CREATE_CONTEXT:: backend={backend}")
+    #print(f"CREATE_CONTEXT:: backend={backend}")
     if backend == 'bitcoin':
         # old version
         if algorithm_name == 'secp256k1':
