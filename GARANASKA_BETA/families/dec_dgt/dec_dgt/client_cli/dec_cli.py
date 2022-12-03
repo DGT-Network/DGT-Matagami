@@ -1784,13 +1784,18 @@ def do_list(args):
     client = _get_client(args)
     results = client.list()
     token = DecTokenInfo()
+    to_yaml = {}
     for pair in results:
         for name, value in pair.items():
             token.ParseFromString(value)
             dec = cbor.loads(token.dec) if token.group_code in DEC_TYPES else {}
+            if args.yaml > 0:
+                to_yaml[name] = token.group_code if args.verbose is None or args.verbose == 0 else client.do_verbose(dec,args.verbose,off=True)
+            else:
+                print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
-            print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
-
+    if args.yaml > 0:
+        print(do_yaml(to_yaml))
 
 def _get_client(args):
     return DecClient(

@@ -136,9 +136,9 @@ class DecClient:
     def signer_as_hex(self):
         return self._signer.get_public_key().as_hex()
 
-    def do_verbose(self,dec,verbose):
+    def do_verbose(self,dec,verbose,off=True):
         # 
-        if verbose is None or verbose == 0:          
+        if off or (verbose is None or verbose == 0):          
             for k,v in dec.items():                            
                 if isinstance(v,dict) and DATTR_VAL in v:                         
                     dec[k] = v[DATTR_VAL]                      
