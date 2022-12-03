@@ -398,7 +398,7 @@ class DecClient:
             info[DEC_TOTAL_SUM] = args.sum
             info[DEC_TMSTAMP] = time.time()
             print('PROTO',info)                                                                 
-            self._send_transaction(DEC_BURN_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)
+            self._send_transaction(DEC_BURN_OP, ANY_EMISSION_KEY.format(args.name), info, to=None, wait=wait)
         else:
             print('Set  passkey and burn_sum argument')
 
@@ -428,13 +428,13 @@ class DecClient:
 
             info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
             print('PROTO',info)                                                                      
-            self._send_transaction(DEC_CHANGE_MINT_OP, DEC_EMISSION_KEY, info, to=None, wait=wait)          
+            self._send_transaction(DEC_CHANGE_MINT_OP, ANY_EMISSION_KEY.format(args.name), info, to=None, wait=wait)          
         else:                                                                                        
             print('Set  passkey')                                              
 
 
     def distribute(self,args,wait=None):    
-        token = self.show(DEC_EMISSION_KEY)               
+        token = self.show(ANY_EMISSION_KEY.format(args.name))               
         info = {}                                         
         if token.group_code == DEC_NAME_DEF :             
             dec = cbor.loads(token.dec)                        
@@ -450,7 +450,7 @@ class DecClient:
             info[DEC_PASSKEY] = args.passkey                                                        
             info[DATTR_VAL]   = args.value                                       
             print('PROTO',info)                                                                     
-            self._send_transaction(DEC_FAUCET_OP, args.pubkey, info, to=DEC_EMISSION_KEY, wait=wait)  
+            self._send_transaction(DEC_FAUCET_OP, args.pubkey, info, to=ANY_EMISSION_KEY.format(args.name), wait=wait)  
         else:                                                                                       
             print('Set  passkey argument')                                           
 
@@ -467,7 +467,7 @@ class DecClient:
             info[DEC_DID_VAL] = args.did
 
         info[DEC_TMSTAMP] = time.time()
-        self._send_transaction(DEC_MINT_OP, args.pubkey, info, to=DEC_HEART_BEAT_KEY, wait=wait,din=[DEC_EMISSION_KEY])                  
+        self._send_transaction(DEC_MINT_OP, args.pubkey, info, to=DEC_HEART_BEAT_KEY, wait=wait,din=[ANY_EMISSION_KEY.format(args.name)])                  
 
 
     def heart_beat(self,args,wait=None):      

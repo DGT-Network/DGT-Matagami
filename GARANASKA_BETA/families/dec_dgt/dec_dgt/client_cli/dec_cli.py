@@ -521,7 +521,7 @@ def add_birth_parser(subparsers, parent_parser):
         '-n','--name',                           
         type=str,                                
         help='specify token name (DEC/..)',      
-        default='DEC')                           
+        default=DEC_NAME_DEF)                           
 
 
     parser.add_argument(
@@ -565,7 +565,7 @@ def add_total_supply_parser(subparsers, parent_parser):
         '-n','--name',                             
         type=str,                                  
         help='specify token name (DEC/..)',        
-        default='DEC')                             
+        default=DEC_NAME_DEF)                             
 
     parser.add_argument(
         '--wait',
@@ -576,7 +576,9 @@ def add_total_supply_parser(subparsers, parent_parser):
 
 def do_total_supply(args):
     client = _get_client(args)                                
-    response = client.total_supply(args, args.wait)                  
+    response = client.total_supply(args, args.wait)
+    if args.yaml > 0:                
+        response = do_yaml(response)                   
     print(response)                                           
 
 def add_token_info_parser(subparsers, parent_parser):
@@ -602,7 +604,7 @@ def add_token_info_parser(subparsers, parent_parser):
         '-n','--name',                             
         type=str,                            
         help='specify token name (DEC/..)',      
-        default='DEC')  
+        default=DEC_NAME_DEF)  
 
     parser.add_argument(
         '--wait',
@@ -658,6 +660,12 @@ def add_burn_parser(subparsers, parent_parser):
         type=str,                                            
         help='Specify a crypto back openssl/bitcoin',        
         default=CRYPTO_BACK)                                 
+    parser.add_argument(                            
+        '-n','--name',                              
+        type=str,                                   
+        help='specify token name (DEC/..)',         
+        default=DEC_NAME_DEF)                              
+    
                                                              
 
     parser.add_argument(
@@ -719,6 +727,12 @@ def add_change_mint_parser(subparsers, parent_parser):
         type=str,                                            
         help='Specify a crypto back openssl/bitcoin',        
         default=CRYPTO_BACK)                                 
+    parser.add_argument(                             
+        '-n','--name',                              
+        type=str,                                   
+        help='specify token name (DEC/..)',         
+        default=DEC_NAME_DEF)                              
+
                                                              
     parser.add_argument(
         '--wait',
@@ -757,7 +771,12 @@ def add_distribute_parser(subparsers, parent_parser):
         type=str,                                            
         help='Specify a crypto back openssl/bitcoin',        
         default=CRYPTO_BACK)                                 
-                                                             
+    parser.add_argument(                            
+        '-n','--name',                             
+        type=str,                                  
+        help='specify token name (DEC/..)',        
+        default=DEC_NAME_DEF)                             
+    
     parser.add_argument(
         '--wait',
         nargs='?',
@@ -767,7 +786,9 @@ def add_distribute_parser(subparsers, parent_parser):
 
 def do_distribute(args):
     client = _get_client(args)                                
-    response = client.distribute(args, args.wait)                  
+    response = client.distribute(args, args.wait) 
+    if args.yaml > 0:                
+        response = do_yaml(response)                  
     print(response)                                           
 
 def add_faucet_parser(subparsers, parent_parser):
@@ -809,8 +830,12 @@ def add_faucet_parser(subparsers, parent_parser):
         type=str,                                            
         help='Specify a crypto back openssl/bitcoin',        
         default=CRYPTO_BACK)                                 
-                                                             
-
+    parser.add_argument(                       
+        '-n','--name',                         
+        type=str,                              
+        help='specify token name (DEC/..)',    
+        default=DEC_NAME_DEF)                         
+                                               
     parser.add_argument(
         '--wait',
         nargs='?',
@@ -866,6 +891,12 @@ def add_mint_parser(subparsers, parent_parser):
         type=str,                                            
         help='Specify a crypto back openssl/bitcoin',        
         default=CRYPTO_BACK)                                 
+    
+    parser.add_argument(                          
+        '-n','--name',                           
+        type=str,                                
+        help='specify token name (DEC/..)',      
+        default=DEC_NAME_DEF)                           
                                                              
     parser.add_argument(
         '--wait',
@@ -1033,7 +1064,11 @@ def do_balance_of(args):
          DEC_СORPORATE_REST : dec[DEC_СORPORATE_REST],
          DEC_SALE_REST : dec[DEC_SALE_REST]
          }
-        print("{}: {}={} : ".format(args.pubkey,args.asset_type,inf))
+        if args.yaml > 0:                
+            inf = do_yaml({args.asset_type : inf}) 
+
+
+        print("{}: \n{}".format(args.pubkey,inf))
     else:
         print("{} - undefined".format(args.pubkey))
     
