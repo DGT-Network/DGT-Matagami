@@ -58,7 +58,8 @@ UFN_ATTR = 'user_first_name'
 OPR_ATTR = 'oper'                                                               
 EMAIL_ATTR = 'email'                                                            
 ADDRESS_ATTR = 'address'                                                        
-XCERT_ATTR = 'xcert'                                                            
+XCERT_ATTR = 'xcert'
+XCERT_PAYLOAD = 'payload'                                                            
 COUNTRY_ATTR = 'country' 
                                                        
 

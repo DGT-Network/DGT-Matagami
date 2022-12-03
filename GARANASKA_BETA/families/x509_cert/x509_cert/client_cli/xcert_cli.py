@@ -44,7 +44,7 @@ DISTRIBUTION_NAME = 'x509-cert'
 
 DEFAULT_URL = 'http://127.0.0.1:8008'
 
-DGT_TOP = os.environ.get('DGT_TOP')
+DGT_TOP = os.environ.get('DGT_TOP','dgt')
 XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
@@ -291,7 +291,11 @@ def do_show(args):
     token = X509CertInfo()
     token.ParseFromString(value)
     #xcert = cbor.loads(token.xcert)
-    xcert = client.load_xcert(token.xcert)
+    try:
+        xcert = client.load_xcert(token.xcert)
+    except Exception as ex:
+        print("Cant load XCERT={} DATA={}".format(name,token.xcert))
+        return
 
     if client.is_notary_info(name):
         val = client.get_xcert_notary_attr(xcert) 
@@ -335,9 +339,12 @@ def do_list(args):
     for pair in results:
         for name, value in pair.items():
             token.ParseFromString(value)
-            xcert = client.load_xcert(token.xcert)
-            print(f'{name}: valid={xcert.not_valid_before}/{xcert.not_valid_after} {xcert}')
-
+            try:
+                xcert = client.load_xcert(token.xcert)
+                print(f'{name}: valid={xcert.not_valid_before}/{xcert.not_valid_after} {xcert}')
+            except Exception as ex:                                           
+                print("Cant load XCERT={} DATA={}".format(name,token.xcert))  
+                                                                       
 
 def _get_client(args):
     return XcertClient(
