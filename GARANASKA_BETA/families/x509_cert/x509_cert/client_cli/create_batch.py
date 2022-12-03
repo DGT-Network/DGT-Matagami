@@ -33,7 +33,7 @@ from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
 from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
 
 
-from x509_cert.processor.handler import make_xcert_address,FAMILY_NAME,FAMILY_VERSION
+from x509_cert.xcert_addr_util import make_xcert_address
 from x509_cert.client_cli.xcert_attr import *
 
 LOGGER = logging.getLogger(__name__)
