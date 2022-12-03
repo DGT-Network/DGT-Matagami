@@ -170,6 +170,10 @@ class XcertClient:
         val = self.get_xcert_attributes(xcert,X509_COMMON_NAME)
         return cbor.loads(bytes.fromhex(val)) if val is not None else {}
 
+    def xcert_to_dict(self,xcert,exclude=[X509_COMMON_NAME]):                                
+        val = self._signer.context.xcert_to_dict(xcert,exclude)           
+        return val  
+
     def get_pub_key(self,xcert):
         #
         return self._signer.context.get_pub_key(xcert)
@@ -370,9 +374,9 @@ class XcertClient:
                 wait_time = time.time() - start_time
 
                 if status != 'PENDING':
-                    return response
+                    return (status,batch_id) # response
 
-            return response
+            return (status,batch_id) #return response
 
         return self._send_request(
             "batches", batch_list.SerializeToString(),

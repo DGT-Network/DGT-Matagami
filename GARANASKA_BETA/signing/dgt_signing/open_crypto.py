@@ -32,7 +32,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_der_public_key,load_der_private_key
-
+#from sha3 import keccak_256
 import logging
 
 # x509
@@ -257,9 +257,23 @@ class OpenCryptoContext(Context):
             return val[0].value if val != [] else None
         else:
             return None
+    def xcert_to_dict(self,xcert,exclude=[]): 
+        cdict = {}                        
+        for attr in x509_attr_map: 
+            if attr in exclude:
+                continue
+            oid = x509_attr_map[attr]                                  
+            val = xcert.subject.get_attributes_for_oid(oid) 
+            cdict[attr] = val[0].value if val != [] else None         
+        return cdict
+                                                                       
+
 
     def get_pub_key(self,xcert):
         public_key = xcert.public_key()
         return OpenCryptoPublicKey(self,public_key).as_hex()
+
+    def pubkey2addr(self,hex_str,lng=20):
+        return keccak_256(hex_str.encode()).digest()[-lng:].hex()
 
 

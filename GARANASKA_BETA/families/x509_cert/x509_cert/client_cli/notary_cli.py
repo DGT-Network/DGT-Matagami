@@ -52,6 +52,11 @@ DEFAULT_URL = 'http://127.0.0.1:8008'
 
 DGT_TOP = os.environ.get('DGT_TOP','dgt')
 XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
+
+def do_yaml(data):                                                               
+    return yaml.dump(data,explicit_start=True,indent=4,default_flow_style=False) 
+
+
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
     formatter = ColoredFormatter(
@@ -974,13 +979,21 @@ def do_show(args):
         nkey = client.get_pub_key(xcert)
 
         if args.yaml > 0:
-            val = yaml.dump(val,explicit_start=True,indent=4,default_flow_style=False)
+            val = do_yaml(val)
             
-        print("NOTARY KEY={} DATA={}".format(nkey,val))
-    if args.yaml > 0:                                                             
-        xcert = yaml.dump(xcert,explicit_start=True,indent=4,default_flow_style=False)
-
-    print('{}:valid={}->{} {}'.format(name,xcert.not_valid_before,xcert.not_valid_after,xcert))
+        print("NOTARY KEY={} \n{}".format(nkey,val))
+    if args.yaml > 0: 
+        try:
+            xcert = do_yaml(xcert)
+        except Exception as ex:
+            xdict = client.xcert_to_dict(xcert)
+            #print(xdict)
+            xdict[name] = '-Cert'
+            xdict['valid'] = "{}->{}".format(xcert.not_valid_before,xcert.not_valid_after)
+            xcert = do_yaml(xdict)
+            print(xcert)
+    else:
+        print('{}:valid={}->{} {}'.format(name,xcert.not_valid_before,xcert.not_valid_after,xcert))
 
 
 def add_info_parser(subparsers, parent_parser):                                  
