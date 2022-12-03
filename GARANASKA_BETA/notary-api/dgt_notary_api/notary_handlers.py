@@ -24,7 +24,7 @@ import time
 from datetime import datetime
 import uuid
 from aiohttp import web
-
+import traceback
 # pylint: disable=no-name-in-module,import-error
 # needed for the google.protobuf imports to pass pylint
 from google.protobuf.json_format import MessageToDict
@@ -371,7 +371,7 @@ class NotaryRouteHandler(RouteHandler):
                                         self._vault.notary_approve_vault(aval[REQ_PAYLOAD])
 
                                     self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : aval[REQ_PAYLOAD], REQ_STATUS : status,REQ_DGT_LINK:dgt_link})],[])
-                            elif curr_status == DGT_ERROR:
+                            elif curr_status in [ DGT_ERROR,"{"]:
                                 # send again into DGT 
                                 LOGGER.debug('Send request again into DGT={}'.format(akey))
                                 res = self.ask_dgt_approve(akey,aval[REQ_PAYLOAD])
@@ -1097,5 +1097,5 @@ class NotaryRouteHandler(RouteHandler):
             self._db.update([(akey, {'qid' : akey,REQ_PAYLOAD : body, REQ_STATUS : res[0],REQ_DGT_LINK:res[1]})],[])   # REQ_STATUS_DGT_PENDING 
             return res
         except Exception as ex:
-            LOGGER.debug('ask_dgt_approve: body={} - error={}'.format(type(body),ex))
+            LOGGER.debug('ask_dgt_approve: body={} - error={} TB={}'.format(type(body),ex,traceback.format_exc()))
             return (DGT_ERROR,'')
