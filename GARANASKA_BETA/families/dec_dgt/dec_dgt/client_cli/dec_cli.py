@@ -1058,12 +1058,16 @@ def add_balance_of_parser(subparsers, parent_parser):
 def do_balance_of(args):
     client = _get_client(args)                                
     token = client.balance_of(args, args.wait) 
+    #print(token)
     if token:
         dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
-        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM][DATTR_VAL],
-         DEC_СORPORATE_REST : dec[DEC_СORPORATE_REST],
-         DEC_SALE_REST : dec[DEC_SALE_REST]
-         }
+        #print(dec)
+        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM],
+                  }
+        if DEC_СORPORATE_REST in dec:
+            inf[DEC_СORPORATE_REST] = dec[DEC_СORPORATE_REST]
+        if DEC_SALE_REST in dec:
+            inf[DEC_SALE_REST] = dec[DEC_SALE_REST]
         if args.yaml > 0:                
             inf = do_yaml({args.asset_type : inf}) 
 
