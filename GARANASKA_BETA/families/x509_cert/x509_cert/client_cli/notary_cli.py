@@ -1078,7 +1078,7 @@ def do_info(args):
 
     if args.seal > 0:
         stat = client.show_seal_status()
-        print("SEAL STATUS: {}".format(stat))
+        print("SEAL STATUS: \n{}".format(do_yaml(stat)))
         return
         value = client.show(KEYKEEPER_ID)
         if value is None :                                               
