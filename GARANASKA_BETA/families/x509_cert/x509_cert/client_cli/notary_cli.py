@@ -1067,7 +1067,7 @@ def do_info(args):
 
     if args.raft > 0:
         value = client.show_raft_info(args)                                                                             
-        print("RAFT CONGIG: {}".format(value)) 
+        print("RAFT CONGIG: {}".format(do_yaml(value))) 
     if args.list:  
         if False and args.meta > 0 :
             #
@@ -1089,7 +1089,7 @@ def do_info(args):
         xcert = client.load_xcert(token.xcert) 
         val = client.get_xcert_notary_attr(xcert)        
         nkey = client.get_pub_key(xcert)                 
-        print("SEAL KEY={} DATA={}".format(nkey,val))  
+        print("SEAL KEY={} \n{}".format(nkey,do_yaml(val)))  
                                   
                  
 
