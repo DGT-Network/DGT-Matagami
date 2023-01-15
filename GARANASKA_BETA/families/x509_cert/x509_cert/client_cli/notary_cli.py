@@ -106,7 +106,20 @@ def create_parent_parser(prog_name):
         '-y', '--yaml',                  
         action='count',
         default=1,                     
-        help='enable yaml  output')  
+        help='enable yaml  output') 
+    parent_parser.add_argument(                                                 
+        '--check',                                                              
+        action='count',                                                         
+        default=0,                                                              
+        help='Just show all params for operation')                              
+                                                                                
+    parent_parser.add_argument(                                                 
+        '-cb', '--crypto_back',                                                 
+        type=str,                                                               
+        choices=["openssl","bitcoin"] ,                                         
+        help='Specify a crypto back openssl/bitcoin',                           
+        default=CRYPTO_BACK                                                     
+        )                                                                        
 
 
     try:
@@ -208,11 +221,6 @@ def add_set_parser(subparsers, parent_parser):
         help='set time, in day - cert is valid after') 
 
 
-    parser.add_argument(              
-        '-cb', '--crypto_back',               
-        type=str,                             
-        help='Specify a crypto back',         
-        default=CRYPTO_BACK)                    
 
 
 def do_set(args):
@@ -258,11 +266,6 @@ def add_upd_parser(subparsers, parent_parser):
         const=sys.maxsize,
         type=int,
         help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                            
-        '-cb', '--crypto_back',                     
-        type=str,                                   
-        help='Specify a crypto back openssl/bitcoin',               
-        default=CRYPTO_BACK)
     parser.add_argument(                                   
         '--before',                                       
         type=int,                                         
@@ -341,12 +344,7 @@ def add_crt_parser(subparsers, parent_parser):
         type=int,
         help='set time, in seconds, to wait for transaction to commit')
 
-    parser.add_argument(                            
-        '-cb', '--crypto_back',                     
-        type=str,                                   
-        help='Specify a crypto back openssl/bitcoin',               
-        default=CRYPTO_BACK)
-
+ 
     parser.add_argument(                                   
         '--before',                                       
         type=int,                                         
@@ -438,11 +436,6 @@ def add_wallet_parser(subparsers, parent_parser):
         action='count',                                 
         default=0,                                      
         help='Use Notary for control operation')    
-    parser.add_argument(                             
-        '--check',                                  
-        action='count',                              
-        default=0,                                   
-        help='Just show wallet options')     
     
         
                                                         
@@ -452,12 +445,6 @@ def add_wallet_parser(subparsers, parent_parser):
         help='Specify URL of NOTARY REST API',          
         default='http://telebot-dgt:8203'               
         )                                               
-    
-    parser.add_argument(                                      
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
     
                                                                                                                                                 
     parser.add_argument(                                                                                                                        
@@ -507,11 +494,6 @@ def add_wallets_parser(subparsers, parent_parser):
         type=str,                                                                                                                                                  
         default="/project/peer/keys/notary.priv",                                                                                                                  
         help="Identify file containing notary's private key (by default - current notary key)")                                                                           
-    parser.add_argument(                                                                                                                                           
-        '-cb', '--crypto_back',                                                                                                                                    
-        type=str,                                                                                                                                                  
-        help='Specify a crypto back openssl/bitcoin',                                                                                                              
-        default=CRYPTO_BACK)                                                                                                                                       
 
 def do_wallets(args):                                
     client = _get_client(args)                      
@@ -566,12 +548,6 @@ def add_role_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",                                                        
         help="Identify file containing owner private key") 
                                                      
-    parser.add_argument(                                                                                    
-        '-cb', '--crypto_back',                                                                             
-        type=str,                                                                                           
-        help='Specify a crypto back openssl/bitcoin',                                                       
-        default=CRYPTO_BACK)                                                                                
-                                                                                                            
                                                                                                             
     parser.add_argument(                                                                                    
         '--wait',                                                                                           
@@ -612,13 +588,7 @@ def add_roles_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",                                                                    
         help="Identify file containing owner private key")                                                           
                                                                                                                      
-    parser.add_argument(                                                                                             
-        '-cb', '--crypto_back',                                                                                      
-        type=str,                                                                                                    
-        help='Specify a crypto back openssl/bitcoin',                                                                
-        default=CRYPTO_BACK)                                                                                         
-                                                                                                                     
-                                                                                                                     
+                                                                                                                      
     parser.add_argument(                                                                                             
         '--wait',                                                                                                    
         nargs='?',                                                                                                   
@@ -695,13 +665,7 @@ def add_target_parser(subparsers, parent_parser):
         type=str,                                                                                           
         default="/project/peer/keys/notary.priv",                                                        
         help="Identify file containing notary private key")                                                  
-    parser.add_argument(                                                                                    
-        '-cb', '--crypto_back',                                                                             
-        type=str,                                                                                           
-        help='Specify a crypto back openssl/bitcoin',                                                       
-        default=CRYPTO_BACK)                                                                                
-                                                                                                            
-                                                                                                            
+                                                                                                           
     parser.add_argument(                                                                                    
         '--wait',                                                                                           
         nargs='?',                                                                                          
@@ -742,12 +706,7 @@ def add_goods_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",                                                
         help="Identify file containing owner private key")                                       
                                                                                                  
-    parser.add_argument(                                                                         
-        '-cb', '--crypto_back',                                                                  
-        type=str,                                                                                
-        help='Specify a crypto back openssl/bitcoin',                                            
-        default=CRYPTO_BACK)                                                                     
-                                                                                                 
+                                                                                                  
                                                                                                  
     parser.add_argument(                                                                         
         '--wait',                                                                                
@@ -836,14 +795,7 @@ def add_pay_parser(subparsers, parent_parser):
         default='http://telebot-dgt:8203'             
         )                                             
                                                                                       
-    parser.add_argument(                                                                                                                      
-        '-cb', '--crypto_back',                                                                                                               
-        type=str,                                                                                                                             
-        help='Specify a crypto back openssl/bitcoin',                                                                                         
-        default=CRYPTO_BACK)                                                                                                                  
-                                                                                                                                              
-                                                                                                                                              
-                                                                                                                                              
+ 
     parser.add_argument(                                                                                                                      
         '--wait',                                                                                                                             
         nargs='?',                                                                                                                            
@@ -903,11 +855,6 @@ def add_init_parser(subparsers, parent_parser):
         const=sys.maxsize,
         type=int,
         help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                            
-        '-cb', '--crypto_back',                     
-        type=str,                                   
-        help='Specify a crypto back openssl/bitcoin',               
-        default=CRYPTO_BACK)
 
     parser.add_argument(                                   
         '--before',                                       
@@ -950,12 +897,6 @@ def add_show_parser(subparsers, parent_parser):
         type=str,                                              
         help="identify file containing user's private key")    
 
-
-    parser.add_argument(                            
-        '-cb', '--crypto_back',                     
-        type=str,                                   
-        help='Specify a crypto back',               
-        default=CRYPTO_BACK)                          
 
 
 
@@ -1052,11 +993,6 @@ def add_info_parser(subparsers, parent_parser):
         help="identify file containing user's private key")                      
                                                                                  
                                                                                  
-    parser.add_argument(                                                         
-        '-cb', '--crypto_back',                                                  
-        type=str,                                                                
-        help='Specify a crypto back',                                            
-        default=CRYPTO_BACK)                                                     
                                                                                  
 
 
@@ -1113,12 +1049,7 @@ def add_list_parser(subparsers, parent_parser):
         help="identify file containing user's private key") 
 
 
-    parser.add_argument(                   
-        '-cb', '--crypto_back',            
-        type=str,                          
-        help='Specify a crypto back openssl/bitcoin',      
-        default=CRYPTO_BACK)                 
-
+ 
 
 def do_list(args):
     client = _get_client(args)
@@ -1160,12 +1091,6 @@ def add_approvals_parser(subparsers, parent_parser):
         type=str,                                                                        
         help="identify file containing user's private key")                              
                                                                                          
-                                                                                         
-    parser.add_argument(                                                                 
-        '-cb', '--crypto_back',                                                          
-        type=str,                                                                        
-        help='Specify a crypto back openssl/bitcoin',                                    
-        default=CRYPTO_BACK)                                                             
 
 
 
@@ -1223,12 +1148,6 @@ def add_approval_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",                                              
         help="identify file containing notary's private key")     
                                                                 
-                                                                
-    parser.add_argument(                                        
-        '-cb', '--crypto_back',                                 
-        type=str,                                               
-        help='Specify a crypto back openssl/bitcoin',           
-        default=CRYPTO_BACK)                                    
                                                                 
                                                                 
                                                                 
