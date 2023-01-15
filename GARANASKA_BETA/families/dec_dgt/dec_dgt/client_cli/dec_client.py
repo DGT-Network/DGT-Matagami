@@ -23,9 +23,9 @@ import cbor
 import json
 
 from dgt_signing import create_context
-from dgt_signing import CryptoFactory
+from dgt_signing import CryptoFactory,key_to_dgt_addr
 from dgt_signing import ParseError
-
+from dgt_signing import test_eth_list
 from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
@@ -41,12 +41,24 @@ from dec_dgt.client_cli.dec_attr import *
 from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM
 
 TRANS_TOUT = 4
+"""
+{ 'emitter': '3056301006072a8648ce3d020106052b8104000a034200045976931dfc659f1eafbda1698c78fa55ff4502bc71fbfa663468d49e894a1a468d0608873b08de6ff64b11fb0398223ec09674e7e83a20ba6d37580370e56fc4',
+  'payload': {
+               'target': {'target_price': 1002.0, 'target_info': 'empty target', 'invoice': {'customer': None, 'target_price': 1002.0}},
+               'timestamp': 1670580692.5705304,
+               'did': 'did:notary:30563010:000000000'
+             }
+}
+"""
+
 
 # settings family
 from dgt_settings.processor.utils import _make_settings_key,SETTINGS_NAMESPACE
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
+def _sha256(data):                         
+    return hashlib.sha256(data).hexdigest()
 
 def _get_prefix():                                             
     return _sha512(FAMILY_NAME.encode('utf-8'))[0:6]                     
@@ -62,11 +74,13 @@ def _token_info(val):
     return token
 
 def set_param(info,attr,val,def_val):
+    rval = val if val else def_val
+    #rval = uval if attr not in EMISSION_UNVISIBLE_ATTR else key_to_dgt_addr(uval)
     if attr in info:
         if val:
-            info[attr][DATTR_VAL] = val
+            info[attr][DATTR_VAL] = rval 
     else:
-        info[attr] = {DATTR_VAL : val if val else def_val}
+        info[attr] = {DATTR_VAL : rval }
 
 def tmstamp2str(val):
     return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
@@ -118,8 +132,12 @@ class DecClient:
             return vkey  
 
 
-
-
+    def get_random_addr(self):
+        priv_key = self._context.new_random_private_key()
+        pub_key = self._context.get_public_key(priv_key).as_hex()
+        addr = key_to_dgt_addr(pub_key)
+        #print("PUB",addr)
+        return addr
     def load_json_proto(self,value):
         if isinstance(value,dict):                        
             info = value                                  
@@ -147,13 +165,13 @@ class DecClient:
 
     # emission cmd parts
     def emission(self,args,wait=None):
-
+        emission_key = ANY_EMISSION_KEY.format(args.name)
         if args.info > 0:
             # show current emission params
-            token = self.show(DEC_EMISSION_KEY)
+            token = self.show(args,emission_key)
             dec = cbor.loads(token.dec)  
             dec = self.do_verbose(dec,args.verbose)
-            return {DEC_EMISSION_KEY:token.group_code,"INFO":dec}
+            return {emission_key:token.group_code,"INFO":dec}
 
         info = self.load_json_proto(args.proto)
         set_param(info,DEC_TOTAL_SUM,args.total_sum,DEC_TOTAL_SUM_DEF)
@@ -181,14 +199,27 @@ class DecClient:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self.get_pub_key(args.corporate_pub_key)}
         else:
             info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
-
+        for a,val in info.items():
+            if a in EMISSION_UNVISIBLE_ATTR:
+                if isinstance(val,dict) :
+                    val[DATTR_VAL] = key_to_dgt_addr(val[DATTR_VAL])
         if args.check > 0:
             #print("Emission's params={}".format(self.do_verbose(info,args.verbose))) #json.dumps(info, sort_keys=True, indent=4)))
             return self.do_verbose(info,args.verbose)
-        info[DEC_TMSTAMP] = time.time()
-        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
+
+        finfo = {
+                 
+                 DEC_EMITTER : self._signer.get_public_key().as_hex(),
+                 DEC_PAYLOAD : {
+                                 DEC_TMSTAMP     : time.time(),
+                                 DEC_EMISSION_OP : info,
+                                 DEC_DID_VAL     : args.did
+                               }
+                }
+
         #print('PROTO',info)
-        return self._send_transaction(DEC_EMISSION_OP, DEC_EMISSION_KEY, info, to=None, wait=wait if wait else TRANS_TOUT,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
+        #eaddr = self._get_full_addr(emission_key,tp_space=DEC_EMISSION_GRP,owner=args.did) #self._get_address(DEC_EMISSION_KEY)
+        return self._send_transaction(DEC_EMISSION_OP, (emission_key,DEC_EMISSION_GRP,args.did), finfo, to=None, wait=wait if wait else TRANS_TOUT,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
     def wallet_(self,args,wait=None,nsign=None):  
         # nsign - notary key for sign did info 
@@ -236,17 +267,22 @@ class DecClient:
 
     def wallet_info(self,args,signer=None):                                          
         info = {}                                                                    
-        tcurr = time.time()                                                          
-        info[DEC_WALLET_OP] = self.get_only_wallet_opts(args)                             
+        tcurr = time.time()
+        wallet = self.get_only_wallet_opts(args)                                                          
+        info[DEC_WALLET_OP] = wallet                             
         #info[DEC_EMITTER] = signer.get_public_key().as_hex()                        
         info[DEC_TMSTAMP] = tcurr                                                    
         if args.did:                                                                 
             # refer to DID owner                                                     
-            info[DEC_DID_VAL] = args.did                                             
+            info[DEC_DID_VAL] = args.did 
+        pubkey = self._signer.get_public_key().as_hex()
+        waddr = key_to_dgt_addr(pubkey)
+        wallet[DEC_WALLET_ADDR] = waddr
+        #addr = self._get_full_addr(waddr,tp_space=DEC_WALLET_GRP,owner=args.did)                                            
         opts = {                                                                     
                  DEC_CMD_OPTS   : info,                                              
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_WALLET_OP,                      
-                                    DEC_CMD_ARG: self._signer.get_public_key().as_hex()                      
+                                    DEC_CMD_ARG: (waddr,DEC_WALLET_GRP,args.did)                      
                                   }                                                  
                 }                                                                    
         return opts                                                                  
@@ -303,7 +339,9 @@ class DecClient:
         if args.status:                              
             opts[DEC_WALLET_STATUS] = args.status   
         if args.role:                                   
-            opts[DEC_WALLET_ROLE] = [args.role]           
+            opts[DEC_WALLET_ROLE] = [args.role]   
+        if args.token:
+            opts[DEC_WALLET_TOKEN] = args.token
             
         #print("DEC.wallet opts{}".format(opts))
         return opts
@@ -347,34 +385,42 @@ class DecClient:
         info[DEC_WALLET_OPTS_OP] = { DEC_WALLET_OPTS_OP   : payload,                                                                                                         
                                      DEC_SIGNATURE : psign                                                                                                            
                                    }                                                                                                                                  
-        info[DEC_TMSTAMP] = time.time()                                                                                                                        
-        return self._send_transaction(DEC_WALLET_OPTS_OP, self._signer.get_public_key().as_hex(), info, to=None, wait=wait, din=None) # DEC_EMISSION_KEY            
+        info[DEC_TMSTAMP] = time.time() 
+        waddr = (key_to_dgt_addr(self._signer.get_public_key().as_hex()),DEC_WALLET_GRP,args.did)
+        return self._send_transaction(DEC_WALLET_OPTS_OP,waddr, info, to=None, wait=wait if wait else TRANS_TOUT, din=None) # DEC_EMISSION_KEY            
 
 
 
     def birth(self,args,wait=None):
-        token = self.show(ANY_EMISSION_KEY.format(args.name))
-        dec = cbor.loads(token.dec) if token.group_code == DEC_NAME_DEF else {}   
+        token = self.get_object(DEC_EMISSION_GRP,args.did,ANY_EMISSION_KEY.format(args.name))
+        try:
+            dec = cbor.loads(token.dec)  
+        except  Exception as ex:
+            dec = {}
         tmstamp = dec[DEC_TMSTAMP] if DEC_TMSTAMP in dec else 0
         return tmstamp2str(tmstamp)
 
 
     def total_supply(self,args,wait=None):  
-        token = self.show(ANY_EMISSION_KEY.format(args.name))                                     
-        dec = cbor.loads(token.dec) if token.group_code == DEC_NAME_DEF else {} 
+        token = self.get_object(DEC_EMISSION_GRP,args.did,ANY_EMISSION_KEY.format(args.name))
+        try:
+            dec = cbor.loads(token.dec) #if token.group_code == DEC_NAME_DEF else {} 
+        except Exception as ex:
+            dec = {}
         return dec[DEC_TOTAL_SUM] if DEC_TOTAL_SUM in dec else 0
     
        
            
-    def token_info(self,args,wait=None):    
-        token = self.show(ANY_EMISSION_KEY.format(args.name))
+    def token_info(self,args,wait=None): 
+        tname =  ANY_EMISSION_KEY.format(args.name)  
+        token = self.get_object(DEC_EMISSION_GRP,args.did,tname)
         info = {}    
-        
-        if token.group_code == DEC_NAME_DEF :
+        #print(token.group_code,)
+        if token.group_code == args.name :
             dec = cbor.loads(token.dec)
-            #print('DEC=',dec[])
+            #print('DEC=',dec)
             for attr,aval in dec.items():
-                if attr not in [DEC_PASSKEY,DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
+                if attr not in [DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
                     val = aval
                     if attr == DEC_TMSTAMP:
                         val = tmstamp2str(aval) #time.strftime(DEC_TSTAMP_FMT, time.gmtime(aval))
@@ -394,25 +440,36 @@ class DecClient:
     def burn(self,args,wait=None):   
         info = {}
         if args.passkey and args.sum:
-            info[DEC_PASSKEY] = args.passkey
-            info[DEC_TOTAL_SUM] = args.sum
-            info[DEC_TMSTAMP] = time.time()
-            print('PROTO',info)                                                                 
-            self._send_transaction(DEC_BURN_OP, ANY_EMISSION_KEY.format(args.name), info, to=None, wait=wait)
+            binfo = { DEC_PASSKEY   : key_to_dgt_addr(args.passkey),
+                      DEC_TOTAL_SUM : args.sum
+                     }
+            
+            info[DEC_EMITTER] = self._signer.get_public_key().as_hex()                             
+            info[DEC_PAYLOAD] = {                                                                  
+                                  DEC_BURN_OP : binfo,                                              
+                                  DEC_TMSTAMP : time.time(),                                             
+                                  DEC_DID_VAL : DEFAULT_DID if args.did is None else args.did      
+                                }                                                                  
+
+
+            #print('PROTO',info)   
+            tname = ANY_EMISSION_KEY.format(args.name)  
+            #addr = self._get_full_addr(tname,tp_space=DEC_EMISSION_GRP,owner=args.did)                                                            
+            return self._send_transaction(DEC_BURN_OP, (tname,DEC_EMISSION_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT)
         else:
             print('Set  passkey and burn_sum argument')
 
     def change_mint(self,args,wait=None):
         info = {}                                                                                    
         if args.passkey:                                                                
-            info[DEC_PASSKEY] = args.passkey 
+            info[DEC_PASSKEY] = key_to_dgt_addr(args.passkey) 
             if args.mint:
                 try:
                     info[DEC_MINT_PARAM] = json.loads(args.mint) 
                 except Exception as ex :
                     print('Cant load ({}) - {}'.format(args.mint,ex))
                     return
-            elif args.mint_umax or args.mint_t1 or args.mint_b2:
+            elif args.mint_umax or args.mint_t1 or args.mint_b2 or args.mint_period:
                 # take mint params 
                 mint_val = {}                                                                                                                                    
                 if args.mint_umax:                                                                                                                                     
@@ -420,7 +477,9 @@ class DecClient:
                 if args.mint_t1:                                                                                                                                       
                     mint_val[DEC_MINT_COEF_T1] = float(args.mint_t1)                                                                                                   
                 if args.mint_b2:                                                                                                                                       
-                    mint_val[DEC_MINT_COEF_B2] = float(args.mint_b2)                                                                                                   
+                    mint_val[DEC_MINT_COEF_B2] = float(args.mint_b2)
+                if args.mint_period:                                         
+                    mint_val[DEC_MINT_PERIOD] = float(args.mint_period)                                                                                                        
                 info[DEC_MINT_PARAM] = mint_val
             else:
                 print('Set some mint params')
@@ -428,15 +487,15 @@ class DecClient:
 
             info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
             print('PROTO',info)                                                                      
-            self._send_transaction(DEC_CHANGE_MINT_OP, ANY_EMISSION_KEY.format(args.name), info, to=None, wait=wait)          
+            return self._send_transaction(DEC_CHANGE_MINT_OP, (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID), info, to=None, wait=wait if wait else TRANS_TOUT)
         else:                                                                                        
             print('Set  passkey')                                              
 
 
     def distribute(self,args,wait=None):    
-        token = self.show(ANY_EMISSION_KEY.format(args.name))               
+        token = self.get_object(DEC_EMISSION_GRP,args.did,ANY_EMISSION_KEY.format(args.name))               
         info = {}                                         
-        if token.group_code == DEC_NAME_DEF :             
+        if token.group_code == args.name :             
             dec = cbor.loads(token.dec)                        
             for attr in [DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
                 info[attr] = dec[attr]
@@ -447,10 +506,11 @@ class DecClient:
     def faucet(self,args,wait=None):  
         if args.passkey:  
             info = {}                                                              
-            info[DEC_PASSKEY] = args.passkey                                                        
+            info[DEC_PASSKEY] = key_to_dgt_addr(args.passkey)                                                        
             info[DATTR_VAL]   = args.value                                       
-            print('PROTO',info)                                                                     
-            self._send_transaction(DEC_FAUCET_OP, args.pubkey, info, to=ANY_EMISSION_KEY.format(args.name), wait=wait)  
+            print('PROTO',info) 
+            to =  (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)                                                                   
+            self._send_transaction(DEC_FAUCET_OP, (args.pubkey,DEC_WALLET_GRP,DEFAULT_DID), info, to=to, wait=wait)  
         else:                                                                                       
             print('Set  passkey argument')                                           
 
@@ -467,7 +527,9 @@ class DecClient:
             info[DEC_DID_VAL] = args.did
 
         info[DEC_TMSTAMP] = time.time()
-        self._send_transaction(DEC_MINT_OP, args.pubkey, info, to=DEC_HEART_BEAT_KEY, wait=wait,din=[ANY_EMISSION_KEY.format(args.name)])                  
+        to = (DEC_HEART_BEAT_KEY,DEC_EMISSION_GRP,DEFAULT_DID)
+        din = (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)
+        return self._send_transaction(DEC_MINT_OP, (args.pubkey,DEC_WALLET_GRP,args.did), info, to=to, wait=wait if wait else TRANS_TOUT,din=[din])                  
 
 
     def heart_beat(self,args,wait=None):      
@@ -479,7 +541,7 @@ class DecClient:
 
         info[DEC_TMSTAMP] = time.time()
                                                                     
-        self._send_transaction(DEC_HEART_BEAT_OP, DEC_HEART_BEAT_KEY, info, to=None, wait=wait,din=None) #DEC_EMISSION_KEY) 
+        self._send_transaction(DEC_HEART_BEAT_OP, (DEC_HEART_BEAT_KEY,DEC_EMISSION_GRP,DEFAULT_DID), info, to=None, wait=wait,din=None) #DEC_EMISSION_KEY) 
 
     def make_heart_beat_tnx(self,passkey=None,period=None,peers=[]):
         info = {}                                
@@ -487,9 +549,9 @@ class DecClient:
             info[DATTR_VAL]   = passkey          
         if period:                               
             info[DEC_HEART_BEAT_PERIOD] = period
-        info[DEC_HEART_BEAT_PEERS] = peers
+        info[DEC_HEART_BEAT_PEERS] = peers # list peers which participate in consensus
         info[DEC_TMSTAMP] = time.time()
-        return self._make_transaction(DEC_HEART_BEAT_OP,DEC_HEART_BEAT_KEY,info,to=None,din=DEC_EMISSION_KEY)
+        return self._make_transaction(DEC_HEART_BEAT_OP,(DEC_HEART_BEAT_KEY,DEC_EMISSION_GRP,DEFAULT_DID),info,to=None,din=(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID))
 
     
     def seal_count(self,args,wait=None):                            
@@ -499,17 +561,18 @@ class DecClient:
     # banking cmd parts  
     # 
     def balance_of(self,args,wait=None):
-        return self.get_balance_of(args.pubkey,wait)
+        return self.get_balance_of(args,args.pubkey,wait)
 
-    def get_balance_of(self,pubkey,wait=None):  
-        token = self.show(pubkey)  
+    def get_balance_of(self,args,pubkey,wait=None):  
+        token = self.get_object(DEC_WALLET_GRP,args.did,pubkey)  
         return token
 
     def send(self,args,wait=None): 
         # use this cmd for sending token to corporate wallet 
         # use as name _DEC_EMISSION_KEY_
         info = {DATTR_VAL : args.amount}
-        din = [DEC_EMISSION_KEY]
+        #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)
+        din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]
         if args.asset_type:
             info[DEC_ASSET_TYPE] = args.asset_type             
         if args.did:                                
@@ -522,17 +585,22 @@ class DecClient:
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
-        return self._send_transaction(DEC_SEND_OP, args.name, info, to=args.to, wait=wait if wait else TRANS_TOUT,din=din)  
+        addr = (args.name,DEC_EMISSION_GRP if args.name == DEC_EMISSION_KEY else DEC_WALLET_GRP,args.did)
+        
+        return self._send_transaction(DEC_SEND_OP, addr, info, to=(args.to,DEC_WALLET_GRP,args.did), wait=wait if wait else TRANS_TOUT,din=din)  
 
     def pay(self,args,wait=None,control=False):
-        info = self.pay_info(args)                                  
+        info = self.pay_info(args)    
+        if args.check > 0:
+            return info[DEC_CMD_OPTS]
         topts = info[DEC_TRANS_OPTS]                                   
         req = self.dec_req_sign(info[DEC_CMD_OPTS])                    
-        # for notary less mode user sign with his own key              
+        # for notary less mode user sign with his own key  
+ 
         sign_req = self.notary_req_sign(req,self._signer)              
         print('PREQ',sign_req,topts)                                   
         #return    
-        return self._send_sign_transaction(topts,sign_req,wait= 10 if wait is None and control else wait)   
+        return self._send_sign_transaction(topts,sign_req,wait= TRANS_TOUT if wait is None  else wait)   
         
         info = {DATTR_VAL : args.amount}                                                                         
         if args.asset_type:                                                                                      
@@ -569,13 +637,16 @@ class DecClient:
             pay_opts[DEC_ASSET_TYPE] = args.asset_type                         
         #if args.did:                                                       
         #    pay_opts[DEC_DID_VAL] = args.did                                   
-                                                                           
-        to = [args.to]                                                     
-        din = [DEC_EMISSION_KEY]                                           
+        #daddr = self._get_full_addr(args.to,tp_space=DEC_WALLET_GRP,owner=args.didto) 
+        #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)                                                                  
+        to = [(args.to,DEC_WALLET_GRP,args.didto)]                                                     
+        din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]                                           
         if args.target :                                                   
             # target with invoice 
-            pay_opts[DEC_TARGET_INFO] = args.target                                          
-            to.append(args.target)                                         
+            # to wallet is owner target
+            pay_opts[DEC_TARGET_INFO] = args.target 
+            #taddr = self._get_full_addr(args.target,tp_space=DEC_TARGET_GRP,owner=args.didto)                                          
+            to.append((args.target,DEC_TARGET_GRP,args.didto))                                         
                                                                            
         if args.provement_key:                                             
             # invoice ID for controle                                      
@@ -591,11 +662,11 @@ class DecClient:
         if args.did:                                                                
             # refer to DID owner                                                    
             info[DEC_DID_VAL] = args.did 
-                                                       
+        #addr = self._get_full_addr(args.name,tp_space=DEC_WALLET_GRP,owner=args.did)                                              
         opts = {                                                                    
                  DEC_CMD_OPTS   : info,                                             
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_PAY_OP,                     
-                                    DEC_CMD_ARG: args.name ,
+                                    DEC_CMD_ARG: (args.name,DEC_WALLET_GRP,args.did) ,
                                     DEC_CMD_TO : to,
                                     DEC_CMD_DIN: din                    
                                   }                                                 
@@ -613,23 +684,43 @@ class DecClient:
     
      
     def invoice(self,args,wait=None):   
-        info = {DATTR_VAL : args.amount}                                                                         
+        inv = {DATTR_VAL : args.amount}                                                                         
         tcurr = time.time()
-        info[DEC_PROVEMENT_KEY] = args.prove_key 
-        info[DEC_CUSTOMER_KEY] = args.customer if args.customer else None
+        inv[DEC_PROVEMENT_KEY] = args.prove_key 
+        inv[DEC_CUSTOMER_KEY] = args.customer if args.customer else None
         if args.available_till:                                                                                   
-            info[AVAILABLE_TILL] = tcurr + args.available_till                                                         
-        info[DEC_TMSTAMP] = tcurr 
-        din = [DEC_EMISSION_KEY]
+            inv[AVAILABLE_TILL] = tcurr + args.available_till                                                         
+        
+        din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]
         if args.customer:
             din.append(args.customer) 
-        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()                                                                                                       
-        return self._send_transaction(DEC_INVOICE_OP, args.target, info, to=None, wait=wait,din=din)   
+        info = { 
+                 DEC_EMITTER : self._signer.get_public_key().as_hex(),  
+                 DEC_PAYLOAD : {                                                                  
+                              DEC_INVOICE_OP : inv,                                              
+                              DEC_TMSTAMP : tcurr,                                             
+                              DEC_DID_VAL : args.did
+                            }
+              }                                                                  
+
+        if args.check > 0:
+            return inv
+        #iaddr = self._get_full_addr(args.target,owner=args.did)                                                                                                     
+        return self._send_transaction(DEC_INVOICE_OP, (args.target,DEC_TARGET_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=din)   
 
     def get_target_opts(self,args):
-        target = {}
+        target = self.load_json_proto(args.target_proto)
         target[DEC_TARGET_PRICE] = args.price
         target[DEC_TARGET_INFO] = args.target if args.target else DEC_TARGET_INFO_DEF
+        target[DEC_TARGET_ID] = args.target_id
+        target[DEC_TARGET_ADDR] = self.get_random_addr()
+        owner = key_to_dgt_addr(self._signer.get_public_key().as_hex())
+        
+        target[DEC_OWNER] = owner #key_to_dgt_addr(self._signer.get_public_key().as_hex(),pref="0x")
+        #print(type(owner),owner)
+        for key,val in target.items():
+            if key not in TARGET_VISIBLE_ATTR:
+                target[key] = key_to_dgt_addr(val,pref="")
         if args.invoice > 0:                                                                 
             target[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price} 
         return target
@@ -637,30 +728,45 @@ class DecClient:
     def target_info(self,args,signer=None):
         # full info for target                                             
         info = {}                                                               
-        tcurr = time.time()                                                     
-        info[DEC_TARGET_OP] = self.get_target_opts(args)                        
+        tcurr = time.time() 
+        target = self.get_target_opts(args) 
+        
+        info[DEC_TARGET_OP] = target                        
         #info[DEC_EMITTER] = signer.get_public_key().as_hex()              
-        info[DEC_TMSTAMP] = tcurr                                               
+        info[DEC_TMSTAMP] = tcurr  
+        taddr = target[DEC_TARGET_ADDR] 
+        
         if args.did:                                                            
-            # refer to DID owner                                                
+            # refer to DID owner  
             info[DEC_DID_VAL] = args.did  
+            #addr = self._get_full_addr(taddr,owner=args.did)
+        #else:
+        #    addr = self._get_address(taddr)
         opts = {
                  DEC_CMD_OPTS   : info,
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_TARGET_OP,
-                                    DEC_CMD_ARG: args.target_id
+                                    DEC_CMD_ARG: (taddr,DEC_TARGET_GRP,args.did)
                                   }
                 }                                      
         return opts
 
-    def target(self,args,wait=5):                                                                                                          
+    def target(self,args,wait=5):
+          
         info = self.target_info(args) 
+        if  args.check > 0:            
+            return info[DEC_CMD_OPTS]  
+
         topts = info[DEC_TRANS_OPTS] 
         req = self.dec_req_sign(info[DEC_CMD_OPTS])
+         
+                           
+
+
         # for notary less mode user sign with his own key                                                                                                     
         sign_req = self.notary_req_sign(req,self._signer)
         #print('SREQ',sign_req,topts)
         #return 
-        return self._send_sign_transaction(topts,sign_req,wait=wait if wait else 4) 
+        return self._send_sign_transaction(topts,sign_req,wait=wait if wait else TRANS_TOUT) 
 
 
     def user_sign_req(self,info):                                                  
@@ -727,8 +833,8 @@ class DecClient:
         if args.type is not None:                      
             # set transfer                             
             role[DEC_ROLE_TYPE] = args.type
-        if args.did is not None:
-            role[DEC_DID_VAL] = args.did
+        #if args.did is not None:
+        #    role[DEC_DID_VAL] = args.did
         return role            
 
 
@@ -740,15 +846,20 @@ class DecClient:
         role = self.get_role_opts(args)
             
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()                                                        
-        info[DEC_TMSTAMP] = tcurr 
-        info[DEC_ROLE_OP] = role 
-        if args.did:
-            # refer to DID owner
-            info[DEC_DID_VAL] = args.did
-        return self._send_transaction(DEC_ROLE_OP, args.role_id, info, to=None, wait=wait,din=None)                   
+        info[DEC_PAYLOAD] = {
+                              DEC_ROLE_OP : role,
+                              DEC_TMSTAMP : tcurr,
+                              DEC_DID_VAL : DEFAULT_DID if args.did is None else args.did
+                            }
+        #role_addr = self._get_full_addr(args.role_id,tp_space=DEC_ROLE_GRP,owner=args.did)
+        return self._send_transaction(DEC_ROLE_OP, (args.role_id,DEC_ROLE_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=None)                   
                                                                                                                           
         
-    
+    def do_addr(self,args):
+        pub_key = self.get_pub_key(args.key)
+        addr = key_to_dgt_addr(pub_key)
+        return addr
+
     def bank_list(self,args,wait=None):                                                
         pass   
     #  Banking cmd parts END
@@ -765,9 +876,15 @@ class DecClient:
     def trans(self, name, value, to, wait=None):
         return self._send_transaction(DEC_TRANS_OP, name, value, to=to, wait=wait)
 
-    def list(self):
-        result = self._send_request("state?address={}".format(self._get_prefix()))
-
+    def list(self,args):
+        if False:
+            # for test only
+            test_eth_list()
+            return []
+        pref = self._get_prefix() if args.type is None and args.did is None else self._get_full_prefix(args.type,args.did)
+        #print('PREF',pref)
+        result = self._send_request("state?address={}".format(pref))
+        
         try:
             encoded_entries = yaml.safe_load(result)["data"]
 
@@ -778,13 +895,21 @@ class DecClient:
 
         except BaseException:
             return None
+    def show(self,args, name):
+        return self.get_object(args.type,args.did,name)
 
-    def show(self, name):
+    def get_object(self,tp,did, name):
+
         if name.startswith('/') or name.startswith('./'):
             # take public key from file 
             name = self.get_pub_key(name)
-        address = self._get_address(name)
-
+        else:
+            npart = name.split("::")
+            if len(npart) > 1:
+                name,did = npart[0],npart[1] 
+            
+        address = self._get_full_addr(name,tp,did) 
+        #print(name,tp,did,'ADDR',address)
         result = self._send_request("state/{}".format(address), name=name,)
 
         try:
@@ -810,11 +935,33 @@ class DecClient:
     def _get_prefix(self):
         return _sha512(FAMILY_NAME.encode('utf-8'))[0:6]
 
+    def _get_full_prefix(self,tp=None,owner=None):                                    
+        fam_pref =  self._get_prefix() 
+        tp_pref = self._get_type_prefix(DEC_TARGET_GRP if tp is None else tp)
+        own_pref = self._get_user_prefix(owner) if owner else ''
+        return ''.join([fam_pref,tp_pref,own_pref]) 
+
+    def _get_type_prefix(self,tp_space):                                  
+        return _sha256(tp_space.encode('utf-8'))[0:2]
+
+    def _get_user_prefix(self,user):              
+        return _sha256(user.encode('utf-8'))[:22]     
+
     def _get_address(self, name,space=None):
         prefix = self._get_prefix()
         dec_address = _sha512(name.encode('utf-8'))[64:]
         return prefix + dec_address
 
+    def _get_full_addr(self, name,tp_space=DEC_TARGET_GRP,owner="def"):
+        #c2939e264c1029697ee358715d3a14a2add817c4b0165144b5eb1f51756bcd9685098e
+        #0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed
+        prefix = self._get_prefix()  
+        tp_prefix = self._get_type_prefix(tp_space)
+        usr_prefix = self._get_user_prefix(owner)                         
+        dec_address = _sha256(name.encode('utf-8'))[:40]     
+        return ''.join([prefix,tp_prefix,usr_prefix,dec_address])                          
+
+        
     def _send_request(self, suffix, data=None, content_type=None, name=None):
         if self.url.startswith("http://"):
             url = "{}/{}".format(self.url, suffix)
@@ -848,31 +995,35 @@ class DecClient:
 
     def _make_transaction(self, verb, name, value, to=None,din=None,din_ext=None):                                                                  
         val = {                                                                                                                                   
-            DEC_CMD: verb,                                                                          
+            DEC_CMD    : verb,                                                                          
             DEC_CMD_ARG: name,                                                                                                                             
-            'Value': value, # sign twice                                                                                                                            
+            DEC_CMD_VAL: value, # sign twice                                                                                                                            
         }                                                                                                                                        
-        if to is not None:                                                                                                                       
-            val[DEC_CMD_TO] = to                                                                                                                        
+        if to is not None:  
+            if not isinstance(to,list):    
+                to = [to]  
+            #tval = to[0]                                                                                                               
+            val[DEC_CMD_TO] = to #tval[0] if isinstance(tval,tuple) else tval                                                                                                                      
                                                                                                                                                   
         hex_pubkey =  self._signer.get_public_key().as_hex()                                                                                                                                       
         sign_val = {} 
                                                                                                                                                 
         # Construct the address                                                                                                                   
-        address = self._get_address(name)                                                                                                         
+        address = self._get_full_addr(name[0],name[1],name[2])#self._get_address(name) 
+        print('NAME',address)                                                                                                        
         inputs = [address]                                                                                                                        
         outputs = [address]                                                                                                                       
         if to is not None: 
-            for tval in to if isinstance(to,list) else [to]:
-                address_to = self._get_address(tval)                                                                                                    
+            for tval in to:
+                address_to = self._get_full_addr(tval[0],tval[1],tval[2]) if isinstance(tval,tuple) else self._get_address(tval)
                 inputs.append(address_to)                                                                                                             
                 outputs.append(address_to) 
         dinputs = []                                                                                                            
         if din is not None:                                                                                                                       
             for ain in (din if isinstance(din,list) else [din]):                                                                                                                   
-                address_in = self._get_address(ain)                                                                                               
+                address_in = self._get_full_addr(ain[0],ain[1],ain[2]) if isinstance(ain,tuple) else self._get_address(ain)                                                                                               
                 inputs.append(address_in) 
-                dinputs.append((FAMILY_NAME,ain))
+                dinputs.append((FAMILY_NAME,ain[0],ain[1],ain[2])) #(FAMILY_NAME,ain[0] if isinstance(ain,tuple) else ain))
 
         if din_ext is not None:
             # external family 
@@ -885,7 +1036,7 @@ class DecClient:
         # input list
         val[DATTR_INPUTS] = dinputs
                                                                                                                                                   
-        #print("in={} out={}".format(inputs,outputs))
+        print("in={} out={} din={}".format(inputs,outputs,dinputs))
         payload = cbor.dumps(val)
         psign = self._signer.sign(payload) # for fool notary mode this is notary node sign 
         sign_val[DEC_SIGNATURE] =  psign

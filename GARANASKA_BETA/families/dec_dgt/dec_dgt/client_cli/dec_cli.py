@@ -93,8 +93,40 @@ def create_parent_parser(prog_name):
         '-y', '--yaml',                
         action='count',                
         default=1,                     
-        help='enable yaml  output')    
+        help='enable yaml  output') 
 
+    parent_parser.add_argument(                           
+        '--check',                                 
+        action='count',                            
+        default=0,                                 
+        help='Just show all params for operation')  
+
+    parent_parser.add_argument(                                        
+        '-cb', '--crypto_back',                                 
+        type=str,
+        choices=["openssl","bitcoin"] ,                                              
+        help='Specify a crypto back openssl/bitcoin',           
+        default=CRYPTO_BACK                                          
+        ) 
+    parent_parser.add_argument(                           
+        '-U','--url',                                   
+        type=str,                                  
+        help='Specify URL of REST API',            
+        default='http://api-dgt-c1-1:8108')
+    parent_parser.add_argument(                                                         
+        '--wait',                                                                
+        nargs='?',                                                               
+        const=sys.maxsize,                                                       
+        type=int,                                                                
+        help='Set time, in seconds, to wait for transaction to commit')          
+    parent_parser.add_argument(                                                   
+        '--tips',                                                         
+        default=0,                                                
+        type=int,                                                         
+        help='Set tips for transaction(reward for acceptor peer)')   
+
+    
+                                                          
     try:
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
     except pkg_resources.DistributionNotFound:
@@ -140,6 +172,7 @@ def create_parser(prog_name):
     add_invoice_parser(subparsers, parent_parser)
     add_target_parser(subparsers, parent_parser)
     add_role_parser(subparsers, parent_parser)
+    add_addr_parser(subparsers, parent_parser)
     add_bank_list_parser(subparsers, parent_parser)
 
     #
@@ -180,8 +213,8 @@ def add_emission_parser(subparsers, parent_parser):
     parser.add_argument(
         '--name',
         type=str,
-        #default=DEC_NAME_DEF,
-        help='name of DEC')
+        default=DEC_NAME_DEF,
+        help='Name of token')
 
     parser.add_argument(
         '--total_sum','-ts',
@@ -275,48 +308,28 @@ def add_emission_parser(subparsers, parent_parser):
        type=int,               
        help='Wait to date for actualization of cmd: birth, mint, changemint')       
 
-           
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
     parser.add_argument(
         '--keyfile',
         type=str,
         default="/project/dgt/clusters/c1/dgt1/keys/validator.priv.openssl",
         help="identify file containing user's private key")
-    parser.add_argument(                            
-        '--check',                                 
-        action='count',                             
-        default=0,                                  
-        help='Just show all params for emission')    
     parser.add_argument(                               
         '--info',                                     
         action='count',                                
         default=0,                                     
         help='Show emission status')      
-    """
-    parser.add_argument(               
-        '-vv','--verbose',                      
-        action='count',                
-        default=0,                     
-        help='Show more info')   
-    """                                   
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        default=4,
-        help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                                   
-        '-cb', '--crypto_back',                            
-        type=str,                                          
-        help='Specify a crypto back openssl/bitcoin',      
-        default=CRYPTO_BACK)                               
-
+    parser.add_argument(                
+        '--did','-d',                   
+        type=str,                               
+        default=DEFAULT_DID,            
+        help="DID ")                    
+    parser.add_argument(             
+        '-tp','--type',              
+        type=str,                    
+        default=DEC_EMISSION_GRP,      
+        help='Type of key to show')  
+    
+    
 
 
 
@@ -338,16 +351,10 @@ def add_wallet_parser(subparsers, parent_parser):
     
     parser.add_argument(                  
         '--did','-d',                     
-        type=str,                         
-        help="DID - {'sign' : 'notary sign for did structure','did' :{'val' : 'did value','nkey' : 'notary public key'} }")                       
+        type=str,
+        default=DEFAULT_DID,                         
+        help="DID ")                       
 
-                                                                                                   
-    parser.add_argument(                                                                         
-        '--url',                                                                                 
-        type=str,                                                                                
-        help='specify URL of REST API',                                                          
-        default='http://api-dgt-c1-1:8108')                                                      
-                                                                                                 
     parser.add_argument(                                                                         
         '--keyfile',                                                                             
         type=str, 
@@ -361,7 +368,10 @@ def add_wallet_parser(subparsers, parent_parser):
         default=DEC_OPTS_PROTO_FILE_NM,                                   
         help='Proto file with wallet permisions params'
         )  
-       
+    parser.add_argument(             
+        '-tk','--token',              
+        type=str,                    
+        help='Type of token')  
     parser.add_argument(                     
         '--limit','-l',                      
         type=int,                            
@@ -376,7 +386,8 @@ def add_wallet_parser(subparsers, parent_parser):
         ) 
     parser.add_argument(                 
         '--status','-st',                
-        type=str,                        
+        type=str,
+        choices=["on","off"],                        
         help="Wallet status"             
         )                                
     parser.add_argument(                
@@ -385,27 +396,7 @@ def add_wallet_parser(subparsers, parent_parser):
        help="Wallet role name"            
        )                               
     
-    parser.add_argument(                           
-        '--check',                                  
-        action='count',                            
-        default=0,                                 
-        help='Just show all params for wallet')  
     
-                                       
-    parser.add_argument(                                      
-        '-cb', '--crypto_back',                               
-        type=str,                                             
-        help='Specify a crypto back openssl/bitcoin',         
-        default="openssl"
-        )                                  
-    
-    parser.add_argument(                                                                         
-        '--wait',                                                                                
-        nargs='?',                                                                               
-        const=sys.maxsize,                                                                       
-        type=int,                                                                                
-        help='set time, in seconds, to wait for transaction to commit'
-        )                          
                                                                                                  
 def do_wallet(args):                                                                               
     client = _get_client(args)                                                                   
@@ -425,15 +416,9 @@ def add_wallet_opts_parser(subparsers, parent_parser):
                                                                                                                                                                                          
     parser.add_argument(                                                                                                                                                                 
         '--did','-d',                                                                                                                                                                    
-        type=str,                                                                                                                                                                        
-        help="DID - {'sign' : 'notary sign for did structure','did' :{'val' : 'did value','nkey' : 'notary public key'} }")                                                              
-                                                                                                                                                                                         
-                                                                                                                                                                                         
-    parser.add_argument(                                                                                                                                                                 
-        '--url',                                                                                                                                                                         
-        type=str,                                                                                                                                                                        
-        help='specify URL of REST API',                                                                                                                                                  
-        default='http://api-dgt-c1-1:8108')                                                                                                                                              
+        type=str,
+        default=DEFAULT_DID,                                                                                                                                                                        
+        help="DID")                                                              
                                                                                                                                                                                          
     parser.add_argument(                                                                                                                                                                 
         '--keyfile',                                                                                                                                                                     
@@ -473,24 +458,13 @@ def add_wallet_opts_parser(subparsers, parent_parser):
        help="Revoke role"           
        )                                 
                                                                                                                                                                                                              
-    parser.add_argument(                                                                                                                                                                 
-        '-cb', '--crypto_back',                                                                                                                                                          
-        type=str,                                                                                                                                                                        
-        help='Specify a crypto back openssl/bitcoin',                                                                                                                                    
-        default="openssl")                                                                                                                                                               
-                                                                                                                                                                                         
-                                                                                                                                                                                         
-    parser.add_argument(                                                                                                                                                                 
-        '--wait',                                                                                                                                                                        
-        nargs='?',                                                                                                                                                                       
-        const=sys.maxsize,                                                                                                                                                               
-        type=int,                                                                                                                                                                        
-        help='set time, in seconds, to wait for transaction to commit')                                                                                                                  
 
 
 def do_wallet_opts(args):
     client = _get_client(args)                  
-    response = client.wallet_opts(args,wait= args.wait)   
+    response = client.wallet_opts(args,wait= args.wait)  
+    if isinstance(response,dict):    
+        response = do_yaml(response)  
     print(response)                             
 
 def add_birth_parser(subparsers, parent_parser):
@@ -503,33 +477,20 @@ def add_birth_parser(subparsers, parent_parser):
         help='Info about dec birth')
     
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                   
-        '-cb', '--crypto_back',                            
-        type=str,                                          
-        help='Specify a crypto back openssl/bitcoin',      
-        default=CRYPTO_BACK)                               
     parser.add_argument(                         
         '-n','--name',                           
         type=str,                                
         help='specify token name (DEC/..)',      
-        default=DEC_NAME_DEF)                           
-
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
+        default=DEC_NAME_DEF) 
+    parser.add_argument(            
+        '--did','-d',               
+        type=str,                   
+        default=DEFAULT_DID,                                  
+        help='DID')                 
+                                    
 
 def do_birth(args):
     client = _get_client(args)                                
@@ -547,32 +508,21 @@ def add_total_supply_parser(subparsers, parent_parser):
         help='Info about dec supply')
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                   
-        '-cb', '--crypto_back',                            
-        type=str,                                          
-        help='Specify a crypto back openssl/bitcoin',      
-        default=CRYPTO_BACK)                               
     parser.add_argument(                           
         '-n','--name',                             
         type=str,                                  
         help='specify token name (DEC/..)',        
-        default=DEC_NAME_DEF)                             
+        default=DEC_NAME_DEF) 
+    parser.add_argument(        
+        '--did','-d',           
+        type=str,               
+        default=DEFAULT_DID,    
+        help='DID')             
+                                
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_total_supply(args):
     client = _get_client(args)                                
@@ -591,12 +541,6 @@ def add_token_info_parser(subparsers, parent_parser):
         help='Info about dec token')
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
@@ -604,19 +548,13 @@ def add_token_info_parser(subparsers, parent_parser):
         '-n','--name',                             
         type=str,                            
         help='specify token name (DEC/..)',      
-        default=DEC_NAME_DEF)  
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
+        default=DEC_NAME_DEF) 
+    parser.add_argument(   
+        '--did','-d',      
+        type=str,
+        default=DEFAULT_DID,           
+        help='DID') 
+                                                          
                                                              
 
 def do_token_info(args):
@@ -646,34 +584,21 @@ def add_burn_parser(subparsers, parent_parser):
         help='burn sum')                                       
                                                                
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
     parser.add_argument(                            
         '-n','--name',                              
         type=str,                                   
         help='specify token name (DEC/..)',         
-        default=DEC_NAME_DEF)                              
+        default=DEC_NAME_DEF) 
+    parser.add_argument(        
+        '--did','-d',           
+        type=str,               
+        default=DEFAULT_DID,    
+        help='DID')                                          
     
                                                              
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_burn(args):
     client = _get_client(args)                                
@@ -710,40 +635,28 @@ def add_change_mint_parser(subparsers, parent_parser):
         '--mint-b2','-mb2',                                     
         type=str,           # json as string                    
         help='mint B2 param')                                   
-
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
+    parser.add_argument(                           
+        '--mint-period','-mp',                        
+        type=str,           # json as string       
+        help='mint period param')                      
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
     parser.add_argument(                             
         '-n','--name',                              
         type=str,                                   
         help='specify token name (DEC/..)',         
         default=DEC_NAME_DEF)                              
 
-                                                             
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_change_mint(args):
     client = _get_client(args)                                
-    response = client.change_mint(args, args.wait)                  
+    response = client.change_mint(args, args.wait) 
+    if args.yaml > 0:               
+        response = do_yaml(response)
+                     
     print(response)                                           
 
 def add_distribute_parser(subparsers, parent_parser):
@@ -756,33 +669,22 @@ def add_distribute_parser(subparsers, parent_parser):
         help='Info about distribute dec token')
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
     parser.add_argument(                            
         '-n','--name',                             
         type=str,                                  
         help='specify token name (DEC/..)',        
-        default=DEC_NAME_DEF)                             
+        default=DEC_NAME_DEF) 
+    parser.add_argument(           
+        '--did','-d',              
+        type=str,                  
+        default=DEFAULT_DID,       
+        help='DID')
+                                   
     
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_distribute(args):
     client = _get_client(args)                                
@@ -815,33 +717,16 @@ def add_faucet_parser(subparsers, parent_parser):
         help='passkey for special operation')                  
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
     parser.add_argument(                       
         '-n','--name',                         
         type=str,                              
         help='specify token name (DEC/..)',    
         default=DEC_NAME_DEF)                         
                                                
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_faucet(args):
     client = _get_client(args)                                
@@ -849,16 +734,21 @@ def do_faucet(args):
     print(response)                                           
 
 def add_mint_parser(subparsers, parent_parser):
-    message = 'Mint  DEC token.'
+    message = 'Mint  DEC token to <pubkey>.'
 
     parser = subparsers.add_parser(
         DEC_MINT_OP,
         parents=[parent_parser],
         description=message,
         help='Mint DEC token')
+    parser.add_argument(                           
+        'pubkey',                                  
+        type=str,                                  
+        help='identify name of key to reward')  
+
 
     parser.add_argument(                                       
-        '--corporate_wallet','-cw',                                     
+       '-cw', '--corporate_wallet',                                     
         type=str,                                              
         help='corporate wallet')                  
 
@@ -866,48 +756,29 @@ def add_mint_parser(subparsers, parent_parser):
         '--sum','-s',                                          
         type=int,                                              
         help='Sum ')  
-    parser.add_argument(          
-        '--pub_key','-pub',       
-        type=str,                                                      
-        help='pub key')   
     parser.add_argument(      
         '--did','-d',   
-        type=str,             
-        help='DID')       
-            
-    parser.add_argument(
-        '--url',
         type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
+        default = DEFAULT_DID,
+        help='DID')   
+    parser.add_argument(                                    
+        '-n','--name',                                      
+        type=str,                                           
+        help='specify token name (DEC/..)',                 
+        default=DEC_NAME_DEF)                               
     parser.add_argument(
         '--keyfile',
         type=str,
         default="/project/peer/keys/validator.priv",
         help="identify file containing user's private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-    
-    parser.add_argument(                          
-        '-n','--name',                           
-        type=str,                                
-        help='specify token name (DEC/..)',      
-        default=DEC_NAME_DEF)                           
-                                                             
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
+   
+
 
 def do_mint(args):
     client = _get_client(args)                                
-    response = client.mint(args, args.wait)                  
+    response = client.mint(args, args.wait)  
+    if isinstance(response,dict):     
+        response = do_yaml(response)                  
     print(response) 
     
 def add_heart_beat_parser(subparsers, parent_parser):
@@ -936,28 +807,11 @@ def add_heart_beat_parser(subparsers, parent_parser):
         help='pub keys')   
           
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
+                                                            
 
 def do_heart_beat(args):
     client = _get_client(args)                                
@@ -979,30 +833,10 @@ def add_seal_count_parser(subparsers, parent_parser):
         help='pub key')   
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
-
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_seal_count(args):
     client = _get_client(args)                                
@@ -1029,47 +863,38 @@ def add_balance_of_parser(subparsers, parent_parser):
         type=str,
         default=DEC_NAME_DEF,                                              
         help='passkey for special operation')                  
-
-    parser.add_argument(
-        '--url',
+    parser.add_argument(    
+        '--did','-d',       
         type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
+        default=DEFAULT_DID,           
+        help='DID')         
+
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_balance_of(args):
     client = _get_client(args)                                
     token = client.balance_of(args, args.wait) 
     #print(token)
     if token:
-        dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
-        #print(dec)
+        try:
+            dec = cbor.loads(token.dec)# if token.group_code  in DEC_TYPES else {}
+        except Exception as ex:
+            dec = {}
+        
         inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM],
                   }
         if DEC_СORPORATE_REST in dec:
             inf[DEC_СORPORATE_REST] = dec[DEC_СORPORATE_REST]
         if DEC_SALE_REST in dec:
             inf[DEC_SALE_REST] = dec[DEC_SALE_REST]
-        if args.yaml > 0:                
-            inf = do_yaml({args.asset_type : inf}) 
+        if args.yaml > 0:   
+            tname = dec[DEC_NAME][DATTR_VAL] if DEC_NAME in dec else args.asset_type            
+            inf = do_yaml({tname : inf}) 
 
 
         print("{}: \n{}".format(args.pubkey,inf))
@@ -1097,7 +922,8 @@ def add_send_parser(subparsers, parent_parser):
         help='number token for transfer')   
     parser.add_argument(           
         '--did','-d',              
-        type=str,                  
+        type=str,
+        default=DEFAULT_DID,                   
         help='DID')                
 
     parser.add_argument(                                       
@@ -1111,31 +937,11 @@ def add_send_parser(subparsers, parent_parser):
        help="Wallet role name"          
        )                                
     
-                                          
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
-
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_send(args):
     client = _get_client(args)                                
@@ -1164,13 +970,25 @@ def add_pay_parser(subparsers, parent_parser):
        
     parser.add_argument(           
         '--did','-d',              
-        type=str,                  
-        help='DID')
+        type=str, 
+        default = DEFAULT_DID,                 
+        help='DID of wallet from')
+    parser.add_argument(            
+        '--didto','-dto',               
+        type=str,                   
+        default = DEFAULT_DID,      
+        help='DID of wallet to')  
+
+
+
+
+
     # with out target works like send                 
     parser.add_argument(            
         '--target','-tg',         
         type=str,                   
-        help='Target object')             
+        help='Target object')  
+               
     parser.add_argument(                                       
         '--asset_type','-at',                                     
         type=str,                                              
@@ -1190,31 +1008,16 @@ def add_pay_parser(subparsers, parent_parser):
        help="Wallet role name"          
        )                                   
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-    parser.add_argument(
         '--keyfile',
         type=str,
-        help="Identify file containing  private key")
+        help="File containing  private key of owner wallet from")
 
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='Set time, in seconds, to wait for transaction to commit')
 
 def do_pay(args):                                  
     client = _get_client(args)                      
-    response = client.pay(args, args.wait)   
+    response = client.pay(args, args.wait) 
+    if isinstance(response,dict):     
+        response = do_yaml(response)  
     print(response)                                 
 
 
@@ -1257,29 +1060,17 @@ def add_invoice_parser(subparsers, parent_parser):
        default=DEC_ROLE_DEF,            
        help="Wallet role name"          
        )                                
+    parser.add_argument(           
+        '--did','-d',              
+        type=str,                  
+        default=DEFAULT_DID,       
+        help='DID')                
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing owner private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_invoice(args):
     client = _get_client(args)                                
@@ -1308,6 +1099,12 @@ def add_target_parser(subparsers, parent_parser):
         '--target','-tg',                                                                                                 
         type=str,                                                                                                         
         help='Target specification')
+    parser.add_argument(                          
+        '--target_proto',                           
+        type=str,                                 
+        default=DEC_TARGET_PROTO_FILE_NM,           
+        help='Target proto file')                   
+
     parser.add_argument(             
         '--invoice','-i',            
         action='count', 
@@ -1315,38 +1112,23 @@ def add_target_parser(subparsers, parent_parser):
         help='Invoice free') 
     parser.add_argument(          
         '--did','-d',              
-        type=str,                 
+        type=str,
+        default=DEFAULT_DID,                 
         help='DID')               
                                                                                          
-                                                                                                                          
-    parser.add_argument(                                                                                                  
-        '--url',                                                                                                          
-        type=str,                                                                                                         
-        help='specify URL of REST API',                                                                                   
-        default='http://api-dgt-c1-1:8108')                                                                               
     parser.add_argument(                                                                                                  
         '--keyfile',                                                                                                      
         type=str,  
         default="/project/peer/keys/validator.priv",                                                                                                       
         help="Identify file containing owner private key")                                                               
-    parser.add_argument(                                                                                                  
-        '-cb', '--crypto_back',                                                                                           
-        type=str,                                                                                                         
-        help='Specify a crypto back openssl/bitcoin',                                                                     
-        default=CRYPTO_BACK)                                                                                              
                                                                                                                           
-                                                                                                                          
-    parser.add_argument(                                                                                                  
-        '--wait',                                                                                                         
-        nargs='?',                                                                                                        
-        const=sys.maxsize,                                                                                                
-        type=int,                                                                                                         
-        help='set time, in seconds, to wait for transaction to commit')                                                   
 
 
 def do_target(args):
     client = _get_client(args)                                
-    response = client.target(args, args.wait)                  
+    response = client.target(args, args.wait) 
+    if isinstance(response,dict):    
+        response = do_yaml(response)                  
     print(response)
 
 def add_role_parser(subparsers, parent_parser):                                                                
@@ -1379,38 +1161,66 @@ def add_role_parser(subparsers, parent_parser):
         help='Send limit')                                                                             
     parser.add_argument(            
         '--did','-d',               
-        type=str,                   
+        type=str,
+        default=DEFAULT_DID,                   
         help='DID')                 
                                                                                                                  
-    parser.add_argument(                                                                                         
-        '--url',                                                                                                 
-        type=str,                                                                                                
-        help='specify URL of REST API',                                                                          
-        default='http://api-dgt-c1-1:8108')                                                                      
     parser.add_argument(                                                                                         
         '--keyfile',                                                                                             
         type=str,                                                                                                
         default="/project/peer/keys/validator.priv",                                                             
         help="Identify file containing owner private key")                                                       
-    parser.add_argument(                                                                                         
-        '-cb', '--crypto_back',                                                                                  
-        type=str,                                                                                                
-        help='Specify a crypto back openssl/bitcoin',                                                            
-        default=CRYPTO_BACK)                                                                                     
                                                                                                                  
-                                                                                                                 
-    parser.add_argument(                                                                                         
-        '--wait',                                                                                                
-        nargs='?',                                                                                               
-        const=sys.maxsize,                                                                                       
-        type=int,                                                                                                
-        help='set time, in seconds, to wait for transaction to commit')                                          
                                                                                                                  
                                                                                                                  
 def do_role(args):                                                                                             
     client = _get_client(args)                                                                                   
-    response = client.role(args, args.wait)                                                                    
-    print(response)                                                                                              
+    response = client.role(args, args.wait) 
+    if isinstance(response,dict):     
+        response = do_yaml(response)  
+                                                                       
+    print(response)   
+     
+def add_addr_parser(subparsers, parent_parser):                             
+    message = 'Generate addr for key'                                      
+    parser = subparsers.add_parser(                                            
+        "addr",                                                        
+        parents=[parent_parser],                                            
+        description=message,                                                
+        help='Generate addr ')                                                
+                                                                            
+    parser.add_argument(                                                    
+        'key',                                                          
+        type=str,                                                           
+        help='Public key')                                                     
+                                                                            
+    parser.add_argument(                                                    
+        '--did','-d',                                                       
+        type=str,                                                           
+        default=DEFAULT_DID,                                                
+        help='DID')                                                         
+                                                                            
+    parser.add_argument(                                                    
+        '--keyfile',                                                        
+        type=str,                                                           
+        default="/project/peer/keys/validator.priv",                        
+        help="Identify file containing owner private key")                  
+    
+    
+
+    
+    
+    
+    
+        
+def do_addr(args):                                        
+    client = _get_client(args)                            
+    response = client.do_addr(args)               
+    if isinstance(response,dict):                         
+        response = do_yaml(response)                      
+                                                          
+    print(response)                                       
+                                                                                              
 
 
 def add_bank_list_parser(subparsers, parent_parser):
@@ -1427,83 +1237,17 @@ def add_bank_list_parser(subparsers, parent_parser):
         help='DID')                
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def do_bank_list(args):
     client = _get_client(args)                                
     response = client.bank_list(args, args.wait)                  
     print(response) 
 
-def add_mint_parser(subparsers, parent_parser):                                            
-    message = 'Mint DEC for <key>.'                                            
-    parser = subparsers.add_parser(                                                       
-        DEC_MINT_OP,                                                                       
-        parents=[parent_parser],                                                          
-        description=message,                                                              
-        help='Mint token for peer')                                                             
-    parser.add_argument(                                                                  
-        'pubkey',                                                                           
-        type=str,                                                                         
-        help='Peer pub key')                                                               
-                                                                                          
-    parser.add_argument(                                                                  
-        '--did','-d',                                                                     
-        type=str,                                                                         
-        help='DID')                                                                       
-    parser.add_argument(                                                                  
-        '--sum','-s',                                                                 
-        type=str,                                                                         
-        help='Token amount')
-                                                          
-    parser.add_argument(                                                                  
-        '--url',                                                                          
-        type=str,                                                                         
-        help='specify URL of REST API',                                                   
-        default='http://api-dgt-c1-1:8108')                                               
-    parser.add_argument(                                                                  
-        '--keyfile',                                                                      
-        type=str,                                                                         
-        help="identify file containing user's private key") 
-
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
-    
-                                  
-    parser.add_argument(                                                                  
-        '--wait',                                                                         
-        nargs='?',                                                                        
-        const=sys.maxsize,                                                                
-        type=int,                                                                         
-        help='set time, in seconds, to wait for transaction to commit')   
-                    
-def do_mint(args):                                   
-    client = _get_client(args)                            
-    response = client.mint(args, args.wait)          
-    print(response)                                       
+                      
 
 
 def add_set_parser(subparsers, parent_parser):
@@ -1526,28 +1270,10 @@ def add_set_parser(subparsers, parent_parser):
         help='amount to set')
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
 
 def do_set(args):
@@ -1577,29 +1303,9 @@ def add_inc_parser(subparsers, parent_parser):
         help='specify amount to increment')
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
-
 
 
 
@@ -1630,29 +1336,10 @@ def add_dec_parser(subparsers, parent_parser):
         help='amount to decrement')
 
     parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-
-    parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
-
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
 
 def add_trans_parser(subparsers, parent_parser):
@@ -1679,31 +1366,11 @@ def add_trans_parser(subparsers, parent_parser):
         type=str,
         help='identify name of key transfer to')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-            help='set time, in seconds, to wait for transaction to commit')
-
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
-
 
 
 
@@ -1732,34 +1399,36 @@ def add_show_parser(subparsers, parent_parser):
     parser.add_argument(
         'name',
         type=str,
+        nargs='+',
         help='name of key to show')
-
-    parser.add_argument(
-        '--url',
+    parser.add_argument(              
+        '-tp','--type',                       
         type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
+        choices=[DEC_EMISSION_GRP,DEC_WALLET_GRP,DEC_TARGET_GRP,DEC_ROLE_GRP,DEC_SYNONYMS_GRP] ,
+        default=DEC_TARGET_GRP,                    
+        help='Type of key to show') 
+    parser.add_argument(      
+        '--did','-d',         
+        type=str,
+        default=   DEFAULT_DID,          
+        help='DID')           
+    
 
-    parser.add_argument(                                     
-        '-cb', '--crypto_back',                              
-        type=str,                                            
-        help='Specify a crypto back openssl/bitcoin',        
-        default=CRYPTO_BACK)                                 
-                                                             
 
 def do_show(args):
-    name = args.name
+    names = args.name
     client = _get_client(args)
-    token = client.show(name)
-    dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
+    for name in names:
+        token = client.show(args,name)
+        dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
     
-    dec =  client.do_verbose(dec,args.verbose)
-    if args.yaml > 0:                                                              
-        dec = do_yaml(dec) 
+        dec =  client.do_verbose(dec,args.verbose)
+        if args.yaml > 0:                                                              
+            dec = do_yaml(dec) 
 
 
 
-    print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
+        print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
 
 def add_list_parser(subparsers, parent_parser):
@@ -1769,34 +1438,38 @@ def add_list_parser(subparsers, parent_parser):
         'list',
         parents=[parent_parser],
         description=message,
-        help='Displays all bgt values')
-
-    parser.add_argument(
-        '--url',
+        help='Displays all dec values')
+    parser.add_argument(               
+        '-tp','--type',                
         type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
-    parser.add_argument(                                   
-        '-cb', '--crypto_back',                            
-        type=str,                                          
-        help='Specify a crypto back openssl/bitcoin',      
-        default=CRYPTO_BACK)                               
+        choices=[DEC_EMISSION_GRP,DEC_WALLET_GRP,DEC_TARGET_GRP,DEC_ROLE_GRP,DEC_SYNONYMS_GRP] ,                      
+        help='Type of key to filter')    
+    parser.add_argument(        
+        '--did','-d',           
+        type=str,               
+        help='DID')             
 
 
 
 def do_list(args):
     client = _get_client(args)
-    results = client.list()
+    results = client.list(args)
     token = DecTokenInfo()
     to_yaml = {}
     for pair in results:
+        #print('pair',pair)
         for name, value in pair.items():
             token.ParseFromString(value)
-            dec = cbor.loads(token.dec) if token.group_code in DEC_TYPES else {}
+            try:
+                dec = cbor.loads(token.dec)# if token.group_code in DEC_TYPES else {}
+            except Exception as ex:
+                dec = {}
+            #print('dec',dec)
+            fname = "{}::{}".format(name,dec[DEC_DID_VAL]) if DEC_DID_VAL in dec else name
             if args.yaml > 0:
-                to_yaml[name] = token.group_code if args.verbose is None or args.verbose == 0 else client.do_verbose(dec,args.verbose,off=True)
+                to_yaml[fname] = token.group_code if args.verbose is None or args.verbose == 0 else client.do_verbose(dec,args.verbose,off=True)
             else:
-                print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
+                print('{}: {}={} dec={}'.format(fname,token.group_code,token.decimals,dec))
 
     if args.yaml > 0:
         print(do_yaml(to_yaml))
@@ -1887,7 +1560,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
                                                         
     elif args.command == DEC_BANK_LIST_OP:           
         do_bank_list(args)                          
-        
+    elif args.command == 'addr':    
+        do_addr(args)                   
+            
     elif args.command == 'show':
         do_show(args)
     elif args.command == 'list':
@@ -1908,6 +1583,7 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
 
 
 def main_wrapper():
+    # 
     # pylint: disable=bare-except
     sys.stdout = open(1, 'w', encoding='utf-8', closefd=False) #sys.stdout.reconfigure(encoding='utf-8')
     try:

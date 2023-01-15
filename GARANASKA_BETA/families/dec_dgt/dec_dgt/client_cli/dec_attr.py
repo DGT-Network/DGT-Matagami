@@ -21,8 +21,13 @@ DEC_HEART_BEAT_KEY  = "_DEC_HEART_BEAT_"
 DEC_NAME_DEF = "DEC"
 DEC_WALLET  = 'DEC_token'
 DEC_INVOICE_DEF = "INVOICE"
-DEC_TARGET_GRP = "TARGET"
-DEC_ROLE_GRP   = "ROLE"
+# objects groups
+DEC_TARGET_GRP = "targets"
+DEC_ROLE_GRP   = "roles"
+DEC_WALLET_GRP   = "wallets"
+DEC_EMISSION_GRP   = "emissions"
+DEC_SYNONYMS_GRP   = "synonyms"
+#
 DEC_HEART = "HEARTBEAT"
 DEC_TOTAL_SUM_DEF = 8589869056
 DEC_GRANULARITY_DEF = 7
@@ -43,6 +48,7 @@ DEC_TARGET_DEF = "any target"
 DEC_TARGET_INFO_DEF = "empty target"
 DEC_ROLE_DEF        = "def_role"
 DEC_ADMIN_PUB_KEY_DEF = "12345"
+DEC_PASSKEY_DEF = "passkey"
 DEC_TSTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 # DEC attributes
 DEC_NAME              = "name"              
@@ -76,7 +82,10 @@ DEC_SALE_TOTAL        = "sale_total"
 DEC_SALE_REST         = "sale_rest" 
 DEC_ASSET_TYPE        = "asset_type"
 DEC_DID_VAL           = "did" 
-DEC_TARGET            = "target" 
+DEC_TARGET            = "target"
+DEC_TARGET_ID         = "name"
+DEC_TARGET_ADDR         = "addr"
+DEC_TARGET_URL        = "url" 
 DEC_PROVEMENT_KEY     = "provement_key"  
 DEC_CUSTOMER_KEY      = "customer"
 AVAILABLE_TILL        = "available_till" 
@@ -91,14 +100,17 @@ DEC_PUBKEY           = "dec_pubkey"
 NOTARY_PUBKEY        = "notary_pubkey"
 DEC_SIGNATURE        = "dec_sign"
 DEC_EMITTER          = "emitter"
+DEC_OWNER            = "owner"
 DEC_NOTARY_KEY       = "notary_key"
 DEC_NOTARY_REQ_SIGN  = "notary_req_sign"
 DEC_SPEND_TMSTAMP      = "spend_timestamp"
 DEC_SPEND_PERIOD      = "spend_period"
 DEC_WALLET_STATUS     = "status"
 DEC_WALLET_ROLE       = "role"
+DEC_WALLET_TOKEN      = "token"
 DEC_WALLET_STATUS_ON     = "on"
 DEC_WALLET_STATUS_OFF     = "off"
+DEC_WALLET_ADDR         = "addr"
 DEC_TARGET_INFO     = "target_info"
 DEC_TARGET_PRICE     = "target_price"
 DEC_ROLE_TYPE        = "role_type"
@@ -109,7 +121,8 @@ DEC_CMD_OPTS       = "opts"
 DEC_TRANS_OPTS     = "topts"
 DEC_CMD            = 'Verb'   
 DEC_CMD_ARG        = 'Name'   
-DEC_CMD_TO         = 'To'     
+DEC_CMD_TO         = 'To' 
+DEC_CMD_VAL        = 'Value'    
 DEC_CMD_DIN        = 'Din'    
 DEC_CMD_DIN_EXT    = 'DinExt' 
 
@@ -167,10 +180,15 @@ MAX_VALUE = 4294967295
 
 MAX_NAME_LENGTH = 20
 
+TARGET_VISIBLE_ATTR =  DEC_TARGET_ID,DEC_TARGET_URL,DEC_TARGET_ADDR,DEC_TARGET_PRICE,DEC_TARGET_INFO,DEC_OWNER
+LONG_NAME_OPS = DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_MINT_OP,DEC_SEND_OP,DEC_PAY_OP,DEC_TARGET_OP,DEC_INVOICE_OP
+EMISSION_UNVISIBLE_ATTR = DEC_PASSKEY,DEC_ADMIN_PUB_KEY,DEC_CORPORATE_PUB_KEY
+
 DEC_PROTO_FILE_NM = "/project/dgt/etc/dec/emission.json"
 DEC_COMM_FILE_NM = "/project/dgt/etc/dec/comment.json" 
 DEC_OPTS_PROTO_FILE_NM = "/project/dgt/etc/dec/wallet_opts.json"
 DEC_ROLE_PROTO_FILE_NM = "/project/dgt/etc/dec/role.json"
+DEC_TARGET_PROTO_FILE_NM = "/project/dgt/etc/dec/target.json"
 
 DEC_PROTO = {                                                                 
     "COUNTRY_NAME"              : "CA",                                         
@@ -185,6 +203,12 @@ DEC_PROTO = {
     "BUSINESS_CATEGORY"         : "YOUR BUSINESS CATEGORY",                     
     "USER_ID"                   : "000000000000000001"                          
 } 
-
+DEF_WALLET_OPTS = {
+"role"        : ["def_role"],         
+"limit"       : 10001,                
+"spend_period": 61,                   
+"token"       : "DEC",                
+"status"      : "off"                  
+}
 # external family                                                                            
 SETTINGS_NAMESPACE = '000000'                                                                             
