@@ -119,8 +119,24 @@ def create_parent_parser(prog_name):
         choices=["openssl","bitcoin"] ,                                         
         help='Specify a crypto back openssl/bitcoin',                           
         default=CRYPTO_BACK                                                     
-        )                                                                        
-
+        ) 
+    parent_parser.add_argument(                             
+        '-U','--url',                                     
+        type=str,                                    
+        default="http://api-dgt-c1-1:8108",          
+        help='specify URL of REST API')              
+    parent_parser.add_argument(                             
+        '-NU','--notary_url',                              
+        type=str,                                    
+        help='Specify URL of NOTARY REST API',       
+        default='http://telebot-dgt:8203'            
+        )
+    parent_parser.add_argument(                                                 
+        '--wait',                                                        
+        nargs='?',                                                                                                   
+        const=sys.maxsize,                                               
+        type=int,                                                                                                                               
+        help='set time, in seconds, to wait for transaction to commit')  
 
     try:
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
@@ -193,23 +209,12 @@ def add_set_parser(subparsers, parent_parser):
         default=XCERT_PROTO_FILE,
         help='xcert atributes JSON or File name')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
     parser.add_argument(                                                
         '--before',                                                       
         type=int,                                                       
@@ -249,23 +254,12 @@ def add_upd_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",
         help='specify User name')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
-
+ 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
     parser.add_argument(                                   
         '--before',                                       
         type=int,                                         
@@ -312,18 +306,6 @@ def add_crt_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",
         help='Specify private key for user who ask operation')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
-
-    parser.add_argument(                                    
-        '--notary_url',                                     
-        type=str,                                           
-        help='Specify URL of NOTARY REST API',              
-        default='http://telebot-dgt:8203'                   
-        )
       
     parser.add_argument(                                
         '--notary',                                     
@@ -336,13 +318,6 @@ def add_crt_parser(subparsers, parent_parser):
         type=str,
         default="/project/peer/keys/notary.priv",
         help="Identify file containing notary's private key")
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
  
     parser.add_argument(                                   
@@ -420,12 +395,6 @@ def add_wallet_parser(subparsers, parent_parser):
     
                                                                                                                                                
     parser.add_argument(                                                                                                                        
-        '--url',                                                                                                                                
-        type=str,                                                                                                                               
-        help='specify URL of REST API',                                                                                                         
-        default='http://api-dgt-c1-1:8108')                                                                                                     
-                                                                                                                                                
-    parser.add_argument(                                                                                                                        
         '--keyfile',                                                                                                                            
         type=str,                                                                                                                               
         default="/project/peer/keys/notary.priv",                                                                                            
@@ -438,22 +407,6 @@ def add_wallet_parser(subparsers, parent_parser):
         help='Use Notary for control operation')    
     
         
-                                                        
-    parser.add_argument(                                
-        '--notary_url',                                 
-        type=str,                                       
-        help='Specify URL of NOTARY REST API',          
-        default='http://telebot-dgt:8203'               
-        )                                               
-    
-                                                                                                                                                
-    parser.add_argument(                                                                                                                        
-        '--wait',                                                                                                                               
-        nargs='?',                                                                                                                              
-        const=sys.maxsize,                                                                                                                      
-        type=int,                                                                                                                               
-        help='set time, in seconds, to wait for transaction to commit')                                                                         
-
 
 
 def do_wallet(args):
@@ -477,11 +430,6 @@ def add_wallets_parser(subparsers, parent_parser):
         type=str,                                                                                                                                                  
         help='specify DID owner of wallets')                                                                                                              
                                                                                                                                                                    
-    parser.add_argument(                                                                                                                                           
-        '--url',                                                                                                                                                   
-        type=str,                                                                                                                                                  
-        help='specify URL of REST API',                                                                                                                            
-        default='http://api-dgt-c1-1:8108')                                                                                                                        
     parser.add_argument(                                    
         '--opts_proto',                                     
         type=str,                                           
@@ -535,27 +483,14 @@ def add_role_parser(subparsers, parent_parser):
         type=str,                                                                                           
         help='Send limit')                                                                                  
                                                                                                             
-                                                                                                            
-    parser.add_argument(                                                                                    
-        '--url',                                                                                            
-        type=str,                                                                                           
-        help='specify URL of REST API',                                                                     
-        default='http://api-dgt-c1-1:8108') 
-                                                                    
+                                                                     
     parser.add_argument(                                                                                    
         '--keyfile',                                                                                        
         type=str,                                                                                           
         default="/project/peer/keys/notary.priv",                                                        
         help="Identify file containing owner private key") 
                                                      
-                                                                                                            
-    parser.add_argument(                                                                                    
-        '--wait',                                                                                           
-        nargs='?',                                                                                          
-        const=sys.maxsize,                                                                                  
-        type=int,                                                                                           
-        help='set time, in seconds, to wait for transaction to commit') 
-                                        
+                                       
 def do_role(args):                                                                                                                                  
     client = _get_client(args) 
     client.init_dec(args.keyfile)            
@@ -577,24 +512,11 @@ def add_roles_parser(subparsers, parent_parser):
                                                                                                                      
                                                                                                                      
     parser.add_argument(                                                                                             
-        '--url',                                                                                                     
-        type=str,                                                                                                    
-        help='specify URL of REST API',                                                                              
-        default='http://api-dgt-c1-1:8108')                                                                          
-                                                                                                                     
-    parser.add_argument(                                                                                             
         '--keyfile',                                                                                                 
         type=str,                                                                                                    
         default="/project/peer/keys/notary.priv",                                                                    
         help="Identify file containing owner private key")                                                           
                                                                                                                      
-                                                                                                                      
-    parser.add_argument(                                                                                             
-        '--wait',                                                                                                    
-        nargs='?',                                                                                                   
-        const=sys.maxsize,                                                                                           
-        type=int,                                                                                                    
-        help='Set time, in seconds, to wait for transaction to commit')                                              
 
 def do_roles(args):                       
     client = _get_client(args)           
@@ -647,18 +569,6 @@ def add_target_parser(subparsers, parent_parser):
         default=0,                    
         help='Use Notary for control operation') 
                                                                            
-    parser.add_argument(                          
-        '--notary_url',                               
-        type=str, 
-        help='Specify URL of NOTARY REST API',                                
-        default='http://telebot-dgt:8203'            
-        )    
-                                                                                                                                              
-    parser.add_argument(                                                                                    
-        '--url',                                                                                            
-        type=str,                                                                                           
-        help='specify URL of REST API',                                                                     
-        default='http://api-dgt-c1-1:8108') 
                                                                     
     parser.add_argument(                                                                                    
         '--keyfile',                                                                                        
@@ -666,12 +576,6 @@ def add_target_parser(subparsers, parent_parser):
         default="/project/peer/keys/notary.priv",                                                        
         help="Identify file containing notary private key")                                                  
                                                                                                            
-    parser.add_argument(                                                                                    
-        '--wait',                                                                                           
-        nargs='?',                                                                                          
-        const=sys.maxsize,                                                                                  
-        type=int,                                                                                           
-        help='set time, in seconds, to wait for transaction to commit')                                     
 
 def do_target(args):                          
     client = _get_client(args)               
@@ -695,12 +599,6 @@ def add_goods_parser(subparsers, parent_parser):
                                                                                                  
                                                                                                  
     parser.add_argument(                                                                         
-        '--url',                                                                                 
-        type=str,                                                                                
-        help='specify URL of REST API',                                                          
-        default='http://api-dgt-c1-1:8108')                                                      
-                                                                                                 
-    parser.add_argument(                                                                         
         '--keyfile',                                                                             
         type=str,                                                                                
         default="/project/peer/keys/notary.priv",                                                
@@ -708,13 +606,6 @@ def add_goods_parser(subparsers, parent_parser):
                                                                                                  
                                                                                                   
                                                                                                  
-    parser.add_argument(                                                                         
-        '--wait',                                                                                
-        nargs='?',                                                                               
-        const=sys.maxsize,                                                                       
-        type=int,                                                                                
-        help='Set time, in seconds, to wait for transaction to commit')                          
-
 
 
 
@@ -772,11 +663,6 @@ def add_pay_parser(subparsers, parent_parser):
        help="Wallet role name"                                                                                                                
        )                                                                                                                                      
     parser.add_argument(                                                                                                                      
-        '--url',                                                                                                                              
-        type=str,                                                                                                                             
-        help='specify URL of REST API',                                                                                                       
-        default='http://api-dgt-c1-1:8108')                                                                                                   
-    parser.add_argument(                                                                                                                      
         '--keyfile',                                                                                                                          
         type=str,
         default="/project/peer/keys/notary.priv",                                                                                                                             
@@ -788,20 +674,6 @@ def add_pay_parser(subparsers, parent_parser):
         default=0,                                    
         help='Use Notary for control operation')      
                                                       
-    parser.add_argument(                              
-        '--notary_url',                               
-        type=str,                                     
-        help='Specify URL of NOTARY REST API',        
-        default='http://telebot-dgt:8203'             
-        )                                             
-                                                                                      
- 
-    parser.add_argument(                                                                                                                      
-        '--wait',                                                                                                                             
-        nargs='?',                                                                                                                            
-        const=sys.maxsize,                                                                                                                    
-        type=int,                                                                                                                             
-        help='set time, in seconds, to wait for transaction to commit')                                                                       
                                                                                                                                               
 def do_pay(args):                                                                                                                             
     client = _get_client(args)   
@@ -836,25 +708,12 @@ def add_init_parser(subparsers, parent_parser):
         help='specify own notary addr(http://vault-n2:8300)') 
 
 
-
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API DGT network')
-
     parser.add_argument(
         '--keyfile',
         type=str,
         default="/project/peer/keys/notary.priv",
         help="Identify file containing notary's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
     parser.add_argument(                                   
         '--before',                                       
@@ -887,11 +746,6 @@ def add_show_parser(subparsers, parent_parser):
         type=str,
         help='certificate of key to show')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
     parser.add_argument(                                       
         '--keyfile',                                           
         type=str,                                              
@@ -946,18 +800,6 @@ def add_info_parser(subparsers, parent_parser):
         description=message,                                                     
         help='Display notary raft config')        
                                                                                  
-                                                                                 
-    parser.add_argument(                                                         
-        '--url',                                                                 
-        type=str,                                                                
-        default="http://api-dgt-c1-1:8108",                                      
-        help='specify URL of REST API')   
-    parser.add_argument(                                  
-        '--notary_url',                                  
-        type=str,                                        
-        help='Specify URL of NOTARY REST API',           
-        default='http://telebot-dgt:8203'                
-        ) 
     parser.add_argument(                         
         '--raft',                              
         action='count',                          
@@ -1038,11 +880,6 @@ def add_list_parser(subparsers, parent_parser):
         description=message,
         help='Displays all X509 certificates')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
     parser.add_argument(                                    
         '--keyfile',                                        
         type=str,                                           
@@ -1075,16 +912,6 @@ def add_approvals_parser(subparsers, parent_parser):
         description=message,                                                             
         help='Displays all notary approvals')                                           
                                                                                          
-    parser.add_argument(                                                                 
-        '--url',                                                                         
-        type=str,                                                                       
-        default='api-dgt-c1-1:8108',                                              
-        help='specify URL of DGT REST API') 
-    parser.add_argument(                         
-        '--notary_url',                                 
-        type=str,                                
-        default='http://telebot-dgt:8203',       
-        help='specify URL of NOTARY REST API')   
                                                      
     parser.add_argument(                                                                 
         '--keyfile',                                                                     
@@ -1130,17 +957,6 @@ def add_approval_parser(subparsers, parent_parser):
         help='Delete notary approve request') 
     
                
-
-    parser.add_argument(                                        
-        '--url',                                                
-        type=str,                                               
-        default='api-dgt-c1-1:8108',                            
-        help='specify URL of DGT REST API')                     
-    parser.add_argument(                                        
-        '--notary_url',                                         
-        type=str,                                               
-        default='http://telebot-dgt:8203',                      
-        help='specify URL of NOTARY REST API')                  
                                                                 
     parser.add_argument(                                        
         '--keyfile',                                            
