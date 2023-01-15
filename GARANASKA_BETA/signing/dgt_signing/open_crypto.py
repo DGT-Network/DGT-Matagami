@@ -32,7 +32,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_der_public_key,load_der_private_key
-#from sha3 import keccak_256
+
 import logging
 
 # x509
@@ -132,7 +132,7 @@ class OpenCryptoContext(Context):
         else:
             self._algorithm = "secp256k1"
             self._ctx  = ec.SECP256K1()
-        logging.info(f"OpenCryptoContext: CRYPTO_BACK={self._backend} algorithm={self._algorithm}")
+        #logging.info(f"OpenCryptoContext: CRYPTO_BACK={self._backend} algorithm={self._algorithm}")
 
     @property
     def algorithm(self):
@@ -273,7 +273,21 @@ class OpenCryptoContext(Context):
         public_key = xcert.public_key()
         return OpenCryptoPublicKey(self,public_key).as_hex()
 
-    def pubkey2addr(self,hex_str,lng=20):
-        return keccak_256(hex_str.encode()).digest()[-lng:].hex()
-
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                              
+    
+    
+    
+    
+    
+    
+    
+    

@@ -274,7 +274,9 @@ class PbftSettingsView:
                     default_value=PbftSettingsView._IS_HEART_BEAT_,                          
                     validate_function=lambda value: value==0 or value==1)                              
             
-        return self._params[PbftSettingsView.IS_HEART_BEAT]                                  
+        return self._params[PbftSettingsView.IS_HEART_BEAT]                                    
+
+
 
 
     @property

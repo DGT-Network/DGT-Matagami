@@ -1101,6 +1101,7 @@ class PeersGetRequest(_ClientRequestHandler):
 
     def _respond(self, request):
         peers = self._gossip.get_peers(mode=request.status)
+        LOGGER.debug("PeersGetRequest: peers={}".format(peers))
         endpoints = list(set([peers[connection_id] for connection_id in peers]))
         return self._wrap_response(peers=endpoints)
 

@@ -412,7 +412,9 @@ def main():
             LOGGER.info(f"VAULT MODE url={bot_api_config.vault_url} NOTARY={opts.user_notary} LEAD={opts.lead_addr} REST={opts.url}")
             #vault = Vault(bot_api_config.vault_url,notary=opts.notary_name,lead_addr=opts.lead_addr,opts=opts)
             vault = NotaryClient(opts.url,'/project/peer/keys/notary.priv',opts.crypto_back,vault_url=bot_api_config.vault_url,notary=opts.notary_name,lead_addr=opts.lead_addr)
-            vault.init(opts.notary_name)
+            if not vault.init_vault():
+                LOGGER.info("VAULT NOT READY")
+                sys.exit(1)
         else:
             vault = None
         if opts.bot_on:

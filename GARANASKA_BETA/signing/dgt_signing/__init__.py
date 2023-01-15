@@ -20,8 +20,78 @@ from dgt_signing.core import SigningError
 from dgt_signing.secp256k1 import Secp256k1Context
 from dgt_signing.open_crypto import OpenCryptoContext
 
+from sha3 import keccak_256
+import hashlib
+
 DGT_CRYPTO_NM = 'dgt.crypto'
 DGT_CRYPTO_ALG_NM = 'dgt.crypto.alg'
+
+def key_to_dgt_addr(hex_str,pref="0x",lng=20):                                        
+    a =  keccak_256(hex_str.encode()).digest()[-lng:].hex()                              
+    h = hashlib.sha256()                                                                 
+    h.update(a.encode())                                                                 
+    h.update(h.digest())                                                                 
+    crc = h.hexdigest()                                                                  
+    addr = "{}{}{}".format(pref,a,crc[0:4])                                              
+    return addr                                                                          
+                                                                                         
+def check_dgt_addr(addr,pref="0x"):                                                      
+    a = addr[2:42]                                                                       
+    h = hashlib.sha256()                                                                 
+    h.update(a.encode())                                                                 
+    h.update(h.digest())                                                                 
+    crc = h.hexdigest() #_sha256(_sha256(a.encode()).encode()) #h.hexdigest()            
+    crc0 = addr[-4:]                                                                     
+    #print('a',a,'cr',addr[-4:],crc[0:4] == crc0,addr[0:2])                                         
+    return crc[0:4] == crc0  and pref == addr[0:2]                                          
+
+def checksum_encode(addr): # Takes a 20-byte binary address as input
+    hex_addr = addr[2:].hex()
+    print('addr',addr[2:],hex_addr)
+    hashed_address = keccak_256(addr[2:]).digest().hex() #addr.hex()
+    print('hashed_address->',hashed_address)
+    checksummed_buffer = ""
+
+    # Treat the hex address as ascii/utf-8 for keccak256 hashing
+    #hashed_address = keccak_256(text=hex_addr).hex()
+
+    # Iterate over each character in the hex address
+    for nibble_index, character in enumerate(hex_addr):
+
+        if character in "0123456789":
+            # We can't upper-case the decimal digits
+            checksummed_buffer += character
+        elif character in "abcdef":
+            # Check if the corresponding hex digit (nibble) in the hash is 8 or higher
+            try:
+                hashed_address_nibble = int(hashed_address[nibble_index], 16)
+            except IndexError:
+                break
+            if hashed_address_nibble > 7:
+                checksummed_buffer += character.upper()
+            else:
+                checksummed_buffer += character
+        #else:
+        #    raise eth_utils.ValidationError(
+        #        f"Unrecognized hex character {character!r} at position {nibble_index}"
+        #    )
+
+    return "0x" + checksummed_buffer
+def test_eth(addr):
+    addr_bytes = addr.encode() #eth_utils.to_bytes(hexstr=addr_str)
+    checksum_encoded = checksum_encode(addr_bytes)
+    print( checksum_encoded == addr, f"{checksum_encoded} != expected {addr}")
+
+def test_eth_list():
+    test_eth("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed")
+    test_eth("0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359")
+    test_eth("0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB")
+    test_eth("0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb")
+
+
+
+
+
 
 
 
