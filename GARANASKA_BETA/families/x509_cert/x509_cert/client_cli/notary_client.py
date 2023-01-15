@@ -24,7 +24,7 @@ import json
 import logging
 import traceback
 
-from dgt_signing import create_context
+from dgt_signing import create_context,key_to_dgt_addr,check_dgt_addr,checksum_encode
 from dgt_signing import CryptoFactory
 from dgt_signing import ParseError
 from dgt_signing.core import (X509_COMMON_NAME, X509_USER_ID,X509_BUSINESS_CATEGORY,X509_SERIAL_NUMBER)
@@ -41,7 +41,7 @@ from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 
 from x509_cert.client_cli.exceptions import XcertClientException,XcertClientKeyfileException
 from x509_cert.client_cli.xcert_attr import *
-from x509_cert.client_cli.xcert_client import XcertClient,_sha512
+from x509_cert.client_cli.xcert_client import XcertClient,_sha512,_sha256
 # 
 try:
     from sha3 import keccak_256
@@ -70,9 +70,14 @@ DID_WALLETS = "wallets"
 DID_ROLES   = "roles"
 DID_GOODS   = "goods"
 WAIT_DEF = 10
-TARGET_PATH = "{}/target/{}"
-ROLES_PATH = "{}/roles/{}"
-WALLETS_PATH = "{}/wallets/{}"                                                                     
+# <group>/<did>/<object>
+TARGET_PATH = "targets/{}/{}"     
+ROLES_PATH = "roles/{}/{}"       
+WALLETS_PATH = "wallets/{}/{}"   
+
+TARGET_PATH_ = "{}/target/{}"
+ROLES_PATH_ = "{}/roles/{}"
+WALLETS_PATH_ = "{}/wallets/{}"                                                                     
 
 
 
@@ -88,34 +93,44 @@ class NotaryClient(XcertClient):
         self._vault = None
         self._url = url
         self._backend = backend
-        if Vault:
-            if vault_url is None:
-                # client mode 
-                # wait until info about leader will be commit into DGT 
-                ninfo = None
-                attempt = 100 
-                while ninfo is None and attempt > 0:
-                    attempt -= 1
-                    ninfo = self.get_notary_info(NOTARY_LEADER_ID)
-                    if ninfo is None:
-                        LOGGER.debug("NOTARY CLIENT try to get LEADER info: {}".format(attempt))
-                        time.sleep(1)
-                        #print(f'notary info={ninfo}')
-                if NOTARY_TOKEN in ninfo and NOTARY_URL in ninfo:
-                    self._vault = Vault(ninfo[NOTARY_URL],token=ninfo[NOTARY_TOKEN])
-                else:
-                    print('Cant get notary info')
-                    
-                    
-            else:
-                # init mode                                                      
-                self._vault = Vault(vault_url,notary=notary,lead_addr=lead_addr) 
-        else:
-            print('No vault')
-
+        self._vault_url = vault_url
+        self._notary = notary
+        self._lead_addr = lead_addr
         self._cdec = None
         self._user_signer = None
-        
+
+    def init_vault(self):
+        if Vault is None: 
+            print('No vault')                   
+            LOGGER.debug("No vault instance")   
+            return False                        
+            
+                                                                                                              
+        if self._vault_url is None:                                                                                   
+            # client mode                                                                                       
+            # wait until info about leader will be commit into DGT                                              
+            ninfo = None                                                                                        
+            attempt = 100                                                                                       
+            while ninfo is None and attempt > 0:                                                                
+                attempt -= 1                                                                                    
+                ninfo = self.get_notary_info(NOTARY_LEADER_ID)                                                  
+                if ninfo is None:                                                                               
+                    LOGGER.debug("NOTARY CLIENT try to get LEADER info: {}".format(attempt))                    
+                    time.sleep(1)                                                                               
+                    #print(f'notary info={ninfo}')                                                              
+            if ninfo is not None and NOTARY_TOKEN in ninfo and NOTARY_URL in ninfo:                             
+                self._vault = Vault(ninfo[NOTARY_URL],token=ninfo[NOTARY_TOKEN]) 
+                return True                               
+            else:                                                                                               
+                print('Cant get notary info')                                                                   
+                LOGGER.debug("Cant get notary info from DGT")
+                return False                                                   
+                                                                                                                
+        else:                                                                                                   
+            # init mode                                                                                         
+            self._vault = Vault(self._vault_url,notary=self._notary,lead_addr=self._lead_addr)                                    
+            return True
+
     def get_user_key(self,user_key_file):
         try:                                                  
             # use user key                                    
@@ -126,9 +141,30 @@ class NotaryClient(XcertClient):
 
         self._user_pubkey = self._user_signer.get_public_key().as_hex()
 
-    def pubkey2addr(self,pubkey,lng=20):
+    def pubkey2addr(self,pubkey,lng=20,pref="0x"):
         # self._user_signer.pubkey2addr(pubkey,lng)
-        return keccak_256(pubkey.encode()).digest()[-lng:].hex()
+        a =  keccak_256(pubkey.encode()).digest()[-lng:]
+        a1 =  keccak_256(pubkey.encode()).digest()[-lng:].hex()
+        print('a',a1.encode(),a.hex().encode())
+        #crc1 = _sha256(_sha256(a).encode())
+        h = hashlib.sha256()
+        h.update(a1.encode())
+        h.update(h.digest())
+        crc = h.hexdigest()
+        crc1 = _sha256(_sha256(a1.encode()).encode())
+        print(a,a1,'H',h.hexdigest(),'C',crc1)
+        addr = "{}{}{}".format(pref,a1,crc[0:4])
+        print('A',a.hex(),'C',crc[0:4],crc,'AD',addr)
+        self.check_addr(addr)
+        return addr
+    def check_addr(self,addr):
+        a = addr[2:42]
+        h = hashlib.sha256()
+        h.update(a.encode())
+        h.update(h.digest())
+        crc = h.hexdigest() #_sha256(_sha256(a.encode()).encode()) #h.hexdigest()
+        crc0 = addr[-4:]
+        print('a',a,'cr',addr[-4:],crc[0:4] == crc0)
 
     def init_dec(self,keyfile):
         # for  wallet mode 
@@ -332,8 +368,10 @@ class NotaryClient(XcertClient):
         if uid == KECCAK_MODE:
             # keccak_256(public_key).digest()[-20:]
             self.get_user_key(args.user)
-            addr = self.pubkey2addr(self._user_pubkey)
-            print("XCERT ADDR",addr)
+            addr = key_to_dgt_addr(self._user_pubkey)
+            addr1 = checksum_encode(self._user_pubkey)
+            print("XCERT ADDR",addr,addr1,check_dgt_addr(addr))
+            return
             uid = addr
             #return 
         secret = self._vault.get_secret(uid)

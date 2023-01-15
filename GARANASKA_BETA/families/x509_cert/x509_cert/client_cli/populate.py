@@ -32,8 +32,8 @@ from dgt_signing import CryptoFactory
 from dgt_sdk.protobuf import batch_pb2
 from dgt_sdk.protobuf import transaction_pb2
 
-from x509_cert.processor.handler import make_xcert_address
-
+#from x509_cert.processor.handler import make_xcert_address
+from x509_cert.xcert_addr_util import make_xcert_address
 
 LOGGER = logging.getLogger(__name__)
 

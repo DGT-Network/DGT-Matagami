@@ -41,8 +41,11 @@ LOGGER = logging.getLogger(__name__)
 NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
 
 
-def _sha512(data):
-    return hashlib.sha512(data).hexdigest()
+def _sha256(data):
+    return hashlib.sha256(data).hexdigest()
+
+def _sha512(data):                          
+    return hashlib.sha512(data).hexdigest() 
 
 def _get_prefix():                                             
     return _sha512(FAMILY_NAME.encode('utf-8'))[0:6]                     
@@ -251,6 +254,7 @@ class XcertClient:
 
     def show(self, name):
         address = self._get_address(name)
+        
         try:
             result = self._send_request("state/{}".format(address), name=name,)
         except XcertClientException:

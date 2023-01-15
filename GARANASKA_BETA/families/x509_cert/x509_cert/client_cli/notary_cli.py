@@ -1248,13 +1248,18 @@ def _get_client(args,init=False):
         notary= args.value
         lurl = args.leader_addr
         vurl = args.vault_addr
-
-        return NotaryClient(url=url,keyfile=keyfile,backend=backend,vault_url=vurl,notary=notary,lead_addr=lurl)                                       
+        print("VAULT INIT url={}".format(vurl))
+        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,vault_url=vurl,notary=notary,lead_addr=lurl)                                       
      
     else:
-        return NotaryClient(url=url,keyfile=keyfile,backend=backend)
+        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend)
 
-
+    if not client.init_vault():                
+        #LOGGER.info("VAULT NOT READY EXIT") 
+        print("VAULT NOT READY EXIT")       
+        sys.exit(1)
+    return client   
+                                
 def _get_keyfile(args):
     try:
         if args.keyfile is not None:
