@@ -49,6 +49,7 @@ RUN apt-get install -y -q \
     python3-yaml \
     python3-zmq python3-cbor python3-secp256k1 python3-cryptography>=1.7.1
 
+RUN pip3 install pysha3
 RUN mkdir /var/log/sawtooth
 
 ENV PATH=$PATH:/project/$DGT_TOP/bin:/project/$DGT_TOP/bgx/bin

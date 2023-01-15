@@ -47,6 +47,7 @@ RUN apt-get install -y -q \
  
 RUN pip3 install hvac             
 RUN pip3 install "hvac[parser]"
+RUN pip3 install pysha3
  
 COPY ./docker/vault/vault_1.10.2_linux_amd64.zip /usr/local/bin
 RUN (cd /usr/local/bin;unzip   vault_1.10.2_linux_amd64.zip)   

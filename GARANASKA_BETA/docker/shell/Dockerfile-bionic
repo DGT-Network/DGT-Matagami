@@ -44,6 +44,15 @@ RUN apt-get install -y -q \
     python3-toml \
     python3-yaml python3-pip
 RUN pip3 install cryptography
+RUN pip3 install pysha3
+# take Ethereum hash function
+# import sha3
+# k = sha3.keccak_256()
+# k.update('age'.encode())
+# print (k.hexdigest())
+# addr = keccak_256('51fe1dfe5211f93bc7'.encode()).digest()[-20:].hex()
+#RUN pip3 install pysha3
+
 ENV PATH=$PATH:/project/$DGT_TOP/bin:/project/$DGT_TOP/bgx/bin
 
 WORKDIR /project/$DGT_TOP

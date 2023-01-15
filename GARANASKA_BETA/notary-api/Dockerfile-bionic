@@ -55,7 +55,7 @@ RUN apt-get install -y -q \
 RUN pip3 install pysocks
 RUN pip3 install hvac             
 RUN pip3 install "hvac[parser]"  
-				  
+RUN pip3 install pysha3				  
 RUN mkdir /var/log/dgt
 
 ENV PATH=$PATH:/project/$DGT_TOP/bin:/project/$DGT_TOP/bgx/bin

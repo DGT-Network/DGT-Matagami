@@ -46,7 +46,7 @@ RUN apt-get install -y -q \
     python3-secp256k1
 
 RUN pip3 install web3
-
+RUN pip3 install pysha3
 RUN mkdir -p /var/log/sawtooth
 
 ENV PATH=$PATH:/project/$BGX_TOP/bgx/bin:/project/$BGX_TOP/bin
