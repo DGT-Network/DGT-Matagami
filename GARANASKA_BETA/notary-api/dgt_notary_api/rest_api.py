@@ -324,6 +324,10 @@ def main():
             reporter.start()
         # notary client add dec api
         vault = NotaryClient(opts.url,NOTARY_PRIV_KEY,opts.crypto_back)
+        if not vault.init_vault():                
+            LOGGER.info("VAULT NOT READY EXIT")        
+            sys.exit(1)                           
+
         vault.init_dec(NOTARY_PRIV_KEY)
         start_rest_api(
             host,
