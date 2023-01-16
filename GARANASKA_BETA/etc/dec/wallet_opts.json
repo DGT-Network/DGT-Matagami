@@ -2,5 +2,6 @@
     "role"        : ["def_role"],
     "limit"       : 10001,
     "spend_period": 61,
+    "token"       : "DEC",
     "status"      : "on"
 }
