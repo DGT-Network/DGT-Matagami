@@ -249,9 +249,11 @@ class NotaryClient(XcertClient):
         is_meta = opts.meta > 0
         is_recursive = opts.recursive > 0
         def do_yaml(t_dir,c_yaml):
+            #print("t_dir=>{} c_yaml={}".format(t_dir,type(c_yaml)))
             c_dir = self._vault.get_sys_info(info="ls",path=t_dir)
+            #print("cdir={} {}".format(c_dir,type(c_dir)))
             for fnm in c_dir:
-                fpath = t_dir + '/' + fnm
+                fpath = t_dir + '' + fnm
                 mdata = self._vault.get_secret(fpath) if opts.meta > 0 else None
                 if mdata:
                     for dk in [XCERT_ATTR]:
@@ -259,7 +261,12 @@ class NotaryClient(XcertClient):
                             del mdata[dk]
                 if fnm[-1] == '/': 
                     if opts.recursive > 0:
-                        c_yaml[fnm] = do_yaml(fpath,{} if fnm not in ["roles/","target/","wallets/"] or  is_meta else [])
+                        try:
+
+                            c_yaml[fnm] = do_yaml(fpath,{} if fnm not in ["roles/","target/","wallets/"] or  is_meta else {})
+                        except Exception as ex:
+                            print("bad arg path={} fnm={} - ({})".format(fpath,fnm,ex))
+                            c_yaml[fnm] = {}
                     else:
                         c_yaml[fnm] = "-Dir"
                 else:  
@@ -369,9 +376,9 @@ class NotaryClient(XcertClient):
             # keccak_256(public_key).digest()[-20:]
             self.get_user_key(args.user)
             addr = key_to_dgt_addr(self._user_pubkey)
-            addr1 = checksum_encode(self._user_pubkey)
-            print("XCERT ADDR",addr,addr1,check_dgt_addr(addr))
-            return
+            #addr1 = checksum_encode(self._user_pubkey)
+            #print("XCERT ADDR",addr,addr1,check_dgt_addr(addr))
+            #return
             uid = addr
             #return 
         secret = self._vault.get_secret(uid)
@@ -563,19 +570,6 @@ class NotaryClient(XcertClient):
             if data is not None:                                                                  
                 print('Role {} already exist'.format(role_path))                                         
                 return 
-            """                                                                       
-            secret = data['data']                                                             
-            # add new role into DID role list                                                  
-            if DID_ROLES in secret and isinstance(secret[DID_ROLES],dict) :               
-                rlist = secret[DID_ROLES]  
-                if args.role_id in rlist:
-                    print('Role {} already in list for {}.'.format(args.role_id,args.did))
-                    return  
-                # add new role                                                                  
-            else:                                                                             
-                # new role list
-                rlist = {} 
-            """                           
             # add new role
             resp,_ = self._cdec.role(args,wait=WAIT_DEF)
             if resp in ['PENDING','INVALID']  :             

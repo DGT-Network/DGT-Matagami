@@ -42,7 +42,7 @@ from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 # DEC 
 from dec_dgt.client_cli.dec_attr import (DEC_WALLET_OP,DEC_WALLET_OPTS_OP,DEC_WALLET_LIMIT_DEF,DEC_WALLET_LIMIT,
                                          DEC_OPTS_PROTO_FILE_NM,DEC_ROLE_PROTO_FILE_NM,DEC_ROLE_OP,DEC_ROLES_OP,DEC_GOODS_OP,DEC_TARGET_OP,DEC_PAY_OP,
-                                         DEC_APPROVALS,DEC_APPROVAL
+                                         DEC_APPROVALS,DEC_APPROVAL,DEC_TARGET_PROTO_FILE_NM
                                          )
 
 DISTRIBUTION_NAME = 'x509-cert'
@@ -288,7 +288,7 @@ def add_crt_parser(subparsers, parent_parser):
         description=message,
         help='Update xcert atributes')
 
-    parser.add_argument(   # 03aefd25cc96f9b4a55d8ca9e196037571c9a7d696022919964c6eff5676d7b9e4       
+    parser.add_argument(   
         'user_id',              
         type=str,                 
         help='Specify user ID')   
@@ -551,6 +551,12 @@ def add_target_parser(subparsers, parent_parser):
         '--pkey',                                           
         type=str,                                         
         help='specify target owner private key file')     
+    
+    parser.add_argument(                       
+        '--target_proto',                      
+        type=str,                              
+        default=DEC_TARGET_PROTO_FILE_NM,      
+        help='Target proto file')              
                                                                                                           
     parser.add_argument(                                                                                    
         '--target','-tg',                                                                                   

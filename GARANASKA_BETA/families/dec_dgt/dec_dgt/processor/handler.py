@@ -491,7 +491,7 @@ class DecTransactionHandler(TransactionHandler):
             # this is case when user ask tokens from сorporate wallet
             # check who is user 
             emiss = cbor.loads(token.dec)
-            if value[DEC_EMITTER] != emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]:
+            if key_to_dgt_addr(value[DEC_EMITTER]) != emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]:
                 raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have not access'.format(DEC_SEND_OP))
             if emiss[DEC_СORPORATE_REST] < amount:
                 amount = emiss[DEC_СORPORATE_REST]
