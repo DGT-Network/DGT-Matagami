@@ -598,7 +598,7 @@ class DecClient:
         # for notary less mode user sign with his own key  
  
         sign_req = self.notary_req_sign(req,self._signer)              
-        print('PREQ',sign_req,topts)                                   
+        #print('PREQ',sign_req,topts)                                   
         #return    
         return self._send_sign_transaction(topts,sign_req,wait= TRANS_TOUT if wait is None  else wait)   
         
@@ -1010,7 +1010,7 @@ class DecClient:
                                                                                                                                                 
         # Construct the address                                                                                                                   
         address = self._get_full_addr(name[0],name[1],name[2])#self._get_address(name) 
-        print('NAME',address)                                                                                                        
+        #print('NAME',address)                                                                                                        
         inputs = [address]                                                                                                                        
         outputs = [address]                                                                                                                       
         if to is not None: 
@@ -1036,7 +1036,7 @@ class DecClient:
         # input list
         val[DATTR_INPUTS] = dinputs
                                                                                                                                                   
-        print("in={} out={} din={}".format(inputs,outputs,dinputs))
+        #print("in={} out={} din={}".format(inputs,outputs,dinputs))
         payload = cbor.dumps(val)
         psign = self._signer.sign(payload) # for fool notary mode this is notary node sign 
         sign_val[DEC_SIGNATURE] =  psign
