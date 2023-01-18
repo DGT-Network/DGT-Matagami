@@ -57,7 +57,7 @@ def add_keygen_parser(subparsers, parent_parser):
         '-cb', '--crypto_back',               
         type=str,                             
         help='Specify a crypto back',         
-        default='bitcoin')  
+        default='openssl')  
 
 
 
