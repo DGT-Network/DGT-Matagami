@@ -1281,7 +1281,7 @@ def add_tips_parser(subparsers, parent_parser):
                                        
 def do_tips(args):                                          
     client = _get_client(args)                                   
-    response = client.get_tips(args, args.wait)                
+    response = client.tips(args, args.wait)                
     if args.yaml > 0:                                            
         response = do_yaml(response)                             
     print(response)                                                                    

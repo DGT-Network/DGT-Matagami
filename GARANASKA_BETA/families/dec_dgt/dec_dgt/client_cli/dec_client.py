@@ -514,17 +514,22 @@ class DecClient:
         else:                                                                                       
             print('Set  passkey argument')                                           
 
-    def get_tips(self,args,wait=None):
-        token = self.get_object(DEC_EMISSION_GRP,args.did,ANY_EMISSION_KEY.format(args.name))       
-        info = {}                                                                                   
-        if token.group_code == args.name :                                                          
-            dec = cbor.loads(token.dec)                                                             
-            if DEC_TIPS_OP in dec:
-                val = dec[DEC_TIPS_OP][DATTR_VAL]
-                info[DEC_TIPS_OP] = val[args.cmd] if args.cmd in val else 0.0
-            else:
-                info[DEC_TIPS_OP] = 0.0
-        return info                                                                                 
+    def tips(self,args,wait=None):
+        tips = self.get_tips(args.name,args.cmd,args.did)       
+        info = {DEC_TIPS_OP: tips}                                                                                   
+        return info  
+                                                                                   
+    def get_tips(self,tname,cmd,did):                                                         
+        token = self.get_object(DEC_EMISSION_GRP,did,ANY_EMISSION_KEY.format(tname))
+        tips = 0.0  
+        if token.group_code == tname :                                                     
+            dec = cbor.loads(token.dec)                                                        
+            if DEC_TIPS_OP in dec:                                                             
+                val = dec[DEC_TIPS_OP][DATTR_VAL]                                              
+                if cmd in val:
+                    tips = val[cmd]                  
+            
+        return tips                                                                            
 
 
     #                            
@@ -765,7 +770,9 @@ class DecClient:
     def target(self,args,wait=5):
           
         info = self.target_info(args) 
-        if  args.check > 0:            
+        if  args.check > 0: 
+            tips = self.get_tips(DEC_NAME_DEF,DEC_TARGET_OP,args.did)  
+            info[DEC_CMD_OPTS][DEC_TIPS_OP] = tips         
             return info[DEC_CMD_OPTS]  
 
         topts = info[DEC_TRANS_OPTS] 
