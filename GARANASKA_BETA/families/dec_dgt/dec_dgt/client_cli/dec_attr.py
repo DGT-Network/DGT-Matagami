@@ -149,6 +149,8 @@ DEC_BURN_OP         = 'burn'
 DEC_CHANGE_MINT_OP  = 'changemint'
 DEC_DISTRIBUTE_OP   = 'distribute'
 DEC_FAUCET_OP       = 'faucet'
+DEC_TIPS_OP         = 'tips'
+
 #
 DEC_MINT_OP         = 'mint'
 DEC_HEART_BEAT_OP   = 'heartbeat'

@@ -174,7 +174,7 @@ def create_parser(prog_name):
     add_role_parser(subparsers, parent_parser)
     add_addr_parser(subparsers, parent_parser)
     add_bank_list_parser(subparsers, parent_parser)
-
+    add_tips_parser(subparsers, parent_parser)
     #
     add_set_parser(subparsers, parent_parser)
     add_inc_parser(subparsers, parent_parser)
@@ -1247,7 +1247,44 @@ def do_bank_list(args):
     response = client.bank_list(args, args.wait)                  
     print(response) 
 
-                      
+def add_tips_parser(subparsers, parent_parser):            
+    message = 'Info about tips for DEC transactions.'                 
+                                                                 
+    parser = subparsers.add_parser(                              
+        DEC_TIPS_OP,                                       
+        parents=[parent_parser],                                 
+        description=message,                                     
+        help='Info about tips for dec transactions')                  
+    parser.add_argument(     
+        'cmd',           
+        type=str,            
+        help='Comand name for test tips')      
+    
+    
+                                                                
+    parser.add_argument(                                         
+        '--keyfile',                                             
+        type=str,                                                
+        help="identify file containing user's private key")      
+                                                                 
+    parser.add_argument(                                         
+        '-n','--name',                                           
+        type=str,                                                
+        help='specify token name (DEC/..)',                      
+        default=DEC_NAME_DEF)  
+    parser.add_argument(    
+        '--did','-d',       
+        type=str,default=DEFAULT_DID,           
+        help='DID')         
+    
+                                      
+                                       
+def do_tips(args):                                          
+    client = _get_client(args)                                   
+    response = client.get_tips(args, args.wait)                
+    if args.yaml > 0:                                            
+        response = do_yaml(response)                             
+    print(response)                                                                    
 
 
 def add_set_parser(subparsers, parent_parser):
@@ -1559,7 +1596,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_role(args)                      
                                                         
     elif args.command == DEC_BANK_LIST_OP:           
-        do_bank_list(args)                          
+        do_bank_list(args)                 
+    elif args.command == DEC_TIPS_OP:     
+        do_tips(args)                               
     elif args.command == 'addr':    
         do_addr(args)                   
             
