@@ -121,8 +121,8 @@ def create_parent_parser(prog_name):
         help='Set time, in seconds, to wait for transaction to commit')          
     parent_parser.add_argument(                                                   
         '--tips',                                                         
-        default=0,                                                
-        type=int,                                                         
+        default=0.0,                                                
+        type=float,                                                         
         help='Set tips for transaction(reward for acceptor peer)')   
 
     

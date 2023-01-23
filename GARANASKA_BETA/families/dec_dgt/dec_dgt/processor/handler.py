@@ -74,6 +74,13 @@ def make_full_dec_address(name,op,val):
     owner = val[DEC_PAYLOAD][DEC_DID_VAL] if DEC_PAYLOAD in val else val[DEC_DID_VAL]
     return full_dec_address(name,tp,owner)
  
+def get_wallet(wval):
+    # wallet of source            
+    #curr = state[name]            
+    token = DecTokenInfo()        
+    token.ParseFromString(wval)   
+    src = cbor.loads(token.dec)   
+    return src,token
 
 class DecTransactionHandler(TransactionHandler):
     def __init__(self):
@@ -551,10 +558,8 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_PAY_OP)) 
 
         # wallet of source
-        curr = state[name]                                                                                                                                   
-        token = DecTokenInfo()                                                                                                                               
-        token.ParseFromString(curr) 
-        src = cbor.loads(token.dec)
+        
+        src,token = get_wallet(state[name])                                                                                                                                 
         total = src[DEC_TOTAL_SUM]
                                                                                                                                  
         #dec = cbor.loads(token.dec)                                                                                                                         
@@ -566,9 +571,7 @@ class DecTransactionHandler(TransactionHandler):
         amount = pinfo[DATTR_VAL]
         tcurr = value[DEC_PAYLOAD][DEC_TMSTAMP]                                                                                                                            
         # destination token                                                                                                                                  
-        dtoken = DecTokenInfo()                                                                                                                              
-        dtoken.ParseFromString(state[to]) 
-        dest = cbor.loads(dtoken.dec)   
+        dest,dtoken = get_wallet(state[to])   
 
         LOGGER.debug('_do_send value={}'.format(value))                                                                                                      
         ttoken = DecTokenInfo()                                                                                                                                                     
@@ -680,15 +683,35 @@ class DecTransactionHandler(TransactionHandler):
 
         if name in state:                                                                                                                           
             raise InvalidTransaction('Verb is "{}" target with such name "{}" already in state'.format(DEC_TARGET_OP,name))                                
-
-        info = {}  
+        LOGGER.debug('TARGET STATE={}'.format([k for k in state.keys()]))
+        info = {} 
         payload = value[DEC_PAYLOAD]
-        info[DEC_TARGET_OP] = payload[DEC_TARGET_OP]                                                                                                                                 
+        info[DEC_TARGET_OP] = payload[DEC_TARGET_OP] 
+        tcurr = payload[DEC_TMSTAMP]  
+        tips = payload[DEC_TIPS_OP]                                                                                                                                   
         if DEC_DID_VAL  in payload:                      
             # for notary mode                          
             info[DEC_DID_VAL] = payload[DEC_DID_VAL]     
         info[DEC_EMITTER] = key_to_dgt_addr(value[DEC_EMITTER]) # pubkey of owner 
-                                                                                                                                                    
+        info[DEC_TMSTAMP] = tcurr 
+        # destination token                                                                                                                         
+        updated = {k: v for k, v in state.items() if k in out}
+        if tips > 0.0:
+            # take tips 
+            oname = info[DEC_EMITTER]
+            if oname not in state:
+                 raise InvalidTransaction('Verb is "{}" and tips > 0 but owner={} wallet undefined '.format(DEC_TARGET_OP,oname)) 
+            owner,otoken = get_wallet(state[oname])
+            total = owner[DEC_TOTAL_SUM]
+            if tips > total:
+                raise InvalidTransaction('Verb is "{}" and not enough DEC on owner={} wallet for paying tips={}'.format(DEC_TARGET_OP,oname,tips))
+            otoken.decimals = round(otoken.decimals - tips)           
+            owner[DEC_TOTAL_SUM] -= tips       
+            owner[DEC_SPEND_TMSTAMP] = tcurr     
+            otoken.dec = cbor.dumps(owner)        
+            updated[oname] = otoken.SerializeToString()
+
+
         token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
                              owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               
                              sign = self._public_key.as_hex(),                                                                                      
@@ -696,11 +719,8 @@ class DecTransactionHandler(TransactionHandler):
                              dec = cbor.dumps(info)                                                                                                 
                 )                                                                                                                                   
                                                                                                                                                     
-        # destination token                                                                                                                         
-                                                                                                                                                    
-        LOGGER.debug('_do_target value={}'.format(info))                                                                                          
-                                                                                                                                                    
-        updated = {k: v for k, v in state.items() if k in out}                                                                                      
+                                                                                                                                 
+        LOGGER.debug('_do_target tips={} value={}'.format(tips,info))                                                                                          
                                                                                                                                                     
         updated[name] = token.SerializeToString()                                                                                                   
                                                                                                                                                     
@@ -1127,7 +1147,8 @@ class DecTransactionHandler(TransactionHandler):
                 self._addr_map[tv[1]] = taddr                                                                                              
                                                                                                                                            
         else:                                                                                                                              
-            r_to = None                                                                                                                    
+            r_to = None  
+        LOGGER.debug('_get_state_data key={} add={}'.format(r_to,astates))                                                                                                                  
         state_entries = context.get_state(astates)                                                                                         
         try:                                                                                                                               
             states = {}                                                                                                                    

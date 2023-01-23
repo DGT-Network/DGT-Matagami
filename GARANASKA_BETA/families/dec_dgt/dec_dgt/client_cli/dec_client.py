@@ -750,9 +750,11 @@ class DecClient:
         
         info[DEC_TARGET_OP] = target                        
         #info[DEC_EMITTER] = signer.get_public_key().as_hex()              
-        info[DEC_TMSTAMP] = tcurr  
+        info[DEC_TMSTAMP] = tcurr 
+        info[DEC_TIPS_OP] = args.tips 
         taddr = target[DEC_TARGET_ADDR] 
-        
+ 
+
         if args.did:                                                            
             # refer to DID owner  
             info[DEC_DID_VAL] = args.did  
@@ -763,8 +765,13 @@ class DecClient:
                  DEC_CMD_OPTS   : info,
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_TARGET_OP,
                                     DEC_CMD_ARG: (taddr,DEC_TARGET_GRP,args.did)
+ 
                                   }
-                }                                      
+                } 
+        
+        if args.tips > 0.0:                                   
+            opts[DEC_TRANS_OPTS][DEC_CMD_TO] = [(target[DEC_OWNER],DEC_WALLET_GRP,args.did)]
+                                             
         return opts
 
     def target(self,args,wait=5):
@@ -1037,6 +1044,7 @@ class DecClient:
                 address_to = self._get_full_addr(tval[0],tval[1],tval[2]) if isinstance(tval,tuple) else self._get_address(tval)
                 inputs.append(address_to)                                                                                                             
                 outputs.append(address_to) 
+                print("TO",tval[0],address_to)
         dinputs = []                                                                                                            
         if din is not None:                                                                                                                       
             for ain in (din if isinstance(din,list) else [din]):                                                                                                                   
