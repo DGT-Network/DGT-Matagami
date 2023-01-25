@@ -764,8 +764,8 @@ class DecClient:
         opts = {
                  DEC_CMD_OPTS   : info,
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_TARGET_OP,
-                                    DEC_CMD_ARG: (taddr,DEC_TARGET_GRP,args.did)
- 
+                                    DEC_CMD_ARG: (taddr,DEC_TARGET_GRP,args.did),
+                                    DEC_CMD_DIN : [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]
                                   }
                 } 
         

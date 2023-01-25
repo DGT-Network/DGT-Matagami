@@ -82,6 +82,9 @@ def get_wallet(wval):
     src = cbor.loads(token.dec)   
     return src,token
 
+def get_dec(val):
+    return get_wallet(val)
+
 class DecTransactionHandler(TransactionHandler):
     def __init__(self):
         self._context = create_context('secp256k1') 
@@ -698,6 +701,12 @@ class DecTransactionHandler(TransactionHandler):
         updated = {k: v for k, v in state.items() if k in out}
         if tips > 0.0:
             # take tips 
+            emiss,etoken = get_dec(state[DEC_EMISSION_KEY])
+            min_tips = emiss[DEC_TIPS_OP][DATTR_VAL][DEC_TARGET_OP] if DEC_TARGET_OP in emiss[DEC_TIPS_OP][DATTR_VAL] else 0.0
+            LOGGER.debug('TARGET TIPS={}'.format(emiss[DEC_TIPS_OP]))
+            if tips < min_tips:
+                raise InvalidTransaction('Verb is "{}" but tips < min {} '.format(DEC_TARGET_OP,min_tips))
+
             oname = info[DEC_EMITTER]
             if oname not in state:
                  raise InvalidTransaction('Verb is "{}" and tips > 0 but owner={} wallet undefined '.format(DEC_TARGET_OP,oname)) 
