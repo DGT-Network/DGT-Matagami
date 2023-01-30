@@ -739,7 +739,7 @@ class DecClient:
             if key not in TARGET_VISIBLE_ATTR:
                 target[key] = key_to_dgt_addr(val,pref="")
         if args.invoice > 0:                                                                 
-            target[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None,DEC_TARGET_PRICE :args.price} 
+            target[DEC_INVOICE_OP] = {DEC_CUSTOMER_KEY : None, DEC_TARGET_PRICE :args.price} 
         return target
 
     def target_info(self,args,signer=None):

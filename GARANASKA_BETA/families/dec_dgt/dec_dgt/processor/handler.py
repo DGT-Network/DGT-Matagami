@@ -703,7 +703,7 @@ class DecTransactionHandler(TransactionHandler):
             # take tips 
             emiss,etoken = get_dec(state[DEC_EMISSION_KEY])
             min_tips = emiss[DEC_TIPS_OP][DATTR_VAL][DEC_TARGET_OP] if DEC_TARGET_OP in emiss[DEC_TIPS_OP][DATTR_VAL] else 0.0
-            LOGGER.debug('TARGET TIPS={}'.format(emiss[DEC_TIPS_OP]))
+            #LOGGER.debug('TARGET TIPS={}'.format(emiss[DEC_TIPS_OP]))
             if tips < min_tips:
                 raise InvalidTransaction('Verb is "{}" but tips < min {} '.format(DEC_TARGET_OP,min_tips))
 
