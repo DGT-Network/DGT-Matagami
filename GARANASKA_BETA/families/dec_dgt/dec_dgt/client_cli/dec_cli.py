@@ -1040,7 +1040,7 @@ def add_invoice_parser(subparsers, parent_parser):
         help='Prove of key - kind of invoice')  
     parser.add_argument(                    
         'amount',                           
-        type=int,                           
+        type=float,                           
         help='number token for transfer')   
             
     parser.add_argument(      
