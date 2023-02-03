@@ -509,8 +509,11 @@ class DecClient:
             info[DEC_PASSKEY] = key_to_dgt_addr(args.passkey)                                                        
             info[DATTR_VAL]   = args.value                                       
             print('PROTO',info) 
-            to =  (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)                                                                   
-            self._send_transaction(DEC_FAUCET_OP, (args.pubkey,DEC_WALLET_GRP,DEFAULT_DID), info, to=to, wait=wait)  
+            to =  (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)
+            pubkey = self.get_pub_key(args.pubkey)
+            info[DEC_EMITTER] = self._signer.get_public_key().as_hex() 
+            info[DEC_TMSTAMP] = time.time()                                                                   
+            return self._send_transaction(DEC_FAUCET_OP, (key_to_dgt_addr(pubkey),DEC_WALLET_GRP,DEFAULT_DID), info, to=to, wait=wait if wait else TRANS_TOUT)  
         else:                                                                                       
             print('Set  passkey argument')                                           
 

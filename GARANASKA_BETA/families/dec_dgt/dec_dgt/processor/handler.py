@@ -427,8 +427,7 @@ class DecTransactionHandler(TransactionHandler):
     def _do_faucet(self,name, value, to, state, out):                                                          
         LOGGER.debug('Faucet "{}" by {}'.format(name,value))                                       
                                                                                                                
-        if name not in state:                                                                                  
-            raise InvalidTransaction('Verb is "{}" but pubkey "{}" not in state'.format(DEC_FAUCET_OP,name)) 
+       
         if DEC_EMISSION_KEY not in state:                                                          
             raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_FAUCET_OP))                                                                                                       
         curr = state[DEC_EMISSION_KEY]                                                                                     
@@ -441,23 +440,39 @@ class DecTransactionHandler(TransactionHandler):
         max_sale = total_sum/100*sale_share
         total_sale = dec[DEC_SALE_TOTAL]
         tval = value[DATTR_VAL]
+        tcurr = value[DEC_TMSTAMP]
         # destination token
-        dtoken = DecTokenInfo()                                                                
-        dtoken.ParseFromString(state[name])
+        if name in state:                                                                       
+            # destination token                                                               
+            dtoken = DecTokenInfo()                                                           
+            dtoken.ParseFromString(state[name])                                                 
+                                                                                              
+        else:                                                                                 
+            LOGGER.debug('Faucet create destination WALLET={}'.format(name))                  
+            dtoken = self._new_wallet(0,tcurr)                                                
+                                                                 
+
+        
         LOGGER.debug('_do_faucet total={} sale: max={} total={} value={}'.format(total_sum,max_sale,total_sale,value))                                        
                                                                                                                
         if DEC_PASSKEY not in value or passkey != value[DEC_PASSKEY]:                                                                      
             raise InvalidTransaction('Verb is "{}", but passkey incorrect or not set'.format(DEC_FAUCET_OP)) 
                        
         
-        if total_sale + tval > max_sale:
-            raise InvalidTransaction('Verb is "{}", but value={} too match'.format(DEC_FAUCET_OP,tval))
+        if tval > max_sale:
+            raise InvalidTransaction('Verb is "{}", but value={} too match < {}'.format(DEC_FAUCET_OP,tval,max_sale))
 
-        updated = {k: v for k, v in state.items() if k in out}                                                             
+        updated = {k: v for k, v in state.items() if k in out} 
+        dest = cbor.loads(dtoken.dec)                                                            
         dtoken.decimals += tval 
-        dec[DEC_SALE_TOTAL] = total_sale + tval                                                                                                    
-        token.dec = cbor.dumps(dec)                                                                            
-        updated[DEC_EMISSION_KEY] = token.SerializeToString()
+        dest[DEC_TOTAL_SUM] += tval 
+        dtoken.dec = cbor.dumps(dest) 
+
+
+
+        #dec[DEC_SALE_TOTAL] = total_sale + tval                                                                                                    
+        #token.dec = cbor.dumps(dec)                                                                            
+        #updated[DEC_EMISSION_KEY] = token.SerializeToString()
         updated[name] = dtoken.SerializeToString()                                                              
                                                                                                                
         return updated                                                                                         
