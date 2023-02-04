@@ -25,8 +25,8 @@ import hashlib
 
 DGT_CRYPTO_NM = 'dgt.crypto'
 DGT_CRYPTO_ALG_NM = 'dgt.crypto.alg'
-
-def key_to_dgt_addr(hex_str,pref="0x",lng=20):                                        
+DGT_ADDR_PREF = "0x"
+def key_to_dgt_addr(hex_str,pref=DGT_ADDR_PREF,lng=20):                                        
     a =  keccak_256(hex_str.encode()).digest()[-lng:].hex()                              
     h = hashlib.sha256()                                                                 
     h.update(a.encode())                                                                 
