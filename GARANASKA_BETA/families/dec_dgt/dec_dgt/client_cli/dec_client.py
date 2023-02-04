@@ -608,7 +608,8 @@ class DecClient:
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
-        addr = (args.name,DEC_EMISSION_GRP if args.name == DEC_EMISSION_KEY else DEC_WALLET_GRP,args.did)
+        faddr = args.name if args.name == DEC_EMISSION_KEY else self.key_to_addr(args.name)
+        addr = (faddr,DEC_EMISSION_GRP if args.name == DEC_EMISSION_KEY else DEC_WALLET_GRP,args.did)
         taddr = self.key_to_addr(args.to)
         return self._send_transaction(DEC_SEND_OP, addr, info, to=(taddr,DEC_WALLET_GRP,args.did), wait=wait if wait else TRANS_TOUT,din=din)  
 
@@ -661,8 +662,9 @@ class DecClient:
         #if args.did:                                                       
         #    pay_opts[DEC_DID_VAL] = args.did                                   
         #daddr = self._get_full_addr(args.to,tp_space=DEC_WALLET_GRP,owner=args.didto) 
-        #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)                                                                  
-        to = [(args.to,DEC_WALLET_GRP,args.didto)]                                                     
+        #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)
+        taddr = self.key_to_addr(args.to)                                                                  
+        to = [(taddr,DEC_WALLET_GRP,args.didto)]                                                     
         din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]                                           
         if args.target :                                                   
             # target with invoice 
@@ -685,11 +687,11 @@ class DecClient:
         if args.did:                                                                
             # refer to DID owner                                                    
             info[DEC_DID_VAL] = args.did 
-        #addr = self._get_full_addr(args.name,tp_space=DEC_WALLET_GRP,owner=args.did)                                              
+        faddr = self.key_to_addr(args.name)                                              
         opts = {                                                                    
                  DEC_CMD_OPTS   : info,                                             
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_PAY_OP,                     
-                                    DEC_CMD_ARG: (args.name,DEC_WALLET_GRP,args.did) ,
+                                    DEC_CMD_ARG: (faddr,DEC_WALLET_GRP,args.did) ,
                                     DEC_CMD_TO : to,
                                     DEC_CMD_DIN: din                    
                                   }                                                 
