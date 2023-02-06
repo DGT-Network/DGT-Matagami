@@ -48,5 +48,6 @@
 	 "dgt6" : "BA.ba6"     
        },
 "static_map" :["c1.dgt1","c1.dgt2","c1.dgt3","c2.dgt1"],
+"gate_tips" : {"c1.dgt1" : 0.1,"c1.dgt2": 0.1,"c1.dgt3": 0.1},
 "notaries" :["n1","n2","n3"]                    
 }			     

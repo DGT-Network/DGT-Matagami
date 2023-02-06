@@ -1596,6 +1596,21 @@ class Gossip(object):
         #LOGGER.debug("get topology=%s",stopology.encode("utf-8")) 
         return stopology.encode("utf-8")
 
+    def get_gates(self):                                                           
+        """                                                                           
+        topology with cluster                                                         
+        FIXME - we should extend base version with information about status peers     
+        """                                                                           
+        
+        sgates = json.dumps(                                                       
+                self._fbft.gates,                                                  
+                indent=2,                                                             
+                separators=(',', ': '),                                               
+                sort_keys=True)                                                       
+                                                                                      
+        #LOGGER.debug("get topology=%s",stopology.encode("utf-8"))                    
+        return sgates.encode("utf-8")                                              
+
 
     def peer_to_public_key(self, peer):
         """Returns the public key for the associated peer."""

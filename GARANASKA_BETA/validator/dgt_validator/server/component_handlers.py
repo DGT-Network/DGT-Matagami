@@ -250,6 +250,10 @@ def add(
         validator_pb2.Message.CLIENT_TOPOLOGY_GET_REQUEST,
         client_handlers.TopologyGetRequest(gossip),
         thread_pool)
+    dispatcher.add_handler(                                     
+        validator_pb2.Message.CLIENT_GATE_GET_REQUEST,      
+        client_handlers.GateGetRequest(gossip),             
+        thread_pool)                                            
 
     """
     dispatcher.add_handler(

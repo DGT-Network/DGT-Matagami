@@ -31,3 +31,16 @@ message ClientTopologyGetResponse {
     Status status = 1;
     bytes  topology = 2;
 }
+
+message ClientGateGetRequest{                 
+}                                                 
+                                                  
+message ClientGateGetResponse {               
+    enum Status {                                 
+        STATUS_UNSET = 0;                         
+        OK = 1;                                   
+        ERROR = 2;                                
+    }                                             
+    Status status = 1;                            
+    bytes  gates = 2;                          
+}                                                 

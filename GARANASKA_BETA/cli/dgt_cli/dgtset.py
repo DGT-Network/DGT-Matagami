@@ -47,10 +47,10 @@ from dgt_validator.protobuf.batch_pb2 import BatchList
 #from dgt_cli.protobuf.batch_pb2 import BatchList
 
 from dgt_signing import create_context
-from dgt_signing import CryptoFactory
+from dgt_signing import CryptoFactory,key_to_dgt_addr
 from dgt_signing import ParseError
 from dgt_validator.gossip.fbft_topology import (PeerSync,PeerRole,PeerAtr,FbftTopology,TOPOLOGY_SET_NM,DGT_PING_COUNTER,
-                                                DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,DGT_TOPOLOGY_NEST_NM,TOPO_MAP,DGT_NET_NEST
+                                                DGT_TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,DGT_TOPOLOGY_NEST_NM,TOPO_MAP,TOPO_GATES,DGT_NET_NEST
                                                 )
 
 from x509_cert.client_cli.xcert_attr import XCERT_CRT_OP,NOTARY_LIST_ID,NOTARY_KEYS,NOTARIES_MAP,DGT_NOTARY_KEYS
@@ -64,7 +64,7 @@ VALIDATOR_PUB_KEY = '/project/peer/keys/validator.pub'
 PROJ_DGT = f'/project/{DGT_TOP}'
 MAP_NET_FNM = f"{PROJ_DGT}/etc/dgt.net.map"
 STATIC_MAP = "static_map"
-
+GATE_TIPS = "gate_tips"
 
 _MIN_PRINT_WIDTH = 15
 
@@ -124,6 +124,7 @@ def get_net_map(fname,fpub,crypto,mapping):
              nest_str : pub_key_str,
   
            }
+    gtips = {}
     # add static peer into map 
     #mapping = get_mapping_file()
     if mapping and STATIC_MAP in mapping:
@@ -140,8 +141,19 @@ def get_net_map(fname,fpub,crypto,mapping):
                 if pkey and  nest not in fmap:
                     fmap[nest] = pkey
 
-    print(f"MAP={fmap}")
-    return fmap
+    if mapping and GATE_TIPS in mapping:                  
+        for nm,tips in mapping[GATE_TIPS].items():        
+            clust = nm.split('.')                         
+            nest = mapping[clust[0]][clust[1]] 
+            gate = {"tips" : tips}   
+            if nest in fmap:
+                gate['addr'] = key_to_dgt_addr(fmap[nest])
+            gtips[nest] = gate                 
+
+
+
+    print("MAP={} \nTIPS={}".format(fmap,gtips))
+    return fmap,gtips
 
 def get_notary_map(mapping,crypto):
     notaries = mapping[NOTARIES_MAP] 
@@ -172,7 +184,7 @@ def _do_config_proposal_create(args):
     #print(f"settings = {settings}")
     settings.append((args.crypto_name,args.crypto_back))
     mapping = get_mapping_file()
-    first_map = get_net_map(args.topology_nest,args.pub_key,args.crypto_back,mapping)
+    first_map,gate_tips = get_net_map(args.topology_nest,args.pub_key,args.crypto_back,mapping)
     #if first_map:
     #    settings.append((args.topology_map_name,json.dumps(first_map)))
 
@@ -183,7 +195,8 @@ def _do_config_proposal_create(args):
             try:
                 net_data =  file_to_load.read()                                
                 data = json.loads(net_data)
-                data[TOPO_MAP] = first_map 
+                data[TOPO_MAP] = first_map
+                data[TOPO_GATES] = gate_tips
                 # add map into topology
                 settings.append((args.net_set_name,json.dumps(data))) 
                 print(f"Load Dgt net from {args.net}")

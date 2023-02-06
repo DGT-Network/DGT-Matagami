@@ -1138,6 +1138,21 @@ class TopologyGetRequest(_ClientRequestHandler):
         return self._wrap_response(topology=topology)
 
 
+class GateGetRequest(_ClientRequestHandler):
+    def __init__(self, gossip):
+        super().__init__(
+            client_topology_pb2.ClientGateGetRequest,
+            client_topology_pb2.ClientGateGetResponse,
+            validator_pb2.Message.CLIENT_GATE_GET_RESPONSE
+        )
+        self._gossip = gossip
+
+    def _respond(self, request):
+        #LOGGER.debug('TopologyGetRequest: ...')
+        gate = self._gossip.get_gates()
+        return self._wrap_response(gates=gate)
+
+
 class HeadsGetRequest(_ClientRequestHandler):
     def __init__(self, block_store,block_publisher):
         super().__init__(

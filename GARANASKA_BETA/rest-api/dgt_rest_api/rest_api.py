@@ -141,6 +141,7 @@ def start_rest_api(host, port, connection, timeout, registry,
     app.router.add_get('/dag/{head_id}', handler.fetch_dag)
     app.router.add_get('/graph', handler.fetch_dag_graph)
     app.router.add_get('/topology', handler.fetch_topology)
+    app.router.add_get('/gates', handler.fetch_gates)
     #ADD TP FAMILY handlers
     app.router.add_get('/tx_families', handler.tx_families)                           
     app.router.add_get('/run', handler.run_transaction)                               

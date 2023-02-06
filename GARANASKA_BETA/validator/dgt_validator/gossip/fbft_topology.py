@@ -33,6 +33,7 @@ DGT_PING_COUNTER  = 'dgt.ping.counter'
 TOPOLOGY_GENESIS_HEX = b'Genesis'.hex()
 TOPO_GENESIS =  'Genesis'
 TOPO_MAP = "map"
+TOPO_GATES = "gates"
 DGT_NET_NEST = '/project/peer/keys/dgt.net.nest'
 DGT_SELF_CERT = '/project/peer/keys/certificate.pem'
 DGT_KYC_DID = '/project/peer/keys/kyc.txt'
@@ -151,6 +152,7 @@ class FbftTopology(object):
     """
     def __init__(self,topology_nest_nm=None):
         self._validator_id = None
+        self._own_nest  = None
         self._topo_nest_nm = topology_nest_nm
         self._abstr_topo = self._topo_nest_nm is not None and False
         self._nnest2key = PeerMaping() # nest-> key
@@ -232,6 +234,9 @@ class FbftTopology(object):
     @property
     def topology(self):
         return self._topology
+    @property                
+    def gates(self):      
+        return self._topology[TOPO_GATES]
 
     def cluster_peer_role_by_key(self,key):
         nest = self.nest2key(key)
@@ -846,6 +851,7 @@ class FbftTopology(object):
                     self._nest_colour = name
                     self._cluster    = children
                     self._parent     = arbiter_id
+                    self._own_nest   = nest
                     if PeerAtr.role in peer:
                         self._own_role = peer[PeerAtr.role]
                     if PeerAtr.delegate in peer:
@@ -901,9 +907,11 @@ class FbftTopology(object):
 
         self._validator_id = validator_id
         self._endpoint = endpoint
-        self._topology = topology if topology != {} else {PeerAtr.children:{},TOPO_MAP: {}}
+        self._topology = topology if topology != {} else {PeerAtr.children:{},TOPO_MAP: {},TOPO_GATES : {}}
         if TOPO_MAP in self._topology:     
             self.load_topo_map(self._topology[TOPO_MAP]) 
+        if TOPO_GATES in self._topology:
+            LOGGER.debug('GATES={}'.format(self._topology[TOPO_GATES]))
 
         #LOGGER.debug('get_topology=%s',self._topology)
         topology['topology'] = peering_mode
@@ -933,7 +941,7 @@ class FbftTopology(object):
                     break
             # add Identity
             topology['Network'] = 'DGT TEST network'
-            topology['Identity'] = {'PubKey'     : self._validator_id,
+            identity = {'PubKey'     : self._validator_id,
                                     'IP'         : self._endpoint,
                                     'Network'    : network,
                                     'Cluster'    : self._nest_colour,
@@ -943,6 +951,11 @@ class FbftTopology(object):
                                     'KYCKey'     : KYCKey
 
             }
+            if self._own_nest is not None and self._own_nest in self._topology[TOPO_GATES]:
+                identity['gate'] = self._topology[TOPO_GATES][self._own_nest]
+                self._topology[TOPO_GATES][self._own_nest]['this'] = True
+
+            topology['Identity'] = identity
             LOGGER.debug('Arbiters RING=%s\n GENESIS=%s PUBLICS=%s child=%s dyn=%s', self.arbiters_info, self.genesis_node[:8], len(self.publics),self.own_child_info,self.is_dynamic_cluster)
 
 

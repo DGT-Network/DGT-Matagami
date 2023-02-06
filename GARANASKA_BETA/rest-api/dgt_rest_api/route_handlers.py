@@ -698,6 +698,28 @@ class RouteHandler:
             data=json.loads(topology),
             metadata=self._get_metadata(request, response))
 
+
+    async def fetch_gates(self, request):                                          
+        """Fetches the topology from the validator.                                   
+        Request:                                                                      
+                                                                                      
+        Response:                                                                     
+            data: JSON array of net topology                                          
+            link: The link to this exact query                                        
+        """                                                                           
+        #LOGGER.debug('Request fetch_topology ')                                      
+        response = await self._query_validator(                                       
+            Message.CLIENT_GATE_GET_REQUEST,                                      
+            client_topology_pb2.ClientGateGetResponse,                            
+            client_topology_pb2.ClientGateGetRequest())                           
+        gates = base64.b64decode(response['gates'])                             
+        #LOGGER.debug('Request fetch_topology=%s',topology)                           
+        return self._wrap_response(                                                   
+            request,                                                                  
+            data=json.loads(gates),                                                
+            metadata=self._get_metadata(request, response))                           
+
+
     async def fetch_dag_graph(self, request):                                   
         """Fetches the dag graph from the validator.                            
         Request:                                                               
