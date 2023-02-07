@@ -1113,8 +1113,13 @@ def add_target_parser(subparsers, parent_parser):
     parser.add_argument(          
         '--did','-d',              
         type=str,
-        default=DEFAULT_DID,                 
-        help='DID')               
+        default=DEFAULT_DID,                
+        help='DID')            
+    parser.add_argument(        
+        '--gate','-g',           
+        type=str,               
+        default=DEFAULT_GATE,    
+        help='Default gate for transaction')                
                                                                                          
     parser.add_argument(                                                                                                  
         '--keyfile',                                                                                                      

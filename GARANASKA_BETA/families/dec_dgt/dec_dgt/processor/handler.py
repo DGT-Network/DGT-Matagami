@@ -706,7 +706,8 @@ class DecTransactionHandler(TransactionHandler):
         payload = value[DEC_PAYLOAD]
         info[DEC_TARGET_OP] = payload[DEC_TARGET_OP] 
         tcurr = payload[DEC_TMSTAMP]  
-        tips = payload[DEC_TIPS_OP]                                                                                                                                   
+        tips = payload[DEC_TIPS_OP][DEC_TIPS_OP]  
+        agate  = payload[DEC_TIPS_OP][GATE_ADDR_ATTR]                                                                                                                                
         if DEC_DID_VAL  in payload:                      
             # for notary mode                          
             info[DEC_DID_VAL] = payload[DEC_DID_VAL]     
@@ -734,7 +735,19 @@ class DecTransactionHandler(TransactionHandler):
             owner[DEC_SPEND_TMSTAMP] = tcurr     
             otoken.dec = cbor.dumps(owner)        
             updated[oname] = otoken.SerializeToString()
-
+            if agate in state:                                                               
+                # destination token                                                       
+                dtoken = DecTokenInfo()                                                   
+                dtoken.ParseFromString(state[agate])                                         
+                                                                                          
+            else:                                                                         
+                LOGGER.debug('_do_target create gate WALLET={}'.format(agate))          
+                dtoken = self._new_wallet(0,tcurr)                                        
+            dest = cbor.loads(dtoken.dec)
+            dtoken.decimals = round(dtoken.decimals + tips)                                                      
+            dest[DEC_TOTAL_SUM] += tips  
+            dtoken.dec = cbor.dumps(dest)
+            updated[agate] = dtoken.SerializeToString()  
 
         token = DecTokenInfo(group_code = DEC_TARGET_GRP,                                                                                          
                              owner_key = self._signer.sign(DEC_TARGET_GRP.encode()),                                                               
