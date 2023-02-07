@@ -637,7 +637,13 @@ class FbftTopology(object):
             return True
         LOGGER.debug('peer_is_leader: is not leader=%s',peer_key[:8])
         return False
-    
+
+    def peer_is_gate(self,agate):
+        for nest,val in self._topology[TOPO_GATES].items():
+            if val["addr"] == agate:
+                return True
+        return False
+
     def update_peer_activity(self,peer_key,endpoint,mode,sync=False,force=False,pid=None,extpoint=None):
         
         for key,peer in self.get_topology_iter():
