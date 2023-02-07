@@ -525,17 +525,27 @@ class DecClient:
         info = {DEC_TIPS_OP: tips}                                                                                   
         return info  
                                                                                    
-    def get_tips(self,tname,cmd,did):                                                         
-        token = self.get_object(DEC_EMISSION_GRP,did,ANY_EMISSION_KEY.format(tname))
+    def get_tips(self,tname,cmd,did):  
+        result = self._send_request("gates")
+        try:
+            gates = yaml.safe_load(result)['data']
+        except Exception as ex:
+            gates = {}
+        
+        
         tips = 0.0  
-        if token.group_code == tname :                                                     
-            dec = cbor.loads(token.dec)                                                        
-            if DEC_TIPS_OP in dec:                                                             
-                val = dec[DEC_TIPS_OP][DATTR_VAL]                                              
-                if cmd in val:
-                    tips = val[cmd]                  
-            
-        return tips                                                                            
+        try:
+            token = self.get_object(DEC_EMISSION_GRP,did,ANY_EMISSION_KEY.format(tname))
+            if token.group_code == tname :                                                     
+                dec = cbor.loads(token.dec)                                                        
+                if DEC_TIPS_OP in dec:                                                             
+                    val = dec[DEC_TIPS_OP][DATTR_VAL]                                              
+                    if cmd in val:
+                        tips = val[cmd]
+        except Exception as ex:
+            pass                  
+        gates['DGT'] = {'tips' : tips }  
+        return gates                                                                            
 
 
     #                            
