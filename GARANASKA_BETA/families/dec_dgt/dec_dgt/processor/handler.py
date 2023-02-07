@@ -730,6 +730,20 @@ class DecTransactionHandler(TransactionHandler):
             total = owner[DEC_TOTAL_SUM]
             if tips > total:
                 raise InvalidTransaction('Verb is "{}" and not enough DEC on owner={} wallet for paying tips={}'.format(DEC_TARGET_OP,oname,tips))
+
+            if DGT_TOPOLOGY_SET_NM not in state:                   
+                raise InvalidTransaction('Verb is "{}" but no topology {} info'.format(DEC_TARGET_OP,DGT_TOPOLOGY_SET_NM))
+            tval = json.loads(state[DGT_TOPOLOGY_SET_NM])  
+            fbft = FbftTopology()                                                                             
+            fbft.get_topology(tval,'','','static')                                                            
+            #                                                                                                 
+            is_gate = fbft.peer_is_gate(agate)                                                            
+            LOGGER.debug('Topology peer={} gate "{}"'.format(agate,is_gate))                              
+            if not is_gate:                                                                                   
+                raise InvalidTransaction('Verb is "{}", but emitter is not Gate'.format(DEC_EMISSION_OP))   
+
+
+
             otoken.decimals = round(otoken.decimals - tips)           
             owner[DEC_TOTAL_SUM] -= tips       
             owner[DEC_SPEND_TMSTAMP] = tcurr     
