@@ -1,0 +1,23 @@
+dgt keygen --key-dir /project/peer/keys corp
+dgt keygen --key-dir /project/peer/keys admin
+dgt keygen --key-dir /project/peer/keys wkey
+dgt keygen --key-dir /project/peer/keys wkey1
+# make emission
+dec emission  -apk /project/peer/keys/admin.priv -ck /project/peer/keys/corp.priv
+# send DEC to wallet for testing
+dec faucet /project/peer/keys/wkey.priv 1000 --keyfile /project/peer/keys/validator.priv -pk passkey
+dec faucet /project/peer/keys/wkey1.priv 1000 --keyfile /project/peer/keys/validator.priv -pk passkey
+# create targets
+dec target target-1 1 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
+dec target target-2 2 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
+dec target target-2 3 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
+# list all objects
+dec list
+# show off wallets
+echo WALLETS
+dec list -v -tp wallets
+echo EMISSIONS
+dec list -v -tp emissions
+echo TARGETS
+dec list -v -tp targets
+#

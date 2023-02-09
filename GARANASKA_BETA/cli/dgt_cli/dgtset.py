@@ -127,6 +127,7 @@ def get_net_map(fname,fpub,crypto,mapping):
     gtips = {}
     # add static peer into map 
     #mapping = get_mapping_file()
+ 
     if mapping and STATIC_MAP in mapping:
         static_nests = {}
         for nm in mapping[STATIC_MAP]:
@@ -147,7 +148,14 @@ def get_net_map(fname,fpub,crypto,mapping):
             nest = mapping[clust[0]][clust[1]] 
             gate = {"tips" : tips}   
             if nest in fmap:
-                gate['addr'] = key_to_dgt_addr(fmap[nest])
+                pkey = fmap[nest]
+            else:
+                # get pubkey for nest 
+                key_file = f"{PROJ_DGT}/clusters/{clust[0]}/{clust[1]}/keys/validator.pub.{crypto}"  
+                pkey = get_pub_key(key_file)                                                         
+
+            # set gate addr 
+            gate['addr'] = key_to_dgt_addr(pkey)
             gtips[nest] = gate                 
 
 
