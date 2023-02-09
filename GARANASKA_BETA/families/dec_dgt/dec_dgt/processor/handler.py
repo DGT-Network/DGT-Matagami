@@ -544,9 +544,12 @@ class DecTransactionHandler(TransactionHandler):
             emiss[DEC_СORPORATE_REST] -= amount
             token.dec = cbor.dumps(emiss)
         else:
-            if key_to_dgt_addr(value[DEC_EMITTER]) != name:
-                raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
+            eaddr = key_to_dgt_addr(value[DEC_EMITTER])
             src = cbor.loads(token.dec)
+            wopts = src[DEC_WALLET_OPTS_OP]
+            if eaddr != name and DEC_WALLET_ADDR in wopts  and eaddr != wopts[DEC_WALLET_ADDR]:
+                raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
+            
             total = src[DEC_TOTAL_SUM]
             if total < amount:                                                                                
                 raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount)) 
@@ -593,12 +596,13 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_PAY_OP))                                                       
         if target is not None and target not in state:
             raise InvalidTransaction('Verb is "{}" but target "{}" not in state'.format(DEC_PAY_OP,target))
-        if key_to_dgt_addr(value[DEC_EMITTER]) != name:                                                                                     
+        src,token = get_wallet(state[name])
+        wopts = src[DEC_WALLET_OPTS_OP]
+        eaddr = key_to_dgt_addr(value[DEC_EMITTER])
+        if eaddr != name and DEC_WALLET_ADDR in wopts  and eaddr != wopts[DEC_WALLET_ADDR]:                                                                                     
             raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_PAY_OP)) 
 
         # wallet of source
-        
-        src,token = get_wallet(state[name])                                                                                                                                 
         total = src[DEC_TOTAL_SUM]
                                                                                                                                  
         #dec = cbor.loads(token.dec)                                                                                                                         
