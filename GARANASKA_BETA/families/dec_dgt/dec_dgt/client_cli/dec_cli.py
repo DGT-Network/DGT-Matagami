@@ -171,6 +171,7 @@ def create_parser(prog_name):
     add_pay_parser(subparsers, parent_parser)
     add_invoice_parser(subparsers, parent_parser)
     add_target_parser(subparsers, parent_parser)
+    add_alias_parser(subparsers, parent_parser)
     add_role_parser(subparsers, parent_parser)
     add_addr_parser(subparsers, parent_parser)
     add_bank_list_parser(subparsers, parent_parser)
@@ -1128,6 +1129,70 @@ def add_target_parser(subparsers, parent_parser):
         help="Identify file containing owner private key")                                                               
                                                                                                                           
 
+def add_alias_parser(subparsers, parent_parser):                                                                        
+    message = 'Create alias <alias_name> '                                                                   
+    parser = subparsers.add_parser(                                                                                       
+        DEC_ALIAS_OP,                                                                                                   
+        parents=[parent_parser],                                                                                          
+        description=message,                                                                                              
+        help='Create user alias')                                                                                 
+
+    parser.add_argument(                                                                                                  
+        'alias_name',                                                                                                      
+        type=str,                                                                                                         
+        help='Alias name')                                                                            
+    parser.add_argument(          
+        '--did','-d',              
+        type=str,
+        default=DEFAULT_DID,                
+        help='DID') 
+    
+    parser.add_argument(                                       
+        '--opts_proto',                                        
+        type=str,                                              
+        default=DEC_OPTS_PROTO_FILE_NM,                        
+        help='Proto file with wallet permisions params'            
+        ) 
+    parser.add_argument(                              
+        '-tk','--token',                              
+        type=str,                                     
+        help='Type of token')                         
+    parser.add_argument(                              
+        '--limit','-l',                               
+        type=int,                                     
+        #default=DEC_WALLET_LIMIT_DEF,                
+        help="Wallet dec transfer limit "             
+        )                                             
+    parser.add_argument(                              
+        '--spend_period','-sp',                       
+        type=int,                                     
+        #default=DEC_WALLET_LIMIT_DEF,                
+        help="Wallet spending period"                 
+        )                                             
+    parser.add_argument(                              
+        '--status','-st',                             
+        type=str,                                     
+        choices=["on","off"],                         
+        help="Wallet status"                          
+        )                                             
+    parser.add_argument(                              
+       '--role','-r',                                 
+       type=str,                                      
+       help="Wallet role name"                                                                                    
+       )                                              
+    parser.add_argument(        
+        '--gate','-g',           
+        type=str,               
+        default=DEFAULT_GATE,    
+        help='Default gate for transaction')                
+
+    parser.add_argument(                                                                                                  
+        '--keyfile',                                                                                                      
+        type=str,  
+        default="/project/peer/keys/validator.priv",                                                                                                       
+        help="Identify file containing alias owner private key")                                                               
+
+
 
 def do_target(args):
     client = _get_client(args)                                
@@ -1135,6 +1200,15 @@ def do_target(args):
     if isinstance(response,dict):    
         response = do_yaml(response)                  
     print(response)
+
+def do_alias(args):                                                     
+    client = _get_client(args)                                           
+    response = client.alias(args, args.wait)                            
+    if isinstance(response,dict):                                        
+        response = do_yaml(response)                                     
+    print(response)                                                      
+
+
 
 def add_role_parser(subparsers, parent_parser):                                                                
     message = 'Role with <role_id>'                                                                     
@@ -1596,7 +1670,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
     elif args.command == DEC_INVOICE_OP:          
         do_invoice(args)                  
     elif args.command == DEC_TARGET_OP:       
-        do_target(args)                       
+        do_target(args)                      
+    elif args.command == DEC_ALIAS_OP:           
+        do_alias(args)                            
     elif args.command == DEC_ROLE_OP:   
         do_role(args)                      
                                                         

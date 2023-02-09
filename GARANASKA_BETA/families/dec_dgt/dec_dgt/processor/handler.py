@@ -36,7 +36,7 @@ from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM,FbftTopology
 LOGGER = logging.getLogger(__name__)
 
 
-FULL_ADDR_TYPES = [DEC_TARGET_OP,DEC_ROLE_OP,DEC_WALLET_OP,DEC_EMISSION_OP,DEC_BURN_OP,DEC_INVOICE_OP,DEC_SEND_OP,DEC_PAY_OP]
+FULL_ADDR_TYPES = [DEC_TARGET_OP,DEC_ROLE_OP,DEC_WALLET_OP,DEC_EMISSION_OP,DEC_BURN_OP,DEC_INVOICE_OP,DEC_SEND_OP,DEC_PAY_OP,DEC_ALIAS_OP]
 OP_ADDR_TYPES = {
 DEC_TARGET_OP   : DEC_TARGET_GRP,
 DEC_ROLE_OP     : DEC_ROLE_GRP,
@@ -136,6 +136,7 @@ class DecTransactionHandler(TransactionHandler):
             DEC_PAY_OP         : self._do_pay,
             DEC_INVOICE_OP     : self._do_invoice,
             DEC_TARGET_OP      : self._do_target,
+            DEC_ALIAS_OP       : self._do_alias,
             DEC_ROLE_OP        : self._do_role,
             DEC_MINT_OP        : self._do_mint,
             DEC_HEART_BEAT_OP  : self._do_heartbeat,
@@ -236,6 +237,26 @@ class DecTransactionHandler(TransactionHandler):
                             )                                                                                  
                 )
         return token                                                                                              
+
+    def _do_alias(self,name, value, to, state, out):                         
+        LOGGER.debug('Alias "{}" value={}'.format(name,value))               
+        #value = {DEC_EMITTER,DEC_PAYLOAD}                                    
+        if name in state:                                                                                                 
+            raise InvalidTransaction('Verb is "{}", but Alias with name={} already exists.'.format(DEC_ALIAS_OP,name))  
+
+        payload = value[DEC_PAYLOAD]                                                            
+        opts = payload[DEC_ALIAS_OP]                                                           
+        tcurr = payload[DEC_TMSTAMP]                                                            
+        did_val = payload[DEC_DID_VAL] if DEC_DID_VAL in payload else DEFAULT_DID               
+        if value[DEC_EMITTER] == name:                                                          
+            LOGGER.debug('owner WALLET and signer the same')                                    
+
+        updated = {k: v for k, v in state.items() if k in out}                          
+        
+        token = self._new_wallet(0,tcurr,opts,did=did_val)                              
+        updated[name] = token.SerializeToString()                                       
+        
+        return updated                                                                  
 
     def _do_wallet(self,name, value, to, state, out):                                                                                     
         LOGGER.debug('Wallet "{}" value={}'.format(name,value))                                                                                                              

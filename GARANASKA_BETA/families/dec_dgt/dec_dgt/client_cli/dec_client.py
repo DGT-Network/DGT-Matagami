@@ -822,6 +822,27 @@ class DecClient:
         #return 
         return self._send_sign_transaction(topts,sign_req,wait=wait if wait else TRANS_TOUT) 
 
+    def get_alias_opts(self,args):                                           
+        alias = self.get_only_wallet_opts(args)                        
+        return alias                                                         
+
+
+    def alias(self,args,wait=None):                                                                                                                        
+                                                                                                                                                          
+        tcurr = time.time()                                                                                                                               
+        info = {}                                                                                                                                         
+        alias = self.get_alias_opts(args)                                                                                                                   
+                                                                                                                                                          
+        info[DEC_EMITTER] = self._signer.get_public_key().as_hex() 
+        alias[DEC_WALLET_ADDR]  = key_to_dgt_addr(info[DEC_EMITTER])                                                                                      
+        info[DEC_PAYLOAD] = {                                                                                                                             
+                              DEC_ALIAS_OP : alias,                                                                                                         
+                              DEC_TMSTAMP : tcurr,                                                                                                        
+                              DEC_DID_VAL : DEFAULT_DID if args.did is None else args.did                                                                 
+                            }                                                                                                                             
+        #role_addr = self._get_full_addr(args.role_id,tp_space=DEC_ROLE_GRP,owner=args.did)                                                               
+        return self._send_transaction(DEC_ALIAS_OP, (args.alias_name,DEC_SYNONYMS_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=None)       
+
 
     def user_sign_req(self,info):                                                  
         topts = info[DEC_TRANS_OPTS]                                            
