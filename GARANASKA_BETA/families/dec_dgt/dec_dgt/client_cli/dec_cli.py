@@ -1147,6 +1147,11 @@ def add_alias_parser(subparsers, parent_parser):
         default=DEFAULT_DID,                
         help='DID') 
     
+    parser.add_argument(                  
+        '-a','--addr',                     
+        type=str,                         
+        help='Make alias for this address')                       
+
     parser.add_argument(                                       
         '--opts_proto',                                        
         type=str,                                              
@@ -1190,7 +1195,7 @@ def add_alias_parser(subparsers, parent_parser):
         '--keyfile',                                                                                                      
         type=str,  
         default="/project/peer/keys/validator.priv",                                                                                                       
-        help="Identify file containing alias owner private key")                                                               
+        help="Identify file containing alias owner private key in case if addr not set")                                                               
 
 
 
