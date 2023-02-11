@@ -983,16 +983,20 @@ class DecClient:
     def show(self,args, name):
         return self.get_object(args.type,args.did,name)
 
-    def get_object(self,tp,did, name):
+    def get_object(self,tp,did, addr):
 
-        if name.startswith('/') or name.startswith('./'):
-            # take public key from file 
-            name = self.get_pub_key(name)
+        npart = addr.split("::")
+        if len(npart) > 1:
+            name,did = npart[0],npart[1] 
         else:
-            npart = name.split("::")
-            if len(npart) > 1:
-                name,did = npart[0],npart[1] 
-            
+            if "@" in addr:
+                # check alias
+                name = key_to_dgt_addr(addr)
+            else:
+                name = self.get_pub_key(addr)
+                if name != addr:
+                    name = key_to_dgt_addr(name)
+        
         address = self._get_full_addr(name,tp,did) 
         #print(name,tp,did,'ADDR',address)
         result = self._send_request("state/{}".format(address), name=name,)

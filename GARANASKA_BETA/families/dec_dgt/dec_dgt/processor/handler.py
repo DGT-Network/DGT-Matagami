@@ -547,7 +547,8 @@ class DecTransactionHandler(TransactionHandler):
             eaddr = key_to_dgt_addr(value[DEC_EMITTER])
             src = cbor.loads(token.dec)
             wopts = src[DEC_WALLET_OPTS_OP]
-            if eaddr != name and DEC_WALLET_ADDR in wopts  and eaddr != wopts[DEC_WALLET_ADDR]:
+            LOGGER.debug('_do_send CHECK OWNER ={} ~= {}'.format(eaddr,name))
+            if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):
                 raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
             
             total = src[DEC_TOTAL_SUM]
@@ -599,7 +600,7 @@ class DecTransactionHandler(TransactionHandler):
         src,token = get_wallet(state[name])
         wopts = src[DEC_WALLET_OPTS_OP]
         eaddr = key_to_dgt_addr(value[DEC_EMITTER])
-        if eaddr != name and DEC_WALLET_ADDR in wopts  and eaddr != wopts[DEC_WALLET_ADDR]:                                                                                     
+        if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):                                                                                     
             raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_PAY_OP)) 
 
         # wallet of source
