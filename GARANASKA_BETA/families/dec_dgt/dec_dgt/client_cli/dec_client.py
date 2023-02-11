@@ -606,7 +606,7 @@ class DecClient:
         return self.get_balance_of(args,args.pubkey,wait)
 
     def get_balance_of(self,args,pubkey,wait=None):  
-        token = self.get_object(DEC_WALLET_GRP,args.did,pubkey)  
+        token = self.get_object(DEC_WALLET_GRP if "@" not in pubkey else DEC_SYNONYMS_GRP, args.did, pubkey)
         return token
 
     def send(self,args,wait=None): 
