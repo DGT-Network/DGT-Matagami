@@ -927,6 +927,12 @@ def add_send_parser(subparsers, parent_parser):
         default=DEFAULT_DID,                   
         help='DID')                
 
+    parser.add_argument(                 
+        '--didto','-dto',                
+        type=str,                        
+        default = DEFAULT_DID,           
+        help='DID of wallet to')  
+           
     parser.add_argument(                                       
         '--asset_type','-at',                                     
         type=str,

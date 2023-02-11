@@ -639,13 +639,14 @@ class DecClient:
         to_addr =  args.to               
         if args.direct > 0 and is_alias(args.to):
             # take wallet addr from alias
-            to_addr =  self.alias_to_addr(args.to,args.did)
+            to_addr =  self.alias_to_addr(args.to,args.didto)
             #return to_addr
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
         faddr = self.key_to_addr(args.name,args.did)
-        taddr = self.key_to_addr(to_addr,args.did)
+        taddr = self.key_to_addr(to_addr,args.didto)
+        info[DEC_CMD_TO_GRP] = taddr[1]
         return self._send_transaction(DEC_SEND_OP, faddr, info, to=taddr, wait=wait if wait else TRANS_TOUT,din=din)  
 
     def pay(self,args,wait=None,control=False):
@@ -704,7 +705,8 @@ class DecClient:
             to_addr =  self.alias_to_addr(args.to,args.didto)   
 
 
-        taddr = self.key_to_addr(to_addr,args.didto)                                                                  
+        taddr = self.key_to_addr(to_addr,args.didto) 
+        pay_opts[DEC_CMD_TO_GRP]  = taddr[1]                                                               
         to = [taddr]                                                     
         din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]                                           
         if args.target :                                                   
