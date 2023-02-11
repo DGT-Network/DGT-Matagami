@@ -85,6 +85,11 @@ def set_param(info,attr,val,def_val):
 def tmstamp2str(val):
     return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
 
+def is_alias(name):
+    return "@" in name
+
+
+
 class DecClient:
     def __init__(self, url=None, keyfile=None,signer=None,backend=None):
         self.url = url
@@ -137,7 +142,7 @@ class DecClient:
         pub_key = self.get_pub_key(vkey)
         if pub_key.startswith(DGT_ADDR_PREF):
             return (pub_key,DEC_WALLET_GRP,did)
-        elif "@" in pub_key:
+        elif is_alias(pub_key):
             # alias 
             return (key_to_dgt_addr(pub_key),DEC_SYNONYMS_GRP,did)
         else:
@@ -533,7 +538,16 @@ class DecClient:
         tips = self.get_tips(args.name,args.cmd,args.did)       
         info = {DEC_TIPS_OP: tips}                                                                                   
         return info  
-                                                                                   
+
+    def alias_to_addr(self,alias,did):
+        token = self.get_object(DEC_SYNONYMS_GRP,did,alias)     
+        try:                                                                                      
+            dec = cbor.loads(token.dec)                                                           
+        except  Exception as ex:                                                                  
+            dec = {}  
+        #print("DEC",dec)                                                                            
+        return  dec[DEC_WALLET_OPTS_OP][DEC_WALLET_ADDR] if DEC_WALLET_OPTS_OP in dec and DEC_WALLET_ADDR in dec[DEC_WALLET_OPTS_OP] else alias
+
     def get_tips(self,tname,cmd,did):  
         result = self._send_request("gates")
         try:
@@ -606,7 +620,7 @@ class DecClient:
         return self.get_balance_of(args,args.pubkey,wait)
 
     def get_balance_of(self,args,pubkey,wait=None):  
-        token = self.get_object(DEC_WALLET_GRP if "@" not in pubkey else DEC_SYNONYMS_GRP, args.did, pubkey)
+        token = self.get_object(DEC_WALLET_GRP if not is_alias(pubkey) else DEC_SYNONYMS_GRP, args.did, pubkey)
         return token
 
     def send(self,args,wait=None): 
@@ -621,14 +635,17 @@ class DecClient:
             info[DEC_DID_VAL] = args.did
         if args.role:                             
             info[DEC_WALLET_ROLE] = args.role     
-            din.append(args.role)                 
-
-
+            din.append(args.role) 
+        to_addr =  args.to               
+        if args.direct > 0 and is_alias(args.to):
+            # take wallet addr from alias
+            to_addr =  self.alias_to_addr(args.to,args.did)
+            #return to_addr
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
         faddr = self.key_to_addr(args.name,args.did)
-        taddr = self.key_to_addr(args.to,args.did)
+        taddr = self.key_to_addr(to_addr,args.did)
         return self._send_transaction(DEC_SEND_OP, faddr, info, to=taddr, wait=wait if wait else TRANS_TOUT,din=din)  
 
     def pay(self,args,wait=None,control=False):
@@ -681,7 +698,13 @@ class DecClient:
         #    pay_opts[DEC_DID_VAL] = args.did                                   
         #daddr = self._get_full_addr(args.to,tp_space=DEC_WALLET_GRP,owner=args.didto) 
         #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)
-        taddr = self.key_to_addr(args.to,args.didto)                                                                  
+        to_addr =  args.to                                    
+        if args.direct > 0 and is_alias(args.to):             
+            # take wallet addr from alias                     
+            to_addr =  self.alias_to_addr(args.to,args.didto)   
+
+
+        taddr = self.key_to_addr(to_addr,args.didto)                                                                  
         to = [taddr]                                                     
         din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]                                           
         if args.target :                                                   
@@ -989,7 +1012,7 @@ class DecClient:
         if len(npart) > 1:
             name,did = npart[0],npart[1] 
         else:
-            if "@" in addr:
+            if is_alias(addr):
                 # check alias
                 name = key_to_dgt_addr(addr)
             else:
