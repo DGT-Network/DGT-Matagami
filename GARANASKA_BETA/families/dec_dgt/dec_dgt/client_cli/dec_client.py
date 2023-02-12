@@ -86,7 +86,7 @@ def tmstamp2str(val):
     return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
 
 def is_alias(name):
-    return "@" in name
+    return "@" in name or name.startswith('+')
 
 
 
@@ -1017,6 +1017,7 @@ class DecClient:
             if is_alias(addr):
                 # check alias
                 name = key_to_dgt_addr(addr)
+                tp = DEC_SYNONYMS_GRP
             else:
                 name = self.get_pub_key(addr)
                 if name != addr:

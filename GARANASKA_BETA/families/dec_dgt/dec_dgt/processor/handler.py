@@ -224,8 +224,8 @@ class DecTransactionHandler(TransactionHandler):
         #LOGGER.debug('_do_emission updated=%s',updated)                                                                                      
         return updated  
                                                                                                                     
-    def _new_wallet(self,total,tcurr,opts=DEF_WALLET_OPTS,did=DEFAULT_DID):
-        token = DecTokenInfo(group_code = DEC_WALLET,                                                          
+    def _new_wallet(self,total,tcurr,opts=DEF_WALLET_OPTS,did=DEFAULT_DID,group = DEC_WALLET):
+        token = DecTokenInfo(group_code = group,                                                          
                              owner_key = self._signer.sign(DEC_WALLET.encode()), #owner_key,                   
                              sign = self._public_key.as_hex(),                                                 
                              decimals = total,                                                                     
@@ -253,7 +253,7 @@ class DecTransactionHandler(TransactionHandler):
 
         updated = {k: v for k, v in state.items() if k in out}                          
         
-        token = self._new_wallet(0,tcurr,opts,did=did_val)                              
+        token = self._new_wallet(0,tcurr,opts,did=did_val,group=DEC_WALLET_ALIAS)                              
         updated[name] = token.SerializeToString()                                       
         
         return updated                                                                  
