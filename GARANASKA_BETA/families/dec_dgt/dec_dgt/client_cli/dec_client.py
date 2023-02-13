@@ -155,18 +155,10 @@ class DecClient:
         addr = key_to_dgt_addr(pub_key)
         #print("PUB",addr)
         return addr
+
     def load_json_proto(self,value):
-        if isinstance(value,dict):                        
-            info = value                                  
-        else:                                             
-            with open(value,"r",encoding='utf8') as cert_file:            
-                try:                                      
-                    info =  json.load(cert_file)          
-                                                          
-                except Exception as ex: 
-                    print('Cant load file {} - {}'.format(value,ex))                  
-                    info = {}  
-        return info                           
+        return  load_json_proto(value)
+
     @property
     def signer_as_hex(self):
         return self._signer.get_public_key().as_hex()
@@ -514,7 +506,7 @@ class DecClient:
         info = {}                                         
         if token.group_code == args.name :             
             dec = cbor.loads(token.dec)                        
-            for attr in [DEC_MINTING_TOTAL,DEC_СORPORATE_TOTAL,DEC_SALE_TOTAL]:
+            for attr in [DEC_MINTING_TOTAL,DEC_MINTING_REST,DEC_СORPORATE_TOTAL,DEC_СORPORATE_REST,DEC_SALE_TOTAL,DEC_SALE_REST]:
                 info[attr] = dec[attr]
         return info                                       
 
@@ -636,15 +628,19 @@ class DecClient:
         if args.role:                             
             info[DEC_WALLET_ROLE] = args.role     
             din.append(args.role) 
-        to_addr =  args.to               
-        if args.direct > 0 and is_alias(args.to):
+        to_addr =  args.to  
+        nm_addr = args.name             
+        if args.direct > 0 :
             # take wallet addr from alias
-            to_addr =  self.alias_to_addr(args.to,args.didto)
+            if  is_alias(args.to):
+                to_addr =  self.alias_to_addr(args.to,args.didto)
+            if  is_alias(args.name):                                 
+                nm_addr =  self.alias_to_addr(args.name,args.did)  
             #return to_addr
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
-        faddr = self.key_to_addr(args.name,args.did)
+        faddr = self.key_to_addr(nm_addr,args.did)
         taddr = self.key_to_addr(to_addr,args.didto)
         info[DEC_CMD_TO_GRP] = taddr[1]
         return self._send_transaction(DEC_SEND_OP, faddr, info, to=taddr, wait=wait if wait else TRANS_TOUT,din=din)  
@@ -662,33 +658,6 @@ class DecClient:
         #return    
         return self._send_sign_transaction(topts,sign_req,wait= TRANS_TOUT if wait is None  else wait)   
         
-        info = {DATTR_VAL : args.amount}                                                                         
-        if args.asset_type:                                                                                      
-            info[DEC_ASSET_TYPE] = args.asset_type                                                               
-        if args.did:                                                                                             
-            info[DEC_DID_VAL] = args.did                                                                         
-
-        to = [args.to]
-        din = [DEC_EMISSION_KEY]
-        if args.target :
-            # target with invoice
-            to.append(args.target)
-
-        if args.provement_key:      
-            # invoice ID for controle                  
-            info[DEC_PROVEMENT_KEY] = args.provement_key 
-        if args.role:
-            info[DEC_WALLET_ROLE] = args.role
-            din.append(args.role)
-
-        info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
-        info[DEC_TMSTAMP] = time.time()
-        print('emmiter',info[DEC_EMITTER])
-        if wait is None and control:
-            # wait transaction commit
-            wait = 10
-        resp =  self._send_transaction(DEC_PAY_OP, args.name, info, to=to, wait=wait,din=din) 
-        return resp
 
     def pay_info(self,args):
         pay_opts = {}
@@ -699,10 +668,16 @@ class DecClient:
         #    pay_opts[DEC_DID_VAL] = args.did                                   
         #daddr = self._get_full_addr(args.to,tp_space=DEC_WALLET_GRP,owner=args.didto) 
         #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)
-        to_addr =  args.to                                    
-        if args.direct > 0 and is_alias(args.to):             
-            # take wallet addr from alias                     
-            to_addr =  self.alias_to_addr(args.to,args.didto)   
+        to_addr =  args.to                                         
+        nm_addr = args.name                                        
+        if args.direct > 0 :                                       
+            # take wallet addr from alias                          
+            if  is_alias(args.to):                                 
+                to_addr =  self.alias_to_addr(args.to,args.didto)  
+            if  is_alias(args.name):                               
+                nm_addr =  self.alias_to_addr(args.name,args.did)  
+                print("from",nm_addr)
+
 
 
         taddr = self.key_to_addr(to_addr,args.didto) 
@@ -730,7 +705,7 @@ class DecClient:
         if args.did:                                                                
             # refer to DID owner                                                    
             info[DEC_DID_VAL] = args.did 
-        faddr = self.key_to_addr(args.name,args.did)                                              
+        faddr = self.key_to_addr(nm_addr,args.did)                                              
         opts = {                                                                    
                  DEC_CMD_OPTS   : info,                                             
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_PAY_OP,                     
@@ -1018,6 +993,9 @@ class DecClient:
                 # check alias
                 name = key_to_dgt_addr(addr)
                 tp = DEC_SYNONYMS_GRP
+            elif addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:
+                tp = DEC_EMISSION_GRP
+                name = addr
             else:
                 name = self.get_pub_key(addr)
                 if name != addr:

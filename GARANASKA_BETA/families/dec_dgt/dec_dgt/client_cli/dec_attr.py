@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
+import json
+
 FAMILY_NAME ="dec"
 FAMILY_VERSION ="1.0"
 
@@ -19,13 +21,13 @@ ANY_EMISSION_KEY = "_{}_EMISSION_KEY_"
 DEC_EMISSION_KEY = "_DEC_EMISSION_KEY_"
 DEC_HEART_BEAT_KEY  = "_DEC_HEART_BEAT_"
 DEC_NAME_DEF = "DEC"
-DEC_WALLET  = 'wallets'
+DEC_WALLET  = 'accounts'
 DEC_WALLET_ALIAS = "aliases"
 DEC_INVOICE_DEF = "INVOICE"
 # objects groups
 DEC_TARGET_GRP = "targets"
 DEC_ROLE_GRP   = "roles"
-DEC_WALLET_GRP   = "wallets"
+DEC_WALLET_GRP   = "accounts"
 DEC_EMISSION_GRP   = "emissions"
 DEC_SYNONYMS_GRP   = "aliases"
 #
@@ -46,7 +48,7 @@ DEFAULT_DID = "did:notary:30563010:000000000"
 DEFAULT_GATE = "this"
 GATE_ADDR_ATTR = "addr"
 DEC_WALLET_LIMIT_DEF  = 1000
-DEC_SPEND_PERIOD_DEF = 60*2
+DEC_SPEND_PERIOD_DEF = 4
 DEC_TARGET_DEF = "any target"
 DEC_TARGET_INFO_DEF = "empty target"
 DEC_ROLE_DEF        = "def_role"
@@ -218,4 +220,17 @@ DEF_WALLET_OPTS = {
 "status"      : "off"                  
 }
 # external family                                                                            
-SETTINGS_NAMESPACE = '000000'                                                                             
+SETTINGS_NAMESPACE = '000000'  
+
+def load_json_proto(value):                                                                                                                           
+    if isinstance(value,dict):                                                  
+        info = value                                                            
+    else:                                                                       
+        with open(value,"r",encoding='utf8') as cert_file:                      
+            try:                                                                
+                info =  json.load(cert_file)                                    
+                                                                                
+            except Exception as ex:                                             
+                print('Cant load file {} - {}'.format(value,ex))                
+                info = {}                                                       
+    return info                                                                 

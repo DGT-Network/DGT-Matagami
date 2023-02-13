@@ -95,6 +95,7 @@ class DecTransactionHandler(TransactionHandler):
         crypto_factory = CryptoFactory(self._context)
         self._signer = crypto_factory.new_signer(self._private_key)
         #self._signer = CryptoFactory(self._context).new_signer(self.private_key)
+        self._wallet_proto = load_json_proto(DEC_OPTS_PROTO_FILE_NM)
         LOGGER.debug('_do_set: public_key=%s  ',self._public_key.as_hex())
         LOGGER.info('DecTransactionHandler init DONE PREF=%s',DEC_ADDRESS_PREFIX)
 
@@ -224,7 +225,7 @@ class DecTransactionHandler(TransactionHandler):
         #LOGGER.debug('_do_emission updated=%s',updated)                                                                                      
         return updated  
                                                                                                                     
-    def _new_wallet(self,total,tcurr,opts=DEF_WALLET_OPTS,did=DEFAULT_DID,group = DEC_WALLET):
+    def _new_wallet(self,total,tcurr,opts=None,did=DEFAULT_DID,group = DEC_WALLET):
         token = DecTokenInfo(group_code = group,                                                          
                              owner_key = self._signer.sign(DEC_WALLET.encode()), #owner_key,                   
                              sign = self._public_key.as_hex(),                                                 
@@ -232,7 +233,7 @@ class DecTransactionHandler(TransactionHandler):
                              dec=cbor.dumps({DEC_TMSTAMP: tcurr,                                               
                                              DEC_TOTAL_SUM : total,                                                
                                              DEC_DID_VAL   : did,                                          
-                                             DEC_WALLET_OPTS_OP : opts                                         
+                                             DEC_WALLET_OPTS_OP: opts if opts else self._wallet_proto
                                              }                                                                 
                             )                                                                                  
                 )
@@ -570,15 +571,17 @@ class DecTransactionHandler(TransactionHandler):
                 if tcurr - last_tm < spend_period:
                     raise InvalidTransaction('Verb is "{}", and operation send too fast < {}sec'.format(DEC_SEND_OP,spend_period))
 
-            token.decimals -= amount 
+             
             src[DEC_TOTAL_SUM] -= amount
+            token.decimals = round(src[DEC_TOTAL_SUM])
             src[DEC_SPEND_TMSTAMP] = tcurr
             token.dec = cbor.dumps(src)
         
         # destination wallet
         dest = cbor.loads(dtoken.dec)
-        dtoken.decimals += amount  
-        dest[DEC_TOTAL_SUM] += amount                                                                                                                      
+        
+        dest[DEC_TOTAL_SUM] += amount
+        dtoken.decimals = round(dest[DEC_TOTAL_SUM])                                                                                                                      
         dtoken.dec = cbor.dumps(dest)
           
         updated = {k: v for k, v in state.items() if k in out}                                                                                                                

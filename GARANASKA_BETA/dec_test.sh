@@ -24,7 +24,7 @@ dec show trt@mail.ru -tp aliases
 dec list
 # show off wallets
 echo WALLETS
-dec list -v -tp wallets
+dec list -v -tp accounts
 echo EMISSIONS
 dec list -v -tp emissions
 echo TARGETS

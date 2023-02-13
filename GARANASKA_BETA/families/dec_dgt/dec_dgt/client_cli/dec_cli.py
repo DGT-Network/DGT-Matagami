@@ -919,7 +919,7 @@ def add_send_parser(subparsers, parent_parser):
         help='to wallet') 
     parser.add_argument(    
         'amount',        
-        type=int,           
+        type=float,           
         help='number token for transfer')   
     parser.add_argument(           
         '--did','-d',              
@@ -947,8 +947,8 @@ def add_send_parser(subparsers, parent_parser):
     parser.add_argument(                     
         '--direct',                                  
         action='count',                             
-        default=0,                                  
-        help='Send tokens directly to wallet')  
+        default=1,                                  
+        help='Send tokens directly to wallet and from wallet')  
 
 
     parser.add_argument(
@@ -979,7 +979,7 @@ def add_pay_parser(subparsers, parent_parser):
         help='to wallet')                    
     parser.add_argument(                     
         'amount',                            
-        type=int,                            
+        type=float,                            
         help='number token for transfer') 
        
     parser.add_argument(           
@@ -995,7 +995,7 @@ def add_pay_parser(subparsers, parent_parser):
     parser.add_argument(                       
         '--direct',                            
         action='count',                        
-        default=0,                             
+        default=1,                             
         help='Send tokens directly to wallet') 
 
 
