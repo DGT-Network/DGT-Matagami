@@ -21,6 +21,7 @@ import requests
 import yaml
 import cbor
 import json
+import os
 
 from dgt_signing import create_context
 from dgt_signing import CryptoFactory,key_to_dgt_addr,DGT_ADDR_PREF
@@ -86,7 +87,7 @@ def tmstamp2str(val):
     return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
 
 def is_alias(name):
-    return "@" in name or name.startswith('+')
+    return "@" in name or name.startswith('+') or (not name.startswith(DGT_ADDR_PREF) and not os.path.isfile(name))
 
 
 
@@ -139,14 +140,15 @@ class DecClient:
     def key_to_addr(self,vkey,did=DEFAULT_DID):
         if DEC_EMISSION_KEY == vkey:
             return (DEC_EMISSION_KEY,DEC_EMISSION_GRP,did)
-        pub_key = self.get_pub_key(vkey)
-        if pub_key.startswith(DGT_ADDR_PREF):
-            return (pub_key,DEC_WALLET_GRP,did)
-        elif is_alias(pub_key):
+        #pub_key = self.get_pub_key(vkey)
+        #if pub_key.startswith(DGT_ADDR_PREF):
+        #    return (pub_key,DEC_WALLET_GRP,did)
+        if is_alias(vkey):
             # alias 
-            return (key_to_dgt_addr(pub_key),DEC_SYNONYMS_GRP,did)
+            return (key_to_dgt_addr(vkey),DEC_SYNONYMS_GRP,did)
         else:
-            return (key_to_dgt_addr(pub_key),DEC_WALLET_GRP,did)
+            pub_key = self.get_pub_key(vkey)
+            return (key_to_dgt_addr(pub_key) if not  pub_key.startswith(DGT_ADDR_PREF) else  vkey,DEC_WALLET_GRP,did)
         
 
     def get_random_addr(self):
@@ -416,7 +418,7 @@ class DecClient:
             dec = cbor.loads(token.dec) #if token.group_code == DEC_NAME_DEF else {} 
         except Exception as ex:
             dec = {}
-        return dec[DEC_TOTAL_SUM] if DEC_TOTAL_SUM in dec else 0
+        return dec[DEC_TOTAL_SUM][DATTR_VAL] if DEC_TOTAL_SUM in dec else 0
     
        
            
@@ -634,14 +636,17 @@ class DecClient:
             # take wallet addr from alias
             if  is_alias(args.to):
                 to_addr =  self.alias_to_addr(args.to,args.didto)
+                #print('to',to_addr)
             if  is_alias(args.name):                                 
-                nm_addr =  self.alias_to_addr(args.name,args.did)  
+                nm_addr =  self.alias_to_addr(args.name,args.did)
+                #print('from',nm_addr)  
             #return to_addr
 
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
         faddr = self.key_to_addr(nm_addr,args.did)
         taddr = self.key_to_addr(to_addr,args.didto)
+        #print('F',faddr,'T',taddr)
         info[DEC_CMD_TO_GRP] = taddr[1]
         return self._send_transaction(DEC_SEND_OP, faddr, info, to=taddr, wait=wait if wait else TRANS_TOUT,din=din)  
 
@@ -993,6 +998,7 @@ class DecClient:
                 # check alias
                 name = key_to_dgt_addr(addr)
                 tp = DEC_SYNONYMS_GRP
+                #print("treat as alias")
             elif addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:
                 tp = DEC_EMISSION_GRP
                 name = addr
@@ -1111,7 +1117,7 @@ class DecClient:
                 address_to = self._get_full_addr(tval[0],tval[1],tval[2]) if isinstance(tval,tuple) else self._get_address(tval)
                 inputs.append(address_to)                                                                                                             
                 outputs.append(address_to) 
-                print("TO",tval[0],address_to)
+                #print("TO",tval[0],address_to)
         dinputs = []                                                                                                            
         if din is not None:                                                                                                                       
             for ain in (din if isinstance(din,list) else [din]):                                                                                                                   

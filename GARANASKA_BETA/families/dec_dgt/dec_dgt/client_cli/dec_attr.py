@@ -143,7 +143,7 @@ DATTR_COMM = "comm"
 DATTR_INPUTS = 'data_inputs'
 # DEC TPROC operation
 DEC_EMISSION_OP     = 'emission'
-DEC_WALLET_OP       = 'wallet'
+DEC_WALLET_OP       = 'account'
 DEC_WALLET_OPTS_OP  = "opts"
 DEC_ROLE_OP         = 'role'
 DEC_ROLES_OP        = "roles"
