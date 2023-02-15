@@ -826,14 +826,12 @@ class DecClient:
         topts = info[DEC_TRANS_OPTS] 
         req = self.dec_req_sign(info[DEC_CMD_OPTS])
          
-                           
-
-
         # for notary less mode user sign with his own key                                                                                                     
         sign_req = self.notary_req_sign(req,self._signer)
-        #print('SREQ',sign_req,topts)
-        #return 
-        return self._send_sign_transaction(topts,sign_req,wait=wait if wait else TRANS_TOUT) 
+        ret =  self._send_sign_transaction(topts,sign_req,wait=wait if wait else TRANS_TOUT) 
+        fret = { "addr" : info[DEC_CMD_OPTS][DEC_TARGET_OP][DEC_TARGET_ADDR],"ret" : { "status" : ret[0],"batch-id": ret[1]}}
+
+        return fret
 
     def get_alias_opts(self,args):                                           
         alias = self.get_only_wallet_opts(args)
