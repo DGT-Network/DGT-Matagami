@@ -994,14 +994,15 @@ class DecClient:
         if len(npart) > 1:
             name,did = npart[0],npart[1] 
         else:
-            if is_alias(addr):
-                # check alias
-                name = key_to_dgt_addr(addr)
-                tp = DEC_SYNONYMS_GRP
-                #print("treat as alias")
-            elif addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:
+                
+            if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:
                 tp = DEC_EMISSION_GRP
                 name = addr
+            elif is_alias(addr):
+                # check alias                 
+                name = key_to_dgt_addr(addr)  
+                tp = DEC_SYNONYMS_GRP         
+                #print("treat as alias")      
             else:
                 name = self.get_pub_key(addr)
                 if name != addr:
