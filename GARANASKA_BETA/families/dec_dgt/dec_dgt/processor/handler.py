@@ -677,12 +677,13 @@ class DecTransactionHandler(TransactionHandler):
 
         updated = {k: v for k, v in state.items() if k in out} 
                                                                                                       
-        dtoken.decimals += amount
+        
         dest[DEC_TOTAL_SUM] += amount
+        dtoken.decimals = round(dest[DEC_TOTAL_SUM]) 
         dtoken.dec = cbor.dumps(dest) 
         # update wallet of customer                                                                                                                         
-        token.decimals -= amount
-        src[DEC_TOTAL_SUM] -= amount                
+        src[DEC_TOTAL_SUM] -= amount 
+        token.decimals = round(src[DEC_TOTAL_SUM])               
         src[DEC_SPEND_TMSTAMP] = tcurr 
         token.dec = cbor.dumps(src)                 
 

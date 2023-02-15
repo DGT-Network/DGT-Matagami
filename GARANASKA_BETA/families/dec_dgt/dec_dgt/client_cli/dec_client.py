@@ -742,8 +742,10 @@ class DecClient:
         din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]
         if args.customer:
             din.append(args.customer) 
+        pkey = self._signer.get_public_key().as_hex()
+        target = self.get_target_addr(pkey,args.target)
         info = { 
-                 DEC_EMITTER : self._signer.get_public_key().as_hex(),  
+                 DEC_EMITTER : pkey,  
                  DEC_PAYLOAD : {                                                                  
                               DEC_INVOICE_OP : inv,                                              
                               DEC_TMSTAMP : tcurr,                                             
@@ -754,15 +756,19 @@ class DecClient:
         if args.check > 0:
             return inv
         #iaddr = self._get_full_addr(args.target,owner=args.did)                                                                                                     
-        return self._send_transaction(DEC_INVOICE_OP, (args.target,DEC_TARGET_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=din)   
+        return self._send_transaction(DEC_INVOICE_OP, (target,DEC_TARGET_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=din)  
+     
+    def get_target_addr(self,pkey,tid):
+        return key_to_dgt_addr("{}.{}".format(pkey,tid))
 
     def get_target_opts(self,args):
         target = self.load_json_proto(args.target_proto)
+        pkey = self._signer.get_public_key().as_hex()
         target[DEC_TARGET_PRICE] = args.price
         target[DEC_TARGET_INFO] = args.target if args.target else DEC_TARGET_INFO_DEF
         target[DEC_TARGET_ID] = args.target_id
-        target[DEC_TARGET_ADDR] = self.get_random_addr()
-        owner = key_to_dgt_addr(self._signer.get_public_key().as_hex())
+        target[DEC_TARGET_ADDR] = self.get_random_addr() if False else self.get_target_addr(pkey,args.target_id)
+        owner = key_to_dgt_addr(pkey)
         
         target[DEC_OWNER] = owner #key_to_dgt_addr(self._signer.get_public_key().as_hex(),pref="0x")
         #print(type(owner),owner)
