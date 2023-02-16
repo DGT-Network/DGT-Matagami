@@ -171,7 +171,7 @@ class DecClient:
             for k,v in dec.items():                            
                 if isinstance(v,dict) and DATTR_VAL in v:                         
                     dec[k] = v[DATTR_VAL]
-                if k in [DEC_TMSTAMP,DEC_LAST_HEART_TMSTAMP]:
+                if k in [DEC_TMSTAMP,DEC_LAST_HEART_TMSTAMP,DEC_SPEND_TMSTAMP]:
                     dec[k] = tmstamp2str(dec[k])
 
         return dec                                             
