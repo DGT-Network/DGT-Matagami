@@ -954,6 +954,7 @@ def add_send_parser(subparsers, parent_parser):
     parser.add_argument(
         '--keyfile',
         type=str,
+        default="/project/peer/keys/validator.priv",
         help="identify file containing user's private key")
 
 
@@ -1026,6 +1027,7 @@ def add_pay_parser(subparsers, parent_parser):
     parser.add_argument(
         '--keyfile',
         type=str,
+        default="/project/peer/keys/validator.priv",
         help="File containing  private key of owner wallet from")
 
 
