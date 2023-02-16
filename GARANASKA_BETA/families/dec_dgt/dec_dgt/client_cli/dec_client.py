@@ -96,7 +96,7 @@ class DecClient:
         self.url = url
 
         if keyfile is not None:
-            print("use keyfile {}".format(keyfile))
+            #print("use keyfile {}".format(keyfile))
             try:
                 with open(keyfile) as fd:
                     private_key_str = fd.read().strip()
