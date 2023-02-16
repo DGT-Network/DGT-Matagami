@@ -170,7 +170,10 @@ class DecClient:
         if off or (verbose is None or verbose == 0):          
             for k,v in dec.items():                            
                 if isinstance(v,dict) and DATTR_VAL in v:                         
-                    dec[k] = v[DATTR_VAL]                      
+                    dec[k] = v[DATTR_VAL]
+                if k in [DEC_TMSTAMP,DEC_LAST_HEART_TMSTAMP]:
+                    dec[k] = tmstamp2str(dec[k])
+
         return dec                                             
 
 
@@ -182,6 +185,7 @@ class DecClient:
             token = self.show(args,emission_key)
             dec = cbor.loads(token.dec)  
             dec = self.do_verbose(dec,args.verbose)
+
             return {emission_key:token.group_code,"INFO":dec}
 
         info = self.load_json_proto(args.proto)
