@@ -422,7 +422,7 @@ class DecClient:
             dec = cbor.loads(token.dec) #if token.group_code == DEC_NAME_DEF else {} 
         except Exception as ex:
             dec = {}
-        return dec[DEC_TOTAL_SUM][DATTR_VAL] if DEC_TOTAL_SUM in dec else 0
+        return {DEC_TOTAL_SUM : dec[DEC_TOTAL_SUM][DATTR_VAL] if DEC_TOTAL_SUM in dec else 0}
     
        
            
@@ -512,8 +512,8 @@ class DecClient:
         info = {}                                         
         if token.group_code == args.name :             
             dec = cbor.loads(token.dec)                        
-            for attr in [DEC_MINTING_TOTAL,DEC_MINTING_REST,DEC_СORPORATE_TOTAL,DEC_СORPORATE_REST,DEC_SALE_TOTAL,DEC_SALE_REST]:
-                info[attr] = dec[attr]
+            for attr in [DEC_TOTAL_SUM,DEC_MINTING_TOTAL,DEC_MINTING_REST,DEC_СORPORATE_TOTAL,DEC_СORPORATE_REST,DEC_SALE_TOTAL,DEC_SALE_REST]:
+                info[attr] = dec[attr] if not isinstance(dec[attr],dict) else dec[attr][DATTR_VAL]
         return info                                       
 
 

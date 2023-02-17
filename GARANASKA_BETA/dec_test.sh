@@ -10,8 +10,8 @@ dec faucet /project/peer/keys/wkey1.priv 1000 --keyfile /project/peer/keys/valid
 # create targets
 dec target target-1 1 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
 dec target target-2 2 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
-dec target target-2 3 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
-
+dec target target-3 3 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
+dec invoice target-3 123456  1.1 --keyfile /project/peer/keys/wkey.priv
 # alias
 dec alias trt1@mail.ru --keyfile /project/peer/keys/wkey1.priv
 dec alias trt@mail.ru --keyfile /project/peer/keys/wkey.priv
