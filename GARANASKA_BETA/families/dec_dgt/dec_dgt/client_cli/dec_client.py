@@ -125,14 +125,18 @@ class DecClient:
             with open(vkey) as fd:                               
                 private_key_str = fd.read().strip()                 
                 fd.close() 
-                                                     
+            if vkey.endswith('.pub') or vkey.endswith('.PUB'):
+                #print('PUB',private_key_str)
+                return private_key_str
         except OSError as err:
             # use value as pub key                                      
             return vkey 
         try:                                                      
             private_key = self._context.from_hex(private_key_str) 
-            signer = CryptoFactory(self._context).new_signer(private_key)  
-            return signer.get_public_key().as_hex()   
+            signer = CryptoFactory(self._context).new_signer(private_key) 
+            pubkey = signer.get_public_key().as_hex() 
+            #print('pub',pubkey)
+            return pubkey   
         except ParseError as e:                                   
             print('Unable to load private key: {} use param is key'.format(str(e)))
             return vkey  
@@ -1021,8 +1025,7 @@ class DecClient:
             name = self.get_pub_key(addr)                            
             if name != addr:                                         
                 name = key_to_dgt_addr(name)
-                if tp is None:
-                    tp = DEC_WALLET_GRP
+                tp = DEC_WALLET_GRP
         return name,tp                        
 
     def get_object(self,tp,did, addr):
@@ -1032,8 +1035,7 @@ class DecClient:
             name,did = npart[0],npart[1] 
         else:
             name,tp = self.get_name_tp(addr,tp)    
-            
-        
+        #print('get_object,',name,tp,did)    
         address = self._get_full_addr(name,tp,did) 
         #print(name,tp,did,'ADDR',address)
         result = self._send_request("state/{}".format(address), name=name,)
