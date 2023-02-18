@@ -1581,10 +1581,21 @@ def add_list_parser(subparsers, parent_parser):
         '-tp','--type',                
         type=str,
         choices=[DEC_EMISSION_GRP,DEC_WALLET_GRP,DEC_TARGET_GRP,DEC_ROLE_GRP,DEC_SYNONYMS_GRP] ,                      
-        help='Type of key to filter')    
+        help='Type of key to filter') 
+    parser.add_argument(                
+        '-s','--start',                        
+        type=str, 
+        help='Start list from position')      
+    parser.add_argument(                
+        '-l','--limit',                        
+        type=int,                       
+        help='Take not more then limit items')      
+
+
+       
     parser.add_argument(        
         '--did','-d',           
-        type=str,               
+        type=str,
         help='DID')             
 
 

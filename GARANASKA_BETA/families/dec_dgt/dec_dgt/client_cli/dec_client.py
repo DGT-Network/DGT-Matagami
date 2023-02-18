@@ -981,7 +981,19 @@ class DecClient:
             return []
         pref = self._get_prefix() if args.type is None and args.did is None else self._get_full_prefix(args.type,args.did)
         #print('PREF',pref)
-        result = self._send_request("state?address={}".format(pref))
+        limit = ''
+        if args.limit:
+            limit = "&limit={}".format(args.limit)
+        if args.start: 
+            saddr =  args.start.split(':') 
+            stp = saddr[1] if len(saddr) > 1 else args.type
+            name,tp = self.get_name_tp(saddr[0],stp) 
+               
+            saddress = self._get_full_addr(name,tp,args.did if args.did else DEFAULT_DID)
+            limit += "&start={}".format(saddress)
+            #print("PAGING",saddress,limit)  
+
+        result = self._send_request("state?address={}{}".format(pref,limit))
         
         try:
             encoded_entries = yaml.safe_load(result)["data"]
@@ -996,25 +1008,31 @@ class DecClient:
     def show(self,args, name):
         return self.get_object(args.type,args.did,name)
 
+    def get_name_tp(self,addr,tp):
+        if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:            
+            tp = DEC_EMISSION_GRP                                    
+            name = addr                                              
+        elif is_alias(addr):                                         
+            # check alias                                            
+            name = key_to_dgt_addr(addr)                             
+            tp = DEC_SYNONYMS_GRP                                    
+            #print("treat as alias")                                 
+        else:                                                        
+            name = self.get_pub_key(addr)                            
+            if name != addr:                                         
+                name = key_to_dgt_addr(name)
+                if tp is None:
+                    tp = DEC_WALLET_GRP
+        return name,tp                        
+
     def get_object(self,tp,did, addr):
 
         npart = addr.split("::")
         if len(npart) > 1:
             name,did = npart[0],npart[1] 
         else:
-                
-            if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:
-                tp = DEC_EMISSION_GRP
-                name = addr
-            elif is_alias(addr):
-                # check alias                 
-                name = key_to_dgt_addr(addr)  
-                tp = DEC_SYNONYMS_GRP         
-                #print("treat as alias")      
-            else:
-                name = self.get_pub_key(addr)
-                if name != addr:
-                    name = key_to_dgt_addr(name)
+            name,tp = self.get_name_tp(addr,tp)    
+            
         
         address = self._get_full_addr(name,tp,did) 
         #print(name,tp,did,'ADDR',address)
