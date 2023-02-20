@@ -4,6 +4,7 @@ dgt keygen --key-dir /project/peer/keys wkey
 dgt keygen --key-dir /project/peer/keys wkey1
 # make emission
 dec emission  -apk /project/peer/keys/admin.priv -ck /project/peer/keys/corp.priv
+dec emission  -apk /project/peer/keys/admin.priv -ck /project/peer/keys/corp.priv --keyfile /project/dgt/clusters/c2/dgt1/keys/validator.priv.openssl
 # send DEC to wallet for testing
 dec faucet /project/peer/keys/wkey.priv 1000 --keyfile /project/peer/keys/validator.priv -pk passkey
 dec faucet /project/peer/keys/wkey1.priv 1000 --keyfile /project/peer/keys/validator.priv -pk passkey
