@@ -235,10 +235,10 @@ class DecClient:
                                  DEC_DID_VAL     : args.did
                                }
                 }
-
+        taddr = (DEC_ESIGNERS_KEY,DEC_EMISSION_GRP,args.did)
         #print('PROTO',info)
         #eaddr = self._get_full_addr(emission_key,tp_space=DEC_EMISSION_GRP,owner=args.did) #self._get_address(DEC_EMISSION_KEY)
-        return self._send_transaction(DEC_EMISSION_OP, (emission_key,DEC_EMISSION_GRP,args.did), finfo, to=None, wait=wait if wait else TRANS_TOUT,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
+        return self._send_transaction(DEC_EMISSION_OP, (emission_key,DEC_EMISSION_GRP,args.did), finfo, to=taddr, wait=wait if wait else TRANS_TOUT,din_ext=(SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM))
 
     def wallet_(self,args,wait=None,nsign=None):  
         # nsign - notary key for sign did info 

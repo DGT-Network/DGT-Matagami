@@ -96,6 +96,7 @@ class DecTransactionHandler(TransactionHandler):
         self._signer = crypto_factory.new_signer(self._private_key)
         #self._signer = CryptoFactory(self._context).new_signer(self.private_key)
         self._wallet_proto = load_json_proto(DEC_OPTS_PROTO_FILE_NM)
+        self._trans_sign = None
         LOGGER.debug('_do_set: public_key=%s  ',self._public_key.as_hex())
         LOGGER.info('DecTransactionHandler init DONE PREF=%s',DEC_ADDRESS_PREFIX)
 
@@ -170,28 +171,74 @@ class DecTransactionHandler(TransactionHandler):
         if name in state:                                                                                                               
             raise InvalidTransaction('Verb is "{o}", but emission {n} already was made.'.format(o=DEC_EMISSION_OP,n=name))
         # emitter pubkey
-        emitter = val[DEC_EMITTER]            
+        
+        emitter = val[DEC_EMITTER]  
+        esigner = key_to_dgt_addr(emitter)          
         if DGT_TOPOLOGY_SET_NM in state:
             tval = json.loads(state[DGT_TOPOLOGY_SET_NM])
             #LOGGER.debug('Topology "{}"'.format(tval))
             fbft = FbftTopology()
             fbft.get_topology(tval,'','','static')
             # 
-            is_peer = fbft.peer_is_leader(emitter)
+            esigner_min = fbft.get_esigner_min()
+            is_peer = fbft.peer_is_esigner(esigner)
             pname = fbft.get_scope_peer_attr(emitter)
             peer = fbft.get_peer(emitter)
-            LOGGER.debug('Topology is peer={} leader "{}"'.format(peer,is_peer))
+            LOGGER.debug('Peer={} is signer="{}" MIN SIGNER={}'.format(peer,is_peer,esigner_min))
             if not is_peer:
-                raise InvalidTransaction('Verb is "{}", but emitter is not Leader'.format(DEC_EMISSION_OP))
+                raise InvalidTransaction('Verb is "{}", but emitter not in signers'.format(DEC_EMISSION_OP))
+        else:
+            raise InvalidTransaction('Verb is "{}", but there is no emission signers info'.format(DEC_EMISSION_OP))
 
 
-            # check key into topology
-        updated = {k: v for k, v in state.items() if k in out}                                                                                      
-        #owner_key = self._context.sign('DEC_token'.encode(),self._private_key) 
-        payload = val[DEC_PAYLOAD]
-        tcurr = payload[DEC_TMSTAMP]
-        # emission params
+        payload = val[DEC_PAYLOAD]    
+        tcurr = payload[DEC_TMSTAMP]  
         value = payload[DEC_EMISSION_OP]
+        token_name = value[DEC_NAME][DATTR_VAL]
+        epay  = cbor.dumps(value)
+        esign = _sha256(epay).hexdigest() 
+
+        if DEC_ESIGNERS_KEY in state:
+            stoken = DecTokenInfo()           
+            stoken.ParseFromString(state[DEC_ESIGNERS_KEY]) 
+        else:
+            sign = {
+                        DEC_ESIGNERS : [],
+                        DEC_ESIGNATURE : esign,
+                        DEC_ESIGN_NUM  : 0
+                }
+            stoken = DecTokenInfo(group_code = token_name,                                
+                                 owner_key = self._signer.sign(token_name.encode()),     
+                                 sign = emitter,
+                                 decimals=0,                                             
+                                 dec = cbor.dumps(sign)                                 
+                    )                                                                    
+
+
+        # check key into topology
+        updated = {k: v for k, v in state.items() if k in out} 
+        sign = cbor.loads(stoken.dec)
+        if esign != sign[DEC_ESIGNATURE]:                                                                               
+            raise InvalidTransaction('Verb is "{}", but emission signature={} changed '.format(DEC_EMISSION_OP,esign))  
+                                                                                                                        
+        if esigner in sign[DEC_ESIGNERS]:
+            raise InvalidTransaction('Verb is "{}", but this signer={} already sign emission'.format(DEC_EMISSION_OP,esigner))
+
+        
+        sign[DEC_ESIGN_NUM] += 1
+        sign[DEC_ESIGNERS].append(esigner)
+        stoken.dec = cbor.dumps(sign)                           
+        updated[DEC_ESIGNERS_KEY] = stoken.SerializeToString()  
+        if sign[DEC_ESIGN_NUM] < esigner_min:
+            # not enough signers
+            return updated
+        
+                                                                                             
+        #owner_key = self._context.sign('DEC_token'.encode(),self._private_key) 
+        #payload = val[DEC_PAYLOAD]
+        #tcurr = payload[DEC_TMSTAMP]
+        # emission params
+        # value = payload[DEC_EMISSION_OP]
         mint_share = value[DEC_MINTING_SHARE][DATTR_VAL] 
         corp_share = value[DEC_СORPORATE_SHARE][DATTR_VAL]
         sale_share = 100.0 - (mint_share + corp_share)
@@ -214,7 +261,7 @@ class DecTransactionHandler(TransactionHandler):
             if DEC_MINT_PERIOD not in mint:
                 mint[DEC_MINT_PERIOD] = DEC_MINT_PERIOD_DEF
             
-        token_name = value[DEC_NAME][DATTR_VAL]                                               
+        #token_name = value[DEC_NAME][DATTR_VAL]                                               
         token = DecTokenInfo(group_code = token_name,                                                                                  
                              owner_key = self._signer.sign(token_name.encode()),
                              sign = emitter,#self._public_key.as_hex(), 
@@ -1155,7 +1202,8 @@ class DecTransactionHandler(TransactionHandler):
             
             try:
                 public_key = self._context.pub_from_hex(payload[DEC_PUBKEY])
-                ret = self._signer.verify(payload[DEC_SIGNATURE], payload[DATTR_VAL],public_key )
+                self._trans_sign = payload[DEC_SIGNATURE]
+                ret = self._signer.verify(self._trans_sign, payload[DATTR_VAL],public_key )
                 LOGGER.debug('_decode_transaction check sign={} key={}'.format(ret,payload[DEC_PUBKEY]))
             except Exception as ex:
                 LOGGER.debug('_decode_transaction check sign error {}'.format(ex))

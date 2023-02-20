@@ -49,5 +49,6 @@
        },
 "static_map" :["c1.dgt1","c1.dgt2","c1.dgt3","c2.dgt1","c3.dgt1"],
 "gate_tips" : {"c1.dgt1" : 0.1,"c2.dgt1": 0.1,"c3.dgt1": 0.1},
-"notaries" :["n1","n2","n3"]                    
+"notaries" :["n1","n2","n3"],
+"emission" : { "signers" : ["c1.dgt1","c2.dgt1","c3.dgt1"],"signer_min" :2}                    
 }			     

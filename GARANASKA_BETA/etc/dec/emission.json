@@ -15,5 +15,5 @@
 "mint_param"        :  {"val" : {"Umax" : 10, "B2" : 1, "T1" : 1},"comm" :  "{Umax, 𝛽2, 𝜏1} -a set of coefficients that determine the formula for earning a node in exchange for itsSLA indicators"},
 "nBurn"             :  {"val" : 3  ,"comm"        :  "Number of times the Burn command, which allows admin to destroy some numbers of tokens. By default, nBurn= 3"},
 "fee"               :  {"val" : 1.0,"comm"      :  "commission on transactions with DEC (default 1%)–can be changed later"},
-"tips"              :  {"val" : {"target" : 0.2}, "comm"  :  "Tips on some transactions with DEC can be changed for each peers"}
+"tips"              :  {"val" : {"target" : 0.01}, "comm"  :  "Tips on some transactions with DEC can be changed for each peers"}
 }
