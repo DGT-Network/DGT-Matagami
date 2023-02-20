@@ -1013,7 +1013,7 @@ class DecClient:
         return self.get_object(args.type,args.did,name)
 
     def get_name_tp(self,addr,tp):
-        if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY]:            
+        if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY,DEC_ESIGNERS_KEY]:            
             tp = DEC_EMISSION_GRP                                    
             name = addr                                              
         elif is_alias(addr):                                         

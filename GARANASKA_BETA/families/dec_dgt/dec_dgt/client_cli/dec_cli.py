@@ -257,7 +257,7 @@ def add_emission_parser(subparsers, parent_parser):
      
     parser.add_argument(                   
         '--corporate_share','-cs',                    
-        type=int,                        
+        type=float,                        
         #default=DEC_СORPORATE_SHARE_DEF,           
         help='DGT corporate share ') 
     
