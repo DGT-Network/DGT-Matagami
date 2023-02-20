@@ -34,6 +34,9 @@ TOPOLOGY_GENESIS_HEX = b'Genesis'.hex()
 TOPO_GENESIS =  'Genesis'
 TOPO_MAP = "map"
 TOPO_GATES = "gates"
+TOPO_EMISS = "emission"
+TOPO_ESIGNERS = "signers"
+TOPO_ESIGNER_MIN = "signer_min"
 DGT_NET_NEST = '/project/peer/keys/dgt.net.nest'
 DGT_SELF_CERT = '/project/peer/keys/certificate.pem'
 DGT_KYC_DID = '/project/peer/keys/kyc.txt'
@@ -644,6 +647,10 @@ class FbftTopology(object):
                 return True
         return False
 
+    def peer_is_esigner(self,esigner):
+        return esigner in self._topology[TOPO_EMISS][TOPO_ESIGNERS]
+    def get_esigner_min(self):
+        return self._topology[TOPO_EMISS][TOPO_ESIGNER_MIN]
     def update_peer_activity(self,peer_key,endpoint,mode,sync=False,force=False,pid=None,extpoint=None):
         
         for key,peer in self.get_topology_iter():
@@ -913,7 +920,7 @@ class FbftTopology(object):
 
         self._validator_id = validator_id
         self._endpoint = endpoint
-        self._topology = topology if topology != {} else {PeerAtr.children:{},TOPO_MAP: {},TOPO_GATES : {}}
+        self._topology = topology if topology != {} else {PeerAtr.children:{},TOPO_MAP: {},TOPO_GATES: {},TOPO_EMISS: {TOPO_ESIGNERS : [],TOPO_ESIGNER_MIN : 1}}
         if TOPO_MAP in self._topology:     
             self.load_topo_map(self._topology[TOPO_MAP]) 
         if TOPO_GATES in self._topology:

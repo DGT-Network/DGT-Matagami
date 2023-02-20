@@ -65,6 +65,9 @@ PROJ_DGT = f'/project/{DGT_TOP}'
 MAP_NET_FNM = f"{PROJ_DGT}/etc/dgt.net.map"
 STATIC_MAP = "static_map"
 GATE_TIPS = "gate_tips"
+EMISSION_INFO = "emission"
+ESIGNERS = "signers"
+ESIGNER_MIN = "signer_min"
 
 _MIN_PRINT_WIDTH = 15
 
@@ -125,9 +128,10 @@ def get_net_map(fname,fpub,crypto,mapping):
   
            }
     gtips = {}
+    emiss = { ESIGNERS : [],ESIGNER_MIN : 0}
     # add static peer into map 
     #mapping = get_mapping_file()
- 
+    esigners = []
     if mapping and STATIC_MAP in mapping:
         static_nests = {}
         for nm in mapping[STATIC_MAP]:
@@ -157,11 +161,28 @@ def get_net_map(fname,fpub,crypto,mapping):
             # set gate addr 
             gate['addr'] = key_to_dgt_addr(pkey)
             gtips[nest] = gate                 
+    if mapping and EMISSION_INFO in mapping:                                                                                 
+        for snm in mapping[EMISSION_INFO][ESIGNERS]:                                                                       
+            clust = snm.split('.')                                                                                        
+            nest = mapping[clust[0]][clust[1]]                                                                           
+            gate = {"tips" : tips}                                                                                       
+            if nest in fmap:                                                                                             
+                pkey = fmap[nest]                                                                                        
+            else:                                                                                                        
+                # get pubkey for nest                                                                                    
+                key_file = f"{PROJ_DGT}/clusters/{clust[0]}/{clust[1]}/keys/validator.pub.{crypto}"                      
+                pkey = get_pub_key(key_file)                                                                             
+                                                                                                                         
+            # set gate addr                                                                                              
+            esigners.append(key_to_dgt_addr(pkey)) 
+        # emission info                                                                         
+        emiss[ESIGNERS] = esigners
+        emiss[ESIGNER_MIN] = mapping[EMISSION_INFO][ESIGNER_MIN]
 
 
 
-    print("MAP={} \nTIPS={}".format(fmap,gtips))
-    return fmap,gtips
+    print("MAP={} \nTIPS={}\nEMISS={}".format(fmap,gtips,emiss))
+    return fmap,gtips,emiss
 
 def get_notary_map(mapping,crypto):
     notaries = mapping[NOTARIES_MAP] 
@@ -192,7 +213,7 @@ def _do_config_proposal_create(args):
     #print(f"settings = {settings}")
     settings.append((args.crypto_name,args.crypto_back))
     mapping = get_mapping_file()
-    first_map,gate_tips = get_net_map(args.topology_nest,args.pub_key,args.crypto_back,mapping)
+    first_map,gate_tips,emiss = get_net_map(args.topology_nest,args.pub_key,args.crypto_back,mapping)
     #if first_map:
     #    settings.append((args.topology_map_name,json.dumps(first_map)))
 
@@ -205,6 +226,7 @@ def _do_config_proposal_create(args):
                 data = json.loads(net_data)
                 data[TOPO_MAP] = first_map
                 data[TOPO_GATES] = gate_tips
+                data[EMISSION_INFO] = emiss
                 # add map into topology
                 settings.append((args.net_set_name,json.dumps(data))) 
                 print(f"Load Dgt net from {args.net}")
