@@ -83,6 +83,16 @@ def set_param(info,attr,val,def_val):
     else:
         info[attr] = {DATTR_VAL : rval }
 
+def set_param_field(info,attr,field,val,def_val=''):                                               
+    rval = val if val else def_val                                                  
+    #rval = uval if attr not in EMISSION_UNVISIBLE_ATTR else key_to_dgt_addr(uval)  
+    if attr in info:                                                                
+        if val:                                                                     
+            info[attr][DATTR_VAL][field] = rval                                            
+    else:                                                                           
+        info[attr] = {DATTR_VAL : {field : rval} }                                            
+
+
 def tmstamp2str(val):
     return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
 
@@ -203,6 +213,7 @@ class DecClient:
         set_param(info,DEC_СORPORATE_SHARE,args.corporate_share,DEC_СORPORATE_SHARE_DEF)
         set_param(info,DEC_MINTING_SHARE,args.minting_share,DEC_MINTING_SHARE_DEF)
         set_param(info,DEC_ADMIN_PUB_KEY,args.admin_pub_key,DEC_ADMIN_PUB_KEY_DEF)
+        
         # take mint params
         mint_val = info[DEC_MINT_PARAM][DATTR_VAL] if DEC_MINT_PARAM in info else {DEC_MINT_COEF_UMAX: 10,DEC_MINT_COEF_T1:1 ,DEC_MINT_COEF_B2:1}
         if args.mint_umax:
@@ -212,16 +223,24 @@ class DecClient:
         if args.mint_b2:                               
             mint_val[DEC_MINT_COEF_B2] = float(args.mint_b2)
         set_param(info,DEC_MINT_PARAM,args.mint,mint_val)
-
+        corp_keys = []
         if args.corporate_pub_key:
             # check when create corporate wallet - only owner this key have responsibilities for operation
-            info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self.get_pub_key(args.corporate_pub_key)}
+            
+            for pkey in args.corporate_pub_key:
+                corp_keys.append(key_to_dgt_addr(self.get_pub_key(pkey)))
         else:
-            info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : self._signer.get_public_key().as_hex()}
+            corp_keys = [key_to_dgt_addr(self._signer.get_public_key().as_hex())]
+
+        info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : corp_keys}
+        corp_acc = key_to_dgt_addr(self.get_pub_key(args.corporate_account)) if args.corporate_account else corp_keys[0]
+        set_param_field(info,DEC_СORPORATE_ACCOUNT,DEC_CORP_ACC_ADDR,corp_acc)
+
         for a,val in info.items():
             if a in EMISSION_UNVISIBLE_ATTR:
                 if isinstance(val,dict) :
-                    val[DATTR_VAL] = key_to_dgt_addr(val[DATTR_VAL])
+                    if not isinstance(val[DATTR_VAL],list):
+                        val[DATTR_VAL] = key_to_dgt_addr(val[DATTR_VAL])
         if args.check > 0:
             #print("Emission's params={}".format(self.do_verbose(info,args.verbose))) #json.dumps(info, sort_keys=True, indent=4)))
             return self.do_verbose(info,args.verbose)

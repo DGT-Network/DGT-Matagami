@@ -301,7 +301,8 @@ def add_emission_parser(subparsers, parent_parser):
        )  
     parser.add_argument(               
       '--corporate_pub_key','-ck',    
-      type=str,                       
+      type=str,
+      nargs='+',                       
       help='Corporate public key for managing corporate account'              
       )                                                          
     parser.add_argument(        
