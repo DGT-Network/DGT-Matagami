@@ -142,6 +142,7 @@ DEC_CMD_DIN_EXT    = 'DinExt'
 #DEC_WALLET_DID       = "wallet_did"
 # wallet properties
 DEC_WALLET_LIMIT  = "limit"
+DEC_WALLET_SPEND_PERIOD = "spend_period"
 #
 DATTR_VAL  = "val"
 DATTR_COMM = "comm"

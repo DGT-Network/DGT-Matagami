@@ -313,8 +313,8 @@ class DecTransactionHandler(TransactionHandler):
 
         if name in state:                                                                                                              
             raise InvalidTransaction('Verb is "{}", but Wallet with name={} already exists.'.format(DEC_WALLET_OP,name)) 
-        #if DEC_EMISSION_KEY not in state:                                                              
-        #    raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_WALLET_OP)) 
+        if DEC_EMISSION_KEY not in state:                                                              
+            raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_WALLET_OP)) 
         if False:
             if DEC_DID_VAL not in value:
                 # use default did
@@ -343,8 +343,21 @@ class DecTransactionHandler(TransactionHandler):
             tcurr = value[DEC_TMSTAMP] 
         else:
             # 
+            evalue = state[DEC_EMISSION_KEY]   
+            etoken = DecTokenInfo()           
+            etoken.ParseFromString(evalue)      
+            emiss = cbor.loads(etoken.dec)      
+            aopts = emiss[DEC_CORP_ACC_ADDR][DATTR_VAL]
+            # account opts 
             payload = value[DEC_PAYLOAD]
             opts = payload[DEC_WALLET_OP]
+            LOGGER.debug('Account opts={} emiss={}'.format(opts,aopts))
+            if opts[DEC_WALLET_LIMIT] > aopts[DEC_WALLET_LIMIT]:
+                raise InvalidTransaction('Verb is "{}", account limit is exceeded (..< {}).'.format(DEC_WALLET_OP,aopts[DEC_WALLET_LIMIT]))
+            if opts[DEC_WALLET_SPEND_PERIOD] < aopts[DEC_WALLET_SPEND_PERIOD]:                                                                            
+                raise InvalidTransaction('Verb is "{}", account spend period too short (..>= {}).'.format(DEC_WALLET_OP,aopts[DEC_WALLET_SPEND_PERIOD])) 
+
+            
             tcurr = payload[DEC_TMSTAMP]
             did_val = payload[DEC_DID_VAL] if DEC_DID_VAL in payload else DEFAULT_DID
             if value[DEC_EMITTER] == name:

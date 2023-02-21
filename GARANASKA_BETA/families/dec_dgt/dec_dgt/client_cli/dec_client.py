@@ -316,11 +316,13 @@ class DecClient:
         pubkey = self._signer.get_public_key().as_hex()
         waddr = key_to_dgt_addr(pubkey)
         wallet[DEC_WALLET_ADDR] = waddr
+        din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]
         #addr = self._get_full_addr(waddr,tp_space=DEC_WALLET_GRP,owner=args.did)                                            
         opts = {                                                                     
                  DEC_CMD_OPTS   : info,                                              
                  DEC_TRANS_OPTS : { DEC_CMD    : DEC_WALLET_OP,                      
-                                    DEC_CMD_ARG: (waddr,DEC_WALLET_GRP,args.did)                      
+                                    DEC_CMD_ARG: (waddr,DEC_WALLET_GRP,args.did),
+                                    DEC_CMD_DIN: din                      
                                   }                                                  
                 }                                                                    
         return opts                                                                  
