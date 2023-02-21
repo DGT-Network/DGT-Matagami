@@ -1,10 +1,13 @@
 dgt keygen --key-dir /project/peer/keys corp
+dgt keygen --key-dir /project/peer/keys corp1
+dgt keygen --key-dir /project/peer/keys corp2
+dgt keygen --key-dir /project/peer/keys corp3
 dgt keygen --key-dir /project/peer/keys admin
 dgt keygen --key-dir /project/peer/keys wkey
 dgt keygen --key-dir /project/peer/keys wkey1
 # make emission
-dec emission  -apk /project/peer/keys/admin.priv -ck /project/peer/keys/corp.priv
-dec emission  -apk /project/peer/keys/admin.priv -ck /project/peer/keys/corp.priv --keyfile /project/dgt/clusters/c2/dgt1/keys/validator.priv.openssl
+dec emission  -apk /project/peer/keys/admin.priv -ca /project/peer/keys/corp.pub -ck /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub /project/peer/keys/corp3.pub
+dec emission  -apk /project/peer/keys/admin.priv -ca /project/peer/keys/corp.pub -ck /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub /project/peer/keys/corp3.pub --keyfile /project/dgt/clusters/c2/dgt1/keys/validator.priv.openssl
 # send DEC to wallet for testing
 dec faucet /project/peer/keys/wkey.priv 1000 --keyfile /project/peer/keys/validator.priv -pk passkey
 dec faucet /project/peer/keys/wkey1.priv 1000 --keyfile /project/peer/keys/validator.priv -pk passkey
