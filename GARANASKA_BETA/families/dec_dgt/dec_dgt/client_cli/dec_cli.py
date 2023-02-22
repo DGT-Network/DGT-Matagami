@@ -944,6 +944,12 @@ def add_send_parser(subparsers, parent_parser):
        type=str,                        
        help="Wallet role name"          
        ) 
+    
+    parser.add_argument(             
+       '-tid','--trans_id',                
+       type=str,                     
+       help="Transfer id for multi signed operations"       
+       )                             
                                    
     parser.add_argument(                     
         '--direct',                                  
@@ -961,7 +967,9 @@ def add_send_parser(subparsers, parent_parser):
 
 def do_send(args):
     client = _get_client(args)                                
-    response = client.send(args, args.wait)                  
+    response = client.send(args, args.wait) 
+    if isinstance(response,dict):     
+        response = do_yaml(response)                   
     print(response) 
 
 def add_pay_parser(subparsers, parent_parser):
@@ -999,8 +1007,11 @@ def add_pay_parser(subparsers, parent_parser):
         action='count',                        
         default=1,                             
         help='Send tokens directly to wallet') 
-
-
+    parser.add_argument(                                                     
+       '-tid','--trans_id',                                                 
+       type=str,                                                             
+       help="Transfer id for multi signed operations"                        
+       )                                                                     
     # with out target works like send                 
     parser.add_argument(            
         '--target','-tg',         

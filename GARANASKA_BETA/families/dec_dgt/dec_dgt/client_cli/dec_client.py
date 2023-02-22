@@ -649,15 +649,16 @@ class DecClient:
     def send(self,args,wait=None): 
         # use this cmd for sending token to corporate wallet 
         # use as name _DEC_EMISSION_KEY_
-        info = {DATTR_VAL : args.amount}
+        info = {}
+        send_opts = {DATTR_VAL : args.amount}
         #eaddr = self._get_full_addr(DEC_EMISSION_KEY,tp_space=DEC_EMISSION_GRP,owner=DEFAULT_DID)
         din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]
         if args.asset_type:
-            info[DEC_ASSET_TYPE] = args.asset_type             
-        if args.did:                                
-            info[DEC_DID_VAL] = args.did
+            send_opts[DEC_ASSET_TYPE] = args.asset_type             
+        if args.trans_id:
+            send_opts[DEC_TRANS_ID] = args.trans_id
         if args.role:                             
-            info[DEC_WALLET_ROLE] = args.role     
+            send_opts[DEC_WALLET_ROLE] = args.role     
             din.append(args.role) 
         to_addr =  args.to  
         nm_addr = args.name             
@@ -671,12 +672,20 @@ class DecClient:
                 #print('from',nm_addr)  
             #return to_addr
 
+        if args.did:                     
+            info[DEC_DID_VAL] = args.did 
+
         info[DEC_EMITTER] = self._signer.get_public_key().as_hex()
         info[DEC_TMSTAMP] = time.time()
+        info[DEC_SEND_OP] = send_opts
         faddr = self.key_to_addr(nm_addr,args.did)
-        taddr = self.key_to_addr(to_addr,args.didto)
+        taddr = [self.key_to_addr(to_addr,args.didto)]
+        if args.trans_id:
+            taddr.append((DEC_TRANS_KEY.format(args.trans_id),DEC_EMISSION_GRP,args.did))
         #print('F',faddr,'T',taddr)
-        info[DEC_CMD_TO_GRP] = taddr[1]
+        send_opts[DEC_CMD_TO_GRP] = taddr[0][1]
+        if args.check:
+            return send_opts
         return self._send_transaction(DEC_SEND_OP, faddr, info, to=taddr, wait=wait if wait else TRANS_TOUT,din=din)  
 
     def pay(self,args,wait=None,control=False):
@@ -697,7 +706,9 @@ class DecClient:
         pay_opts = {}
         pay_opts = {DATTR_VAL : args.amount}                                   
         if args.asset_type:                                                
-            pay_opts[DEC_ASSET_TYPE] = args.asset_type                         
+            pay_opts[DEC_ASSET_TYPE] = args.asset_type
+        if args.trans_id:                               
+            pay_opts[DEC_TRANS_ID] = args.trans_id                              
         #if args.did:                                                       
         #    pay_opts[DEC_DID_VAL] = args.did                                   
         #daddr = self._get_full_addr(args.to,tp_space=DEC_WALLET_GRP,owner=args.didto) 
@@ -1034,7 +1045,7 @@ class DecClient:
         return self.get_object(args.type,args.did,name)
 
     def get_name_tp(self,addr,tp):
-        if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY,DEC_ESIGNERS_KEY]:            
+        if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY,DEC_ESIGNERS_KEY] or DEC_TRANS_KEY.format('') in addr :            
             tp = DEC_EMISSION_GRP                                    
             name = addr                                              
         elif is_alias(addr):                                         
