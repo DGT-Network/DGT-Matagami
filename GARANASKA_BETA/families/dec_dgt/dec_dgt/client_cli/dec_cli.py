@@ -1232,7 +1232,12 @@ def add_alias_parser(subparsers, parent_parser):
         type=str,               
         default=DEFAULT_GATE,    
         help='Default gate for transaction')                
-
+    parser.add_argument(                                                
+      '--owner_pub_key','-pk',                                          
+      type=str,                                                         
+      nargs='+',                                                        
+      help='Owner public key for managing multi signed account'         
+      )                                                                 
     parser.add_argument(                                                                                                  
         '--keyfile',                                                                                                      
         type=str,  

@@ -5,6 +5,8 @@ dgt keygen --key-dir /project/peer/keys corp3
 dgt keygen --key-dir /project/peer/keys admin
 dgt keygen --key-dir /project/peer/keys wkey
 dgt keygen --key-dir /project/peer/keys wkey1
+dgt keygen --key-dir /project/peer/keys wkey2
+dgt keygen --key-dir /project/peer/keys wkey3
 # make emission
 dec emission  -apk /project/peer/keys/admin.priv -ca /project/peer/keys/corp.pub -ck /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub /project/peer/keys/corp3.pub
 dec emission  -apk /project/peer/keys/admin.priv -ca /project/peer/keys/corp.pub -ck /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub /project/peer/keys/corp3.pub --keyfile /project/dgt/clusters/c2/dgt1/keys/validator.priv.openssl
