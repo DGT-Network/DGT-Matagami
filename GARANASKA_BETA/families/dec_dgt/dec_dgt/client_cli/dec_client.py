@@ -382,7 +382,14 @@ class DecClient:
             opts[DEC_WALLET_ROLE] = [args.role]   
         if args.token:
             opts[DEC_WALLET_TOKEN] = args.token
+        if args.owner_pub_key:
+            # wallet with multi sign
             
+            signers = []
+            for signer in args.owner_pub_key:
+                signers.append(key_to_dgt_addr(self.get_pub_key(signer)))
+
+            opts[DEC_WALLETS_OWNERS] = { DEC_ESIGN_NUM : args.sign_min if args.sign_min else 1,DEC_ESIGNERS : signers}
         #print("DEC.wallet opts{}".format(opts))
         return opts
 

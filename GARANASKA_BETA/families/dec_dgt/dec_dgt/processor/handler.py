@@ -618,13 +618,13 @@ class DecTransactionHandler(TransactionHandler):
                                                                         
         curr = state[name]                                                                                                               
         token = DecTokenInfo()                                                                                                                       
-        token.ParseFromString(curr)                                                                                                                  
-        #dec = cbor.loads(token.dec)                                                                                                                  
-        #total_sum = dec[DEC_TOTAL_SUM][DATTR_VAL]                                                                                                    
-        #passkey = dec[DEC_PASSKEY][DATTR_VAL]                                                                                                        
-        #sale_share = dec[DEC_SALE_SHARE][DATTR_VAL]                                                                                                  
-        #max_sale = total_sum/100*sale_share                                                                                                          
-        #total_sale = dec[DEC_SALE_TOTAL] 
+        token.ParseFromString(curr) 
+        if name != DEC_EMISSION_KEY:
+            etoken = DecTokenInfo()
+            etoken.ParseFromString(state[DEC_EMISSION_KEY])
+        else:
+            etoken = token
+
         opts =   value[DEC_SEND_OP]                                                                                                          
         amount = opts[DATTR_VAL] 
         tcurr = value[DEC_TMSTAMP] 
@@ -647,6 +647,11 @@ class DecTransactionHandler(TransactionHandler):
         else:
             stoken = None
 
+        # get emission info 
+        emiss = cbor.loads(etoken.dec)                                             
+        corp_account = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_ACC_ADDR] 
+        esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
+        msigners = emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]
         LOGGER.debug('_do_send value={}'.format(value))  
         updated = {k: v for k, v in state.items() if k in out}                            
         if name == DEC_EMISSION_KEY:
@@ -655,15 +660,14 @@ class DecTransactionHandler(TransactionHandler):
             if stoken is None:
                 raise InvalidTransaction('Verb is "{}", set transfer id for multi sign operation'.format(DEC_SEND_OP))
 
-            emiss = cbor.loads(token.dec)
-            corp_account = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_ACC_ADDR]
+
             if to != corp_account:
                 raise InvalidTransaction('Verb is "{}", but destination WALLET={} not corporate'.format(DEC_SEND_OP,to))
-            if emitter not in emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]:
+            if emitter not in msigners:
                 LOGGER.debug('_do_send cops={}'.format(emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]))
-                raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have not access'.format(DEC_SEND_OP))
+                raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have no access'.format(DEC_SEND_OP))
 
-            esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
+            #esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
             ret,sign = self.do_multi_sign(stoken,emitter,esign,esigner_min)
             if ret is not None:
                 raise InvalidTransaction(ret)
@@ -678,14 +682,34 @@ class DecTransactionHandler(TransactionHandler):
             if emiss[DEC_СORPORATE_REST] < amount:
                 amount = emiss[DEC_СORPORATE_REST]
             emiss[DEC_СORPORATE_REST] -= amount
-            token.dec = cbor.dumps(emiss)
+            etoken.dec = cbor.dumps(emiss)
         else:
             eaddr = emitter
             src = cbor.loads(token.dec)
             wopts = src[DEC_WALLET_OPTS_OP]
+            multi_mode = False
+            if name == corp_account or DEC_WALLETS_OWNERS in wopts:
+                if stoken is None:                                                                                          
+                    raise InvalidTransaction('Verb is "{}", set transfer id for multi sign operation'.format(DEC_SEND_OP))  
+                if name != corp_account:
+                    esigner_min = wopts[DEC_WALLETS_OWNERS][DEC_ESIGN_NUM]
+                    msigners = wopts[DEC_WALLETS_OWNERS][DEC_ESIGNERS]
+                if emitter not in msigners:                                                                                                               
+                    raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens have no access'.format(DEC_SEND_OP))    
+
+                ret,sign = self.do_multi_sign(stoken,emitter,esign,esigner_min)               
+                if ret is not None:                                                           
+                    raise InvalidTransaction(ret)                                             
+                updated[msign_nm] = stoken.SerializeToString()            
+                if sign[DEC_ESIGN_NUM] < esigner_min:                     
+                    # not enough signers                                  
+                    return updated                                        
+                multi_mode = True
+
             LOGGER.debug('_do_send CHECK OWNER ={} ~= {}'.format(eaddr,name))
-            if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):
-                raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
+            if not multi_mode :
+                if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):
+                    raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
             
             total = src[DEC_TOTAL_SUM]
             if total < amount:                                                                                

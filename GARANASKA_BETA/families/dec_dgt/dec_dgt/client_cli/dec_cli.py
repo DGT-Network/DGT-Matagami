@@ -386,6 +386,19 @@ def add_wallet_parser(subparsers, parent_parser):
         #default=DEC_WALLET_LIMIT_DEF,       
         help="Wallet spending period"        
         ) 
+    parser.add_argument(                            
+        '--sign_min','-smin',                     
+        type=int,                                   
+        default=2,              
+        help="Min signer for multi sign account"               
+        )                                           
+    parser.add_argument(                                                    
+      '--owner_pub_key','-pk',                                          
+      type=str,                                                             
+      nargs='+',                                                            
+      help='Owner public key for managing multi signed account'            
+      )                                                                     
+
     parser.add_argument(                 
         '--status','-st',                
         type=str,
