@@ -750,8 +750,10 @@ class DecTransactionHandler(TransactionHandler):
     def _do_pay(self,name, value, inputs, state, out):                                                                                                      
         LOGGER.debug('Pay "{}" by {} inputs={} state={}'.format(name,value,inputs,[k for k in state.keys()]))                                                                                                   
         to = inputs[0] 
-        target = inputs[1] if len(inputs) > 2 else None
+        #target = inputs[1] if len(inputs) > 2 else None
         pinfo = value[DEC_PAYLOAD][DEC_PAY_OP]
+        target = pinfo[DEC_TARGET_INFO] if DEC_TARGET_INFO in pinfo else None
+        LOGGER.debug('Pay info {}'.format(pinfo))
         is_invoice = DEC_PROVEMENT_KEY in pinfo                                                                                                                                      
         if name not in state :                                                                                                             
             raise InvalidTransaction('Verb is "{}" but name "{}"  not in state'.format(DEC_PAY_OP,name)) 
@@ -761,34 +763,27 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_PAY_OP))                                                       
         if target is not None and target not in state:
             raise InvalidTransaction('Verb is "{}" but target "{}" not in state'.format(DEC_PAY_OP,target))
+
         src,token = get_wallet(state[name])
         wopts = src[DEC_WALLET_OPTS_OP]
         eaddr = key_to_dgt_addr(value[DEC_EMITTER])
-        if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):                                                                                     
-            raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_PAY_OP)) 
+        # check maybe malti wallet
+        if DEC_TRANS_ID in pinfo:                                                                     
+            msign_nm = DEC_TRANS_KEY.format(pinfo[DEC_TRANS_ID])                                      
+            stoken,esign = self.get_multi_sign_token(pinfo,state,msign_nm,eaddr,DEC_NAME_DEF)       
+        else:                                                                                        
+            stoken = None                                                                            
+
+        if DEC_WALLETS_OWNERS in wopts:                                                         
+            if stoken is None:                                                                                          
+                raise InvalidTransaction('Verb is "{}", set transfer id for multi sign operation'.format(DEC_PAY_OP))  
+
+        
 
         # wallet of source
         total = src[DEC_TOTAL_SUM]
-                                                                                                                                 
-        #dec = cbor.loads(token.dec)                                                                                                                         
-        #total_sum = dec[DEC_TOTAL_SUM][DATTR_VAL]                                                                                                           
-        #passkey = dec[DEC_PASSKEY][DATTR_VAL]                                                                                                               
-        #sale_share = dec[DEC_SALE_SHARE][DATTR_VAL]                                                                                                         
-        #max_sale = total_sum/100*sale_share                                                                                                                 
-        #total_sale = dec[DEC_SALE_TOTAL]                                                                                                                    
         amount = pinfo[DATTR_VAL]
         tcurr = value[DEC_PAYLOAD][DEC_TMSTAMP]                                                                                                                            
-        # destination token                                                                                                                                  
-        #dest,dtoken = get_wallet(state[to])   
-        if to in state:                                                                                                     
-            # destination token                                                                                             
-            dtoken = DecTokenInfo()                                                                                         
-            dtoken.ParseFromString(state[to])                                                                               
-                                                                                                                            
-        else:                                                                                                               
-            LOGGER.debug('_do_pay create destination WALLET={}'.format(to))                                                
-            dtoken = self._new_wallet(0,tcurr)                                                                              
-        dest = cbor.loads(dtoken.dec)
 
         LOGGER.debug('_do_send value={}'.format(value))                                                                                                      
         ttoken = DecTokenInfo()                                                                                                                                                     
@@ -815,12 +810,12 @@ class DecTransactionHandler(TransactionHandler):
             if invoice[DEC_TARGET_PRICE] != amount :
                 raise InvalidTransaction('Verb is "{}", but price mismatch with invoice ({}~{})'.format(DEC_PAY_OP,invoice[DEC_TARGET_PRICE],amount))
             # change owner and drop invoice
-            del t_val[DEC_INVOICE_OP]
+            
             new_owner = key_to_dgt_addr(value[DEC_EMITTER])
             if new_owner == t_val[DEC_OWNER] :                                                                                                  
                 raise InvalidTransaction('Verb is "{}", but you are already owner of {}'.format(DEC_PAY_OP, t_val[DEC_TARGET_ID]))
-            t_val[DEC_OWNER] = new_owner # from now owner is customer 
-            ttoken.dec = cbor.dumps(target_val)
+            
+            
 
 
         if DEC_SPEND_TMSTAMP in src :                                                                                                                                             
@@ -833,8 +828,42 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_PAY_OP,amount))   
 
         updated = {k: v for k, v in state.items() if k in out} 
-                                                                                                      
-        
+
+        multi_mode = False
+        if DEC_WALLETS_OWNERS in wopts:    # name == corp_account or                                                                            
+            if stoken is None:                                                                                                                
+                raise InvalidTransaction('Verb is "{}", set transfer id for multi sign operation'.format(DEC_PAY_OP))                        
+            #if name != corp_account:                                                                                                          
+            esigner_min = wopts[DEC_WALLETS_OWNERS][DEC_ESIGN_NUM]                                                                        
+            msigners = wopts[DEC_WALLETS_OWNERS][DEC_ESIGNERS]                                                                            
+            if eaddr not in msigners:                                                                                                       
+                raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens have no access'.format(DEC_PAY_OP))                 
+                                                                                                                                              
+            ret,sign = self.do_multi_sign(stoken,eaddr,esign,esigner_min)                                                                   
+            if ret is not None:                                                                                                               
+                raise InvalidTransaction(ret)                                                                                                 
+            updated[msign_nm] = stoken.SerializeToString()                                                                                    
+            if sign[DEC_ESIGN_NUM] < esigner_min:                                                                                             
+                # not enough signers                                                                                                          
+                return updated                                                                                                                
+            multi_mode = True                                                                                                                 
+
+        if not multi_mode :
+            if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):         
+                raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_PAY_OP))               
+
+
+        # dest wallet 
+        if to in state:                                                                 
+            # destination token                                                         
+            dtoken = DecTokenInfo()                                                     
+            dtoken.ParseFromString(state[to])                                           
+                                                                                        
+        else:                                                                           
+            LOGGER.debug('_do_pay create destination WALLET={}'.format(to))             
+            dtoken = self._new_wallet(0,tcurr)  
+                                                    
+        dest = cbor.loads(dtoken.dec)                                                   
         dest[DEC_TOTAL_SUM] += amount
         dtoken.decimals = round(dest[DEC_TOTAL_SUM]) 
         dtoken.dec = cbor.dumps(dest) 
@@ -847,6 +876,11 @@ class DecTransactionHandler(TransactionHandler):
         updated[name] = token.SerializeToString()                                                                                                            
         updated[to] = dtoken.SerializeToString() 
         if target:
+            # drop invoice                                                 
+            del t_val[DEC_INVOICE_OP]                                      
+            t_val[DEC_OWNER] = new_owner # from now owner is customer      
+            ttoken.dec = cbor.dumps(target_val)                            
+
             updated[target] = ttoken.SerializeToString()
         LOGGER.debug('PAY "{}"'.format("DONE"))                                                                                                                                                     
         return updated                                                                                                                                       

@@ -742,7 +742,11 @@ class DecClient:
             pay_opts[DEC_TARGET_INFO] = args.target 
             #taddr = self._get_full_addr(args.target,tp_space=DEC_TARGET_GRP,owner=args.didto)                                          
             to.append((args.target,DEC_TARGET_GRP,args.didto))                                         
-                                                                           
+        if args.trans_id:                                                                 
+            to.append((DEC_TRANS_KEY.format(args.trans_id),DEC_EMISSION_GRP,DEFAULT_DID))     
+            
+            
+                                                                               
         if args.provement_key:                                             
             # invoice ID for controle                                      
             pay_opts[DEC_PROVEMENT_KEY] = args.provement_key                   
@@ -806,7 +810,7 @@ class DecClient:
         return self._send_transaction(DEC_INVOICE_OP, (target,DEC_TARGET_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=din)  
      
     def get_target_addr(self,pkey,tid):
-        return key_to_dgt_addr("{}.{}".format(pkey,tid))
+        return key_to_dgt_addr("{}.{}".format(pkey,tid)) if not tid.startswith(DGT_ADDR_PREF) else tid
 
     def get_target_opts(self,args):
         target = self.load_json_proto(args.target_proto)
