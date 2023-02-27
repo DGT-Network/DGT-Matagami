@@ -687,6 +687,26 @@ class DecTransactionHandler(TransactionHandler):
             eaddr = emitter
             src = cbor.loads(token.dec)
             wopts = src[DEC_WALLET_OPTS_OP]
+            total = src[DEC_TOTAL_SUM]
+            if total < amount:                                                                                                             
+                raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount))  
+
+            if DEC_SPEND_TMSTAMP in src :  
+                # check how offen we send tokens                                                                                                                                         
+                last_tm = src[DEC_SPEND_TMSTAMP]                                                                                                                                    
+                spend_period = src[DEC_WALLET_OPTS_OP][DEC_SPEND_PERIOD] if DEC_WALLET_OPTS_OP in src and DEC_SPEND_PERIOD in src[DEC_WALLET_OPTS_OP] else DEC_SPEND_PERIOD_DEF     
+                if tcurr - last_tm < spend_period:                                                                                                                                  
+                    raise InvalidTransaction('Verb is "{}", and operation send too fast < {}sec'.format(DEC_SEND_OP,spend_period))       
+                                                           
+            if DEC_WALLET_ROLE in opts: 
+                # check role grant                                                                                   
+                role = opts[DEC_WALLET_ROLE]                                                                                
+                if DEC_WALLET_ROLE in src[DEC_WALLET_OPTS_OP] and role not in src[DEC_WALLET_OPTS_OP][DEC_WALLET_ROLE]:     
+                    raise InvalidTransaction('Verb is "{}" but role "{}" not granted'.format(DEC_SEND_OP,role))             
+
+
+
+
             multi_mode = False
             if name == corp_account or DEC_WALLETS_OWNERS in wopts:
                 if stoken is None:                                                                                          
@@ -711,24 +731,9 @@ class DecTransactionHandler(TransactionHandler):
                 if (eaddr != name and DEC_WALLET_ADDR not in wopts)  or (DEC_WALLET_ADDR in wopts and eaddr != wopts[DEC_WALLET_ADDR]):
                     raise InvalidTransaction('Verb is "{}", but not owner try to send token from user WALLET'.format(DEC_SEND_OP))
             
-            total = src[DEC_TOTAL_SUM]
-            if total < amount:                                                                                
-                raise InvalidTransaction('Verb is "{}", but amount={} token more then token in sender wallet'.format(DEC_SEND_OP,amount)) 
-            if DEC_WALLET_ROLE in opts:
-                role = opts[DEC_WALLET_ROLE]
-                if DEC_WALLET_ROLE in src[DEC_WALLET_OPTS_OP] and role not in src[DEC_WALLET_OPTS_OP][DEC_WALLET_ROLE]:
-                    raise InvalidTransaction('Verb is "{}" but role "{}" not granted'.format(DEC_SEND_OP,role))
 
-              
-            # check spend period
-            #tcurr = value[DEC_TMSTAMP]
-            if DEC_SPEND_TMSTAMP in src :
-                last_tm = src[DEC_SPEND_TMSTAMP]
-                spend_period = src[DEC_WALLET_OPTS_OP][DEC_SPEND_PERIOD] if DEC_WALLET_OPTS_OP in src and DEC_SPEND_PERIOD in src[DEC_WALLET_OPTS_OP] else DEC_SPEND_PERIOD_DEF
-                if tcurr - last_tm < spend_period:
-                    raise InvalidTransaction('Verb is "{}", and operation send too fast < {}sec'.format(DEC_SEND_OP,spend_period))
 
-             
+            # we can do transaction
             src[DEC_TOTAL_SUM] -= amount
             token.decimals = round(src[DEC_TOTAL_SUM])
             src[DEC_SPEND_TMSTAMP] = tcurr
