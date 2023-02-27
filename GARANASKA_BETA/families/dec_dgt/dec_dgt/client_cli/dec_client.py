@@ -1033,22 +1033,29 @@ class DecClient:
             limit = "&limit={}".format(args.limit)
         if args.start: 
             saddr =  args.start.split(':') 
-            stp = saddr[1] if len(saddr) > 1 else args.type
-            name,tp = self.get_name_tp(saddr[0],stp) 
-               
-            saddress = self._get_full_addr(name,tp,args.did if args.did else DEFAULT_DID)
+            if len(saddr) > 1:
+                stp = saddr[1]
+                name,tp = self.get_name_tp(saddr[0],stp) 
+                   
+                saddress = self._get_full_addr(name,tp,args.did if args.did else DEFAULT_DID)
+            else:
+                saddress = saddr[0]
             limit += "&start={}".format(saddress)
             #print("PAGING",saddress,limit)  
 
         result = self._send_request("state?address={}{}".format(pref,limit))
-        
+        #print('res',result)
         try:
-            encoded_entries = yaml.safe_load(result)["data"]
+            sres = yaml.safe_load(result)
+            encoded_entries = sres["data"]
 
-            return [
+            dlist = [
                 cbor.loads(base64.b64decode(entry["data"]))
                 for entry in encoded_entries
             ]
+            if "paging" in sres and "next_position" in sres["paging"]:
+                print("NEXT",sres["paging"]["next_position"])
+            return dlist
 
         except BaseException:
             return None
