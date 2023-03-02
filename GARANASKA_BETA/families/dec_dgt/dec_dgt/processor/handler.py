@@ -332,20 +332,30 @@ class DecTransactionHandler(TransactionHandler):
 
     def _do_alias(self,name, value, to, state, out):                         
         LOGGER.debug('Alias "{}" value={}'.format(name,value))               
-        #value = {DEC_EMITTER,DEC_PAYLOAD}                                    
-        if name in state:                                                                                                 
+        #value = {DEC_EMITTER,DEC_PAYLOAD}  
+        #
+        payload = value[DEC_PAYLOAD]  
+        opts = payload[DEC_ALIAS_OP] 
+        dis = (DEC_ALIAS_DIS in opts and opts[DEC_ALIAS_DIS])                                 
+        if not dis and name in state:                                                                                                 
             raise InvalidTransaction('Verb is "{}", but Alias with name={} already exists.'.format(DEC_ALIAS_OP,name))  
-
-        payload = value[DEC_PAYLOAD]                                                            
-        opts = payload[DEC_ALIAS_OP]                                                           
+                                                                  
+                                                                 
         tcurr = payload[DEC_TMSTAMP]                                                            
         did_val = payload[DEC_DID_VAL] if DEC_DID_VAL in payload else DEFAULT_DID               
         if key_to_dgt_addr(value[DEC_EMITTER]) == opts[DEC_WALLET_ADDR]:                                                          
             LOGGER.debug('owner WALLET alias and signer the same')                                    
 
         updated = {k: v for k, v in state.items() if k in out}                          
-        
-        token = self._new_wallet(0,tcurr,opts,did=did_val,group=DEC_WALLET_ALIAS)                              
+        if name in state:
+            token = DecTokenInfo()                         
+            token.ParseFromString(state[name]) 
+            oalias = cbor.loads(token.dec)
+            oalias[DEC_WALLET_OPTS_OP][DEC_ALIAS_DIS] = dis
+            token.dec = cbor.dumps(oalias) 
+        else:
+            token = self._new_wallet(0,tcurr,opts,did=did_val,group=DEC_WALLET_ALIAS)
+                                          
         updated[name] = token.SerializeToString()                                       
         
         return updated                                                                  

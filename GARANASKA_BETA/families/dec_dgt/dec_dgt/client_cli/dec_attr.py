@@ -141,7 +141,7 @@ DEC_CMD_TO_GRP     =  'to_grp'
 DEC_CMD_VAL        = 'Value'    
 DEC_CMD_DIN        = 'Din'    
 DEC_CMD_DIN_EXT    = 'DinExt' 
-
+DEC_ALIAS_DIS      = 'disable'
 
 
 #DEC_WALLET_DID       = "wallet_did"

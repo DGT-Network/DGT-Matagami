@@ -1170,6 +1170,14 @@ def add_target_parser(subparsers, parent_parser):
         default="/project/peer/keys/validator.priv",                                                                                                       
         help="Identify file containing owner private key")                                                               
                                                                                                                           
+def do_target(args):                                      
+    client = _get_client(args)                            
+    response = client.target(args, args.wait)             
+    if isinstance(response,dict):                         
+        response = do_yaml(response)                      
+    print(response)                                       
+
+
 
 def add_alias_parser(subparsers, parent_parser):                                                                        
     message = 'Create alias <alias_name> '                                                                   
@@ -1244,14 +1252,14 @@ def add_alias_parser(subparsers, parent_parser):
         default="/project/peer/keys/validator.priv",                                                                                                       
         help="Identify file containing alias owner private key in case if addr not set")                                                               
 
+    parser.add_argument(       
+        '--disable','-dis',      
+        action='count',        
+        default=0,             
+        help='Disable alias')   
 
 
-def do_target(args):
-    client = _get_client(args)                                
-    response = client.target(args, args.wait) 
-    if isinstance(response,dict):    
-        response = do_yaml(response)                  
-    print(response)
+
 
 def do_alias(args):                                                     
     client = _get_client(args)                                           

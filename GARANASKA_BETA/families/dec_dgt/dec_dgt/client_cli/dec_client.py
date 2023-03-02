@@ -894,6 +894,9 @@ class DecClient:
         alias = self.get_only_wallet_opts(args)
         # keep hashed alias 
         alias[DEC_ALIAS_OP] = key_to_dgt_addr(args.alias_name) 
+        if args.disable:
+            # for already created aliase - disable them
+            alias[DEC_ALIAS_DIS] = True
         return alias                                                         
 
 
