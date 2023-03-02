@@ -1634,7 +1634,8 @@ def do_corpaccount(args):
 
     corp = client.corpaccount(args)                                                              
 
-    if args.yaml > 0:                                                                           
+    if args.yaml > 0:  
+        corp =  client.do_verbose(corp,args.verbose)                                                                        
         corp = do_yaml(corp)                                                                      
 
     print('{}'.format(corp))                  
