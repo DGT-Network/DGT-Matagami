@@ -182,6 +182,7 @@ def create_parser(prog_name):
     add_dec_parser(subparsers, parent_parser)
     add_trans_parser(subparsers, parent_parser)
     add_show_parser(subparsers, parent_parser)
+    add_corpaccount_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
 
     add_generate_parser(subparsers, parent_parser)
@@ -1606,6 +1607,40 @@ def do_show(args):
 
         print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
+def add_corpaccount_parser(subparsers, parent_parser):
+    message = 'Shows the corporation account.'
+
+    parser = subparsers.add_parser(
+        DEC_CORP_ACC_OP,
+        parents=[parent_parser],
+        description=message,
+        help='Displays corporation account info')
+
+    parser.add_argument(      
+        '--did','-d',         
+        type=str,
+        default=   DEFAULT_DID,          
+        help='DID')           
+    parser.add_argument(          
+        '--name',                 
+        type=str,                 
+        default=DEC_NAME_DEF,     
+        help='Name of token')     
+
+
+def do_corpaccount(args):                                                                                  
+    names = args.name                                                                               
+    client = _get_client(args)                                                                      
+
+    corp = client.corpaccount(args)                                                              
+
+    if args.yaml > 0:                                                                           
+        corp = do_yaml(corp)                                                                      
+
+    print('{}'.format(corp))                  
+
+
+
 
 def add_list_parser(subparsers, parent_parser):
     message = 'Shows the values of all keys in bgt state.'
@@ -1756,6 +1791,8 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
             
     elif args.command == 'show':
         do_show(args)
+    elif args.command == DEC_CORP_ACC_OP:
+        do_corpaccount(args)
     elif args.command == 'list':
         do_list(args)
     elif args.command == 'generate':
