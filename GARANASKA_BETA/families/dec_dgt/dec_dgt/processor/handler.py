@@ -321,7 +321,7 @@ class DecTransactionHandler(TransactionHandler):
                              owner_key = self._signer.sign(DEC_WALLET.encode()), #owner_key,                   
                              sign = self._public_key.as_hex(),                                                 
                              decimals = total,                                                                     
-                             dec=cbor.dumps({DEC_TMSTAMP: tcurr,                                               
+                             dec=cbor.dumps({DEC_CREATE_TMSTAMP: tcurr,                                               
                                              DEC_TOTAL_SUM : total,                                                
                                              DEC_DID_VAL   : did,                                          
                                              DEC_WALLET_OPTS_OP: opts if opts else self._wallet_proto
@@ -752,7 +752,9 @@ class DecTransactionHandler(TransactionHandler):
         # destination wallet
         dest = cbor.loads(dtoken.dec)
         
-        dest[DEC_TOTAL_SUM] += amount
+        dest[DEC_TOTAL_SUM]     += amount
+        dest[DEC_CASHIN_TMSTAMP] = tcurr
+        dest[DEC_CASHIN_AMOUNT]  = amount
         dtoken.decimals = round(dest[DEC_TOTAL_SUM])                                                                                                                      
         dtoken.dec = cbor.dumps(dest)
           
@@ -880,6 +882,9 @@ class DecTransactionHandler(TransactionHandler):
                                                     
         dest = cbor.loads(dtoken.dec)                                                   
         dest[DEC_TOTAL_SUM] += amount
+        dest[DEC_CASHIN_TMSTAMP] = tcurr   
+        dest[DEC_CASHIN_AMOUNT]  = amount  
+
         dtoken.decimals = round(dest[DEC_TOTAL_SUM]) 
         dtoken.dec = cbor.dumps(dest) 
         # update wallet of customer                                                                                                                         
@@ -962,7 +967,7 @@ class DecTransactionHandler(TransactionHandler):
             # for notary mode                          
             info[DEC_DID_VAL] = payload[DEC_DID_VAL]     
         info[DEC_EMITTER] = key_to_dgt_addr(value[DEC_EMITTER]) # pubkey of owner 
-        info[DEC_TMSTAMP] = tcurr 
+        info[DEC_CREATE_TMSTAMP] = tcurr 
         # destination token                                                                                                                         
         updated = {k: v for k, v in state.items() if k in out}
         if tips > 0.0:
@@ -1041,7 +1046,8 @@ class DecTransactionHandler(TransactionHandler):
             # for notary mode
             info[DEC_DID_VAL] = payload[DEC_DID_VAL]
         
-                                                                                                                                         
+        info[DEC_CREATE_TMSTAMP] = payload[DEC_TMSTAMP]   
+                                                                                                                                     
         token = DecTokenInfo(group_code = DEC_ROLE_GRP,                                                                                
                              owner_key = self._signer.sign(DEC_ROLE_GRP.encode()),                                                     
                              sign = self._public_key.as_hex(),                                                                           

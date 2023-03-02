@@ -19,9 +19,13 @@ dec target target-2 2 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
 dec target target-3 3 --keyfile /project/peer/keys/wkey.priv  -g this --tips 0.2
 dec invoice target-3 123456  1.1 --keyfile /project/peer/keys/wkey.priv
 # alias
+
 dec alias trt1@mail.ru --keyfile /project/peer/keys/wkey1.priv
 dec alias trt@mail.ru --keyfile /project/peer/keys/wkey.priv
 dec alias trt2@mail.ru --keyfile /project/peer/keys/wkey.priv
+# account for wkey2
+dec account --keyfile /project/peer/keys/wkey2.priv
+
 dec send /project/peer/keys/wkey1.priv trt@mail.ru 1 --keyfile /project/peer/keys/wkey1.priv
 dec show trt@mail.ru -tp aliases
 
