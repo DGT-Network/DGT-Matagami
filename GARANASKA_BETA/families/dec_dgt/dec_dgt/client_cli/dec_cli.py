@@ -76,6 +76,11 @@ def create_console_handler(verbose_level):
 
     return clog
 
+def do_done(args,ret):
+    ret =  do_verbose(ret,args.verbose)        
+    if args.yaml > 0:                                   
+        ret = do_yaml(ret)  
+    return ret                          
 
 def setup_loggers(verbose_level):
     logger = logging.getLogger()
@@ -1599,11 +1604,7 @@ def do_show(args):
         token = client.show(args,name)
         dec = cbor.loads(token.dec) if token.group_code  in DEC_TYPES else {}
     
-        dec =  client.do_verbose(dec,args.verbose)
-        if args.yaml > 0:                                                              
-            dec = do_yaml(dec) 
-
-
+        dec = do_done(args,dec)
 
         print('{}: {}={} dec={}'.format(name,token.group_code,token.decimals,dec))
 
@@ -1633,11 +1634,8 @@ def do_corpaccount(args):
     client = _get_client(args)                                                                      
 
     corp = client.corpaccount(args)                                                              
-
-    if args.yaml > 0:  
-        corp =  client.do_verbose(corp,args.verbose)                                                                        
-        corp = do_yaml(corp)                                                                      
-
+    corp =  client.do_verbose(corp,args.verbose) 
+    corp = do_done(args,corp)
     print('{}'.format(corp))                  
 
 
@@ -1690,7 +1688,7 @@ def do_list(args):
             #print('dec',dec)
             fname = "{}::{}".format(name,dec[DEC_DID_VAL]) if DEC_DID_VAL in dec else name
             if args.yaml > 0:
-                to_yaml[fname] = token.group_code if args.verbose is None or args.verbose == 0 else client.do_verbose(dec,args.verbose,off=True)
+                to_yaml[fname] = token.group_code if args.verbose is None or args.verbose == 0 else do_verbose(dec,args.verbose,off=True)
             else:
                 print('{}: {}={} dec={}'.format(fname,token.group_code,token.decimals,dec))
 

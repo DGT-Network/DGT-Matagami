@@ -13,7 +13,7 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 import json
-
+import time
 FAMILY_NAME ="dec"
 FAMILY_VERSION ="1.0"
 
@@ -237,6 +237,12 @@ DEF_WALLET_OPTS = {
 # external family                                                                            
 SETTINGS_NAMESPACE = '000000'  
 
+
+def tmstamp2str(val):
+    return time.strftime(DEC_TSTAMP_FMT, time.gmtime(val))
+
+
+
 def load_json_proto(value):                                                                                                                           
     if isinstance(value,dict):                                                  
         info = value                                                            
@@ -248,4 +254,15 @@ def load_json_proto(value):
             except Exception as ex:                                             
                 print('Cant load file {} - {}'.format(value,ex))                
                 info = {}                                                       
-    return info                                                                 
+    return info     
+                                                            
+def do_verbose(dec,verbose,off=True):                                                                                                                                                                             
+    #                                                                                                                                                      
+    if off or (verbose is None or verbose == 0):                                                                                                           
+        for k,v in dec.items():                                                                                                                            
+            if isinstance(v,dict) and DATTR_VAL in v:                                                                                                      
+                dec[k] = v[DATTR_VAL]                                                                                                                      
+            if k in [DEC_TMSTAMP,DEC_LAST_HEART_TMSTAMP,DEC_SPEND_TMSTAMP,DEC_CASHIN_TMSTAMP,DEC_CREATE_TMSTAMP] and not isinstance(dec[k],str):           
+                dec[k] = tmstamp2str(dec[k])                                                                                                               
+                                                                                                                                                           
+    return dec                                                                                                                                             
