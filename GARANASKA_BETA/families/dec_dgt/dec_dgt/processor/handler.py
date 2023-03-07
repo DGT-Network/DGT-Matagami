@@ -239,39 +239,29 @@ class DecTransactionHandler(TransactionHandler):
         tcurr = payload[DEC_TMSTAMP]  
         value = payload[DEC_EMISSION_OP]
         token_name = value[DEC_NAME][DATTR_VAL]
-        epay  = cbor.dumps(value)
-        esign = _sha256(epay).hexdigest() 
-
-        if DEC_ESIGNERS_KEY in state:
-            stoken = DecTokenInfo()           
-            stoken.ParseFromString(state[DEC_ESIGNERS_KEY]) 
-        else:
-            sign = {
-                        DEC_ESIGNERS   : [],
-                        DEC_ESIGNATURE : esign,
-                        DEC_ESIGN_NUM  : 0
-                }
-            stoken = DecTokenInfo(group_code = token_name,                                
-                                 owner_key = self._signer.sign(token_name.encode()),     
-                                 sign = emitter,
-                                 decimals=0,                                             
-                                 dec = cbor.dumps(sign)                                 
-                    )                                                                    
-
+        stoken,esign =  self.get_multi_sign_token(value,state,DEC_ESIGNERS_KEY,esigner,token_name)
+        
 
         # check key into topology
         updated = {k: v for k, v in state.items() if k in out} 
-        sign = cbor.loads(stoken.dec)
+        #sign = cbor.loads(stoken.dec)
+        ret,sign = self.do_multi_sign(stoken,esigner,esign,esigner_min)      
+        if ret is not None:                                                  
+            raise InvalidTransaction(ret) 
+                                           
+        """
         if esign != sign[DEC_ESIGNATURE]:                                                                               
             raise InvalidTransaction('Verb is "{}", but emission signature={} changed '.format(DEC_EMISSION_OP,esign))  
                                                                                                                         
         if esigner in sign[DEC_ESIGNERS]:
             raise InvalidTransaction('Verb is "{}", but this signer={} already sign emission'.format(DEC_EMISSION_OP,esigner))
-
+        
         
         sign[DEC_ESIGN_NUM] += 1
         sign[DEC_ESIGNERS].append(esigner)
-        stoken.dec = cbor.dumps(sign)                           
+        stoken.dec = cbor.dumps(sign)
+        """   
+                               
         updated[DEC_ESIGNERS_KEY] = stoken.SerializeToString()  
         if sign[DEC_ESIGN_NUM] < esigner_min:
             # not enough signers
