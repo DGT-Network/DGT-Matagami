@@ -339,6 +339,17 @@ class DecTransactionHandler(TransactionHandler):
         dis = (DEC_ALIAS_DIS in opts and opts[DEC_ALIAS_DIS])                                 
         if not dis and name in state:                                                                                                 
             raise InvalidTransaction('Verb is "{}", but Alias with name={} already exists.'.format(DEC_ALIAS_OP,name))  
+        if DEC_EMISSION_KEY not in state:                                                                                                            
+            raise InvalidTransaction('Verb is "{}" but emission was not done yet'.format(DEC_ALIAS_OP))
+        
+        emitter = key_to_dgt_addr(value[DEC_EMITTER])
+        # get emission
+        etoken = DecTokenInfo()                                                                                 
+        etoken.ParseFromString(state[DEC_EMISSION_KEY])                                                                            
+        emiss = cbor.loads(etoken.dec) 
+        admpub = emiss[DEC_ADMIN_PUB_KEY][DATTR_VAL]
+        if emitter != admpub:
+            raise InvalidTransaction('Verb is "{}" only DGT admin can create ALIAS'.format(DEC_ALIAS_OP))
                                                                   
                                                                  
         tcurr = payload[DEC_TMSTAMP]                                                            

@@ -203,7 +203,9 @@ class DecClient:
         set_param(info,DEC_NОMINAL_NAME,args.nominal_name,DEC_NОMINAL_NAME_DEF)
         set_param(info,DEC_СORPORATE_SHARE,args.corporate_share,DEC_СORPORATE_SHARE_DEF)
         set_param(info,DEC_MINTING_SHARE,args.minting_share,DEC_MINTING_SHARE_DEF)
-        set_param(info,DEC_ADMIN_PUB_KEY,args.admin_pub_key,DEC_ADMIN_PUB_KEY_DEF)
+        admin_pub = self.get_pub_key(args.admin_pub_key) if args.admin_pub_key else DEC_ADMIN_PUB_KEY_DEF
+        
+        set_param(info,DEC_ADMIN_PUB_KEY,admin_pub,DEC_ADMIN_PUB_KEY_DEF)
         
         # take mint params
         mint_val = info[DEC_MINT_PARAM][DATTR_VAL] if DEC_MINT_PARAM in info else {DEC_MINT_COEF_UMAX: 10,DEC_MINT_COEF_T1:1 ,DEC_MINT_COEF_B2:1}
@@ -225,6 +227,7 @@ class DecClient:
 
         info[DEC_CORPORATE_PUB_KEY] = {DATTR_VAL : corp_keys}
         corp_acc = key_to_dgt_addr(self.get_pub_key(args.corporate_account)) if args.corporate_account else corp_keys[0]
+        #print('CORP',corp_acc)
         set_param_field(info,DEC_СORPORATE_ACCOUNT,DEC_CORP_ACC_ADDR,corp_acc)
 
         for a,val in info.items():
@@ -903,9 +906,10 @@ class DecClient:
                               DEC_ALIAS_OP : alias,                                                                                                         
                               DEC_TMSTAMP : tcurr,                                                                                                        
                               DEC_DID_VAL : DEFAULT_DID if args.did is None else args.did                                                                 
-                            }                                                                                                                             
-        #role_addr = self._get_full_addr(args.role_id,tp_space=DEC_ROLE_GRP,owner=args.did)                                                               
-        return self._send_transaction(DEC_ALIAS_OP, (alias[DEC_ALIAS_OP],DEC_SYNONYMS_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=None)       
+                            } 
+        din = [(DEC_EMISSION_KEY,DEC_EMISSION_GRP,DEFAULT_DID)]                                                                                                                            
+        
+        return self._send_transaction(DEC_ALIAS_OP, (alias[DEC_ALIAS_OP],DEC_SYNONYMS_GRP,args.did), info, to=None, wait=wait if wait else TRANS_TOUT,din=din)       
 
 
     def user_sign_req(self,info):                                                  
