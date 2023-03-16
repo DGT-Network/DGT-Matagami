@@ -669,11 +669,17 @@ class DecTransactionHandler(TransactionHandler):
         # get emission info 
         emiss = cbor.loads(etoken.dec)                                             
         corp_account = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_ACC_ADDR] 
-        esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
+        #esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
         msigners = emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]
+        # pub keys of owner 
+        if name == DEC_EMISSION_KEY:
+            emsigners = emiss[DEC_EMISSION_INFO][DATTR_VAL][DEC_MULTI_SIGNERS]
+            esigner_min = emiss[DEC_EMISSION_INFO][DATTR_VAL][DEC_SIGN_MIN] 
+        else:
+            esigner_min,emsigners = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN],None
         if DEC_TRANS_ID in opts:                                                                     
             msign_nm = DEC_TRANS_KEY.format(opts[DEC_TRANS_ID])                                      
-            stoken,esign = self.get_multi_sign_token(opts,state,msign_nm,emitter,DEC_NAME_DEF,smin=esigner_min)       
+            stoken,esign = self.get_multi_sign_token(opts,state,msign_nm,emitter,DEC_NAME_DEF,smin=esigner_min,slist=emsigners)       
         else:                                                                                        
             stoken = None                                                                            
 
@@ -689,10 +695,16 @@ class DecTransactionHandler(TransactionHandler):
 
             if to != corp_account:
                 raise InvalidTransaction('Verb is "{}", but destination WALLET={} not corporate'.format(DEC_SEND_OP,to))
+
+            if value[DEC_EMITTER] not in emsigners:                                                                                                          
+                LOGGER.debug('_do_send cops={}'.format(emsigners))                                                 
+                raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have no access'.format(DEC_SEND_OP))
+
+            """
             if emitter not in msigners:
                 LOGGER.debug('_do_send cops={}'.format(emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]))
                 raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have no access'.format(DEC_SEND_OP))
-
+            """
             #esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
             ret,sign = self.do_multi_sign(stoken,value[DEC_EMITTER],emitter,esign)
             if ret is not None:
