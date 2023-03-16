@@ -16,5 +16,13 @@
 "nBurn"             :  {"val" : 3  ,"comm"        :  "Number of times the Burn command, which allows admin to destroy some numbers of tokens. By default, nBurn= 3"},
 "fee"               :  {"val" : 1.0,"comm"      :  "commission on transactions with DEC (default 1%)–can be changed later"},
 "tips"              :  {"val" : {"target" : 0.01}, "comm"  :  "Tips on some transactions with DEC can be changed for each peers"},
-"account"           :  {"val" : {"limit" : 10010, "spend_period": 2} , "comm" : "Account restrictions"}
+"account"           :  {"val" : {"limit" : 10010, "spend_period": 2} , "comm" : "Account restrictions"},
+"emission"          :  {"val" : {"sign_min" : 2,"signers_pub_key" : [
+                                     "3056301006072a8648ce3d020106052b8104000a034200040e8570726d2fa5040ff22cdbcfa1f2bc2c0d4a30175a4d53008cd7993cfdd56d91b39e292e2c3759cb5cb3591dd5ab43c3b85d9a6478be5bb2d9a1e18e366fb3",
+                                     "3056301006072a8648ce3d020106052b8104000a03420004be720a5bb9daf3f162f9503e5a97b9c336829f84b6b27bf1afcb2870e7b2aeae5a53ea312b64592cbdfbecb356947950d332d7940d2a0be4e4b41039e631ebea",
+                                     "3056301006072a8648ce3d020106052b8104000a034200047c5224914255bc32fac584eedf7403fa66b82fe6708f561a74c82c9eab279436896be0d797fd4db7465807f1c6e6f871b3d5500d013ddfe585303c22201500e5"
+                                     ]
+                                 } , 
+                        "comm" : "Emission info "
+                       }
 }

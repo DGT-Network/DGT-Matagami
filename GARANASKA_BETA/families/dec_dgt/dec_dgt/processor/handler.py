@@ -162,7 +162,7 @@ class DecTransactionHandler(TransactionHandler):
             raise InvalidTransaction('Verb: {} err={} TB={}'.format(verb,ex,tb)) 
         
         
-    def get_multi_sign_token(self,value,state,msign_nm,emitter,token_name):
+    def get_multi_sign_token(self,value,state,msign_nm,emitter,token_name,smin=0,slist=None):
         epay  = cbor.dumps(value)
         esign = _sha256(epay).hexdigest() 
 
@@ -174,8 +174,12 @@ class DecTransactionHandler(TransactionHandler):
                         DEC_ESIGNERS : [],
                         DEC_ESIGNATURE : esign,
                         DEC_MSIGN_ST   : False,
+                        DEC_SIGN_MIN   : smin,
                         DEC_ESIGN_NUM  : 0
                 }
+            if slist is not None:
+                sign[DEC_MULTI_SIGNERS] = slist
+
             stoken = DecTokenInfo(group_code = token_name,                                
                                  owner_key = self._signer.sign(token_name.encode()),     
                                  sign = emitter,
@@ -184,22 +188,24 @@ class DecTransactionHandler(TransactionHandler):
                     )                                                                    
         return stoken,esign
 
-    def do_multi_sign(self,stoken,esigner,esign,sign_min=1):
+    def do_multi_sign(self,stoken,esigner,asigner,esign):
         sign = cbor.loads(stoken.dec)   
         if sign[DEC_MSIGN_ST]:                                      
             return 'This multi sign transaction already done',sign  
                                                                                                                              
         if esign != sign[DEC_ESIGNATURE]:                                                                                                                    
             return 'Multi sign  signature={} changed '.format(esign),sign                                       
-                                                                                                                                                             
-        if esigner in sign[DEC_ESIGNERS]:                                                                                                                    
-            return 'Multi sign   signer={} already sign transaction'.format(esigner),sign                               
+        if DEC_MULTI_SIGNERS in sign and esigner not in sign[DEC_MULTI_SIGNERS]:                                                
+            return 'Multi sign   signer={} not in list {}'.format(esigner,sign[DEC_MULTI_SIGNERS]),sign
+        
+        if asigner in sign[DEC_ESIGNERS]:                                                                                                                    
+            return 'Multi sign   signer={} already sign transaction'.format(asigner),sign                               
         
         
                                                                                                                                                              
         sign[DEC_ESIGN_NUM] += 1
-        sign[DEC_MSIGN_ST]  = sign[DEC_ESIGN_NUM] == sign_min                                                                                                                            
-        sign[DEC_ESIGNERS].append(esigner)                                                                                                                   
+        sign[DEC_MSIGN_ST]  = sign[DEC_ESIGN_NUM] == sign[DEC_SIGN_MIN]                                                                                                                            
+        sign[DEC_ESIGNERS].append(asigner)                                                                                                                   
         stoken.dec = cbor.dumps(sign)
         return None,sign                                                                                                                        
 
@@ -217,7 +223,13 @@ class DecTransactionHandler(TransactionHandler):
         # emitter pubkey
         
         emitter = val[DEC_EMITTER]  
-        esigner = key_to_dgt_addr(emitter)          
+        esigner = key_to_dgt_addr(emitter) 
+        msigners = val[DEC_MULTI_SIGNERS] if DEC_MULTI_SIGNERS in val else None
+        esigner_min = val[DEC_SIGN_MIN]  if DEC_SIGN_MIN in val else 1
+        if DEC_ESIGNERS_KEY not in state and  msigners is None:
+            # sig key or list of pub keys 
+            raise InvalidTransaction('Verb is "{}", but there is no emission signers info'.format(DEC_EMISSION_OP))
+        """
         if DGT_TOPOLOGY_SET_NM in state:
             tval = json.loads(state[DGT_TOPOLOGY_SET_NM])
             #LOGGER.debug('Topology "{}"'.format(tval))
@@ -233,19 +245,20 @@ class DecTransactionHandler(TransactionHandler):
                 raise InvalidTransaction('Verb is "{}", but emitter not in signers'.format(DEC_EMISSION_OP))
         else:
             raise InvalidTransaction('Verb is "{}", but there is no emission signers info'.format(DEC_EMISSION_OP))
-
+        """
 
         payload = val[DEC_PAYLOAD]    
         tcurr = payload[DEC_TMSTAMP]  
         value = payload[DEC_EMISSION_OP]
+        # pub keys of multi sign 
         token_name = value[DEC_NAME][DATTR_VAL]
-        stoken,esign =  self.get_multi_sign_token(value,state,DEC_ESIGNERS_KEY,esigner,token_name)
+        stoken,esign =  self.get_multi_sign_token(value,state,DEC_ESIGNERS_KEY,esigner,token_name,smin=esigner_min,slist=msigners)
         
 
         # check key into topology
         updated = {k: v for k, v in state.items() if k in out} 
         #sign = cbor.loads(stoken.dec)
-        ret,sign = self.do_multi_sign(stoken,esigner,esign,esigner_min)      
+        ret,sign = self.do_multi_sign(stoken,emitter,esigner,esign)      
         if ret is not None:                                                  
             raise InvalidTransaction(ret) 
                                            
@@ -652,17 +665,19 @@ class DecTransactionHandler(TransactionHandler):
             dtoken = self._new_wallet(0,tcurr)
         dest = cbor.loads(dtoken.dec)
         
-        if DEC_TRANS_ID in opts:
-            msign_nm = DEC_TRANS_KEY.format(opts[DEC_TRANS_ID])
-            stoken,esign = self.get_multi_sign_token(opts,state,msign_nm,emitter,DEC_NAME_DEF)
-        else:
-            stoken = None
 
         # get emission info 
         emiss = cbor.loads(etoken.dec)                                             
         corp_account = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_ACC_ADDR] 
         esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
         msigners = emiss[DEC_CORPORATE_PUB_KEY][DATTR_VAL]
+        if DEC_TRANS_ID in opts:                                                                     
+            msign_nm = DEC_TRANS_KEY.format(opts[DEC_TRANS_ID])                                      
+            stoken,esign = self.get_multi_sign_token(opts,state,msign_nm,emitter,DEC_NAME_DEF,smin=esigner_min)       
+        else:                                                                                        
+            stoken = None                                                                            
+
+
         LOGGER.debug('_do_send value={}'.format(value))  
         updated = {k: v for k, v in state.items() if k in out}                            
         if name == DEC_EMISSION_KEY:
@@ -679,7 +694,7 @@ class DecTransactionHandler(TransactionHandler):
                 raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens to CORPORATE WALLET have no access'.format(DEC_SEND_OP))
 
             #esigner_min = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_SIGN_MIN]
-            ret,sign = self.do_multi_sign(stoken,emitter,esign,esigner_min)
+            ret,sign = self.do_multi_sign(stoken,value[DEC_EMITTER],emitter,esign)
             if ret is not None:
                 raise InvalidTransaction(ret)
 
@@ -728,7 +743,7 @@ class DecTransactionHandler(TransactionHandler):
                 if emitter not in msigners:                                                                                                               
                     raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens have no access'.format(DEC_SEND_OP))    
 
-                ret,sign = self.do_multi_sign(stoken,emitter,esign,esigner_min)               
+                ret,sign = self.do_multi_sign(stoken,value[DEC_EMITTER],emitter,esign)               
                 if ret is not None:                                                           
                     raise InvalidTransaction(ret)                                             
                 updated[msign_nm] = stoken.SerializeToString()            
@@ -787,8 +802,9 @@ class DecTransactionHandler(TransactionHandler):
         eaddr = key_to_dgt_addr(value[DEC_EMITTER])
         # check maybe malti wallet
         if DEC_TRANS_ID in pinfo:                                                                     
-            msign_nm = DEC_TRANS_KEY.format(pinfo[DEC_TRANS_ID])                                      
-            stoken,esign = self.get_multi_sign_token(pinfo,state,msign_nm,eaddr,DEC_NAME_DEF)       
+            msign_nm = DEC_TRANS_KEY.format(pinfo[DEC_TRANS_ID])  
+            esigner_min = wopts[DEC_WALLETS_OWNERS][DEC_ESIGN_NUM] if DEC_WALLETS_OWNERS in wopts else 1                                    
+            stoken,esign = self.get_multi_sign_token(pinfo,state,msign_nm,eaddr,DEC_NAME_DEF,smin=esigner_min)       
         else:                                                                                        
             stoken = None                                                                            
 
@@ -857,7 +873,7 @@ class DecTransactionHandler(TransactionHandler):
             if eaddr not in msigners:                                                                                                       
                 raise InvalidTransaction('Verb is "{}", but user who ask transfer tokens have no access'.format(DEC_PAY_OP))                 
                                                                                                                                               
-            ret,sign = self.do_multi_sign(stoken,eaddr,esign,esigner_min)                                                                   
+            ret,sign = self.do_multi_sign(stoken,value[DEC_EMITTER],eaddr,esign)                                                                   
             if ret is not None:                                                                                                               
                 raise InvalidTransaction(ret)                                                                                                 
             updated[msign_nm] = stoken.SerializeToString()                                                                                    

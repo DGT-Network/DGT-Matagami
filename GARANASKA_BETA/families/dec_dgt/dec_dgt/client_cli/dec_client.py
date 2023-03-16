@@ -248,6 +248,26 @@ class DecClient:
                                  DEC_DID_VAL     : args.did
                                }
                 }
+
+        if args.emiss_signers:
+            # for first time - fix list of signers
+            ekeys = []
+            for pkey in args.emiss_signers:
+                ekeys.append(self.get_pub_key(pkey))
+
+            #finfo[DEC_SIGN_MIN] =  args.emiss_sign_min if args.emiss_sign_min else info[DEC_EMISSION_INFO][DEC_DID_VAL][DEC_SIGN_MIN]
+            #finfo[DEC_MULTI_SIGNERS] = ekeys 
+            info[DEC_EMISSION_INFO][DATTR_VAL][DEC_MULTI_SIGNERS] = ekeys
+            if args.emiss_sign_min:
+                info[DEC_EMISSION_INFO][DATTR_VAL][DEC_SIGN_MIN] = args.emiss_sign_min
+        else:
+            if DEC_EMISSION_INFO not in info:
+                print("Old emission proto - update emission.json")
+                return
+        # emission info 
+        finfo[DEC_SIGN_MIN] = info[DEC_EMISSION_INFO][DATTR_VAL][DEC_SIGN_MIN]
+        finfo[DEC_MULTI_SIGNERS] = info[DEC_EMISSION_INFO][DATTR_VAL][DEC_MULTI_SIGNERS]
+
         taddr = (DEC_ESIGNERS_KEY,DEC_EMISSION_GRP,args.did)
         #print('PROTO',info)
         #eaddr = self._get_full_addr(emission_key,tp_space=DEC_EMISSION_GRP,owner=args.did) #self._get_address(DEC_EMISSION_KEY)
@@ -551,7 +571,7 @@ class DecClient:
             info[DATTR_VAL]   = args.value                                       
             print('PROTO',info) 
             to =  (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)
-            waddr = self.key_to_addr(args.pubkey)
+            waddr = self.key_to_addr(args.pubkey,did=args.did)
             info[DEC_EMITTER] = self._signer.get_public_key().as_hex() 
             info[DEC_TMSTAMP] = time.time()                                                                   
             return self._send_transaction(DEC_FAUCET_OP, waddr, info, to=to, wait=wait if wait else TRANS_TOUT)  

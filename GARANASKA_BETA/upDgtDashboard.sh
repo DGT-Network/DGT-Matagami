@@ -1,5 +1,5 @@
 # START DGT DASHBOARD
-export CRYPTO_BACK="bitcoin"
+export CRYPTO_BACK="openssl"
 while [ -n "$1" ]
 do
 case "$1" in
