@@ -214,6 +214,7 @@ EMISSION_UNVISIBLE_ATTR = DEC_PASSKEY,DEC_ADMIN_PUB_KEY,DEC_CORPORATE_PUB_KEY
 DEC_PROTO_FILE_NM = "/project/dgt/etc/dec/emission.json"
 DEC_COMM_FILE_NM = "/project/dgt/etc/dec/comment.json" 
 DEC_OPTS_PROTO_FILE_NM = "/project/dgt/etc/dec/wallet_opts.json"
+DEC_CORP_OPTS_PROTO_FILE_NM = "/project/dgt/etc/dec/corp_wallet_opts.json"
 DEC_ROLE_PROTO_FILE_NM = "/project/dgt/etc/dec/role.json"
 DEC_TARGET_PROTO_FILE_NM = "/project/dgt/etc/dec/target.json"
 

@@ -96,6 +96,7 @@ class DecTransactionHandler(TransactionHandler):
         self._signer = crypto_factory.new_signer(self._private_key)
         #self._signer = CryptoFactory(self._context).new_signer(self.private_key)
         self._wallet_proto = load_json_proto(DEC_OPTS_PROTO_FILE_NM)
+        self._corp_wallet_proto = load_json_proto(DEC_CORP_OPTS_PROTO_FILE_NM)
         self._trans_sign = None
         LOGGER.debug('_do_set: public_key=%s  ',self._public_key.as_hex())
         LOGGER.info('DecTransactionHandler init DONE PREF=%s',DEC_ADDRESS_PREFIX)
@@ -653,6 +654,9 @@ class DecTransactionHandler(TransactionHandler):
         amount = opts[DATTR_VAL] 
         tcurr = value[DEC_TMSTAMP] 
         emitter = key_to_dgt_addr(value[DEC_EMITTER]) 
+        # get emission info                                                       
+        emiss = cbor.loads(etoken.dec)                                            
+        corp_account = emiss[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_ACC_ADDR] 
         if to in state:
             # destination token                                                                                                                          
             dtoken = DecTokenInfo()                                                                                                                      
@@ -662,7 +666,7 @@ class DecTransactionHandler(TransactionHandler):
             if opts[DEC_CMD_TO_GRP] == DEC_SYNONYMS_GRP:
                 raise InvalidTransaction('Verb is "{}" but alias "{}" not in state'.format(DEC_SEND_OP,to))
             LOGGER.debug('_do_send create destination WALLET={}'.format(to))
-            dtoken = self._new_wallet(0,tcurr)
+            dtoken = self._new_wallet(0, tcurr, opts=self._corp_wallet_proto if corp_account == to else self._wallet_proto)
         dest = cbor.loads(dtoken.dec)
         
 
