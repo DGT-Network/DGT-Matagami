@@ -10,7 +10,7 @@
 "nominal"           :  {"val" : 0.8,"comm"      :  "initial (nominal token price),  (default [0.8 USD])"},
 "nominal_name"      :  {"val" : "USD","comm" :  "Default denomination currency is USD"}, 
 "corporate_account" :  {"val" : {"account" : "0xcfa9fe46e0873050b6819651d6cf6fd5b57e6db4965b","sign_min" : 2},"comm" :  "the corporation's account, to which tokens can be transferred in accordance with the “corporate_share“ parameter"},
-"minting_share"     :  {"val" : 70.0,"comm":  "token share reserved for minting  (default –80%"},
+"minting_share"     :  {"val" : 80.0,"comm":  "token share reserved for minting  (default –80%"},
 "corporate_share"   :  {"val" : 20.0,"comm" :  "the percentage of issued tokens that goes to the account of the corporation"},
 "mint_param"        :  {"val" : {"Umax" : 10, "B2" : 1, "T1" : 1},"comm" :  "{Umax, 𝛽2, 𝜏1} -a set of coefficients that determine the formula for earning a node in exchange for itsSLA indicators"},
 "nBurn"             :  {"val" : 3  ,"comm"        :  "Number of times the Burn command, which allows admin to destroy some numbers of tokens. By default, nBurn= 3"},

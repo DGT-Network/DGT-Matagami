@@ -266,6 +266,9 @@ def do_verbose(dec,verbose,off=True):
             if isinstance(v,dict) and DATTR_VAL in v:                                                                                                      
                 dec[k] = v[DATTR_VAL]                                                                                                                      
             if k in [DEC_TMSTAMP,DEC_LAST_HEART_TMSTAMP,DEC_SPEND_TMSTAMP,DEC_CASHIN_TMSTAMP,DEC_CREATE_TMSTAMP] and not isinstance(dec[k],str):           
-                dec[k] = tmstamp2str(dec[k])                                                                                                               
+                dec[k] = tmstamp2str(dec[k]) 
+        for lock in [DEC_SALE_SHARE,DEC_SALE_TOTAL,DEC_SALE_REST]:
+            if lock in dec :
+                del dec[lock]
                                                                                                                                                            
     return dec                                                                                                                                             
