@@ -1,0 +1,3 @@
+dec emission  -apk /project/peer/keys/admin.priv -ca /project/peer/keys/corp.pub -ck /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub /project/peer/keys/corp3.pub -ems /project/peer/keys/corp.pub /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub --keyfile /project/peer/keys/corp1.priv --corporate_share 20 --minting_share 80 --total_sum 10000000
+dec emission  -apk /project/peer/keys/admin.priv -ca /project/peer/keys/corp.pub -ck /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub /project/peer/keys/corp3.pub -ems /project/peer/keys/corp.pub /project/peer/keys/corp1.pub /project/peer/keys/corp2.pub --keyfile /project/peer/keys/corp2.priv --corporate_share 20 --minting_share 80 --total_sum 10000000
+

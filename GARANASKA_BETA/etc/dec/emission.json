@@ -1,7 +1,7 @@
 {
 "name"              :  {"val" : "DEC","comm" :  "Coin name(DECbydefault)”"},
 "symbol"            :  {"val" : "Đ"  ,"comm" :  "Coin symbol (default Đ, [ Unicode: U+0110])"},
-"total_sum"         :  {"val" : 8589869056, "comm"    :  "the maximum amount of coins by default is  8589869056"},
+"supply_total"      :  {"val" : 8589869056, "comm"    :  "the maximum amount of coins by default is  8589869056"},
 "admin_pub_key"     :  {"val" : "123456","comm" :  "Owner's public key for initial operations"},
 "wait_to_date"      :  {"val" : 123456,"comm" :  "date from which funds can be distributed (see below)"},
 "granularity"       :  {"val" : 7,     "comm"  :  "The minimum fraction (penny) followed by rounding (default is 0.0001)"},
