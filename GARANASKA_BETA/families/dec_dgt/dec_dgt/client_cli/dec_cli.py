@@ -924,10 +924,12 @@ def do_balance_of(args):
         except Exception as ex:
             dec = {}
         
-        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM],
+        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM][DATTR_VAL],
                   }
         if DEC_СORPORATE_REST in dec:
             inf[DEC_СORPORATE_REST] = dec[DEC_СORPORATE_REST]
+        if DEC_СORPORATE_TOTAL in dec:
+            inf[DEC_СORPORATE_TOTAL] = dec[DEC_СORPORATE_TOTAL]
         if False and DEC_SALE_REST in dec:
             inf[DEC_SALE_REST] = dec[DEC_SALE_REST]
         if args.yaml > 0:   
