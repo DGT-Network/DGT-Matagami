@@ -1,0 +1,7 @@
+{
+    "role"        : ["corp_role"],
+    "limit"       : 100001,
+    "spend_period": 1,
+    "token"       : "DEC",
+    "status"      : "on"
+}
