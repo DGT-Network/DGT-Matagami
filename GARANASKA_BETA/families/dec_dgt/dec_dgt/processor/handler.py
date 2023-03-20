@@ -588,7 +588,7 @@ class DecTransactionHandler(TransactionHandler):
         total_sum = dec[DEC_TOTAL_SUM][DATTR_VAL]
         passkey = dec[DEC_PASSKEY][DATTR_VAL] 
         sale_share = dec[DEC_SALE_SHARE][DATTR_VAL]
-        max_sale = total_sum/100*sale_share
+        max_sale = dec[DEC_WALLET_OP][DATTR_VAL][DEC_WALLET_LIMIT]
         total_sale = dec[DEC_SALE_TOTAL]
         tval = value[DATTR_VAL]
         tcurr = value[DEC_TMSTAMP]
