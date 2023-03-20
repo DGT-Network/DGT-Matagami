@@ -928,7 +928,7 @@ def do_balance_of(args):
                   }
         if DEC_СORPORATE_REST in dec:
             inf[DEC_СORPORATE_REST] = dec[DEC_СORPORATE_REST]
-        if DEC_SALE_REST in dec:
+        if False and DEC_SALE_REST in dec:
             inf[DEC_SALE_REST] = dec[DEC_SALE_REST]
         if args.yaml > 0:   
             tname = dec[DEC_NAME][DATTR_VAL] if DEC_NAME in dec else args.asset_type            
