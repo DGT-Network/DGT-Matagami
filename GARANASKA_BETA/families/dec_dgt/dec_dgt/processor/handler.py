@@ -1190,6 +1190,10 @@ class DecTransactionHandler(TransactionHandler):
                 heart[DEC_MINT_REWARD] += total_reward
             else:
                 heart[DEC_MINT_REWARD] = total_reward
+            if total_reward > 0.0:
+                emiss[DEC_MINTING_REST] -= total_reward
+                etoken.dec = cbor.dumps(emiss)                          
+                updated[DEC_EMISSION_KEY] = etoken.SerializeToString()
 
             for key,peer in lucky_peers.items():   
                 if peer[DEC_HEART_BEAT_CURR] > 0: 
@@ -1211,6 +1215,7 @@ class DecTransactionHandler(TransactionHandler):
         updated[DEC_HEART_BEAT_KEY] = htoken.SerializeToString() 
         token.dec = cbor.dumps(dec)               
         updated[name] = token.SerializeToString() 
+       
                                                                                                                         
         return updated                                                                                                  
 

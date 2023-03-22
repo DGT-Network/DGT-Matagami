@@ -627,9 +627,9 @@ class DecClient:
             info[DEC_DID_VAL] = args.did
 
         info[DEC_TMSTAMP] = time.time()
-        to = (DEC_HEART_BEAT_KEY,DEC_EMISSION_GRP,DEFAULT_DID)
-        din = (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)
-        return self._send_transaction(DEC_MINT_OP, (args.pubkey,DEC_WALLET_GRP,args.did), info, to=to, wait=wait if wait else TRANS_TOUT,din=[din])                  
+        to = [(DEC_HEART_BEAT_KEY,DEC_EMISSION_GRP,DEFAULT_DID),(ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)]
+        din = None # (ANY_EMISSION_KEY.format(args.name),DEC_EMISSION_GRP,DEFAULT_DID)
+        return self._send_transaction(DEC_MINT_OP, (args.pubkey,DEC_WALLET_GRP,args.did), info, to=to, wait=wait if wait else TRANS_TOUT,din=din)                  
 
 
     def heart_beat(self,args,wait=None):      
