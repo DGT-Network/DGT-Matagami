@@ -344,7 +344,7 @@ def add_crt_parser(subparsers, parent_parser):
 def do_crt(args):                                                          
                   
     client = _get_client(args)                                             
-    response = client.crt(args, args.wait) # ( value,user_id,args.before,args.after,wait)         
+    response = client.do_crt(args, args.wait) # ( value,user_id,args.before,args.after,wait)         
     print(response)                                                        
 
 def add_wallet_parser(subparsers, parent_parser):                                                                                               

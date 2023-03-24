@@ -200,13 +200,18 @@ class NotaryClient(XcertClient):
             key = _meta_xcert[0]
             if key:
                 info = _meta_xcert[1]
-                if _meta_xcert[2]:                                                               
+                
+                if _meta_xcert[2]: 
+                    logging.info('INIT NOTARY SET XCERT={}'.format(key))                                                              
                     response = self.set(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM) 
-                else:                                                                  
+                else: 
+                    logging.info('INIT NOTARY CRT XCERT={}'.format(key))                                                                 
                     response = self.crt(info,key,XCERT_BEFORE_TM,XCERT_AFTER_TM)
                 ilog = 'INIT NOTARY={} key={} info={} response={}'.format(name,key,info,response)
                 #print(ilog)
                 LOGGER.info(ilog) 
+            else:
+                logging.info('INIT NOTARY NO KEY={}'.format(_meta_xcert))
 
     def crt_obj_secret(self,key,opts,did):
         opts[DEC_DID_VAL] = did                                                  
@@ -368,7 +373,7 @@ class NotaryClient(XcertClient):
 
 
 
-    def crt(self,args,wait=WAIT_DEF):
+    def do_crt(self,args,wait=WAIT_DEF):
         # create user xcert using notary approve 
         # value, wait, user_id = args.value, args.wait, args.user_id
         uid = args.user_id

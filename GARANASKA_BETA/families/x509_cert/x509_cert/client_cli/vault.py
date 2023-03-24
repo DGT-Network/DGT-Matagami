@@ -177,7 +177,8 @@ class Vault(object):
 
 
         #sdown = self._client.sys.step_down()
-        LOGGER.info(f"CONNECTED to={self._vault_url}")
+        
+        LOGGER.info("CONNECTED to={}".format(self._vault_url))
         if False:
             raft_config = self._client.sys.read_raft_config()
             led_status = None #self._client.sys.read_leader_status()
@@ -200,6 +201,8 @@ class Vault(object):
             #self.enable_secrets_engine('kv',"secret/data/")
             # testing only
             #self.create_xcert({'email':"trt@mail.ru"},uid='foo')
+        
+        LOGGER.info("init DONE for={}".format(self._vault_url))
         return self._meta_xcert
     
     def do_meta_xcert(self,info,key,init=False):                                
