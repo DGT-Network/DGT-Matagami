@@ -58,7 +58,7 @@ class Vault(object):
         self._crypto_back = opts.crypto_back
         self._rest = self.init_rest_api()
         self._notary_id =  KEYKEEPER_ID if notary == SEAL_NODE_NM else (NOTARY_LEADER_ID if lead_addr is None else NOTARY_FOLOWER_ID)
-        LOGGER.info(f'Try connect to NOTARY={self._notary} vault={vault_url} CRYPTO={self._crypto_back} REST={self._rest}')
+        LOGGER.info(f'TRY CONNECT TO NOTARY={self._notary} vault={vault_url} CRYPTO={self._crypto_back} REST={self._rest}')
         
         try:
             self._client = hvac.Client(url=self._vault_url,token=self._vault_token,verify=False)

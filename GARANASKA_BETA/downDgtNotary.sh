@@ -9,7 +9,7 @@ export LADDR=""
 export BON=""
 export NREST="OFF"
 export SEAL_ADDR="vault-n1:8220"
-
+export HTTPS_MODE=""
 
 while [ -n "$1" ]
 do

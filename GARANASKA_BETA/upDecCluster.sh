@@ -44,6 +44,7 @@ export DBPASS="pwlrdata"
 export PNM="dgt"
 export KYC=""
 export CRYPTO_BACK="bitcoin"
+export HTTPS_MODE=""
 declare -A segments=(
     [c11]='AA.aa1'
     [c12]='AA.aa2'
@@ -56,6 +57,7 @@ case "$1" in
 -G) GENESIS="Y";echo "Genesis mode." ;;
 -E) export SINGLE="Y";echo "External mode." ;;
 -SC) export SIGNED="--signed_consensus";echo "Signed consensus." ;;
+-HTTPS) export HTTPS_MODE="--http_ssl";echo "Https mode." ;;
 -C) shift;export PCONTROL=$1;echo "Peers control mode." ;;
 -S) echo "Dynamic mode." 
 shift;export PEERING='dynamic';export SEEDS="--seeds $1";echo "--seed $1"

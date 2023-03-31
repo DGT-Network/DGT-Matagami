@@ -48,7 +48,7 @@ DISTRIBUTION_NAME = 'dec-dgt'
 CRYPTO_BACK = "openssl"
 
 DEFAULT_URL = 'http://127.0.0.1:8008'
-
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
@@ -117,7 +117,7 @@ def create_parent_parser(prog_name):
         '-U','--url',                                   
         type=str,                                  
         help='Specify URL of REST API',            
-        default='http://api-dgt-c1-1:8108')
+        default=DGT_API_URL)
     parent_parser.add_argument(                                                         
         '--wait',                                                                
         nargs='?',                                                               
