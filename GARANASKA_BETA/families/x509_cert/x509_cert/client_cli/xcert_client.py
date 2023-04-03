@@ -39,7 +39,8 @@ from x509_cert.client_cli.xcert_attr import *
 LOGGER = logging.getLogger(__name__)
 
 NOTARY_TYPES = [KEYKEEPER_ID,NOTARY_LEADER_ID,NOTARY_FOLOWER_ID,NOTARY_LIST_ID]
-
+HTTPS_SRV_KEY = '/project/peer/keys/http_srv.key'  
+HTTPS_SRV_CERT = '/project/peer/keys/http_srv.crt'
 
 def _sha256(data):
     return hashlib.sha256(data).hexdigest()
@@ -283,11 +284,12 @@ class XcertClient:
 
     def _send_request(self, suffix, data=None, content_type=None, name=None,rest_url=None):
         rest_url = rest_url if rest_url else self.url
-        if rest_url.startswith("http://"):
-            url = "{}/{}".format(rest_url, suffix)
-        else:
-            url = "http://{}/{}".format(rest_url, suffix)
-
+        if rest_url.startswith("http://") or rest_url.startswith("https://"):                                                    
+            url = "{}/{}".format(rest_url, suffix)                                                                               
+        else:                                                                                                                    
+            url = "{}://{}/{}".format('https' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http',rest_url, suffix)      
+        cert = (HTTPS_SRV_CERT, HTTPS_SRV_KEY) if rest_url.startswith("https://") else None                                      
+        
         headers = {}
 
         if content_type is not None:
@@ -295,9 +297,9 @@ class XcertClient:
         #print('_send_request',url)
         try:
             if data is not None:
-                result = requests.post(url, headers=headers, data=data)
+                result = requests.post(url, headers=headers, data=data,verify=False,cert=cert)
             else:
-                result = requests.get(url, headers=headers)
+                result = requests.get(url, headers=headers,verify=False,cert=cert)
                 
 
             if result.status_code == 404:

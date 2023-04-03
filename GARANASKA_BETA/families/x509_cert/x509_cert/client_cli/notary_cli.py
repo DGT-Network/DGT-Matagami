@@ -49,7 +49,8 @@ DISTRIBUTION_NAME = 'x509-cert'
 
 CRYPTO_BACK = 'openssl'
 DEFAULT_URL = 'http://127.0.0.1:8008'
-
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+NOTARY_API_URL = 'https://telebot-dgt:8203' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://telebot-dgt:8203'
 DGT_TOP = os.environ.get('DGT_TOP','dgt')
 XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
 
@@ -123,13 +124,13 @@ def create_parent_parser(prog_name):
     parent_parser.add_argument(                             
         '-U','--url',                                     
         type=str,                                    
-        default="http://api-dgt-c1-1:8108",          
+        default=DGT_API_URL,          
         help='specify URL of REST API')              
     parent_parser.add_argument(                             
         '-NU','--notary_url',                              
         type=str,                                    
         help='Specify URL of NOTARY REST API',       
-        default='http://telebot-dgt:8203'            
+        default=NOTARY_API_URL            
         )
     parent_parser.add_argument(                                                 
         '--wait',                                                        
