@@ -14,52 +14,46 @@
 
 # docker build -f rest_api/Dockerfile -t sawtooth-rest-api-local .
 
-# -------------=== dashboard build ===-------------
+# -------------=== rest_api build ===-------------
 
-FROM ubuntu:bionic
+FROM ubuntu:jammy
 ARG DGT_TOP
-RUN apt-get update && apt-get install gnupg -y
+RUN apt-get update \
+ && apt-get install gnupg -y
 
-RUN echo "deb http://repo.sawtooth.me/ubuntu/ci bionic universe" >> /etc/apt/sources.list \
- && (apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD \
- || apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 8AA7AF1F1091A5FD) \
- && apt-get update
-
-#RUN (apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD \
-# || apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 8AA7AF1F1091A5FD) \
-# && apt-get update
-
-RUN apt-get update && apt-get install -y -q  \
+RUN apt-get update && apt-get install -y -q \
     git \
     python3 \
-    python3-stdeb \
-    python3-pip   
+    python3-stdeb python3-pip
 
 RUN apt-get install -y -q \
     python3-grpcio \
-    python3-grpcio-tools \
     python3-protobuf
 
 RUN apt-get install -y -q \
     python3-aiodns \
-    python3-aiohttp python3-aiohttp-security \
+    python3-aiohttp \
     python3-colorlog \
-    python3-cchardet\
-    python3-pyformance \
     python3-toml \
     python3-yaml \
-    python3-zmq python3-cbor python3-secp256k1 python3-cryptography>=1.7.1
+    python3-zmq  \
+    python3-cryptography>=1.7.1 \
+    python3-cbor graphviz
 
+RUN pip3 install secp256k1
+RUN pip3 install grpcio-tools
+RUN pip3 install pyformance 
+RUN pip3 install chardet
 RUN pip3 install pysha3
-#RUN pip3 install aiohttp_security[session]
-RUN mkdir /var/log/sawtooth
+
+RUN mkdir /var/log/dgt
 
 ENV PATH=$PATH:/project/$DGT_TOP/bin:/project/$DGT_TOP/bgx/bin
 
 WORKDIR /project/$DGT_TOP
 
-CMD echo "\033[0;32m--- Building dgt-dashboard ---\n\033[0m" \
+CMD echo "\033[0;32m--- Building dgt_rest_api ---\n\033[0m" \
  && bin/protogen \
- && cd dashboard \
+ && cd rest-api \
  && python3 setup.py clean --all \
  && python3 setup.py build

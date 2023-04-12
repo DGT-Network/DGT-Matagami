@@ -50,6 +50,7 @@ from dgt_validator.metrics.wrappers import GaugeWrapper
 import os
 from urllib.parse import urlparse
 import http.client
+is_new_async = hasattr(asyncio,"all_tasks")
 
 ASK_MY_IP1 = "icanhazip.com" 
 ASK_MY_IP_PATH1 = "/" #"/ip"
@@ -577,7 +578,8 @@ class _SendReceive(object):
         self._dispatcher.remove_send_message(self._connection)
         self._dispatcher.remove_send_last_message(self._connection)
         yield from self._stop_auth()
-        tasks = list(asyncio.Task.all_tasks(self._event_loop).copy())
+
+        tasks = list(asyncio.all_tasks(self._event_loop).copy()) if is_new_async else list(asyncio.Task.all_tasks(self._event_loop).copy())
         for task in tasks:
             task.cancel()
 
@@ -603,7 +605,8 @@ class _SendReceive(object):
             # is the Auth Task.
             self._event_loop.run_until_complete(self._stop_auth())
         # Cancel all running tasks
-        tasks = list(asyncio.Task.all_tasks(self._event_loop).copy())
+        
+        tasks = list(asyncio.all_tasks(self._event_loop).copy()) if is_new_async else list(asyncio.Task.all_tasks(self._event_loop).copy())
         for task in tasks:
             self._event_loop.call_soon_threadsafe(task.cancel)
         while tasks:

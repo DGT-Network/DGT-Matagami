@@ -17,7 +17,7 @@ import copy
 import logging
 import hashlib
 import cbor
-
+from sys import version_info
 LOGGER = logging.getLogger(__name__)
 
 INIT_ROOT_KEY = ''
@@ -68,7 +68,10 @@ class MerkleDatabase(object):
             node = self._get_by_addr(path)
         except KeyError:
             # pylint: disable=stop-iteration-return
-            raise StopIteration()
+            if version_info.minor > 6:
+                return None
+            else:
+                raise StopIteration()
 
         if path == INIT_ROOT_KEY:
             node = self._get_by_hash(hash_key)
@@ -79,6 +82,7 @@ class MerkleDatabase(object):
         for child in node["c"]:
             for value in self._yield_iter(path + child, node["c"][child]):
                 yield value
+                
 
     def __contains__(self, item):
         """Does the tree contain an address.

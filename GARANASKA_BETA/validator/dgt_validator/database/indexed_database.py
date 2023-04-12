@@ -16,7 +16,7 @@
 import logging
 import os
 import lmdb
-
+from sys  import version_info
 from dgt_validator.database import database
 
 
@@ -324,7 +324,12 @@ class ReferenceChainCursor(database.Cursor):
                         cursor_chain,
                         deserializer)
                 except lmdb.Error:
-                    raise StopIteration()
+                    if version_info.minor > 6:  
+                        return None             
+                    else:                       
+                        raise StopIteration()   
+
+                    
 
         return _WrapperIter()
 

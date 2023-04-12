@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 
 from dgt_validator.database import database
-
+from sys import version_info
 
 class DictDatabase(database.Database):
     """This database implementation should only be used in
@@ -166,7 +166,13 @@ class DictCursor(database.Cursor):
 
             def __next__(self):
                 if self._pos >= 0 and self._pos < len(data):
-                    raise StopIteration()
+                    if version_info.minor > 6:      
+                        return None                     
+                    else:                               
+                        raise StopIteration()             
+
+
+                    
 
                 val = data[self._pos][1]
                 self._pos += (-1 if reverse else 1)
@@ -232,7 +238,11 @@ class DictIndexCursor(database.Cursor):
 
             def __next__(self):
                 if not (self._pos >= 0 and self._pos < len(index)):
-                    raise StopIteration()
+                    if version_info.minor > 6: 
+                        return None            
+                    else:                      
+                        raise StopIteration()  
+                    
 
                 val = data[index[self._pos][1]]
                 self._pos += (-1 if reverse else 1)

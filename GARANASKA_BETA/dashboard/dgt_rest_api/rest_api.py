@@ -111,19 +111,35 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def start_rest_api(host, port, connection, timeout, registry,
+def start_rest_api(host, port,
+                   connection,handler,subscriber_handler,# connection, timeout, registry,
                    client_max_size=None,http_ssl=False):
     """Builds the web app, adds route handlers, and finally starts the app.
     """
-    loop = asyncio.get_event_loop()
-    connection.open()
-    app = web.Application(loop=loop, client_max_size=client_max_size)
-    app.on_cleanup.append(lambda app: connection.close())
+    runners = []
+    async def start_site(app):
+        runner = web.AppRunner(app)
+        runners.append(runner)
+        await runner.setup()
+        site = web.TCPSite(runner, host, port)
+        await site.start()
+
+    async def stop_site(loop):
+        for runner in runners:
+            await loop.run_until_complete(runner.cleanup())
+
+
+    #loop = asyncio.get_event_loop()
+    #connection.open()
+    app = web.Application(#loop=loop, 
+                          client_max_size=client_max_size
+                          )
+    #app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    LOGGER.info('Creating handlers for validator at %s', connection.url)
+    #LOGGER.info('Creating handlers for validator at %s', connection.url)
 
-    handler = DashboardRouteHandler(loop, connection, timeout, registry)
+    #handler = DashboardRouteHandler(loop, connection, timeout, registry)
 
     app.router.add_post('/batches', handler.submit_batches)
     app.router.add_get('/batch_statuses', handler.list_statuses)
@@ -161,7 +177,7 @@ def start_rest_api(host, port, connection, timeout, registry,
     app.router.add_get('/{html}.html', handler.index)
     app.router.add_get('/{script}.js',handler.javascript)
 
-    subscriber_handler = StateDeltaSubscriberHandler(connection)
+    #subscriber_handler = StateDeltaSubscriberHandler(connection)
     app.router.add_get('/subscriptions', subscriber_handler.subscriptions)
     app.on_shutdown.append(lambda app: subscriber_handler.on_shutdown())
 
@@ -174,15 +190,27 @@ def start_rest_api(host, port, connection, timeout, registry,
     else:
         ssl_context = None
 
+    if True:
+        loop = asyncio.get_event_loop()
+        loop.create_task(start_site(app))
+        try:
+            loop.run_forever()
+        except:
+            pass
+        finally:
+            #await stop_site(loop)
+            for runner in runners:
+                loop.run_until_complete(runner.cleanup())
 
-    web.run_app(
-        app,
-        host=host,
-        port=port,
-        access_log=LOGGER,
-        access_log_format='%r: %s status, %b size, in %Tf s'
-        ,ssl_context=ssl_context
-        )
+    else:
+        web.run_app(
+            app,
+            host=host,
+            port=port,
+            access_log=LOGGER,
+            access_log_format='%r: %s status, %b size, in %Tf s'
+            ,ssl_context=ssl_context
+            )
 
 
 def load_rest_api_config(first_config):
@@ -235,7 +263,7 @@ def main():
 
         # connect to validator
         connection = Connection(url)
-
+        connection.open()
         log_config = get_log_config(filename="rest_api_log_config.toml")
 
         # If no toml, try loading yaml
@@ -280,13 +308,14 @@ def main():
                 username=rest_api_config.opentsdb_username,
                 password=rest_api_config.opentsdb_password)
             reporter.start()
-
+        # create handlers
+        subscriber_handler = StateDeltaSubscriberHandler(connection)
+        handler = DashboardRouteHandler(loop, connection, int(rest_api_config.timeout), wrapped_registry)
+        LOGGER.info('Creating handlers for validator at %s', connection.url)
         start_rest_api(
             host,
             port,
-            connection,
-            int(rest_api_config.timeout),
-            wrapped_registry,
+            connection,handler,subscriber_handler,# connection,int(rest_api_config.timeout),wrapped_registry,
             client_max_size=rest_api_config.client_max_size,
             http_ssl=opts.http_ssl > 0)
         # pylint: disable=broad-except

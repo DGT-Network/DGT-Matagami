@@ -1,0 +1,87 @@
+# Copyright 2020 DGT NETWORK INC © Stanislav Parsov
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -------------===  build ===-------------
+# export DEBIAN_FRONTEND=noninteractive &&
+
+FROM ubuntu:jammy
+ARG DGT_TOP
+#ARG DEBIAN_FRONTEND=noninteractive
+#ARG export TZ="Asia/Novosibirsk"
+#FROM python:3.9.5 as python-base
+RUN apt-get update && apt -y upgrade && apt-get install gnupg -y
+
+
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install  --no-install-recommends -y \
+    build-essential \
+    cron            \
+    coreutils  \
+    procps 
+
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y -q \
+    git apt-utils \
+    iputils-ping\
+    net-tools curl gcc autoconf cmake libtool 
+     
+#RUN  export DEBIAN_FRONTEND=noninteractive && apt-get install -y -q  python3-pip    
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y -q python3 && python3 -V
+
+RUN  apt-get install -y -q \
+    python3-stdeb \
+    python3-pip
+
+   
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install -y -q \                                                            
+    python3-colorlog \                                                                  
+    python3-toml \                                                                      
+    python3-yaml \                                                                      
+    python3-zmq \
+    python3-cbor  \
+    python3-cryptography>=1.7.1  
+
+RUN apt-get install -y -q \
+    python3-grpcio \
+    python3-protobuf 
+    
+
+					       
+
+#python3-aiohttp-security python3-grpcio-tools python3-aiohttp python3-aiodns
+#ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+
+RUN pip3 install grpcio-tools
+RUN pip3 install pyformance
+RUN pip3 install chardet
+RUN pip3 install secp256k1
+RUN pip3 install pysha3
+RUN pip3 install aiodns
+RUN pip3 install aiohttp
+RUN pip3 install aiohttp_security[session]
+
+RUN mkdir /var/log/sawtooth
+
+ENV PATH=$PATH:/project/$DGT_TOP/bin:
+
+WORKDIR /project/$DGT_TOP
+
+CMD echo "\033[0;32m--- Building dgt-dashboard ---\n\033[0m" \
+ && bin/protogen \
+ && cd dashboard \
+ && python3 setup.py clean --all \
+ && python3 setup.py build
+
+
+
+
+
+

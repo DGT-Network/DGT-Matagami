@@ -15,6 +15,7 @@
 
 from abc import ABCMeta
 from abc import abstractmethod
+from sys import version_info
 import logging
 LOGGER = logging.getLogger(__name__)
 
@@ -223,7 +224,12 @@ class SchedulerIterator(object):
                 if (self._scheduler.complete(block=False) and
                         self._scheduler.count() == self._next_index or
                         self._scheduler.is_cancelled()):
-                    raise StopIteration()
+                    #if version_info.minor > 6:      
+                    #    return None                     
+                    #else:                               
+                    raise StopIteration()             
+
+                    
 
                 txn = self._scheduler.next_transaction()
                 if txn is not None:

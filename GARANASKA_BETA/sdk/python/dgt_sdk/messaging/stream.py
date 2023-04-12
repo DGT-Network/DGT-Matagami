@@ -32,7 +32,7 @@ from dgt_sdk.messaging.future import FutureCollection
 from dgt_sdk.messaging.future import FutureCollectionKeyError
 from dgt_sdk.messaging.future import FutureResult
 from dgt_sdk.messaging.future import FutureError
-
+is_new_async = hasattr(asyncio,"all_tasks")
 LOGGER = logging.getLogger(__file__)
 
 # Used to send a message to core.TransactionProcessor to reregister with
@@ -146,7 +146,7 @@ class _SendReceiveThread(Thread):
         LOGGER.debug("monitor socket received disconnect event")
         for future in self._futures.future_values():
             future.set_result(FutureError())
-        tasks = list(asyncio.Task.all_tasks(self._event_loop))
+        tasks = list(asyncio.all_tasks(self._event_loop) if is_new_async else asyncio.Task.all_tasks(self._event_loop))
         for task in tasks:
             task.cancel()
         self._event_loop.stop()
@@ -182,7 +182,7 @@ class _SendReceiveThread(Thread):
     def _cancel_tasks_yet_to_be_done(self):
         """Cancels all the tasks (pending coroutines and futures)
         """
-        tasks = list(asyncio.Task.all_tasks(self._event_loop))
+        tasks = list(asyncio.all_tasks(self._event_loop) if is_new_async else asyncio.Task.all_tasks(self._event_loop))
         for task in tasks:
             self._event_loop.call_soon_threadsafe(task.cancel)
         self._event_loop.call_soon_threadsafe(self._done_callback)
@@ -224,8 +224,8 @@ class _SendReceiveThread(Thread):
                 self._monitor_sock = self._sock.get_monitor_socket(
                     zmq.EVENT_DISCONNECTED,
                     addr=self._monitor_fd)
-                self._send_queue = asyncio.Queue(loop=self._event_loop)
-                self._recv_queue = asyncio.Queue(loop=self._event_loop)
+                self._send_queue = asyncio.Queue() if is_new_async else asyncio.Queue(loop=self._event_loop)
+                self._recv_queue = asyncio.Queue() if is_new_async else asyncio.Queue(loop=self._event_loop)
                 if first_time is False:
                     self._recv_queue.put_nowait(RECONNECT_EVENT)
                 with self._condition:

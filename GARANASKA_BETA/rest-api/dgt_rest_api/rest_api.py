@@ -108,18 +108,33 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def start_rest_api(host, port, connection, timeout, registry,
+def start_rest_api(host, port, 
+                   connection,handler,subscriber_handler,# connection, timeout, registry,
                    client_max_size=None,http_ssl=False):
     """Builds the web app, adds route handlers, and finally starts the app.
     """
-    loop = asyncio.get_event_loop()
-    connection.open()
-    app = web.Application(loop=loop, client_max_size=client_max_size)
+    runners = []                                                      
+    async def start_site(app):                                        
+        runner = web.AppRunner(app)                                   
+        runners.append(runner)                                        
+        await runner.setup()                                          
+        site = web.TCPSite(runner, host, port)                        
+        await site.start()                                            
+                                                                      
+    async def stop_site(loop):                                        
+        for runner in runners:                                        
+            await loop.run_until_complete(runner.cleanup()) 
+                      
+    #loop = asyncio.get_event_loop()
+    #connection.open()
+    app = web.Application(#loop=loop,
+                           client_max_size=client_max_size
+                           )
     app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    handler = DgtRouteHandler(loop, connection, timeout, registry)
-    LOGGER.info('Creating handlers for validator at %s', connection.url)
+    #handler = DgtRouteHandler(loop, connection, timeout, registry)
+    #LOGGER.info('Creating handlers for validator at %s', connection.url)
 
     app.router.add_post('/batches', handler.submit_batches)
     app.router.add_get('/batch_statuses', handler.list_statuses)
@@ -175,7 +190,20 @@ def start_rest_api(host, port, connection, timeout, registry,
     else:                                                                                           
         ssl_context = None                                                                          
 
-    web.run_app(
+    if True:                                                                   
+        loop = asyncio.get_event_loop()                                        
+        loop.create_task(start_site(app))                                      
+        try:                                                                   
+            loop.run_forever()                                                 
+        except:                                                                
+            pass                                                               
+        finally:                                                               
+            #await stop_site(loop)                                             
+            for runner in runners:                                             
+                loop.run_until_complete(runner.cleanup())                      
+                                                                               
+    else:                                                                      
+        web.run_app(
         app,
         host=host,
         port=port,
@@ -235,7 +263,7 @@ def main():
             url = rest_api_config.connect
 
         connection = Connection(url)
-
+        connection.open()
         log_config = get_log_config(filename="rest_api_log_config.toml")
 
         # If no toml, try loading yaml
@@ -279,6 +307,18 @@ def main():
                 password=rest_api_config.opentsdb_password)
             reporter.start()
 
+        # create handlers                                                                                                              
+        subscriber_handler = StateDeltaSubscriberHandler(connection)                                                                   
+        handler = DgtRouteHandler(loop, connection, int(rest_api_config.timeout), wrapped_registry)
+        
+        LOGGER.info('Creating handlers for validator at %s', connection.url)                                                           
+        start_rest_api(                                                                                                                
+            host,                                                                                                                      
+            port,                                                                                                                      
+            connection,handler,subscriber_handler,# connection,int(rest_api_config.timeout),wrapped_registry,                          
+            client_max_size=rest_api_config.client_max_size,                                                                           
+            http_ssl=opts.http_ssl > 0)                                                                                                
+        """
         start_rest_api(
             host,
             port,
@@ -287,6 +327,7 @@ def main():
             wrapped_registry,
             client_max_size=rest_api_config.client_max_size,
             http_ssl=opts.http_ssl > 0)
+        """
         # pylint: disable=broad-except
     except Exception as e:
         LOGGER.exception(e)

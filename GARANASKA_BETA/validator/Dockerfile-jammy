@@ -12,52 +12,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# docker build -f sdk/examples/intkey_python/Dockerfile -t intkey-tp-python-local .
+# docker build -f validator/Dockerfile -t validator-dgt .
 
-# -------------=== intkey-tp-python build ===-------------
+# -------------===  build ===-------------
 
-FROM ubuntu:bionic
+FROM ubuntu:jammy
 ARG DGT_TOP
 RUN apt-get update \
  && apt-get install gnupg -y
 
-RUN echo "deb http://repo.sawtooth.me/ubuntu/ci bionic universe" >> /etc/apt/sources.list \
- && (apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD \
- || apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 8AA7AF1F1091A5FD) \
- && apt-get update
-
 RUN apt-get update && apt-get install -y -q \
     git \
+    iputils-ping\
+    net-tools unzip \
     python3 \
     python3-stdeb python3-pip
 
 RUN apt-get install -y -q \
     python3-grpcio \
-    python3-grpcio-tools \
-    python3-protobuf 
-
-RUN apt-get update && apt-get install -y -q  libzmq5
+    python3-protobuf
 
 RUN apt-get install -y -q \
+    libssl-dev \
+    openssl \
+    pkg-config \
     python3-cbor \
     python3-colorlog \
+    python3-cryptography>=1.7.1 \
+    python3-dev \
+    python3-lmdb \
+    python3-netifaces \
     python3-toml \
     python3-yaml \
-    python3-zmq   \
-    python3-secp256k1 python3-cryptography>=1.7.1
-     	    
+    python3-zmq 
+     
+      
+#  python3-graphviz
+RUN pip3 install secp256k1
+RUN pip3 install grpcio-tools
+RUN pip3 install pyformance
 RUN pip3 install pysha3
+
+ENV PATH=$PATH:/project/$DGT_TOP/bin:/protoc3/bin
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+RUN mkdir -p /etc/dgt/keys
+RUN mkdir -p /var/lib/dgt
 RUN mkdir -p /var/log/dgt
 
-ENV PATH=$PATH:/project/$DGT_TOP/bin:/project/$DGT_TOP/bgx/bin:
+#ENV PATH=$PATH:/project/$DGT_TOP/bin
 
 WORKDIR /project/$DGT_TOP
 
-#RUN pip3 install asyncio-nats-client
-#RUN pip3 install pyorient
-
-CMD echo "\033[0;32m--- Building bgt-python ---\n\033[0m" \
+CMD echo "\033[0;32m--- Building validator ---\n\033[0m" \
  && bin/protogen \
- && cd families/bgt_python \
+ && cd validator \
+ && if [ -d "debian" ]; then rm -rf debian; fi \
  && python3 setup.py clean --all \
- && python3 setup.py build
+ && python3 setup.py --command-packages=stdeb.command debianize \
+ && if [ -d "packaging/ubuntu" ]; then cp -R packaging/ubuntu/* debian/; fi 
+ 

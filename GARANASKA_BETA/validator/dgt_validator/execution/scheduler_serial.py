@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-
+#from  sys import version_info
 from collections import deque
 from collections import namedtuple
 from itertools import filterfalse
@@ -249,7 +249,11 @@ class SerialScheduler(Scheduler):
                 except IndexError:
                     if self._final:
                         self._condition.notify_all()
-                        raise StopIteration()
+                        #if version_info.minor > 6:      
+                        #    return None                     
+                        #else:                               
+                        raise StopIteration()             
+                        
                     return None
                 # Handle this transaction being invalid based on a
                 # dependency.

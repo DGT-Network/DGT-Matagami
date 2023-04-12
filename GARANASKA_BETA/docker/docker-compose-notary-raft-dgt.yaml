@@ -31,6 +31,7 @@ services:
     - DGT_TOP=${DGT_TOP}
     - CRYPTO_BACK=${CRYPTO_BACK}
     - BOT_TOKEN=${BOT_TOKEN}
+    - HTTPS_MODE=${HTTPS_MODE}
     - LA=${LA}
     volumes:
       - ..:/project/${DGT_TOP}
@@ -48,7 +49,7 @@ services:
         echo ##dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR} ${LA} ${REST_API}
         rm -f /project/peer/logs/bgt-bot*.log /project/peer/logs/rest-api-*.log ;
         notary init n${V}  -va http://vault-n${V}:${VPORT} ${LA}
-        if [ ${NREST} == 'ON' ]; then (cd notary-api;dgt-notary-api -vv  --bind telebot-dgt-n${V}:${NAPI} ${REST_API} -cb ${CRYPTO_BACK}); else echo 'OFF NOTARY REST '; fi;
+        if [ ${NREST} == 'ON' ]; then (cd notary-api;dgt-notary-api -vv  --bind telebot-dgt-n${V}:${NAPI} ${REST_API} -cb ${CRYPTO_BACK} ${HTTPS_MODE}); else echo 'OFF NOTARY REST '; fi;
         cd telebot
         python3 setup.py clean --all
         python3 setup.py build
@@ -71,6 +72,7 @@ services:
     - DGT_HOME=/project/peer                     
     - DGT_TOP=${DGT_TOP}                         
     - CRYPTO_BACK=${CRYPTO_BACK}
+    - HTTPS_MODE=${HTTPS_MODE}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_notaries/n${V}/etc:/vault/config
@@ -90,13 +92,14 @@ services:
       - VAULT_ADDR=http://vault-n${V}:${VPORT}
       - VAULT_API_ADDR=http://vault-n${V}:${VPORT}
       - VAULT_ADDRESS=http://vault-n${V}:${VPORT}
+      - HTTPS_MODE=${HTTPS_MODE}
     container_name: vault-n${V}
     restart: unless-stopped
     cap_add:
       - IPC_LOCK  # -dev echo TOKEN  $$(cat /project/peer/etc/unseal.token) CONF= $$(cat /vault/config/vault.hcl);
     command: |                                                                                                                                                   
       sh -c "
-        echo VAULT::LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK} ; 
+        echo VAULT::LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK};cr_cert.sh /project/peer/keys/http_srv.crt /project/peer/keys/http_srv.key; 
         dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR}  ${LA} ${REST_API} 
         export VAULT_TOKEN1=$$(cat /project/peer/etc/unseal.token) ;vault server  -log-level=debug -config=/vault/config/vault.hcl;
         tail -f /dev/null  

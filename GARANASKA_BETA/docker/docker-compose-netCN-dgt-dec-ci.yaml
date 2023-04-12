@@ -21,13 +21,13 @@ services:
   settings-tp:
     build:
       context: ..
-      dockerfile: docker/settings/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: settings-tp-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     networks: 
     - network1
     environment:
@@ -54,13 +54,13 @@ services:
   bgt-tp-python:
     build:
       context: ..
-      dockerfile: families/bgt_python/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: bgt-tp-python-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
@@ -88,13 +88,13 @@ services:
   dec-tp:
     build:
       context: ..
-      dockerfile: families/dec_dgt/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: dec-tp-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
@@ -122,13 +122,13 @@ services:
   stuff-tp:
     build:
       context: ..
-      dockerfile: families/smart_stuff/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: stuff-tp-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
@@ -156,13 +156,13 @@ services:
   xcert-tp:
     build:
       context: ..
-      dockerfile: families/x509_cert/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: xcert-tp-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
@@ -191,13 +191,13 @@ services:
   client:
     build:
       context: ..
-      dockerfile: docker/shell/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: shell-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     networks:
     - network1
     environment:
@@ -223,13 +223,13 @@ services:
   validator-dgt:
     build:
       context: ..
-      dockerfile: validator/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: validator-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     networks:
     - network1
     environment:
@@ -284,13 +284,13 @@ services:
   dgt-api:
     build:
       context: ..
-      dockerfile: rest-api/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy   
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: rest-api-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/${DGT_TOP}/clusters/${C}/${PNM}${N}
     - PEER_HOME=/project/peer
@@ -322,13 +322,13 @@ services:
   dgt-pbft:
     build:
       context: ..
-      dockerfile: consensus/dgt_pbft/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: pbft-${PNM}-${DISTR}:${ISOLATION_ID}
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     networks:
     - network1
     environment:

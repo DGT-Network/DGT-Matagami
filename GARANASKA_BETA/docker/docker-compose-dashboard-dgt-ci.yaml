@@ -19,13 +19,13 @@ services:
   dashboard-dgt:
     build:
       context: ..
-      dockerfile: dashboard/Dockerfile-${DISTR}
+      dockerfile: docker/Dockerfile-${DISTR}
       args:
         - http_proxy
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: dashboard-dgt
+    image: ${PNM}-common-${DISTR}:${ISOLATION_ID}
     environment:
     - DGT_HOME=/project/peer
     - CRYPTO_BACK=${CRYPTO_BACK}

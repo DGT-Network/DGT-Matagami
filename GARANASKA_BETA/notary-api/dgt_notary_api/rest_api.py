@@ -56,6 +56,7 @@ NOTARY_DB_FILENAME = '/project/peer/data/notary.lmdb'
 
 HTTPS_SRV_KEY = '/project/peer/keys/http_srv.key'
 HTTPS_SRV_CERT = '/project/peer/keys/http_srv.crt'
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def deserialize_data(encoded):
     return cbor.loads(encoded)
@@ -98,7 +99,7 @@ def parse_args(args):
         '--url',                                                    
         type=str,                                                   
         help="identify the URL of a validator's REST API",          
-        default='http://api-dgt-c1-1:8108') 
+        default=DGT_API_URL) 
     parser.add_argument(                         
         '-cb', '--crypto-back',                  
         type=str,                                

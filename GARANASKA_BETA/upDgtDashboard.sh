@@ -1,6 +1,7 @@
 # START DGT DASHBOARD
 export CRYPTO_BACK="openssl"
 export HTTPS_MODE=""
+export PNM="dgt"
 while [ -n "$1" ]
 do
 case "$1" in
@@ -13,4 +14,4 @@ esac
 shift
 done
 
-docker-compose -f docker/docker-compose-dashboard-dgt.yaml $@
+docker-compose -f docker/docker-compose-dashboard-dgt-ci.yaml $@

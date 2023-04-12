@@ -17,7 +17,7 @@ import ctypes
 import logging
 from enum import IntEnum
 from dgt_validator.consensus.proxy import UnknownBlock
-
+from sys  import version_info
 LOGGER = logging.getLogger(__name__)
 
 #from dgt_validator.ffi import OwnedPointer
@@ -236,7 +236,13 @@ class _BlockIterator:
     def __next__(self):
         if not self._c_iter_ptr:
             LOGGER.debug("_BlockIterator: StopIteration ")
-            raise StopIteration()
+            if version_info.minor > 6: 
+                return None            
+            else:                      
+                raise StopIteration()  
+
+
+            
         #LOGGER.debug("_BlockIterator: __next__ ptr=%s",self._c_iter_ptr)
         block_id = next(self._c_iter_ptr)
         #LOGGER.debug("_BlockIterator: next=%s",block_id)
@@ -250,7 +256,12 @@ class _BlockIterator:
                 del self._block_store[block_id]
         else:
             LOGGER.debug("_BlockIterator:not in store  StopIteration ")
-            raise StopIteration()
+            if version_info.minor > 6:  
+                return None             
+            else:                       
+                raise StopIteration()   
+
+            
 
         return block 
 
