@@ -12,32 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# docker build -f validator/Dockerfile -t validator-dgt .
+# docker build -f docker/Dockerfile -t dgt-common-jammy
 
 # -------------===  build ===-------------
 
 FROM ubuntu:jammy
 ARG DGT_TOP
-RUN apt-get update \
- && apt-get install gnupg -y
+#RUN apt-get update && apt-get install gnupg -y
 
-RUN apt-get update && apt-get install -y -q \
-    git \
-    iputils-ping\
-    net-tools unzip \
-    python3 \
-    python3-stdeb python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+# git python3-stdeb net-tools pkg-config
+RUN apt-get update && apt-get install --no-install-recommends -y -q \
+    iputils-ping \
+    unzip         \
+    openssl
 
-RUN apt-get install -y -q \
+RUN apt-get install --no-install-recommends -y -q \
+    python3       \
+    python3-pip   \
     python3-grpcio \
-    python3-protobuf \
-    && rm -rf /var/lib/apt/lists/*
+    python3-protobuf 
+    
 
-RUN apt-get install -y -q \
-    libssl-dev \
-    openssl \
-    pkg-config \
+RUN apt-get install --no-install-recommends -y -q \
     python3-cbor \
     python3-colorlog \
     python3-cryptography>=1.7.1 \
@@ -47,30 +43,25 @@ RUN apt-get install -y -q \
     python3-toml \
     python3-yaml \
     python3-zmq \
+    python3-requests \
+    python3-sha3 \
     && rm -rf /var/lib/apt/lists/*
      
       
-#  python3-graphviz
+#  python3-graphviz libssl-dev
 RUN pip3 install secp256k1
 RUN pip3 install grpcio-tools
 RUN pip3 install pyformance
 RUN pip3 install chardet
-RUN pip3 install aiodns
-RUN pip3 install aiohttp
-RUN pip3 install aiohttp_security[session]
+RUN pip3 install aiodns aiohttp aiohttp_security[session]
 
-
-RUN pip3 install pysha3
-
-ENV PATH=$PATH:/project/$DGT_TOP/bin:/protoc3/bin
+ENV PATH=$PATH:/project/$DGT_TOP/bin:
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN mkdir -p /etc/dgt/keys
 RUN mkdir -p /var/lib/dgt
 RUN mkdir -p /var/log/dgt
-
-#ENV PATH=$PATH:/project/$DGT_TOP/bin
 
 WORKDIR /project/$DGT_TOP
 
