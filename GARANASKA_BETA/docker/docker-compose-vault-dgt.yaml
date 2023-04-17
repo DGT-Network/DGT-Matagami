@@ -25,7 +25,7 @@ services:
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: vault-dgt
+    image: vault-dgt-${DISTR}
     environment:
     - DGT_HOME=/project/peer
     - DGT_TOP=${DGT_TOP}

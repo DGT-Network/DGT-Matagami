@@ -141,9 +141,9 @@ def _query_index_keys(req):
     keys = [val.encode() for key,val in req.items() if key == 'qid']
     return keys                              
 
-def start_rest_api(host, port, connection, timeout, registry,client_max_size=None,vault=None,http_ssl=False):
+def start_rest_api(host, port, connection,handler,subscriber_handler,client_max_size=None,http_ssl=False):
     """Builds the web app, adds route handlers, and finally starts the app.
-    """
+    
     notary_db = IndexedDatabase(                                                                                                     
             NOTARY_DB_FILENAME,                                                                                                      
             serialize_data,                                                                                                        
@@ -161,14 +161,30 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
         #notary_db.delete("ROOT")
     else:
         notary_db.put("ROOT", {'qid' : 'xxx'}) 
+    """
+    runners = []                                                 
+    async def start_site(app,ssl_ctx):                                   
+        runner = web.AppRunner(app)                              
+        runners.append(runner)                                   
+        await runner.setup()                                     
+        site = web.TCPSite(runner, host, port,ssl_context=ssl_ctx)                   
+        await site.start()                                       
+                                                                 
+    async def stop_site(loop):                                   
+        for runner in runners:                                   
+            await loop.run_until_complete(runner.cleanup())      
 
-    loop = asyncio.get_event_loop()
-    connection.open()
-    app = web.Application(loop=loop, client_max_size=client_max_size)
+
+
+    #loop = asyncio.get_event_loop()
+    #connection.open()
+    app = web.Application(#loop=loop, 
+                          client_max_size=client_max_size
+                          )
     app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
-    handler = NotaryRouteHandler(loop, connection, timeout, registry,vault=vault,db=notary_db)
+    #handler = NotaryRouteHandler(loop, connection, timeout, registry,vault=vault,db=notary_db)
     LOGGER.info('Creating handlers for validator at %s', connection.url)
     app.router.add_get('/show', handler.show_xcert)
     app.router.add_get('/list', handler.list_xcert)
@@ -226,7 +242,7 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
         app.router.add_get('/global_transactions', handler.get_global_transactions)
         app.router.add_post('/transactions/add_funds', handler.post_add_funds)
     #
-    subscriber_handler = StateDeltaSubscriberHandler(connection)
+    #subscriber_handler = StateDeltaSubscriberHandler(connection)
     app.router.add_get('/subscriptions', subscriber_handler.subscriptions)
     app.on_shutdown.append(lambda app: subscriber_handler.on_shutdown())
 
@@ -238,7 +254,19 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
     else:
         ssl_context = None
 
+    loop = asyncio.get_event_loop()                               
+    loop.create_task(start_site(app,ssl_context))                             
+    try:                                                          
+        loop.run_forever()                                        
+    except:                                                       
+        pass                                                      
+    finally:                                                      
+        #await stop_site(loop)                                    
+        for runner in runners:                                    
+            loop.run_until_complete(runner.cleanup())             
 
+
+    """
     web.run_app(
         app,
         host=host,
@@ -246,7 +274,7 @@ def start_rest_api(host, port, connection, timeout, registry,client_max_size=Non
         access_log=LOGGER,
         access_log_format='%r: %s status, %b size, in %Tf s'
         ,ssl_context=ssl_context)
-
+    """
 
 def load_rest_api_config(first_config):
     default_config = load_default_rest_api_config()
@@ -299,7 +327,7 @@ def main():
             url = rest_api_config.connect
 
         connection = Connection(url)
-
+        connection.open()
         log_config = get_log_config(filename="rest_api_log_config.toml")
 
         # If no toml, try loading yaml
@@ -349,14 +377,32 @@ def main():
             sys.exit(1)                           
 
         vault.init_dec(NOTARY_PRIV_KEY)
+        # database 
+        notary_db = IndexedDatabase(                                                 
+                NOTARY_DB_FILENAME,                                                  
+                serialize_data,                                                      
+                deserialize_data,                                                    
+                indexes={'query': _query_index_keys},                                
+                flag='c',                                                            
+                _size=NOTARY_DB_SIZE,                                                
+                dupsort=True                                                         
+                )                                                                    
+        if "ROOT" in notary_db:                                                      
+            LOGGER.info('LIST REQUEST {}...\n'.format(notary_db.keys()))             
+            with notary_db.cursor() as curs:                                         
+                for val in curs.iter():                                              
+                    LOGGER.info('VALUES=%s',val)                                     
+            #notary_db.delete("ROOT")                                                
+        else:                                                                        
+            notary_db.put("ROOT", {'qid' : 'xxx'})                                   
+
+        subscriber_handler = StateDeltaSubscriberHandler(connection)
+        handler = NotaryRouteHandler(loop, connection, int(rest_api_config.timeout), wrapped_registry,vault=vault,db=notary_db)
         start_rest_api(
             host,
             port,
-            connection,
-            int(rest_api_config.timeout),
-            wrapped_registry,
+            connection,handler,subscriber_handler,# connection,int(rest_api_config.timeout),wrapped_registry,
             client_max_size=rest_api_config.client_max_size,
-            vault = vault,
             http_ssl=opts.http_ssl > 0)
         # pylint: disable=broad-excpt
     except Exception as e:

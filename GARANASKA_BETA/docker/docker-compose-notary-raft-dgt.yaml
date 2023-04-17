@@ -25,7 +25,7 @@ services:
         - https_proxy
         - no_proxy
         - DGT_TOP=${DGT_TOP}
-    image: telebot-dgt
+    image: telebot-dgt-${DISTR}
     environment:
     - DGT_HOME=/project/peer
     - DGT_TOP=${DGT_TOP}
@@ -67,7 +67,7 @@ services:
         - https_proxy                               
         - no_proxy                                  
         - DGT_TOP=${DGT_TOP}  
-    image: vault-dgt
+    image: vault-dgt-${DISTR}
     environment:                                 
     - DGT_HOME=/project/peer                     
     - DGT_TOP=${DGT_TOP}                         
@@ -99,8 +99,9 @@ services:
       - IPC_LOCK  # -dev echo TOKEN  $$(cat /project/peer/etc/unseal.token) CONF= $$(cat /vault/config/vault.hcl);
     command: |                                                                                                                                                   
       sh -c "
-        echo VAULT::LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK};cr_cert.sh /project/peer/keys/http_srv.crt /project/peer/keys/http_srv.key; 
+        echo VAULT::LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK}; 
         dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR}  ${LA} ${REST_API} 
+        cr_cert.sh /project/peer/keys/http_srv.crt /project/peer/keys/http_srv.key;
         export VAULT_TOKEN1=$$(cat /project/peer/etc/unseal.token) ;vault server  -log-level=debug -config=/vault/config/vault.hcl;
         tail -f /dev/null  
       "                                                                                                                                                          

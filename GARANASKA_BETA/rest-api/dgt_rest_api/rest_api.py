@@ -114,11 +114,11 @@ def start_rest_api(host, port,
     """Builds the web app, adds route handlers, and finally starts the app.
     """
     runners = []                                                      
-    async def start_site(app):                                        
+    async def start_site(app,ssl_context):                                        
         runner = web.AppRunner(app)                                   
         runners.append(runner)                                        
         await runner.setup()                                          
-        site = web.TCPSite(runner, host, port)                        
+        site = web.TCPSite(runner, host, port,ssl_context=ssl_context)                        
         await site.start()                                            
                                                                       
     async def stop_site(loop):                                        
@@ -192,7 +192,7 @@ def start_rest_api(host, port,
 
     if True:                                                                   
         loop = asyncio.get_event_loop()                                        
-        loop.create_task(start_site(app))                                      
+        loop.create_task(start_site(app,ssl_context))                                      
         try:                                                                   
             loop.run_forever()                                                 
         except:                                                                
