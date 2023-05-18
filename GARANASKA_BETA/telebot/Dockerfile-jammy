@@ -52,7 +52,7 @@ RUN pip3 install secp256k1
 RUN pip3 install grpcio-tools
 RUN pip3 install pyformance
 RUN pip3 install chardet
-RUN pip3 install aiodns aiohttp aiohttp_security[session]
+RUN pip3 install aiodns aiohttp aiohttp_security[session] oauthlib
 RUN pip3  install pytelegrambotapi
 #RUN pip3 install dialogflow
 RUN pip3 install google-cloud-dialogflow

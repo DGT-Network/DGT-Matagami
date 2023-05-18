@@ -110,11 +110,6 @@ def add_load_parser(subparsers, parent_parser):
         help='location of input file',
         default='batches.bgt')
 
-    parser.add_argument(
-        '-U', '--url',
-        type=str,
-        help='url for the REST API',
-        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--auth-user',

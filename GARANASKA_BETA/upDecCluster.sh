@@ -45,6 +45,7 @@ export PNM="dgt"
 export KYC=""
 export CRYPTO_BACK="bitcoin"
 export HTTPS_MODE=""
+export ACCESS_TOKEN=""
 export FCOMPOSE="docker-compose-netCN-dgt-dec-ci.yaml"
 declare -A segments=(
     [c11]='AA.aa1'
@@ -60,6 +61,7 @@ case "$1" in
 -MI) export FCOMPOSE="docker-compose-netCN-dgt-dec.yaml";echo "Many images." ;;
 -SC) export SIGNED="--signed_consensus";echo "Signed consensus." ;;
 -HTTPS) export HTTPS_MODE="--http_ssl";echo "Https mode." ;;
+-ATOK) export ACCESS_TOKEN="--access_token";echo "Token mode." ;;
 -C) shift;export PCONTROL=$1;echo "Peers control mode." ;;
 -S) echo "Dynamic mode." 
 shift;export PEERING='dynamic';export SEEDS="--seeds $1";echo "--seed $1"

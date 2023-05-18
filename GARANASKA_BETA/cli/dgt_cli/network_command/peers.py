@@ -70,7 +70,8 @@ def do_peers(args):
 def _do_peers_list(args):
     urls = split_comma_append_args(args.urls)
     users = split_comma_append_args(args.users)
-    clients = make_rest_apis(urls, users)
+    print("_do_peers_list",args)
+    clients = make_rest_apis(urls, users,token=args.access_token)
 
     print(
         json.dumps(
@@ -115,7 +116,7 @@ def _add_graph_parser(parser, parent_parser):
 def _do_peers_graph(args):
     urls = split_comma_append_args(args.urls)
     users = split_comma_append_args(args.users)
-    clients = make_rest_apis(urls, users)
+    clients = make_rest_apis(urls, users,token=args.access_token)
 
     status_dict = _get_peer_endpoints(clients)
 

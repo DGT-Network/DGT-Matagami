@@ -134,7 +134,7 @@ def start_rest_api(host, port,
     app = web.Application(#loop=loop, 
                           client_max_size=client_max_size
                           )
-    #app.on_cleanup.append(lambda app: connection.close())
+    app.on_cleanup.append(lambda app: connection.close())
 
     # Add routes to the web app
     #LOGGER.info('Creating handlers for validator at %s', connection.url)

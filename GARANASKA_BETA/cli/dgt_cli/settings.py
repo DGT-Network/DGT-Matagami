@@ -18,7 +18,7 @@ import csv
 import hashlib
 import json
 import sys
-
+import os 
 import yaml
 
 from dgt_cli.exceptions import CliException
@@ -34,6 +34,7 @@ _MIN_PRINT_WIDTH = 15
 _MAX_KEY_PARTS = 4
 _ADDRESS_PART_SIZE = 16
 
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def add_settings_parser(subparsers, parent_parser):
     """Creates the args parser needed for the settings command and its
@@ -66,7 +67,7 @@ def add_settings_parser(subparsers, parent_parser):
         '--url',
         type=str,
         help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
+        default=DGT_API_URL)
 
     list_parser.add_argument(
         '--filter',
@@ -79,6 +80,11 @@ def add_settings_parser(subparsers, parent_parser):
         default='default',
         choices=['default', 'csv', 'json', 'yaml'],
         help='choose the output format')
+    list_parser.add_argument(          
+        '--access_token','-atok',        
+        type=str,                        
+        default=None,                    
+        help='Access token')             
 
 
 def do_settings(args):
@@ -91,7 +97,7 @@ def do_settings(args):
 def _do_settings_list(args):
     """Lists the current on-chain configuration values.
     """
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
     state = rest_client.list_state(subtree=SETTINGS_NAMESPACE)
 
     prefix = args.filter

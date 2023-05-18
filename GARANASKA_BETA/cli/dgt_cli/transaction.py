@@ -66,7 +66,7 @@ def do_transaction(args):
         Args:
             args: The parsed arguments sent to the command at runtime
     """
-    rest_client = RestClient(args.url, args.user)
+    rest_client = RestClient(args.url, args.user,token=args.access_token)
 
     if args.subcommand == 'list':
         transactions = rest_client.list_transactions()

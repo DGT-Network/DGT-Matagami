@@ -84,7 +84,7 @@ def do_block(args):
         Args:
             args: The parsed arguments sent to the command at runtime
     """
-    rest_client = RestClient(args.url, args.user)
+    rest_client = RestClient(args.url, args.user,token=args.access_token)
 
     if args.subcommand == 'list':
         block_generator = rest_client.list_blocks()

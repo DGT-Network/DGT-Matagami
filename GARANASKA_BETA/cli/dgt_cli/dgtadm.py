@@ -32,7 +32,7 @@ from dgt_cli.admin_command.node import do_node,do_notary
 
 
 DISTRIBUTION_NAME = 'dgtadm'
-
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def create_parser(prog_name):
     parent_parser = create_parent_parser(prog_name)

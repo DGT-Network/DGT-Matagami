@@ -12,28 +12,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-
+import  os
 import json
 from base64 import b64encode
 from http.client import RemoteDisconnected
 import requests
+
 # pylint: disable=no-name-in-module,import-error
 # needed for the google.protobuf imports to pass pylint
 from google.protobuf.message import Message as BaseMessage
 
 from dgt_cli.exceptions import CliException
+from dgt_sdk.oauth.requests import OAuth2Session
+
+
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+HTTPS_SRV_KEY = '/project/peer/keys/http_srv.key'  
+HTTPS_SRV_CERT = '/project/peer/keys/http_srv.crt'
+
+
 
 
 class RestClient:
-    def __init__(self, base_url=None, user=None):
-        self._base_url = base_url or 'http://api-dgt-c1-1:8108'
-
+    def __init__(self, base_url=None, user=None,token=None,client=None,scopes=None):
+        self._base_url = base_url or DGT_API_URL
+        
         if user:
             b64_string = b64encode(user.encode()).decode()
             self._auth_header = 'Basic {}'.format(b64_string)
         else:
             self._auth_header = None
 
+        # request oauth client   
+        
+        self._scopes = scopes 
+        self._client = client                                                                   
+        self._username = None
+        self._password = None
+        self._cert = (HTTPS_SRV_CERT, HTTPS_SRV_KEY) if self._base_url.startswith("https://") else None
+        if user:
+            up = user.split(':')
+            self._username = up[0]
+            if len(up) > 1:
+                self._password = up[1]
+
+        
+        self._requests = OAuth2Session(client=None, 
+                              client_id=client if token is None else None,                       
+                              scope =scopes if token is None else None,                             
+                              token = {'access_token': token} if token is not None else None, 
+                              grant_type = 'password'  if token is None else None,
+                              cert=self._cert                         
+                              #redirect_uri='http://127.0.0.1:8003/calendar',                 
+                              #**dgt_data                                                     
+                              )                                                               
     def list_blocks(self, limit=None):
         """Return a block generator.
 
@@ -59,6 +91,29 @@ class RestClient:
 
     def get_dag(self,head_id):
         return self._get('/dag/' + head_id)['data']
+
+    def get_token(self):
+        dgt_data = {     #'code': 'json',                                              
+                         #'grant_type': 'password', #'authorization_code',             
+                         # 'username': 'john',                                         
+                         #'password':  'doe',                                          
+                         'scope'  :  self._scopes                                            
+                         #'redirect_uri': 'http://127.0.0.1:8003/calendar'             
+                }                                                                      
+        turl = '{}/token'.format(self._base_url)
+        #print("TURL",turl)
+        resp = self._requests.fetch_token(
+                    token_url= turl, 
+                    code='json',                                                                                     
+                    #auth=auth,                                                                                      
+                    client_id=self._client,                                                                             
+                    #client_secret=client_secret,                                                                    
+                    username=self._username ,                                                                              
+                    password=self._password ,
+                    verify=False,cert=self._cert,                                                                              
+                    **dgt_data                                                                                       
+                 )                                                                                                                             
+        return resp     
 
     def get_status(self):
         return self._get('/status')['data']
@@ -192,11 +247,11 @@ class RestClient:
 
         try:
             if method == 'POST':
-                result = requests.post(
-                    url, params=params, data=data, headers=headers)
+                result = self._requests.post(
+                    url, params=params, data=data, headers=headers,verify=False)
             elif method == 'GET':
-                result = requests.get(
-                    url, params=params, data=data, headers=headers)
+                result = self._requests.get(
+                    url, params=params, data=data, headers=headers,verify=False)
             result.raise_for_status()
             return (result.status_code, result.json())
         except requests.exceptions.HTTPError as e:

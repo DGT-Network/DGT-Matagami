@@ -27,6 +27,7 @@ from dgt_signing import create_context
 from dgt_signing import CryptoFactory,key_to_dgt_addr,DGT_ADDR_PREF
 from dgt_signing import ParseError
 from dgt_signing import test_eth_list
+from dgt_sdk.oauth.requests import OAuth2Session
 from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
@@ -44,6 +45,7 @@ from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM
 TRANS_TOUT = 4
 HTTPS_SRV_KEY = '/project/peer/keys/http_srv.key'  
 HTTPS_SRV_CERT = '/project/peer/keys/http_srv.crt'
+
 
 """
 { 'emitter': '3056301006072a8648ce3d020106052b8104000a034200045976931dfc659f1eafbda1698c78fa55ff4502bc71fbfa663468d49e894a1a468d0608873b08de6ff64b11fb0398223ec09674e7e83a20ba6d37580370e56fc4',
@@ -103,7 +105,7 @@ def is_alias(name):
 
 
 class DecClient:
-    def __init__(self, url=None, keyfile=None,signer=None,backend=None):
+    def __init__(self, url=None, keyfile=None,signer=None,backend=None,token=None):
         self.url = url
 
         if keyfile is not None:
@@ -129,6 +131,17 @@ class DecClient:
             self._context = signer.context
         else:
             self._context = create_context('secp256k1',backend=backend)
+        # request oauth client
+        
+        self._requests = OAuth2Session(token = {'access_token': token} if token is not None else None)                                                              
+
+
+
+
+
+
+
+
 
     def get_pub_key(self,vkey):
         # try first open file with private key
@@ -1181,8 +1194,7 @@ class DecClient:
             url = "{}/{}".format(self.url, suffix)
         else:
             url = "{}://{}/{}".format('https' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http',self.url, suffix)
-        cert = (HTTPS_SRV_CERT, HTTPS_SRV_KEY) if self.url.startswith("https://") else None
-        #cert = None
+        
         headers = {}
 
         if content_type is not None:
@@ -1190,9 +1202,9 @@ class DecClient:
 
         try:
             if data is not None:
-                result = requests.post(url, headers=headers, data=data,verify=False,cert=cert)
+                result = self._requests.post(url, headers=headers, data=data,verify=False)
             else:
-                result = requests.get(url, headers=headers,verify=False,cert=cert) # cert=(HTTPS_SRV_CERT, HTTPS_SRV_KEY)
+                result = self._requests.get(url, headers=headers,verify=False) 
 
             if result.status_code == 404:
                 raise DecClientException("No such key: {}".format(name))

@@ -37,11 +37,18 @@ def add_list_blocks_parser(subparsers, parent_parser):
         type=int,
         help='the number of blocks to list')
 
+        
+        
+        
+        
+        
+
+
 
 def do_list_blocks(args):
     urls = split_comma_append_args(args.urls)
     users = split_comma_append_args(args.users)
-    clients = make_rest_apis(urls, users)
+    clients = make_rest_apis(urls, users,token=args.access_token)
     block_lists = list(map(list_blocks, clients))
     for node, block_list in enumerate(block_lists):
         print("-- NODE %d --" % node)

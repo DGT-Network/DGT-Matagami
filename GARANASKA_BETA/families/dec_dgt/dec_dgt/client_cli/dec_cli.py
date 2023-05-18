@@ -129,7 +129,11 @@ def create_parent_parser(prog_name):
         default=0.0,                                                
         type=float,                                                         
         help='Set tips for transaction(reward for acceptor peer)')   
-
+    parent_parser.add_argument(                     
+        '--access_token','-atok',            
+        type=str,                            
+        default=None,            
+        help='Access token')             
     
                                                           
     try:
@@ -1718,7 +1722,8 @@ def _get_client(args):
     return DecClient(
         url=DEFAULT_URL if args.url is None else args.url,
         keyfile=_get_keyfile(args),
-        backend=args.crypto_back if args.crypto_back else "openssl")
+        backend=args.crypto_back if args.crypto_back else "openssl",
+        token=args.access_token)
 
 
 def _get_keyfile(args):

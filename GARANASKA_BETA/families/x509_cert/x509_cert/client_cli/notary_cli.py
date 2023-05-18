@@ -121,6 +121,12 @@ def create_parent_parser(prog_name):
         help='Specify a crypto back openssl/bitcoin',                           
         default=CRYPTO_BACK                                                     
         ) 
+    parent_parser.add_argument(                
+        '--access_token','-atok',              
+        type=str,                              
+        default=None,                          
+        help='Access token')                   
+
     parent_parser.add_argument(                             
         '-U','--url',                                     
         type=str,                                    
@@ -1009,10 +1015,10 @@ def _get_client(args,init=False):
         lurl = args.leader_addr
         vurl = args.vault_addr
         print("VAULT INIT url={}".format(vurl))
-        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,vault_url=vurl,notary=notary,lead_addr=lurl)                                       
+        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,vault_url=vurl,notary=notary,lead_addr=lurl,token=args.access_token)                                       
      
     else:
-        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend)
+        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,token=args.access_token)
 
     if not client.init_vault():                
         #LOGGER.info("VAULT NOT READY EXIT") 

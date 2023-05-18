@@ -86,7 +86,7 @@ def do_compare_chains(args):
     """Calculates and outputs comparison between all nodes on the network."""
     urls = split_comma_append_args(args.urls)
     users = split_comma_append_args(args.users)
-    clients = make_rest_apis(urls, users)
+    clients = make_rest_apis(urls, users,token=args.access_token)
 
     broken = []
 

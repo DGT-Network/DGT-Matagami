@@ -75,7 +75,7 @@ class Vault(object):
 
     def init_vault(self):
         self._keys = {}
-        self._notary_id =  KEYKEEPER_ID if self._notary == SEAL_NODE_NM else (NOTARY_LEADER_ID if self._lead_addr is None else NOTARY_FOLOWER_ID)
+        self._notary_id =  KEYKEEPER_ID if self._notary == SEAL_NODE_NM else (NOTARY_LEADER_ID if self._lead_addr is None else "{}{}_".format(NOTARY_FOLOWER_ID,self._notary))
         LOGGER.info(f'Try connect to NOTARY={self._notary} vault={self._vault_url} lead={self._lead_addr}')
         print(f'Try connect to NOTARY={self._notary} vault={self._vault_url} lead={self._lead_addr}')
         self.is_init = None

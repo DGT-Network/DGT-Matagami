@@ -81,15 +81,25 @@ WALLETS_PATH_ = "{}/wallets/{}"
 OBJ_TYPE_LIST = "roles/","target/","wallets/"
 
 
+def get_file_data(fnm):                                                    
+    with open(fnm,"r") as fdata:                                                    
+        try:                                                                              
+            data =  fdata.read()                                                   
+            return data                                                                   
+        except Exception as ex:                                                           
+            print(f"CANT GET file  {fnm} - ({ex})")          
+            return None                                                                   
+
+
 
 class NotaryClient(XcertClient):
-    def __init__(self, url, keyfile=None,backend=None,vault_url=None,notary=None,lead_addr=None):
+    def __init__(self, url, keyfile=None,backend=None,vault_url=None,notary=None,lead_addr=None,token=None):
         """
         url - dgt rest-api
         keyfile -key file for sign certificate
         backend 
         """
-        super().__init__(url,keyfile=keyfile,backend=backend)
+        super().__init__(url,keyfile=keyfile,backend=backend,token=token)
         self._vault = None
         self._url = url
         self._backend = backend
@@ -101,7 +111,7 @@ class NotaryClient(XcertClient):
 
     def init_vault(self):
         if Vault is None: 
-            print('No vault')                   
+            
             LOGGER.debug("No vault instance")   
             return False                        
             
@@ -112,14 +122,21 @@ class NotaryClient(XcertClient):
             ninfo = None                                                                                        
             attempt = 100                                                                                       
             while ninfo is None and attempt > 0:                                                                
-                attempt -= 1                                                                                    
-                ninfo = self.get_notary_info(NOTARY_LEADER_ID)                                                  
+                attempt -= 1 
+                not_id = get_file_data(NOTARY_ID_FILE)                                                                                   
+                ninfo = self.get_notary_info(NOTARY_LEADER_ID if not_id is None else not_id)                                                  
                 if ninfo is None:                                                                               
                     LOGGER.debug("NOTARY CLIENT try to get LEADER info: {}".format(attempt))                    
                     time.sleep(1)                                                                               
                     #print(f'notary info={ninfo}')                                                              
-            if ninfo is not None and NOTARY_TOKEN in ninfo and NOTARY_URL in ninfo:                             
-                self._vault = Vault(ninfo[NOTARY_URL],token=ninfo[NOTARY_TOKEN]) 
+            if ninfo is not None and NOTARY_TOKEN in ninfo and NOTARY_URL in ninfo: 
+                    
+                vurl =  ninfo[NOTARY_URL]
+                #vurl =   "http://vault-n3:8420" 
+                vtoken = ninfo[NOTARY_TOKEN] 
+                #vtoken = "hvs.r0rjASW1ZYz3jK2LM6cpVjAy" 
+                print("NINFO",vurl)                   
+                self._vault = Vault(vurl,token=vtoken) 
                 return True                               
             else:                                                                                               
                 print('Cant get notary info')                                                                   
@@ -177,7 +194,8 @@ class NotaryClient(XcertClient):
 
     def is_notary_info(self,key):
         # check maybe this is special key for some kind of notary
-        return key in NOTARY_TYPES
+        rkey = key.split('n')
+        return rkey[0] in NOTARY_TYPES
 
     def get_notary_info(self,key):
         value = self.show(key) 

@@ -17,14 +17,15 @@ from argparse import ArgumentParser
 from dgt_cli.rest_client import RestClient
 
 
-def make_rest_apis(urls, users):
+def make_rest_apis(urls, users,token=None):
     clients = []
     for i, url in enumerate(urls):
         try:
             user = users[i]
         except IndexError:
             user = ''
-        clients.append(RestClient(url, user))
+        
+        clients.append(RestClient(url, user,token=token))
     return clients
 
 
@@ -62,5 +63,11 @@ def base_multinode_parser():
         help='Specify the users to authorize requests, in the same order as '
         'the URLs, separate by commas. Passing empty strings between commas '
         'is supported.')
+    base_parser.add_argument(      
+        '--access_token','-atok',    
+        type=str,                    
+        default=None,                
+        help='Access token')         
+
 
     return base_parser

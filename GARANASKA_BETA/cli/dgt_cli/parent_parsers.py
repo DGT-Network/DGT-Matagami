@@ -14,6 +14,14 @@
 # ------------------------------------------------------------------------------
 
 from argparse import ArgumentParser
+import yaml
+import time
+
+def do_yaml(data):                                                               
+    return yaml.dump(data,explicit_start=True,indent=4,default_flow_style=False) 
+
+def do_tmstamp2str(val):                                      
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(val)) 
 
 
 def base_http_parser():
@@ -26,15 +34,21 @@ def base_http_parser():
     base_parser = ArgumentParser(add_help=False)
 
     base_parser.add_argument(
-        '--url',
+        '--url','-U',
         type=str,
         help="identify the URL of the validator's REST API "
-        "(default: http://localhost:8008)")
+        "(default: http://api-dgt-c1-1:8108)")
     base_parser.add_argument(
         '-u', '--user',
         type=str,
         metavar='USERNAME[:PASSWORD]',
         help='specify the user to authorize request')
+    base_parser.add_argument(      
+        '--access_token','-atok',    
+        type=str,                    
+        default=None,                
+        help='Access token')         
+
 
     return base_parser
 

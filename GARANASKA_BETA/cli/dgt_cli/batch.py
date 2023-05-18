@@ -154,7 +154,7 @@ def do_batch(args):
 
 
 def do_batch_list(args):
-    rest_client = RestClient(args.url, args.user)
+    rest_client = RestClient(args.url, args.user,token=args.access_token)
     batches = rest_client.list_batches()
     keys = ('batch_id', 'txns', 'signer')
     headers = tuple(k.upper() for k in keys)
@@ -187,7 +187,7 @@ def do_batch_list(args):
 
 
 def do_batch_show(args):
-    rest_client = RestClient(args.url, args.user)
+    rest_client = RestClient(args.url, args.user,token=args.access_token)
     output = rest_client.get_batch(args.batch_id)
 
     if args.key:
@@ -213,7 +213,7 @@ def do_batch_status(args):
         Args:
             args: The parsed arguments sent to the command at runtime
     """
-    rest_client = RestClient(args.url, args.user)
+    rest_client = RestClient(args.url, args.user,token=args.access_token)
     batch_ids = args.batch_ids.split(',')
 
     if args.wait and args.wait > 0:
@@ -249,7 +249,7 @@ def do_batch_submit(args):
     except IOError as e:
         raise CliException(e)
 
-    rest_client = RestClient(args.url, args.user)
+    rest_client = RestClient(args.url, args.user,token=args.access_token)
 
     start = time.time()
 

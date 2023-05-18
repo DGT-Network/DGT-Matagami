@@ -32,7 +32,8 @@ XCERT_CRT_OP = 'crt'
 XCERT_SET_OP = 'set'
 XCERT_UPD_OP = 'upd'
 XCERT_WALLETS_OP = 'wallets'
-
+FILE_NOTARY_ID = "nid.txt"
+NOTARY_ID_FILE = "/project/peer/etc/{}".format(FILE_NOTARY_ID)
 NOTARIES_MAP = "notaries"
 DGT_NOTARY_KEYS = 'dgt.notary.authorized_keys'
 

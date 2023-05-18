@@ -27,6 +27,7 @@ from dgt_signing import CryptoFactory
 from dgt_signing import ParseError
 from dgt_signing.core import (X509_COMMON_NAME, X509_USER_ID,X509_BUSINESS_CATEGORY,X509_SERIAL_NUMBER)
 
+from dgt_sdk.oauth.requests import OAuth2Session
 from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
@@ -134,7 +135,7 @@ def create_meta_xcert_txn(signer, key, value):
                                                                      
 
 class XcertClient:
-    def __init__(self, url, keyfile=None,backend=None):
+    def __init__(self, url, keyfile=None,backend=None,token=None):
         self.url = url
         self._backend = backend
         #print(f"XcertClient: BACKEND={backend} ")
@@ -144,7 +145,9 @@ class XcertClient:
         else:
             self._private_key = None
             self._public_key = None
-        
+
+        # request oauth client                                                                         
+        self._requests = OAuth2Session(token = {'access_token': token} if token is not None else None) 
 
     def get_signer(self,keyfile):
         try:                                                                                          
@@ -183,7 +186,8 @@ class XcertClient:
         return self._signer.context.get_pub_key(xcert)
 
     def is_notary_info(self,key):
-        return key in NOTARY_TYPES
+        rkey = key.split('n')
+        return rkey[0] in NOTARY_TYPES
 
     def get_notary_info(self,key):
         value = self.show(key)    
@@ -297,9 +301,9 @@ class XcertClient:
         #print('_send_request',url)
         try:
             if data is not None:
-                result = requests.post(url, headers=headers, data=data,verify=False,cert=cert)
+                result = self._requests.post(url, headers=headers, data=data,verify=False,cert=cert)
             else:
-                result = requests.get(url, headers=headers,verify=False,cert=cert)
+                result = self._requests.get(url, headers=headers,verify=False,cert=cert)
                 
 
             if result.status_code == 404:

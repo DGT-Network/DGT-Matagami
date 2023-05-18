@@ -44,6 +44,25 @@ from dgt_rest_api.config import load_toml_rest_api_config
 from dgt_rest_api.config import merge_rest_api_config
 from dgt_rest_api.config import RestApiConfig
 
+# OAUTH mode
+import cbor
+from dgt_sdk.oauth.endpoints import oauth_middleware,AioHttpOAuth2Server,OAuth2_RequestValidator,setup_oauth,AUTH_SCOPE_LIST,AUTH_USER_LIST,AUTH_CONFIG_NM
+from oauthlib import oauth2
+from dgt_validator.database.indexed_database import IndexedDatabase
+
+TOKEN_DB_FILENAME = '/project/peer/data/tokens.lmdb'
+DEFAULT_DB_SIZE= 1024*1024*1
+
+def deserialize_data(encoded):                
+    return cbor.loads(encoded)                
+
+
+def serialize_data(value):                    
+    return cbor.dumps(value, sort_keys=True)  
+
+
+
+
 
 LOGGER = logging.getLogger(__name__)
 DISTRIBUTION_NAME = 'dgt-rest-api'
@@ -76,7 +95,20 @@ def parse_args(args):
     parser.add_argument('-hssl', '--http_ssl',        
                         action='count',               
                         default=0,                    
-                        help='enable https mode')     
+                        help='enable https mode')  
+    
+    parser.add_argument('-atok', '--access_token',          
+                        action='count',                 
+                        default=0,                      
+                        help='enable token mode')       
+
+
+
+    parser.add_argument('--oauth_conf','-aconf',                   
+                        help='OAuth config ', 
+                        default="/project/dgt/etc/{}".format(AUTH_CONFIG_NM),
+                        type=str)                               
+       
 
     parser.add_argument('--opentsdb-url',
                         help='specify host and port for Open TSDB database \
@@ -107,10 +139,38 @@ def parse_args(args):
 
     return parser.parse_args(args)
 
+def add_oauth_middl(app,oauth_conf):
+    # add oauth mode 
+    async def generate_token(request :web.Request) -> web.Response:       
+        # token for access                      
+        print('generate_token')                                           
+
+
+
+    token_db = IndexedDatabase(                                                           
+            TOKEN_DB_FILENAME,                                                            
+            serialize_data,                                                               
+            deserialize_data,                                                             
+            indexes={'client': lambda dict: [dict['client'].encode()]},                   
+            flag='c',                                                                     
+            _size=DEFAULT_DB_SIZE,                                                        
+            dupsort=True                                                                  
+            )  
+    user_validator = OAuth2_RequestValidator(db=token_db,conf="/project/dgt/etc/{}".format(AUTH_CONFIG_NM))                                                                          
+    req_validator = oauth2.LegacyApplicationServer(user_validator,token_expires_in=user_validator.token_expires_in)                          
+    auth = AioHttpOAuth2Server(req_validator,user_validator)                                                                                                                                                               
+    setup_oauth(app,auth) 
+                                                                                                                                                                                      
+    app.router.add_post('/token',generate_token)
+    app.middlewares.append(oauth_middleware)
+    LOGGER.info('ADD TOKEN  CONTROL OK' )
+
+
 
 def start_rest_api(host, port, 
                    connection,handler,subscriber_handler,# connection, timeout, registry,
-                   client_max_size=None,http_ssl=False):
+                   client_max_size=None,http_ssl=False,
+                   access_token=False,oauth_conf=None):
     """Builds the web app, adds route handlers, and finally starts the app.
     """
     runners = []                                                      
@@ -131,7 +191,10 @@ def start_rest_api(host, port,
                            client_max_size=client_max_size
                            )
     app.on_cleanup.append(lambda app: connection.close())
-
+    if access_token and oauth_conf:
+        # add token control
+        add_oauth_middl(app,oauth_conf)
+        
     # Add routes to the web app
     #handler = DgtRouteHandler(loop, connection, timeout, registry)
     #LOGGER.info('Creating handlers for validator at %s', connection.url)
@@ -183,7 +246,7 @@ def start_rest_api(host, port,
     app.on_shutdown.append(lambda app: subscriber_handler.on_shutdown())
 
     # Start app
-    LOGGER.info('Starting REST API on %s:%s HTTPS=%s', host, port,http_ssl )
+    LOGGER.info('Starting REST API on %s:%s HTTPS=%s TOKEN=%s', host, port,http_ssl,access_token )
     if http_ssl:                                                                                    
         ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)                           
         ssl_context.load_cert_chain(HTTPS_SRV_CERT, HTTPS_SRV_KEY)                                  
@@ -317,7 +380,9 @@ def main():
             port,                                                                                                                      
             connection,handler,subscriber_handler,# connection,int(rest_api_config.timeout),wrapped_registry,                          
             client_max_size=rest_api_config.client_max_size,                                                                           
-            http_ssl=opts.http_ssl > 0)                                                                                                
+            http_ssl=opts.http_ssl > 0,
+            access_token=opts.access_token >0,
+            oauth_conf=opts.oauth_conf)                                                                                                
         """
         start_rest_api(
             host,

@@ -42,6 +42,8 @@ from dgt_cli.settings import add_settings_parser
 from dgt_cli.settings import do_settings
 from dgt_cli.peer import add_peer_parser
 from dgt_cli.peer import do_peer
+from dgt_cli.token import add_token_parser  
+from dgt_cli.token import do_token          
 from dgt_cli.status import add_status_parser
 from dgt_cli.status import do_status
 from dgt_cli.head import add_dag_parser
@@ -97,6 +99,15 @@ def create_parent_parser(prog_name):
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
     except pkg_resources.DistributionNotFound:
         version = 'UNKNOWN'
+    """
+    parent_parser.add_argument(             
+        '--access_token','-atok',           
+        type=str,                           
+        default=None,                       
+        help='Access token')                
+
+    """
+
 
     parent_parser.add_argument(
         '-V', '--version',
@@ -123,6 +134,7 @@ def create_parser(prog_name):
     add_identity_parser(subparsers, parent_parser)
     add_keygen_parser(subparsers, parent_parser)
     add_peer_parser(subparsers, parent_parser)
+    add_token_parser(subparsers, parent_parser)
     add_status_parser(subparsers, parent_parser)
     add_settings_parser(subparsers, parent_parser)
     add_state_parser(subparsers, parent_parser)
@@ -152,6 +164,8 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None,
         do_keygen(args)
     elif args.command == 'block':
         do_block(args)
+    elif args.command == 'token':    
+        do_token(args)               
     elif args.command == 'batch':
         do_batch(args)
     elif args.command == 'transaction':

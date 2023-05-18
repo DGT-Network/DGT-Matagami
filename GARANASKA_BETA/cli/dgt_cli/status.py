@@ -55,7 +55,7 @@ def do_status(args):
 
 
 def do_status_show(args):
-    rest_client = RestClient(base_url=args.url)
+    rest_client = RestClient(base_url=args.url,token=args.access_token)
     status = rest_client.get_status()
 
     if args.format == 'csv' or args.format == 'default':

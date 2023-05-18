@@ -47,7 +47,8 @@ services:
         cd dashboard
         python3 setup.py clean --all
         python3 setup.py build
-        dgt-dashboard -vv  --connect tcp://validator-dgt-c1-1:4104 --bind dashboard-dgt:8003 -cb ${CRYPTO_BACK} ${HTTPS_MODE}
+        echo dgt-dashboard -vv  --connect tcp://validator-dgt-c1-1:4104 --bind dashboard-dgt:8003 -cb ${CRYPTO_BACK} ${HTTPS_MODE}
+        tail -f /dev/null
       "
     stop_signal: SIGKILL
 

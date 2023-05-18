@@ -41,9 +41,9 @@ from bgt_common.protobuf.smart_bgt_token_pb2 import BgtTokenInfo
 
 DISTRIBUTION_NAME = 'sawtooth-bgt'
 
-
+CRYPTO_BACK="openssl"
 DEFAULT_URL = 'http://127.0.0.1:8008'
-
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
@@ -96,6 +96,30 @@ def create_parent_parser(prog_name):
         version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth) version {}')
         .format(version),
         help='display version information')
+    parent_parser.add_argument(                                                                          
+        '-cb', '--crypto_back',                                                                          
+        type=str,                                                                                        
+        choices=["openssl","bitcoin"] ,                                                                  
+        help='Specify a crypto back openssl/bitcoin',                                                    
+        default=CRYPTO_BACK                                                                              
+        )                                                                                                
+    parent_parser.add_argument(                                                                          
+        '-U','--url',                                                                                    
+        type=str,                                                                                        
+        help='Specify URL of REST API',                                                                  
+        default=DGT_API_URL)                                                                             
+    parent_parser.add_argument(                                                                          
+        '--wait',                                                                                        
+        nargs='?',                                                                                       
+        const=sys.maxsize,                                                                               
+        type=int,                                                                                        
+        help='Set time, in seconds, to wait for transaction to commit')                                  
+    parent_parser.add_argument(                                                                          
+        '--access_token','-atok',                                                                        
+        type=str,                                                                                        
+        default=None,                                                                                    
+        help='Access token')                                                                             
+
 
     return parent_parser
 
@@ -144,23 +168,12 @@ def add_set_parser(subparsers, parent_parser):
         type=int,
         help='amount to set')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 
 def do_set(args):
@@ -189,23 +202,12 @@ def add_inc_parser(subparsers, parent_parser):
         type=int,
         help='specify amount to increment')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 
 def do_inc(args):
@@ -234,23 +236,12 @@ def add_dec_parser(subparsers, parent_parser):
         type=int,
         help='amount to decrement')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
 
 def add_trans_parser(subparsers, parent_parser):
     message = 'Sends an bgt transaction from <name> to  <to> by <value>.'
@@ -276,24 +267,13 @@ def add_trans_parser(subparsers, parent_parser):
         type=str,
         help='identify name of key transfer to')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-            help='set time, in seconds, to wait for transaction to commit')
-
+ 
 
 def do_dec(args):
     name, value, wait = args.name, args.value, args.wait
@@ -322,11 +302,6 @@ def add_show_parser(subparsers, parent_parser):
         type=str,
         help='name of key to show')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
 
 def do_show(args):
@@ -347,11 +322,6 @@ def add_list_parser(subparsers, parent_parser):
         description=message,
         help='Displays all bgt values')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        help='specify URL of REST API',
-        default='http://api-dgt-c1-1:8108')
 
 
 def do_list(args):
@@ -366,8 +336,9 @@ def do_list(args):
 
 def _get_client(args):
     return BgtClient(
-        url=DEFAULT_URL if args.url is None else args.url,
-        keyfile=_get_keyfile(args))
+        url=args.url,
+        keyfile=_get_keyfile(args),
+        token=args.access_token)
 
 
 def _get_keyfile(args):

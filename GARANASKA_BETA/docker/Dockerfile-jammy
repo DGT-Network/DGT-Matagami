@@ -53,7 +53,9 @@ RUN pip3 install secp256k1
 RUN pip3 install grpcio-tools
 RUN pip3 install pyformance
 RUN pip3 install chardet
-RUN pip3 install aiodns aiohttp aiohttp_security[session]
+RUN pip3 install aiodns aiohttp aiohttp_security[session] oauthlib
+
+# aiohttp_oauth2
 
 ENV PATH=$PATH:/project/$DGT_TOP/bin:
 

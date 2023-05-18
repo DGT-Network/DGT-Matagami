@@ -29,7 +29,7 @@ import time
 import pkg_resources
 from os.path import exists
 from colorlog import ColoredFormatter
-
+from dgt_cli.parent_parsers import base_http_parser
 from dgt_cli.exceptions import CliException
 from dgt_cli.rest_client import RestClient
 from dgt_cli.make_set_txn import _create_batch,_create_propose_txn,_create_topology_txn,_create_vote_txn,_key_to_address
@@ -262,7 +262,7 @@ def _do_config_proposal_create(args):
             raise CliException('Unable to write to batch file: {}'.format(str(e)))
 
     elif args.url is not None:
-        rest_client = RestClient(args.url)
+        rest_client = RestClient(args.url,token=args.access_token)
         rest_client.send_batches(batch_list)
     else:
         raise AssertionError('No target for create set.')
@@ -283,7 +283,7 @@ def _do_config_proposal_list(args):
         has_prefix = candidate.proposal.setting.startswith(prefix)
         return has_prefix and has_pub_key
 
-    candidates_payload = _get_proposals(RestClient(args.url))
+    candidates_payload = _get_proposals(RestClient(args.url,token=args.access_token))
     candidates = [
         c for c in candidates_payload.candidates
         if _accept(c, args.public_key, args.filter)
@@ -324,7 +324,7 @@ def _do_config_proposal_vote(args):
     validator.
     """
     signer = _read_signer(args.key,args.crypto_back)
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
 
     proposals = _get_proposals(rest_client)
 
@@ -508,7 +508,7 @@ def _do_list_topology(args):
      Executes the 'topology list' subcommand.  
     """
     #signer = _read_signer(args.key)
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
 
     topology = _get_topology(rest_client,args)
 
@@ -576,7 +576,7 @@ def _param_topology(rest_client,signer,args):
         batch_list = BatchList(batches=[batch])
 
         if args.url is not None:
-            rest_client = RestClient(args.url)
+            rest_client = RestClient(args.url,token=args.access_token)
             rest_client.send_batches(batch_list)
         else:
             raise AssertionError('No target for create set.')
@@ -606,7 +606,7 @@ def _set_topology(rest_client,signer,args):
     batch_list = BatchList(batches=[batch])
 
     if args.url is not None:
-        rest_client = RestClient(args.url)
+        rest_client = RestClient(args.url,token=args.access_token)
         rest_client.send_batches(batch_list)
     else:
         raise AssertionError('No target for create set.')
@@ -618,7 +618,7 @@ def _do_param_topology(args):
      Executes the 'topology set' subcommand.  
     """
     signer = _read_signer(args.key)
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
     _param_topology(rest_client,signer,args)
 
 def _do_ping_topology(args):
@@ -626,7 +626,7 @@ def _do_ping_topology(args):
      Executes the 'topology ping' subcommand.  
     """
     signer = _read_signer(args.key)
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
     args.param_name = DGT_PING_COUNTER
     args.new = "1"
     _param_topology(rest_client,signer,args)
@@ -638,7 +638,7 @@ def _do_set_topology(args):
      Executes the 'topology set' subcommand.  
     """
     signer = _read_signer(args.key)
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
 
     _set_topology(rest_client,signer,args)
 
@@ -684,6 +684,13 @@ def create_parent_parser(prog_name):
         '-v', '--verbose',
         action='count',
         help='enable more verbose output')
+    """
+    parent_parser.add_argument(       
+        '--access_token','-atok',     
+        type=str,                     
+        default=None,                 
+        help='Access token')          
+    """
 
     try:
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
@@ -776,6 +783,7 @@ def create_parser(prog_name):
     prop_parser = proposal_parsers.add_parser(
         'create',
         help='Creates proposals for setting changes',
+        parents=[base_http_parser()],
         description='Create proposals for settings changes. The change '
                     'may be applied immediately or after a series of votes, '
                     'depending on the vote threshold setting.'
@@ -834,11 +842,6 @@ def create_parser(prog_name):
         type=str,
         help='specify the output file for the resulting batches')
 
-    prop_target_group.add_argument(
-        '--url',
-        type=str,
-        help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
 
     prop_parser.add_argument(
         'setting',
@@ -850,15 +853,11 @@ def create_parser(prog_name):
     proposal_list_parser = proposal_parsers.add_parser(
         'list',
         help='Lists the currently proposed (not active) settings',
+        parents=[base_http_parser()],
         description='Lists the currently proposed (not active) settings. '
                     'Use this list of proposals to find proposals to '
                     'vote on.')
 
-    proposal_list_parser.add_argument(
-        '--url',
-        type=str,
-        help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
 
     proposal_list_parser.add_argument(
         '--public-key',
@@ -881,14 +880,10 @@ def create_parser(prog_name):
     vote_parser = proposal_parsers.add_parser(
         'vote',
         help='Votes for specific setting change proposals',
+        parents=[base_http_parser()],
         description='Votes for a specific settings change proposal. Use '
                     '"dgtset proposal list" to find the proposal id.')
 
-    vote_parser.add_argument(
-        '--url',
-        type=str,
-        help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
 
     vote_parser.add_argument(
         '-k', '--key',
@@ -896,6 +891,12 @@ def create_parser(prog_name):
         help='specify a signing key for the resulting transaction batch',
         default=VALIDATOR_PKEY
         )
+    vote_parser.add_argument(           
+        '-cb', '--crypto_back',            
+        type=str,                          
+        help='Specify a crypto back',      
+        default='bitcoin')                 
+
 
     vote_parser.add_argument(
         'proposal_id',
@@ -922,6 +923,7 @@ def create_parser(prog_name):
     topology_list_parser = topology_parsers.add_parser(
         'list',
         help='Lists current topology',
+        parents=[base_http_parser()],
         description='Lists the current topology  settings. '
                     )
     topology_list_parser.add_argument(
@@ -933,15 +935,12 @@ def create_parser(prog_name):
         type=str,
         help='specify peer name')
 
-    topology_list_parser.add_argument(
-        '--url',
-        type=str,
-        help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
+    
     # SET 
     topology_set_parser = topology_parsers.add_parser(
         'set',
         help='change current topology',
+        parents=[base_http_parser()],
         description='change the current topology  settings. '
                     )
     topology_set_parser.add_argument(
@@ -972,15 +971,12 @@ def create_parser(prog_name):
         type=str,
         help='Peers JSON description',
         )
-    topology_set_parser.add_argument(
-        '--url',
-        type=str,
-        help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
+    
     # PARAM
     topology_param_parser = topology_parsers.add_parser(
         'param',
         help='change topology settings',
+        parents=[base_http_parser()],
         description='change topology  settings. '
                     )
 
@@ -991,11 +987,6 @@ def create_parser(prog_name):
         help='specify signing key for resulting batches and initial authorized key',
         default=VALIDATOR_PKEY
         )
-    topology_param_parser.add_argument(
-        '--url',
-        type=str,
-        help="identify the URL of a validator's REST API",
-        default='http://api-dgt-c1-1:8108')
     topology_param_parser.add_argument(
         'param_name',
         type=str,
@@ -1009,7 +1000,8 @@ def create_parser(prog_name):
 
     topology_ping_parser = topology_parsers.add_parser(           
         'ping',                                                   
-        help='Ping DGT network',                           
+        help='Ping DGT network', 
+        parents=[base_http_parser()],                          
         description='Send ping transaction into DGT network. '                  
                     ) 
 
@@ -1019,12 +1011,6 @@ def create_parser(prog_name):
         help='specify signing key for resulting batches and initial authorized key',     
         default=VALIDATOR_PKEY                                   
         )                                                                                
-    topology_ping_parser.add_argument(                                                  
-        '--url',                                                                         
-        type=str,                                                                        
-        help="identify the URL of a validator's REST API",                               
-        default='http://api-dgt-c1-1:8108')                                              
-
 
 
 

@@ -44,6 +44,9 @@ DISTRIBUTION_NAME = 'x509-cert'
 
 DEFAULT_URL = 'http://127.0.0.1:8008'
 
+CRYPTO_BACK = "openssl"
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+
 DGT_TOP = os.environ.get('DGT_TOP','dgt')
 XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
 def create_console_handler(verbose_level):
@@ -85,6 +88,33 @@ def create_parent_parser(prog_name):
         '-v', '--verbose',
         action='count',
         help='enable more verbose output')
+    parent_parser.add_argument(    
+        '--access_token','-atok',  
+        type=str,                  
+        default=None,              
+        help='Access token')       
+    parent_parser.add_argument(                            
+        '-cb', '--crypto_back',                            
+        type=str,                                          
+        choices=["openssl","bitcoin"] ,                    
+        help='Specify a crypto back openssl/bitcoin',      
+        default=CRYPTO_BACK                                
+        )                                                  
+
+    parent_parser.add_argument(                                             
+        '-U','--url',                                                       
+        type=str,                                                           
+        help='Specify URL of REST API',                                     
+        default=DGT_API_URL)                                                
+    parent_parser.add_argument(                                                     
+        '--wait',                                                            
+        nargs='?',                                                           
+        const=sys.maxsize,                                                   
+        type=int,                                                            
+        help='set time, in seconds, to wait for transaction to commit')      
+
+
+
 
     try:
         version = pkg_resources.get_distribution(DISTRIBUTION_NAME).version
@@ -125,7 +155,7 @@ def create_parser(prog_name):
 
 
 def add_set_parser(subparsers, parent_parser):
-    message = 'Sends an bgt transaction to set <name> to <value>.'
+    message = 'Create xcert for proto <value> (json file or string).'
 
     parser = subparsers.add_parser(
         'set',
@@ -145,23 +175,11 @@ def add_set_parser(subparsers, parent_parser):
         default=XCERT_PROTO_FILE,
         help='xcert atributes JSON')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
     parser.add_argument(                                                
         '--before',                                                       
         type=int,                                                       
@@ -172,12 +190,7 @@ def add_set_parser(subparsers, parent_parser):
         default=10,                                       
         help='set time, in day - cert is valid after') 
 
-
-    parser.add_argument(              
-        '-cb', '--crypto_back',               
-        type=str,                             
-        help='Specify a crypto back',         
-        default='bitcoin')                    
+                    
 
 
 def do_set(args):
@@ -206,28 +219,12 @@ def add_upd_parser(subparsers, parent_parser):
         default="/project/peer/keys/validator.priv",
         help='specify User name')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
-
+ 
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
 
-    parser.add_argument(
-        '--wait',
-        nargs='?',
-        const=sys.maxsize,
-        type=int,
-        help='set time, in seconds, to wait for transaction to commit')
-    parser.add_argument(                            
-        '-cb', '--crypto_back',                     
-        type=str,                                   
-        help='Specify a crypto back openssl/bitcoin',               
-        default='bitcoin')
     parser.add_argument(                                   
         '--before',                                       
         type=int,                                         
@@ -261,26 +258,10 @@ def add_show_parser(subparsers, parent_parser):
         'name',
         type=str,
         help='certificate of key to show')
-
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
     parser.add_argument(                                       
         '--keyfile',                                           
         type=str,                                              
         help="identify file containing user's private key")    
-
-
-    parser.add_argument(                            
-        '-cb', '--crypto_back',                     
-        type=str,                                   
-        help='Specify a crypto back',               
-        default='bitcoin')                          
-
-
-
 
 
 
@@ -314,22 +295,11 @@ def add_list_parser(subparsers, parent_parser):
         description=message,
         help='Displays all X509 certificates')
 
-    parser.add_argument(
-        '--url',
-        type=str,
-        default="http://api-dgt-c1-1:8108",
-        help='specify URL of REST API')
     parser.add_argument(                                    
         '--keyfile',                                        
         type=str,                                           
         help="identify file containing user's private key") 
 
-
-    parser.add_argument(                   
-        '-cb', '--crypto_back',            
-        type=str,                          
-        help='Specify a crypto back openssl/bitcoin',      
-        default='bitcoin')                 
 
 
 def do_list(args):
@@ -349,7 +319,8 @@ def do_list(args):
 def _get_client(args):
     return XcertClient(
         url=DEFAULT_URL if args.url is None else args.url,
-        keyfile=_get_keyfile(args),backend=args.crypto_back)
+        keyfile=_get_keyfile(args),backend=args.crypto_back,
+        token=args.access_token)
 
 
 def _get_keyfile(args):

@@ -22,6 +22,7 @@ from dgt_cli.admin_command.config import get_key_dir
 from dgt_cli.keygen import create_new_key,_read_signer
 from dgt_signing import create_context
 from dgt_signing.core import X509_COUNTRY_NAME,X509_STATE_OR_PROVINCE_NAME,X509_LOCALITY_NAME,X509_ORGANIZATION_NAME,X509_COMMON_NAME,X509_DNS_NAME
+from x509_cert.client_cli.xcert_attr import FILE_NOTARY_ID,NOTARY_LEADER_ID,KEYKEEPER_ID,NOTARY_FOLOWER_ID
 
 DGT_TOP = os.environ.get('DGT_TOP',"dgt")
 PROJ_DGT = f'/project/{DGT_TOP}'
@@ -61,6 +62,7 @@ ETC_DIR  = "etc"
 KEYS_DIR = "keys"
 LOGS_DIR = "logs"
 POLICY_DIR = "policy"
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def add_node_parser(subparsers, parent_parser):
     """Adds subparser command and flags for 'keygen' command.
@@ -187,7 +189,7 @@ def add_notary_parser(subparsers, parent_parser):
         '--url',                                                 
         type=str,                                                
         help="identify the URL of a validator's REST API",       
-        default='http://api-dgt-c1-1:8108')                                                                     
+        default=DGT_API_URL)                                                                     
 
     parser.add_argument(
         '-q',
@@ -446,7 +448,11 @@ def do_notary(args):
                                                                         
                     except Exception as ex:                             
                         print(f"CANT GET CONFIG ({ex})") 
-
+            # dgt key for notary
+            dst = os.path.join(dname, FILE_NOTARY_ID)
+            notary_id = KEYKEEPER_ID if notary_name == SEAL_NODE_NM else (NOTARY_LEADER_ID if args.lead_addr is None else "{}{}_".format(NOTARY_FOLOWER_ID,notary_name)) 
+            with open(dst,"w") as dfd:
+                dfd.write(notary_id)      
                    
         elif filename == POLICY_DIR:                                                                                                   
             for fnm in ["polic.hcl"]:                   

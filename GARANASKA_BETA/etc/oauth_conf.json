@@ -1,0 +1,23 @@
+{
+  "clients" : {                       
+      "clientDgt": ["status", "calendar","state","show","trans"],
+      "clientC": ["calendar","mail","show","trans"]                
+  },                                                              
+  "users":  { 
+      "dgt" : "matagami" ,                                            
+      "dgt1" : "matagami1" ,
+      "dgt2" : "matagami2"                                         
+  },
+  "token" : {
+      "token_expires_in" : 7776000
+  },
+  "rest" : {
+      "endpoints" : {
+            "/mail"      : ["mail"],
+            "/calendar"  : ["calendar"],
+            "/public1"    : ["mail"],
+            "*"          : ["show","trans"]
+      },
+      "create_token" : "/token"
+  }
+}

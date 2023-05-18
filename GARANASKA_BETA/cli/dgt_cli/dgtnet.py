@@ -38,7 +38,7 @@ def create_parser(prog_name):
     parent_parser = create_parent_parser(prog_name)
 
     parser = argparse.ArgumentParser(
-        description='Inspect status of a sawtooth network',
+        description='Inspect status of a DGT network',
         parents=[parent_parser],)
 
     subparsers = parser.add_subparsers(title='subcommands', dest='subcommand')
@@ -51,13 +51,13 @@ def create_parser(prog_name):
     return parser
 
 
-def main(prog_name=os.path.basename(sys.argv[0]), args=None,
-         with_loggers=True):
+def main(prog_name=os.path.basename(sys.argv[0]), args=None,with_loggers=True):
     parser = create_parser(prog_name)
     if args is None:
         args = sys.argv[1:]
+    
     args = parser.parse_args(args)
-
+    
     if with_loggers is True:
         if args.verbose is None:
             verbose_level = 0
@@ -144,5 +144,12 @@ def create_parent_parser(prog_name):
         version=(DISTRIBUTION_NAME + ' (Hyperledger Sawtooth-DGT) version {}')
         .format(version),
         help='display version information')
+    """
+    parent_parser.add_argument(          
+        '--access_token','-atok',        
+        type=str,                        
+        default=None,                    
+        help='Access token')             
+    """
 
     return parent_parser

@@ -264,7 +264,7 @@ def _do_identity_policy_create(args):
             raise CliException(
                 'Unable to write to batch file: {}'.format(str(e)))
     elif args.url is not None:
-        rest_client = RestClient(args.url)
+        rest_client = RestClient(args.url,token=args.access_token)
         rest_client.send_batches(batch_list)
         if args.wait and args.wait > 0:
             batch_id = batch.header_signature
@@ -294,7 +294,7 @@ def _do_identity_policy_create(args):
 
 
 def _do_identity_policy_list(args):
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
     state = rest_client.list_state(subtree=IDENTITY_NAMESPACE + _POLICY_PREFIX)
 
     head = state['head']
@@ -413,7 +413,7 @@ def _do_identity_role_create(args):
 def _do_identity_role_list(args):
     """Lists the current on-chain configuration values.
     """
-    rest_client = RestClient(args.url)
+    rest_client = RestClient(args.url,token=args.access_token)
     state = rest_client.list_state(subtree=IDENTITY_NAMESPACE + _ROLE_PREFIX)
 
     head = state['head']

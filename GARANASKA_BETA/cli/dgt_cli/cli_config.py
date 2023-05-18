@@ -20,11 +20,11 @@ import toml
 
 
 LOGGER = logging.getLogger(__name__)
-
+DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
 def _load_default_cli_config():
     return {
-        'url': 'http://api-dgt-c1-1:8108'
+        'url': DGT_API_URL
     }
 
 

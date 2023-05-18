@@ -58,7 +58,7 @@ def do_peer(args):
 
 
 def do_peer_list(args):
-    rest_client = RestClient(base_url=args.url)
+    rest_client = RestClient(base_url=args.url,token=args.access_token)
     peers = sorted(rest_client.list_peers())
 
     if args.format == 'csv' or args.format == 'default':

@@ -15,6 +15,7 @@
 
 import hashlib
 import base64
+import os
 import time
 import random
 import requests
@@ -26,6 +27,7 @@ from dgt_signing import create_context
 from dgt_signing import CryptoFactory
 from dgt_signing import ParseError
 
+from dgt_sdk.oauth.requests import OAuth2Session
 from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 from dgt_sdk.protobuf.transaction_pb2 import Transaction
 from dgt_sdk.protobuf.batch_pb2 import BatchList
@@ -55,8 +57,9 @@ def _token_info(val):
     return token
 
 class StuffClient:
-    def __init__(self, url, keyfile=None):
+    def __init__(self, url, keyfile=None,token=None):
         self.url = url
+        self._requests = OAuth2Session(token = {'access_token': token} if token is not None else None)
 
         if keyfile is not None:
             try:
@@ -138,10 +141,10 @@ class StuffClient:
         return prefix + game_address
 
     def _send_request(self, suffix, data=None, content_type=None, name=None):
-        if self.url.startswith("http://"):
+        if self.url.startswith("http"):
             url = "{}/{}".format(self.url, suffix)
         else:
-            url = "http://{}/{}".format(self.url, suffix)
+            url = "{}://{}/{}".format('https' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http',self.url, suffix)
 
         headers = {}
 
@@ -150,9 +153,9 @@ class StuffClient:
 
         try:
             if data is not None:
-                result = requests.post(url, headers=headers, data=data)
+                result = self._requests.post(url, headers=headers, data=data,verify=False)
             else:
-                result = requests.get(url, headers=headers)
+                result = self._requests.get(url, headers=headers,verify=False)
 
             if result.status_code == 404:
                 raise StuffClientException("No such key: {}".format(name))
