@@ -543,7 +543,10 @@ async def oauth_middleware(request: web.Request,handler):# : Callable[[web.Reque
             resp = user_resp
     else:
         scopes = auth.get_rest_verify_scopes(rpath)
-        ses = await get_session(request)
+        try:
+            ses = await get_session(request)
+        except Exception:
+            ses = None
         if ses is not None:
             if 'access_token' in request.query:
                 ses['access_token'] = request.query['access_token']
