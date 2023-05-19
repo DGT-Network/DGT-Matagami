@@ -6,6 +6,8 @@ from oauthlib.oauth2 import OAuth2Error,RequestValidator
 from aiohttp import web,BasicAuth,hdrs
 
 from requests import auth as req_auth
+from aiohttp_session import get_session
+from yarl import URL
 import logging
 
 log = logging.getLogger(__name__)
@@ -63,8 +65,9 @@ async def extract_params(arequest):
 
     basic_auth = {}
     try:
-        body = arequest.body if arequest.body_exists else None
+        body = arequest.body if arequest.body_exists  else None # and arequest.can_read_body
     except Exception:
+        log.debug("Gant get body from request")
         body = None
     # TODO: Remove HACK of using body for GET requests. Use commented code below
     # once https://github.com/oauthlib/oauthlib/issues/609 is fixed.
@@ -233,19 +236,19 @@ class OAuth2_RequestValidator(RequestValidator):
             return self._endpoints['*']
 
     def client_authentication_required(self, request, *args, **kwargs):
-        log.debug('client_authentication_required args={} kwargs={}'.format(args,kwargs))
+        log.debug('client_authentication_required False')
         return False  # Allow public clients
 
     def authenticate_client_id(self, client_id, request, *args, **kwargs):
-        log.debug('authenticate_client_id',client_id,args,kwargs)
+        log.debug('authenticate client_id {}'.format(client_id))
         is_cid = self.clients_scopes.get(client_id) if self._db is None else "{}.{}".format(AUTH_SCOPE_LIST,client_id) in self._db
 
         if is_cid:
             request.client = Client()
             request.client.client_id = client_id
-            log.debug('OK authenticate_client_id',client_id)
+            log.debug('OK authenticate_client_id {}'.format(client_id))
             return True
-        log.debug('FALSE authenticate_client_id',client_id)
+        log.debug('FALSE authenticate_client_id {}'.format(client_id))
         return False
 
     def validate_user(self, username, password, client, request, *args, **kwargs):
@@ -265,7 +268,7 @@ class OAuth2_RequestValidator(RequestValidator):
         return False
 
     def validate_grant_type(self, client_id, grant_type, client, request, *args, **kwargs):
-        log.debug('validate_grant_type',grant_type)
+        log.debug('validate_grant_type {}'.format(grant_type))
         return grant_type in ["password",'authorization_code','client_credentials']
 
     def validate_scopes(self, client_id, scopes, client, request, *args, **kwargs):
@@ -275,7 +278,7 @@ class OAuth2_RequestValidator(RequestValidator):
             cli_scopes = self._db[ckey]['scopes'] if ckey in self._db else []
         else:
             cli_scopes = self.clients_scopes.get(client_id)
-        log.debug('validate_scopes',client_id,scopes,cli_scopes)
+        log.debug('validate id={} scopes {}~{}'.format(client_id,scopes,cli_scopes))
         #scopes= scopes.split(':')
         return all(scope in cli_scopes for scope in scopes)
 
@@ -361,13 +364,14 @@ class AioHttpOAuth2Server(object):
 
 
         uri, http_method, body, headers = await extract_params(request)                                                                                               
-        print("create_token_response:url={} metod={} body={} head={} cred={}".format(uri, http_method, body, headers,credentials_extra))                              
+        log.debug("create_token_response:url={} metod={} body={} head={} cred={}".format(uri, http_method, body, headers,credentials_extra))                              
         try:                                                                                                                                                          
             resp_headers, resp_body, resp_status = self._oauthlib.create_token_response(                                                                              
                 uri, http_method, body, headers, credentials_extra                                                                                                    
             )                                                                                                                                                         
             print("create_token_response: cred={} rhead={} rbody={} rst={}".format(credentials_extra,resp_headers, resp_body, resp_status))                           
-        except OAuth2Error as e:                                                                                                                                      
+        except OAuth2Error as e:   
+            log.debug("create_token_response ERROR {}",format(e))                                                                                                                                  
             resp_headers, resp_body, resp_status = e.headers, e.json, e.status_code   
                                                                                             
         print('st={} head={} b={}'.format(type(resp_status),type(resp_headers),type(resp_body)))                                                                      
@@ -528,7 +532,7 @@ async def verify_request(request: web.Request,scopes=None) -> None:
 @web.middleware                                                                                                            
 async def oauth_middleware(request: web.Request,handler):# : Callable[[web.Request], Awaitable[web.Response]] 
     rpath = request.path                                                                  
-    log.debug('>>> HANDLER={} path={}'.format(handler,rpath))                                                                                
+    log.debug('>>> HANDLER req={} url={}'.format(request.query,request.rel_url))                                                                                
     #ses = await get_session(request) 
     auth = request.config_dict.get(OAUTH_KEY)  
     if auth.is_token_req(rpath):
@@ -539,12 +543,22 @@ async def oauth_middleware(request: web.Request,handler):# : Callable[[web.Reque
             resp = user_resp
     else:
         scopes = auth.get_rest_verify_scopes(rpath)
-        log.debug('SCOPE={}'.format(scopes))
+        ses = await get_session(request)
+        if ses is not None:
+            if 'access_token' in request.query:
+                ses['access_token'] = request.query['access_token']
+            elif 'access_token' in ses:
+                nurl = request.rel_url.with_query('access_token={}'.format(ses['access_token']))
+                req = request.clone(rel_url=nurl)
+                log.debug('COPY={} url={}'.format(req,nurl)) 
+                request = req
+
+        log.debug('SCOPE={} SES={}'.format(scopes,ses))
         if scopes is not None:
             # control access
             await verify_request(request,scopes=scopes)
         resp = await handler(request)
-    #print('auth',auth)                                                                                                       
+    
     
     
     log.debug('<<< HANDLER={}'.format(rpath))                                                                                   
