@@ -40,7 +40,7 @@ from dgt_sdk.protobuf.validator_pb2 import Message
 #
 
 
-DISTRIBUTION_NAME = 'sawtooth-bgt'
+DISTRIBUTION_NAME = 'dgt-bgt'
 _NATS_ = False
 _ORIENTDB_ = False
 ORIENTDB_HOST = "orientdb" # "orientdb" "localhost"
@@ -196,6 +196,7 @@ def main(args=None):
             #processor = TransactionProcessor(url=opts.connect)
             handler = BgtTransactionHandler()
             processor.add_handler(handler)
+            LOGGER.debug("{}: connect {}".format(DISTRIBUTION_NAME,opts.connect))
             processor.start()
         
     except KeyboardInterrupt:

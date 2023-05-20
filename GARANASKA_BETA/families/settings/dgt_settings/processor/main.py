@@ -35,7 +35,7 @@ from dgt_settings.processor.config.settings import merge_settings_config
 
 
 DISTRIBUTION_NAME = 'dgt-settings'
-
+LOGGER = logging.getLogger(__name__)
 
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
@@ -154,7 +154,7 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None,
     handler = SettingsTransactionHandler()
 
     processor.add_handler(handler)
-
+    LOGGER.debug("{}: connect {}".format(DISTRIBUTION_NAME,settings_config.connect))
     try:
         
         processor.start()
