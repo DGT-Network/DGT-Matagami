@@ -357,7 +357,7 @@ services:
 
 networks:
   network1:
-     external: true
+     #external: true
      name: ${PNM}1-network
 #name: ${PNM}${N}-network
 #        driver: default
