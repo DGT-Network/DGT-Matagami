@@ -48,6 +48,7 @@ DGT_FAMILY_NAME = 'dgt_settings'
 class SettingsTransactionHandler(TransactionHandler):
     def __init__(self):
         self._fbft = None
+        LOGGER.debug('SettingsTransactionHandler INIT DONE')
 
     @property
     def family_name(self):

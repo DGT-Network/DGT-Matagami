@@ -156,7 +156,7 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None,
     processor.add_handler(handler)
 
     try:
-        LOGGER.debug("SettingsTransactionHandler: START=%s", DISTRIBUTION_NAME)
+        
         processor.start()
     except KeyboardInterrupt:
         pass
