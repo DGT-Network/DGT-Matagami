@@ -13,6 +13,7 @@ export NREST="OFF"
 export SEAL_ADDR="vault-n1:8220"
 export REST_API="--url http://api-dgt-c1-1:8108"
 export HTTPS_MODE=""
+export DGT_TOKEN=""
 # -BO - telegram bot enable
 # -NR  - rest api enable ; -RA <url> - dgt rest api url
 # -SA <addr>  - seal addr
@@ -25,6 +26,7 @@ case "$1" in
 -CB) shift; export CRYPTO_BACK=$1 ;;
 -UN) shift; export USER_NOTARY="--user-notary $1" ;;
 -BT) shift; export BOT_TOKEN="-bt $1" ;;
+-DTOK) shift; export DGT_TOKEN="-atok $1" ;;
 -BO)  export BON="-bon" ;;
 -NR)  export NREST="ON" ;;
 -HTTPS) export HTTPS_MODE="--http_ssl";echo "Https mode." ;;

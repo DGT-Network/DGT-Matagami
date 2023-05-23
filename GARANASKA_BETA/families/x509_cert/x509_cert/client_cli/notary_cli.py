@@ -1007,14 +1007,14 @@ def do_approval(args):
 
 
 def _get_client(args,init=False):
-    url     = DEFAULT_URL if args.url is None else args.url
+    url     = args.url
     keyfile = _get_keyfile(args)
     backend = args.crypto_back
     if init:
         notary= args.value
         lurl = args.leader_addr
         vurl = args.vault_addr
-        print("VAULT INIT url={}".format(vurl))
+        print("VAULT INIT vurl={}".format(vurl))
         client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,vault_url=vurl,notary=notary,lead_addr=lurl,token=args.access_token)                                       
      
     else:

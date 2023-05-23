@@ -31,6 +31,7 @@ services:
     - DGT_TOP=${DGT_TOP}
     - CRYPTO_BACK=${CRYPTO_BACK}
     - BOT_TOKEN=${BOT_TOKEN}
+    - DGT_TOKEN=${DGT_TOKEN}
     - HTTPS_MODE=${HTTPS_MODE}
     - LA=${LA}
     volumes:
@@ -48,7 +49,7 @@ services:
         bin/protogen;echo TELEGA LADDR=${LA} SADDR=${SADDR} ONBOT=${ONBOT} REST=${REST_API} CB=${CRYPTO_BACK} UN=${USER_NOTARY} BT=${BOT_TOKEN} NREST=${NREST};
         echo ##dgtadm notary n${V} -cb ${CRYPTO_BACK} -a vault-n${V}:${VPORT} -ca vault-n${V}:${CPORT}  -sa http://${SADDR} ${LA} ${REST_API}
         rm -f /project/peer/logs/bgt-bot*.log /project/peer/logs/rest-api-*.log ;
-        notary init n${V}  -va http://vault-n${V}:${VPORT} ${LA}
+        notary init n${V}  -va http://vault-n${V}:${VPORT} ${LA} ${DGT_TOKEN}
         if [ ${NREST} == 'ON' ]; then (cd notary-api;dgt-notary-api -vv  --bind telebot-dgt-n${V}:${NAPI} ${REST_API} -cb ${CRYPTO_BACK} ${HTTPS_MODE}); else echo 'OFF NOTARY REST '; fi;
         cd telebot
         python3 setup.py clean --all
