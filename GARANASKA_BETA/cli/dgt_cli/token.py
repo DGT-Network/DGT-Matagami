@@ -61,17 +61,22 @@ def add_get_token_parser(subparsers, parent_parser):
 
 
 
-def do_token(args):
+def do_token(args,url=None):
     if args.subcommand == 'get':
-        do_get_token(args)
+        do_get_token(args,url=url)
 
     else:
         raise CliException('Invalid command: {}'.format(args.subcommand))
 
 TOK_EXPIRES_AT = "expires_at"
-def do_get_token(args):
-    rest_client = RestClient(base_url=args.url,user=args.user,scopes=args.scopes,client=args.client)
-    token = rest_client.get_token()
+def do_get_token(args,url=None):
+    burl = args.url if url is None else url
+    rest_client = RestClient(base_url=burl,user=args.user,scopes=args.scopes,client=args.client)
+    try:
+        token = rest_client.get_token()
+    except Exception as ex:
+        print('ConnectionError:: {}'.format(ex))
+        return
     
     if isinstance(token,dict) and TOK_EXPIRES_AT in token:
         token[TOK_EXPIRES_AT] =  do_tmstamp2str(token[TOK_EXPIRES_AT])

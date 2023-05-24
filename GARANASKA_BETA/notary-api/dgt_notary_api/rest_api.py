@@ -44,6 +44,10 @@ from dgt_notary_api.config import load_toml_rest_api_config
 from dgt_notary_api.config import merge_rest_api_config
 from dgt_notary_api.config import RestApiConfig
 
+
+from dgt_sdk.oauth.endpoints import oauth_middleware,AioHttpOAuth2Server,OAuth2_RequestValidator,setup_oauth,AUTH_SCOPE_LIST,AUTH_USER_LIST,AUTH_CONFIG_NM
+from oauthlib import oauth2
+
 from dgt_validator.database.indexed_database import IndexedDatabase
 import cbor 
 
@@ -57,6 +61,10 @@ NOTARY_DB_FILENAME = '/project/peer/data/notary.lmdb'
 HTTPS_SRV_KEY = '/project/peer/keys/http_srv.key'
 HTTPS_SRV_CERT = '/project/peer/keys/http_srv.crt'
 DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+
+TOKEN_DB_FILENAME = '/project/peer/data/tokens.lmdb'
+DEFAULT_DB_SIZE= 1024*1024*1
+
 
 def deserialize_data(encoded):
     return cbor.loads(encoded)
@@ -93,7 +101,24 @@ def parse_args(args):
     parser.add_argument('-hssl', '--http_ssl',      
                         action='count',             
                         default=0,                  
-                        help='enable https mode')   
+                        help='enable https mode')  
+    
+    parser.add_argument('-etok', '--enable_token',                                        
+                        action='count',                                                   
+                        default=0,                                                        
+                        help='enable token mode')   
+    parser.add_argument(      
+         '--access_token','-atok',    
+         type=str,                                                          
+         default=None,                                                                                                      
+         help='Access token')                                                                                               
+                                                                                          
+    parser.add_argument('--oauth_conf','-aconf',                                          
+                        help='OAuth config ',                                             
+                        default="/project/dgt/etc/{}".format(AUTH_CONFIG_NM),             
+                        type=str)                                                         
+    
+     
 
     parser.add_argument(                                            
         '--url',                                                    
@@ -141,7 +166,50 @@ def _query_index_keys(req):
     keys = [val.encode() for key,val in req.items() if key == 'qid']
     return keys                              
 
-def start_rest_api(host, port, connection,handler,subscriber_handler,client_max_size=None,http_ssl=False):
+
+def add_oauth_middl(app,oauth_conf):                                                                                                
+    # add oauth mode                                                                                                                
+    async def generate_token(request :web.Request) -> web.Response:                                                                 
+        # token for access                                                                                                          
+        print('generate_token')                                                                                                     
+
+
+
+    token_db = IndexedDatabase(                                                                                                     
+            TOKEN_DB_FILENAME,                                                                                                      
+            serialize_data,                                                                                                         
+            deserialize_data,                                                                                                       
+            indexes={'client': lambda dict: [dict['client'].encode()]},                                                             
+            flag='c',                                                                                                               
+            _size=DEFAULT_DB_SIZE,                                                                                                  
+            dupsort=True                                                                                                            
+            )                                                                                                                       
+    user_validator = OAuth2_RequestValidator(db=token_db,conf="/project/dgt/etc/{}".format(AUTH_CONFIG_NM))                         
+    req_validator = oauth2.LegacyApplicationServer(user_validator,token_expires_in=user_validator.token_expires_in)                 
+    auth = AioHttpOAuth2Server(req_validator,user_validator)                                                                        
+    setup_oauth(app,auth)                                                                                                           
+
+    app.router.add_post('/token',generate_token)
+    if False:
+        fernet_key = fernet.Fernet.generate_key()
+        secret_key = base64.urlsafe_b64decode(fernet_key)
+        storage = EncryptedCookieStorage(secret_key, cookie_name='API_SESSION')
+        setup_session(app, storage)
+
+
+    app.middlewares.append(oauth_middleware)                                                                                        
+    LOGGER.info('ADD TOKEN  CONTROL OK' )                                                                                           
+
+
+
+
+
+
+
+
+
+
+def start_rest_api(host, port, connection,handler,subscriber_handler,client_max_size=None,http_ssl=False,enable_token=False,oauth_conf=None):
     """Builds the web app, adds route handlers, and finally starts the app.
     
     notary_db = IndexedDatabase(                                                                                                     
@@ -182,6 +250,13 @@ def start_rest_api(host, port, connection,handler,subscriber_handler,client_max_
                           client_max_size=client_max_size
                           )
     app.on_cleanup.append(lambda app: connection.close())
+    if enable_token and oauth_conf:
+        # add token control
+        add_oauth_middl(app,oauth_conf)
+
+
+
+
 
     # Add routes to the web app
     #handler = NotaryRouteHandler(loop, connection, timeout, registry,vault=vault,db=notary_db)
@@ -371,7 +446,7 @@ def main():
                 password=rest_api_config.opentsdb_password)
             reporter.start()
         # notary client add dec api
-        vault = NotaryClient(opts.url,NOTARY_PRIV_KEY,opts.crypto_back)
+        vault = NotaryClient(opts.url,NOTARY_PRIV_KEY,opts.crypto_back,token=opts.access_token)
         if not vault.init_vault():                
             LOGGER.info("VAULT NOT READY EXIT")        
             sys.exit(1)                           
@@ -403,7 +478,9 @@ def main():
             port,
             connection,handler,subscriber_handler,# connection,int(rest_api_config.timeout),wrapped_registry,
             client_max_size=rest_api_config.client_max_size,
-            http_ssl=opts.http_ssl > 0)
+            http_ssl=opts.http_ssl > 0,
+            enable_token=opts.enable_token >0,
+            oauth_conf=opts.oauth_conf)
         # pylint: disable=broad-excpt
     except Exception as e:
         LOGGER.exception(e)

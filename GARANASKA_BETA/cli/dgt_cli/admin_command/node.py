@@ -184,13 +184,21 @@ def add_notary_parser(subparsers, parent_parser):
         type=str,                                                                                                          
         help='Specify vault  address for leader ',     
         default=None                                                                                                          
-        )   
+        )  
+    parser.add_argument(            
+        '--access_token','-atok',          
+        type=str,                          
+        default=None,                      
+        help='Access token')               
+    
+     
     parser.add_argument(                           
         '--url',                                                 
         type=str,                                                
-        help="identify the URL of a validator's REST API",       
-        default=DGT_API_URL)                                                                     
-
+        help="Identify the URL of a validator's REST API",       
+        default=DGT_API_URL) 
+     
+ 
     parser.add_argument(
         '-q',
         '--quiet',
@@ -364,7 +372,8 @@ def do_notary(args):
     crypto_back = args.crypto_back
     crypto_suff = f".{crypto_back}" if crypto_back != 'bitcoin' else '.bitcoin'
     notary_name = args.notary_name  if args.notary_name is not None else  SEAL_NODE_NM 
-    print(f"NOTARY={notary_name} CRYPTO={crypto_suff} BACK={crypto_back} args={args}")
+    atoken = args.access_token
+    print(f"NOTARY={notary_name} CRYPTO={crypto_suff} BACK={crypto_back} TOKEN={atoken} args={args}")
     node_dir = PROJ_PEER
     if not os.path.exists(node_dir):                                              
         raise CliException("Notary directory does not exist: {}".format(node_dir)) 
@@ -395,7 +404,7 @@ def do_notary(args):
     notary_info = {}    
     try:
         
-        client = XcertClient(url=args.url,keyfile=os.path.join(node_dir, KEYS_DIR,"notary.priv"),backend=crypto_back)
+        client = XcertClient(url=args.url,keyfile=os.path.join(node_dir, KEYS_DIR,"notary.priv"),backend=crypto_back,token=atoken)
         if notary_name != SEAL_NODE_NM:
             keykeeper_info = client.get_notary_info(KEYKEEPER_ID)
             print(f"CRYPTO BACK={crypto_back} keykeeper_info={keykeeper_info}")

@@ -13,6 +13,7 @@ export NREST="OFF"
 export SEAL_ADDR="vault-n1:8220"
 export REST_API="--url http://api-dgt-c1-1:8108"
 export HTTPS_MODE=""
+export ACCESS_TOKEN=""
 export DGT_TOKEN=""
 # -BO - telegram bot enable
 # -NR  - rest api enable ; -RA <url> - dgt rest api url
@@ -29,7 +30,8 @@ case "$1" in
 -DTOK) shift; export DGT_TOKEN="-atok $1" ;;
 -BO)  export BON="-bon" ;;
 -NR)  export NREST="ON" ;;
--HTTPS) export HTTPS_MODE="--http_ssl";echo "Https mode." ;;
+-HTTPS) export HTTPS_MODE="--http_ssl";export REST_API="--url https://api-dgt-c1-1:8108";echo "Https mode." ;;
+-ATOK) export ACCESS_TOKEN="--enable_token";echo "Token mode." ;;
 -RA) shift; export REST_API="--url $1" ;;
 -SA) shift; export SEAL_ADDR="$1" ;;
 -LA) shift; export LADDR="-la $1";echo lead=$LADDR ;;

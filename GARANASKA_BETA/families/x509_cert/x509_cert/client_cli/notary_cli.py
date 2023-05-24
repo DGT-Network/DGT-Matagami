@@ -24,6 +24,10 @@ import cbor
 import yaml
 from colorlog import ColoredFormatter
 from dgt_sdk.processor.log import log_configuration
+
+from dgt_cli.token import add_token_parser , do_token 
+
+
 from x509_cert.client_cli.generate import add_generate_parser
 from x509_cert.client_cli.generate import do_generate
 from x509_cert.client_cli.populate import add_populate_parser
@@ -125,7 +129,12 @@ def create_parent_parser(prog_name):
         '--access_token','-atok',              
         type=str,                              
         default=None,                          
-        help='Access token')                   
+        help='DGT Access token')
+    parent_parser.add_argument(  
+        '--notary_token','-ntok',
+        type=str,                
+        default=None,            
+        help='Notary Access token')                    
 
     parent_parser.add_argument(                             
         '-U','--url',                                     
@@ -196,6 +205,7 @@ def create_parser(prog_name):
     add_info_parser(subparsers, parent_parser)
     add_list_parser(subparsers, parent_parser)
     add_init_parser(subparsers, parent_parser)
+    add_token_parser(subparsers, parent_parser)
     """
     add_generate_parser(subparsers, parent_parser)
     add_load_parser(subparsers, parent_parser)
@@ -1010,15 +1020,16 @@ def _get_client(args,init=False):
     url     = args.url
     keyfile = _get_keyfile(args)
     backend = args.crypto_back
+    print('A:',args)
     if init:
         notary= args.value
         lurl = args.leader_addr
         vurl = args.vault_addr
         print("VAULT INIT vurl={}".format(vurl))
-        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,vault_url=vurl,notary=notary,lead_addr=lurl,token=args.access_token)                                       
+        client = NotaryClient(url=url, keyfile=keyfile, backend=backend, vault_url=vurl, notary=notary, lead_addr=lurl, token=args.access_token)
      
     else:
-        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,token=args.access_token)
+        client =  NotaryClient(url=url,keyfile=keyfile,backend=backend,token=args.access_token, ntoken=args.notary_token)
 
     if not client.init_vault():                
         #LOGGER.info("VAULT NOT READY EXIT") 
@@ -1088,7 +1099,10 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
     elif args.command == 'list':
         do_list(args)
     elif args.command == 'init':    
-        do_init(args)               
+        do_init(args)  
+    elif args.command == 'token': 
+        do_token(args,url=NOTARY_API_URL)  
+        
     else:                                                                   
         raise XcertCliException("invalid command: {}".format(args.command)) 
 

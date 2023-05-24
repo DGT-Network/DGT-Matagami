@@ -509,6 +509,7 @@ class OAuth2Session(requests.Session):
         client_id=None,
         client_secret=None,
         files=None,
+        access_token=None,
         **kwargs
     ):
         """Intercept all requests and add the OAuth 2 token if present."""
@@ -564,6 +565,8 @@ class OAuth2Session(requests.Session):
         log.debug("Requesting url %s using method %s.", url, method)
         log.debug("Supplying headers %s and data %s", headers, data)
         log.debug("Passing through key word arguments %s.", kwargs)
+        if access_token and 'Authorization' in headers:
+            headers['Authorization'] = "Bearer {}".format(access_token)
         return super(OAuth2Session, self).request(
             method, url, headers=headers, data=data, files=files, **kwargs
         )

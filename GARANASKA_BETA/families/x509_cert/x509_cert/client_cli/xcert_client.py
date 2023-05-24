@@ -286,7 +286,7 @@ class XcertClient:
         game_address = _sha512(name.encode('utf-8'))[64:]
         return prefix + game_address
 
-    def _send_request(self, suffix, data=None, content_type=None, name=None,rest_url=None):
+    def _send_request(self, suffix, data=None, content_type=None, name=None,rest_url=None,access_token=None):
         rest_url = rest_url if rest_url else self.url
         if rest_url.startswith("http://") or rest_url.startswith("https://"):                                                    
             url = "{}/{}".format(rest_url, suffix)                                                                               
@@ -301,9 +301,10 @@ class XcertClient:
         #print('_send_request',url)
         try:
             if data is not None:
-                result = self._requests.post(url, headers=headers, data=data,verify=False,cert=cert)
+                result = self._requests.request('POST',url, headers=headers, data=data,verify=False,cert=cert,access_token=access_token)
             else:
-                result = self._requests.get(url, headers=headers,verify=False,cert=cert)
+                
+                result = self._requests.request('GET',url, headers=headers, verify=False, cert=cert,access_token=access_token)
                 
 
             if result.status_code == 404:
@@ -316,6 +317,7 @@ class XcertClient:
             raise XcertClientException('Failed to connect to REST API: {}'.format(err))
 
         except BaseException as err:
+            print('error',err)
             raise XcertClientException(err)
 
         return result.text
