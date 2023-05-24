@@ -317,7 +317,7 @@ class XcertClient:
             raise XcertClientException('Failed to connect to REST API: {}'.format(err))
 
         except BaseException as err:
-            print('error',err)
+            print('Error',err)
             raise XcertClientException(err)
 
         return result.text

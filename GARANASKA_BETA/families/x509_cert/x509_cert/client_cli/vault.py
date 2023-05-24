@@ -307,7 +307,7 @@ class Vault(object):
         LOGGER.info(f"TRY TO GET XCERT={kvc}..")
         try:                                                                       
             read_response = self._client.secrets.kv.read_secret_version(path=kvc)        
-            LOGGER.info(f"read_response={read_response}") 
+            #LOGGER.info(f"read_response={read_response}") 
             return read_response['data']                               
         except hvac.exceptions.InvalidPath:                                        
             LOGGER.info(f"UNDEFINED={kvc}") 

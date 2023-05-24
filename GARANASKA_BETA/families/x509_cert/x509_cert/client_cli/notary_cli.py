@@ -1020,7 +1020,7 @@ def _get_client(args,init=False):
     url     = args.url
     keyfile = _get_keyfile(args)
     backend = args.crypto_back
-    print('A:',args)
+    
     if init:
         notary= args.value
         lurl = args.leader_addr
