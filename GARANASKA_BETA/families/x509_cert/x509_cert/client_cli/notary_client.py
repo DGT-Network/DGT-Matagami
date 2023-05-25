@@ -109,6 +109,7 @@ class NotaryClient(XcertClient):
         self._cdec = None
         self._user_signer = None
         self._ntoken = ntoken
+        self._dtoken = token
 
     def init_vault(self):
         if Vault is None: 
@@ -187,7 +188,7 @@ class NotaryClient(XcertClient):
     def init_dec(self,keyfile):
         # for  wallet mode 
         # keyfile - this is private key wallet owner 
-        self._cdec = DecClient(self._url,keyfile=keyfile,backend=self._backend)
+        self._cdec = DecClient(self._url,keyfile=keyfile,backend=self._backend,token=self._dtoken)
 
     def get_xcert_notary_attr(self,xcert):
         val = self.get_xcert_attributes(xcert,X509_COMMON_NAME)
