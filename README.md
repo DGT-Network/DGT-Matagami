@@ -2,8 +2,9 @@
 
 # DGT-Matagami
 
-       DGT (Digital Transactions Platform) is a distributed blockchain platform focused on WEB 3 solutions, em-phasizing tokenization and privacy. Developed since 2018 as a fork of Hyperledger Sawtooth, DGT introduces significant changes, including a hybrid network design with distinct permissioned segments. 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+DGT (Digital Transactions Platform) is a distributed blockchain platform focused on WEB 3 solutions, em-phasizing tokenization and privacy. Developed since 2018 as a fork of Hyperledger Sawtooth, DGT introduces significant changes, including a hybrid network design with distinct permissioned segments. 
+
+
 **VERSIONS**:
 -----------
 DGT (Digital Transactions Platform) has undergone iterative development since its inception, with each ver-sion introducing enhancements and improvements. The following is a summary of the key versions of DGT:
