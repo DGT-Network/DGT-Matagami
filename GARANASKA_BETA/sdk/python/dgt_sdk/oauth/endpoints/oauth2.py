@@ -551,9 +551,12 @@ async def oauth_middleware(request: web.Request,handler):# : Callable[[web.Reque
             if 'access_token' in request.query:
                 ses['access_token'] = request.query['access_token']
             elif 'access_token' in ses:
-                nurl = request.rel_url.with_query('access_token={}'.format(ses['access_token']))
+                nq = 'access_token={}'.format(ses['access_token'])
+                for arg,val in request.query.items():
+                    nq += "&{}={}".format(arg,val)
+                nurl = request.rel_url.with_query(nq)
                 req = request.clone(rel_url=nurl)
-                log.debug('COPY={} url={}'.format(req,nurl)) 
+                log.debug('COPY={} nurl={}'.format(req,nurl)) 
                 request = req
 
         log.debug('SCOPE={} SES={}'.format(scopes,ses))

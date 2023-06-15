@@ -526,6 +526,7 @@ class OAuth2Session(requests.Session):
                 url, headers, data = hook(url, headers, data)
 
             log.debug("Adding token %s to request.", self.token)
+            #print("{}: TOKEN={} kwargs={}".format(method,access_token,kwargs))
             try:
                 url, headers, data = self._client.add_token(
                     url, http_method=method, body=data, headers=headers
