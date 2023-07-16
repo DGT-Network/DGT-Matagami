@@ -65,7 +65,7 @@ async def extract_params(arequest):
 
     basic_auth = {}
     try:
-        body = arequest.body if arequest.body_exists  else None # and arequest.can_read_body
+        body = arequest.body if arequest.body_exists   else None # and arequest.can_read_body
     except Exception:
         log.debug("Gant get body from request")
         body = None

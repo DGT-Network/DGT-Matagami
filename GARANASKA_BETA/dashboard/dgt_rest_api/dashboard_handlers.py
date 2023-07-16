@@ -213,6 +213,8 @@ class DashboardRouteHandler(RouteHandler):
                     validator_query,
                     error_traps)
             link = self._build_url(request, path='/batch_statuses', id=batch_id)
+        
+
         return self._wrap_response(
             request,
             data=None,

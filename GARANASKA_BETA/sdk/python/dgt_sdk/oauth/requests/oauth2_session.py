@@ -566,8 +566,10 @@ class OAuth2Session(requests.Session):
         log.debug("Requesting url %s using method %s.", url, method)
         log.debug("Supplying headers %s and data %s", headers, data)
         log.debug("Passing through key word arguments %s.", kwargs)
+        
         if access_token and 'Authorization' in headers:
             headers['Authorization'] = "Bearer {}".format(access_token)
+        #print("HEADER",headers)   
         return super(OAuth2Session, self).request(
             method, url, headers=headers, data=data, files=files, **kwargs
         )
