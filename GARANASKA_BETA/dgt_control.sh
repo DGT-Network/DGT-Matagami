@@ -16,7 +16,7 @@ fi
 #DGT_PARAM_LIST=${DGT_PARAMS[@]} #(PEER CLUST NODE GENESIS SINGLE PCONTROL PEERING NETWORK METRIC SIGNED INFLUXDB DBHOST DBUSER DBPASS PNM KYC CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
 declare -A MODES_HELP=(
  [dynamic]="Set/reset peer in dynamic mode"
- [taccess]="Set/reset token access mode"
+ [access]="Set/reset token access mode"
  [genesis]="Set/reset genesis mode for peer"
  [signed]="Set/reset signed consensus mode for peer"
 
@@ -453,7 +453,7 @@ function set_mode_dynamic {
 
 }
 
-function set_mode_taccess {
+function set_mode_access {
 
   
   eval ACCESS_TOKEN=\$ACCESS_TOKEN_${SNM^^}
