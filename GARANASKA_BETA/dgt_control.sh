@@ -18,6 +18,7 @@ declare -A MODES_HELP=(
  [dynamic]="Set/reset peer in dynamic mode"
  [taccess]="Set/reset token access mode"
  [genesis]="Set/reset genesis mode for peer"
+ [signed]="Set/reset signed consensus mode for peer"
 
 )
 PEER_PARAMS=()
@@ -437,8 +438,18 @@ eval PEER=\$PEER_${SNM^^}
 }
 function set_mode_dynamic {
 
-  echo "set dynamic peer"
+  
   # PEERING=dynamic SEEDS=--seeds <gateway>
+  eval PEERING=\$PEERING_${SNM^^}
+  
+  if [[ $PEERING == *"static"* ]]; then
+      NVAL="dynamic"
+      echo "Set dynamic mode for peer $snm"   
+  else
+      NVAL="static"
+      echo "Set static mode for peer $snm"
+  fi
+  updateEnvParam "PEERING_${SNM^^}" "$PEERING" "$NVAL"
 
 }
 
@@ -455,6 +466,21 @@ function set_mode_taccess {
       echo "Set token access mode for peer $snm"
   fi
   updateEnvParam "ACCESS_TOKEN_${SNM^^}" "$ACCESS_TOKEN" "$NVAL"
+
+}
+function set_mode_signed {
+
+  
+  eval SIGNED=\$SIGNED_${SNM^^}
+  
+  if [[ $SIGNED == *"--signed_consensus"* ]]; then
+      NVAL=""
+      echo "Set unsigned consensus mode for peer $snm"   
+  else
+      NVAL="--signed_consensus"
+      echo "Set signed consensus mode for peer $snm"
+  fi
+  updateEnvParam "SIGNED_${SNM^^}" "$SIGNED" "$NVAL"
 
 }
 
