@@ -17,6 +17,7 @@ fi
 declare -A MODES_HELP=(
  [dynamic]="Set/reset peer in dynamic mode"
  [access]="Set/reset token access mode"
+ [https]="Set/reset https mode"
  [genesis]="Set/reset genesis mode for peer"
  [signed]="Set/reset signed consensus mode for peer"
 
@@ -472,6 +473,21 @@ function set_mode_dynamic {
 
 }
 
+function set_mode_https {
+
+  
+  eval HTTPS_MODE=\$HTTPS_MODE_${SNM^^}
+  
+  if [[ $HTTPS_MODE == *"--http_ssl"* ]]; then
+      NVAL=""
+      echo "Set http mode for peer $snm"   
+  else
+      NVAL="--http_ssl"
+      echo "Set https mode for peer $snm"
+  fi
+  updateEnvParam "HTTPS_MODE_${SNM^^}" "$HTTPS_MODE" "$NVAL"
+
+}
 function set_mode_access {
 
   
