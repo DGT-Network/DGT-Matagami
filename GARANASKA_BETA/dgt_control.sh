@@ -21,6 +21,25 @@ declare -A MODES_HELP=(
  [signed]="Set/reset signed consensus mode for peer"
 
 )
+declare -A CMDS_HELP=(
+ [up]="Create and start DGT containers: ./dgt_control.sh c1_1 up [-d]"
+ [down]="Stop and remove DGT containers, networks, images, and volumes: ./dgt_control.sh c1_1 down"
+ [start]="Start DGT services: ./dgt_control.sh c1_1 start"
+ [stop]="Stop DGT services: ./dgt_control.sh c1_1 stop"
+ [restart]="Restart DGT services: ./dgt_control.sh c1_1 restart"
+ [list]="print DGT peer's params: ./dgt_control.sh dgt list [-v]"
+ [show]="DGT peer params: ./dgt_control.sh c1_2 show"
+ [edit]="edit DGT peer params: ./dgt_control.sh c1_1 edit [<param name>]"
+ [add]="Add new DGT peer: ./dgt_control.sh c4_1 add"
+ [del]="Drop peer declaration: ./dgt_control.sh c4_1 del"
+ [copy]="make peer copy: ./dgt_control.sh c1_1 copy <new peer name>"
+ [mode]="change peer mode: ./dgt_control.sh c1_1 <mode name>"
+ [shell]="Enter into peer shell: ./dgt_control.sh c1_1 shell"
+ [token]="Generate access token: ./dgt_control.sh c1_1 token"
+ [dec]="run dec commands: ./dgt_control.sh c1_1 dec list"
+
+)
+
 PEER_PARAMS=()
 PEER_LIST=()
 LNAME=
@@ -653,8 +672,14 @@ case $CMD in
          doDecDgt $@     
          ;;                
      *)
-
-          echo -e $CBLUE "Undefined cmd '$CMD' use <peer name> (up/up -d/down/start/stop/restart/list/show/edit/add/copy/mode/shell/token)" $CDEF
+          desired_length=12
+          echo -e $CBLUE "usage:<peer name> <subcommand> [<args>]" $CDEF
+          echo -e $CBLUE "subcommands: " $CDEF
+          for key in "${!CMDS_HELP[@]}"; do                      
+            padding_len=$((desired_length - ${#key}))
+            padded_key="${key}$(printf '%*s' $padding_len)"                                              
+            echo -e $CBLUE "  $padded_key     ${CMDS_HELP[$key]}" $CDEF  
+          done
           ;;
 esac
 
