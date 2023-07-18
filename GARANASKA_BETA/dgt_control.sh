@@ -313,6 +313,12 @@ function doCopyDgt {
           return
 
         fi 
+        eval NPEER=\$PEER_${1^^}
+        if [ ! -z ${NPEER} ];then           
+           echo -e $CRED "DGT PEER '$NPEER' ALREADY DEFINED" $CDEF
+           return
+        fi 
+
         echo -e $CBLUE "COPY ${SNM^^} DGT PEER INTO ${1^^}" $CDEF
 
         PEER_LIST+=($1)
@@ -461,14 +467,21 @@ function set_mode_dynamic {
   
   # PEERING=dynamic SEEDS=--seeds <gateway>
   eval PEERING=\$PEERING_${SNM^^}
-  
+  eval SEEDS=\$SEEDS_${SNM^^}
+  eval CLUST=\$CLUST_${SNM^^}
+
   if [[ $PEERING == *"static"* ]]; then
       NVAL="dynamic"
+      NVAL1="--seeds"
+      NCL="dyn"
+      updateEnvParam "CLUST_${SNM^^}" "$CLUST" "$NCL"
       echo "Set dynamic mode for peer $snm"   
   else
       NVAL="static"
+      NVAL1=""
       echo "Set static mode for peer $snm"
   fi
+  updateEnvParam "SEEDS_${SNM^^}" "$SEEDS" "$NVAL1"
   updateEnvParam "PEERING_${SNM^^}" "$PEERING" "$NVAL"
 
 }
@@ -492,14 +505,18 @@ function set_mode_access {
 
   
   eval ACCESS_TOKEN=\$ACCESS_TOKEN_${SNM^^}
-  
+  eval HTTPS_MODE=\$HTTPS_MODE_${SNM^^}
   if [[ $ACCESS_TOKEN == *"--access_token"* ]]; then
       NVAL=""
+      NVAL1=""
       echo "Set free access mode for peer $snm"   
   else
       NVAL="--access_token"
+      NVAL1="--http_ssl"
       echo "Set token access mode for peer $snm"
+      
   fi
+  updateEnvParam "HTTPS_MODE_${SNM^^}" "$HTTPS_MODE" "$NVAL1"
   updateEnvParam "ACCESS_TOKEN_${SNM^^}" "$ACCESS_TOKEN" "$NVAL"
 
 }
