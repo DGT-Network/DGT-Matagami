@@ -4,8 +4,12 @@
 source ./.env.dgt
 FILE_ENV=./.env.dgt
 COMPOSE=docker-compose
+# get name and operation
 SNM=$1
 shift
+CMD=$1
+shift
+
 if ! command -v $COMPOSE &> /dev/null
 then
     echo "$COMPOSE could not be found"
@@ -23,6 +27,7 @@ declare -A MODES_HELP=(
 
 )
 declare -A CMDS_HELP=(
+ [build]="Build or rebuild services: ./dgt_control.sh c1_1 build validator-dgt"
  [up]="Create and start DGT containers: ./dgt_control.sh c1_1 up [-d]"
  [down]="Stop and remove DGT containers, networks, images, and volumes: ./dgt_control.sh c1_1 down"
  [start]="Start DGT services: ./dgt_control.sh c1_1 start"
@@ -646,8 +651,8 @@ function doDecDgt {
 
 }
 
-CMD=$1
-shift
+
+
 case $CMD in
      up)
           doDgtCompose  $@
