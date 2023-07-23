@@ -380,6 +380,18 @@ getParamHelp() {
 
 
 }
+function printHelp {
+ local -n HELP=$1
+  
+  desired_length=10 
+  for key in "${!HELP[@]}"; do  
+     padding_len=$((desired_length - ${#key}))
+     padded_key="${key}$(printf '%*s' $padding_len)"                    
+     echo -e $CBLUE "  $padded_key  ${HELP[$key]}" $CDEF  
+  done
+}
+
+
 function doEditDgt {  
 eval PEER=\$PEER_${SNM^^}
     
@@ -577,12 +589,7 @@ function doModeDgt {
      
   fi
   echo -e $CBLUE "Use mode from list:" $CDEF
-  for key in "${!MODES_HELP[@]}"; do                      
-                                                          
-   echo -e $CBLUE "  $key - '${MODES_HELP[$key]}'" $CDEF  
-  done                                                    
-
-
+  printHelp MODES_HELP
 
 }
 function doDelDgt {
@@ -713,11 +720,8 @@ case $CMD in
           desired_length=12
           echo -e $CBLUE "usage:<peer name> <subcommand> [<args>]" $CDEF
           echo -e $CBLUE "subcommands: " $CDEF
-          for key in "${!CMDS_HELP[@]}"; do                      
-            padding_len=$((desired_length - ${#key}))
-            padded_key="${key}$(printf '%*s' $padding_len)"                                              
-            echo -e $CBLUE "  $padded_key     ${CMDS_HELP[$key]}" $CDEF  
-          done
+          printHelp CMDS_HELP                                                 
+          
           ;;
 esac
 
