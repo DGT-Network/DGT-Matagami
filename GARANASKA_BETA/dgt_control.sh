@@ -16,6 +16,12 @@ then
     echo "Use docker with option compose"
     COMPOSE="docker compose"
 fi
+declare -A DEF_PARAMS=(
+[DAG_BRANCH]="6"
+[MAX_PEER]="70"
+[DBMODE]="metrics" 
+[DBPORT]="8086"
+)
 #FCOMPOSE="docker-compose-netCN-dgt-dec-ci.yaml"
 #DGT_PARAM_LIST=${DGT_PARAMS[@]} #(PEER CLUST NODE GENESIS SINGLE PCONTROL PEERING NETWORK METRIC SIGNED INFLUXDB DBHOST DBUSER DBPASS PNM KYC CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
 declare -A MODES_HELP=(
@@ -24,6 +30,7 @@ declare -A MODES_HELP=(
  [https]="Set/reset https mode"
  [genesis]="Set/reset genesis mode for peer"
  [signed]="Set/reset signed consensus mode for peer"
+ [metric]="Set/reset metric mode for peer"
 
 )
 declare -A CMDS_HELP=(
@@ -43,8 +50,65 @@ declare -A CMDS_HELP=(
  [shell]="Enter into peer shell: ./dgt_control.sh c1_1 shell"
  [token]="Generate access token: ./dgt_control.sh c1_1 token"
  [dec]="run dec commands: ./dgt_control.sh c1_1 dec list"
+ [run]="run dgt commands: ./dgt_control.sh c1_1 dgt bgt list"
 
 )
+if [ ! -v DGT_PARAMS ]; then
+DGT_PARAMS=(PEER CLUST NODE API COMP NET CONS GENESIS SINGLE DAG_BRANCH PCONTROL MAX_PEER PEERING SEEDS NETWORK SIGNED ENDHOST GATEWAY INFLUXDB DBMODE DBHOST DBPORT DBUSER DBPASS PNM KYC CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
+fi
+if [ ! -v DGT_NOTA_PARAMS ]; then
+DGT_NOTA_PARAMS=(PEER PNM CRYPTO_BACK USER_NOTARY BOT_TOKEN LADDR BON NREST SEAL_ADDR REST_API HTTPS_MODE ACCESS_TOKEN DGT_TOKEN)
+fi
+if [ ! -v DGT_GRAF_PARAMS ]; then
+DGT_GRAF_PARAMS=(PEER API DBPORT DBUSER DBPASS DB_ADM_USER DB_ADM_PASS DBMODE)
+fi
+if [ ! -v DGT_DASH_PARAMS ]; then
+DGT_DASH_PARAMS=(PEER CLUST NODE COMP API SIGNED PNM CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
+fi
+
+if [ ! -v PARAMS_HELP ]; then
+declare -A PARAMS_HELP=(
+    [PEER]="Dgt peer name: <name>"
+    [CLUST]="Cluser name: 'c[1..9]'"
+    [NODE]="Peer number in cluster: [1..]"
+    [MAX_PEER]="Maximum peer connectivity: 70"
+    [DAG_BRANCH]="Maximum DAG branch: 6"
+    [API]="REST-API PORT"
+    [COMP]="Component PORT"
+    [NET]="Network PORT"
+    [CONS]="Consensus PORT"
+    [GENESIS]="Genesis mode: Y/N"
+    [SINGLE]="Single peer mode: Y/N"
+    [PCONTROL]="Peer list for control: <peer1>,<peer2>,"
+    [PEERING]="Peering mode: static/dynamic"
+    [SEEDS]="Seed list for static/dymanic:--seeds <seed1>,<seed2>, / --seeds <gateway>"
+    [NETWORK]="Network name for this peer: net0"
+    [ENDHOST]="External peer endpoint: tcp://<host>:<port>/"
+    [GATEWAY]="The gateway as a link to a file hosted in the cloud or uri to DGT peer: ${DGT_GATEWAY} / tcp://<host>:<port>"
+    [INFLUXDB]="User Influx DB: --opentsdb-url-off/--opentsdb-url <url>"
+    [DBHOST]="Service name with Influx DB: stats-influxdb-dgt"
+    [DBUSER]="Influx DB user: <user name>"
+    [DBPASS]="Influx DB password: <password>"
+    [DB_ADM_USER]="Influx DB admin: <admin name>"
+    [DB_ADM_PASS]="Influx DB admin password: <password>"
+    [DBMODE]="Influx DB mode: metrics"
+    [DBPORT]="Influx DB port: 8086"
+    [CRYPTO_BACK]="Cryptography type: openssl/bitcoin"
+    [SIGNED]="Signed consensus mode: --signed_consensus/ "
+    [HTTPS_MODE]="--http_ssl/ "
+    [ACCESS_TOKEN]="Rest-api token: --access_token/ "
+    [PNM]="DGT project name: dgt"
+    [KYC]="KYC value: -kyc val/ "
+    [BOT_TOKEN]="Telegram bot token: <token for telegram access>"
+    [LADDR]="Notary leader uri: -la <uri> / "
+    [SEAL_ADDR]="Notary seal keeper uri: vault-n1:8220"
+    [DGT_TOKEN]="DGT REST-API token: <token>"
+    [USER_NOTARY]="User notary name:--user-notary <user>"
+    [NREST]="Notary rest-api mode: ON/OFF"
+    [BON]="Teler bot mode: -bon/"
+)
+fi
+
 
 PEER_PARAMS=()
 PEER_LIST=()
@@ -166,40 +230,40 @@ function doDashCompose {
    fi
 
 }
+function doPeerParams {
+    local -n PARAMS=$1
+    for var in ${PEER_PARAMS[@]}
+    do
+        vname="${var}_${SNM^^}"
+        if [[ -z "${!vname}" ]];then
+           if [ -v DEF_PARAMS[$var] ]; then
+              PARAMS[$var]="${DEF_PARAMS[$var]}"
+           else 
+              PARAMS[$var]=""
+           fi 
+        else
+           PARAMS[$var]=${!vname}
+           
+        fi
+    done
+}
 
 function doPeerCompose {
    
    if test -f $FCOMPOSE; then 
-       eval PEER=\$PEER_${SNM^^}                                              
-       eval CLUST=\$CLUST_${SNM^^}                                                
-       eval NODE=\$NODE_${SNM^^}                                                
-       eval GENESIS=\$GENESIS_${SNM^^}                                           
-       eval SINGLE=\$SINGLE_${SNM^^}
-       eval PCONTROL=\$PCONTROL_${SNM^^} 
-       eval PEERING=\$PEERING_${SNM^^} 
-       eval NETWORK=\$NETWORK_${SNM^^}                                           
-       eval METRIC=\$METRIC_${SNM^^}
-       eval SIGNED=\$SIGNED_${SNM^^}
-       eval INFLUXDB=\$INFLUXDB_${SNM^^}                                         
-       eval DBHOST=\$DBHOST_${SNM^^}                                           
-       eval DBUSER=\$DBUSER_${SNM^^}
-       eval DBPASS=\$DBPASS_${SNM^^}
-       eval PNM=\$PNM_${SNM^^}
-       eval CRYPTO_BACK=\$CRYPTO_BACK_${SNM^^}
-       eval KYC=\$KYC_${SNM^^}
-       eval HTTPS_MODE=\$HTTPS_MODE_${SNM^^}
-       eval ACCESS_TOKEN=\$ACCESS_TOKEN_${SNM^^}
-       eval API=\$API_${SNM^^}
-       eval COMP=\$COMP_${SNM^^}
-       eval NET=\$NET_${SNM^^}
-       eval CONS=\$CONS_${SNM^^} 
-                                             
- 
+       
+        # set params and default 
+        declare -A params=()
+        doPeerParams params
+        #declare -p params
+        
         #export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1 N=1 API=8108 COMP=4104 NET=8101 CONS=5051;docker-compose -f docker/$FCOMPOSE $mode
-        export COMPOSE_PROJECT_NAME=$SNM G=$GENESIS C=$CLUST N=$NODE API=$API COMP=$COMP NET=$NET CONS=$CONS \
-               GENESIS=$GENESIS SINGLE=$SINGLE PCONTROL=$PCONTROL PEERING=$PEERING NETWORK=$NETWORK \
-               METRIC=$METRIC SIGNED=$SIGNED INFLUXDB=$INFLUXDB DBHOST=$DBHOST DBUSER=$DBUSER DBPASS=$DBPASS \
-               PNM=$PNM CRYPTO_BACK=$CRYPTO_BACK KYC=$KYC HTTPS_MODE=$HTTPS_MODE ACCESS_TOKEN=$ACCESS_TOKEN; \
+        export COMPOSE_PROJECT_NAME=$SNM G=${params["GENESIS"]} C=${params["CLUST"]} N=${params["NODE"]} \
+               API=${params["API"]} COMP=${params["COMP"]} NET=${params["NET"]} CONS=${params["CONS"]} \
+               SINGLE=${params["SINGLE"]} SIGNED=${params["SIGNED"]}  PCONTROL=$PCONTROL MAX_PEER=${params["MAX_PEER"]} \
+               DAG_BRANCH=${params["DAG_BRANCH"]} PEERING=${params["PEERING"]} NETWORK=${params["NETWORK"]} \
+               INFLUXDB=${params["INFLUXDB"]} DBHOST=${params["DBHOST"]} DBPORT=${params["DBPORT"]} DBUSER=${params["DBUSER"]} DBPASS=${params["DBPASS"]} DBMODE=${params["DBMODE"]} \
+               PNM=${params["PNM"]} CRYPTO_BACK=${params["CRYPTO_BACK"]} KYC=${params["KYC"]} HTTPS_MODE=${params["HTTPS_MODE"]} ACCESS_TOKEN=${params["ACCESS_TOKEN"]}; \
                $COMPOSE -f $FCOMPOSE $CMD $@;                           
        
    else                                                                              
@@ -296,11 +360,12 @@ function doShowDgt {
             return 
         fi
         echo -e $CBLUE "DGT PEER  $NM::" $CDEF
-        for var in ${PEER_PARAMS[@]}
+        declare -A params=()
+        doPeerParams params
+
+        for var in ${!params[@]}
         do
-            p_val="${var}_${NM^^}"
-            
-            echo -e $CBLUE "  $var=${!p_val} " $CDEF
+            echo -e $CBLUE "  $var=${params[$var]} " $CDEF
 
         done
    
@@ -553,6 +618,22 @@ function set_mode_signed {
 
 }
 
+function set_mode_metric {
+ # ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics
+  eval INFLUXDB=\$INFLUXDB_${SNM^^}
+
+  if [[ $INFLUXDB == *"--opentsdb-url-off"* ]]; then
+      NVAL="--opentsdb-url"
+      echo "Switch ON metrics for peer $snm"   
+  else
+      NVAL="--opentsdb-url-off"
+      echo "Switch OFF metrics for peer $snm"
+  fi
+  updateEnvParam "INFLUXDB_${SNM^^}" "$INFLUXDB" "$NVAL"
+
+
+}
+
 function set_mode_genesis {
 
 eval GENESIS=\$GENESIS_${SNM^^}
@@ -620,6 +701,17 @@ function doDelDgt {
 
 
 }
+function doDockerCmd() {
+    local container_name=$1;shift
+    local container_id=$(docker ps -q -f "name=${container_name}")
+
+    if [ -n "$container_id" ]; then
+      #echo "Контейнер $container_name запущен."
+      docker exec -it ${container_name} $@
+    else
+      echo "Service '$container_name' is not ready."
+    fi
+}
 
 function doShellDgt {
     
@@ -629,8 +721,9 @@ function doShellDgt {
       echo -e $CRED "UDEFINED PEER '$SNM' " $CDEF        
       return
     fi
-
-    docker exec -it shell-dgt-${CLUST}-${NODE} bash
+    container_name="shell-dgt-${CLUST}-${NODE}"
+    doDockerCmd $container_name "bash"
+    
 
 }
 function doTokenDgt {
@@ -641,8 +734,10 @@ function doTokenDgt {
       echo -e $CRED "UDEFINED PEER '$SNM' " $CDEF        
       return
     fi
-
-    docker exec -it shell-dgt-${CLUST}-${NODE}  dgt token get -u dgt:matagami -sc show -sc trans --client clientC
+    local container_name="shell-dgt-${CLUST}-${NODE}"
+    doDockerCmd $container_name "dgt token get -u dgt:matagami -sc show -sc trans --client clientC" 
+    #docker exec -it shell-dgt-${CLUST}-${NODE}  dgt token get -u dgt:matagami -sc show -sc trans --client clientC
+    
 
 }
 function doDecDgt {
@@ -653,8 +748,22 @@ function doDecDgt {
       echo -e $CRED "UDEFINED PEER '$SNM' " $CDEF        
       return
     fi
+    local container_name="shell-dgt-${CLUST}-${NODE}"
+    doDockerCmd $container_name dec $@
+    #docker exec -it shell-dgt-${CLUST}-${NODE} dec $@
 
-    docker exec -it shell-dgt-${CLUST}-${NODE} dec $@
+}
+function doDgtDgt {
+    
+    eval CLUST=\$CLUST_${SNM^^}
+    eval NODE=\$NODE_${SNM^^}
+    if [ -z ${CLUST} ] || [ -z ${NODE} ];then   
+      echo -e $CRED "UDEFINED PEER '$SNM' " $CDEF        
+      return
+    fi
+    local container_name="shell-dgt-${CLUST}-${NODE}"
+    doDockerCmd $container_name $@
+    #docker exec -it shell-dgt-${CLUST}-${NODE} dec $@
 
 }
 
@@ -662,6 +771,9 @@ function doDecDgt {
 
 case $CMD in
      up)
+          doDgtCompose  $@
+          ;;
+     ps)
           doDgtCompose  $@
           ;;
      down)
@@ -715,7 +827,12 @@ case $CMD in
          ;;               
      dec)                
          doDecDgt $@     
-         ;;                
+         ;;
+     run)                
+         doDgtDgt $@     
+         ;;    
+                
+                
      *)
           desired_length=12
           echo -e $CBLUE "usage:<peer name> <subcommand> [<args>]" $CDEF

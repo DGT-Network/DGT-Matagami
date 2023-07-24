@@ -274,8 +274,8 @@ services:
             --bind component:tcp://eth0:${COMP} \
             --bind network:tcp://eth0:${NET} \
             --bind consensus:tcp://eth0:${CONS} \
-            --max_dag_branch 6 --scheduler parallel ${SIGNED} --peering ${PEERING} ${SEEDS} --maximum-peer-connectivity 70 \
-            ${INFLUXDB} http://${DBHOST}:8086 --opentsdb-db metrics --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
+            --max_dag_branch ${DAG_BRANCH} --scheduler parallel ${SIGNED} --peering ${PEERING} ${SEEDS} --maximum-peer-connectivity ${MAX_PEER} \
+            ${INFLUXDB} http://${DBHOST}:${DBPORT} --opentsdb-db ${DBMODE} --opentsdb-username ${DBUSER} --opentsdb-password ${DBPASS}
       "
     stop_signal: SIGTERM
     #stop_grace_period: 600ms
