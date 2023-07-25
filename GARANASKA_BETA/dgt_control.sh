@@ -1,8 +1,9 @@
 #!/bin/bash
 # DGT SERVICE CONTROL
 #
-source ./.env.dgt
 FILE_ENV=./.env.dgt
+source $FILE_ENV
+
 COMPOSE=docker-compose
 # get name and operation
 SNM=$1
@@ -21,6 +22,9 @@ declare -A DEF_PARAMS=(
 [MAX_PEER]="70"
 [DBMODE]="metrics" 
 [DBPORT]="8086"
+[ENDHOST]=""
+[ENDPOINTS]=""
+[SEEDS]=""
 )
 #FCOMPOSE="docker-compose-netCN-dgt-dec-ci.yaml"
 #DGT_PARAM_LIST=${DGT_PARAMS[@]} #(PEER CLUST NODE GENESIS SINGLE PCONTROL PEERING NETWORK METRIC SIGNED INFLUXDB DBHOST DBUSER DBPASS PNM KYC CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
@@ -261,6 +265,7 @@ function doPeerCompose {
         export COMPOSE_PROJECT_NAME=$SNM G=${params["GENESIS"]} C=${params["CLUST"]} N=${params["NODE"]} \
                API=${params["API"]} COMP=${params["COMP"]} NET=${params["NET"]} CONS=${params["CONS"]} \
                SINGLE=${params["SINGLE"]} SIGNED=${params["SIGNED"]}  PCONTROL=$PCONTROL MAX_PEER=${params["MAX_PEER"]} \
+               ENDHOST=${params["ENDHOST"]} ENDPOINTS=${params["ENDPOINTS"]} SEEDS=${params["SEEDS"]} PEERS=${params["PEERS"]} \
                DAG_BRANCH=${params["DAG_BRANCH"]} PEERING=${params["PEERING"]} NETWORK=${params["NETWORK"]} \
                INFLUXDB=${params["INFLUXDB"]} DBHOST=${params["DBHOST"]} DBPORT=${params["DBPORT"]} DBUSER=${params["DBUSER"]} DBPASS=${params["DBPASS"]} DBMODE=${params["DBMODE"]} \
                PNM=${params["PNM"]} CRYPTO_BACK=${params["CRYPTO_BACK"]} KYC=${params["KYC"]} HTTPS_MODE=${params["HTTPS_MODE"]} ACCESS_TOKEN=${params["ACCESS_TOKEN"]}; \
@@ -770,27 +775,9 @@ function doDgtDgt {
 
 
 case $CMD in
-     up)
+     up | down | start | stop | restart | build | ps)
           doDgtCompose  $@
           ;;
-     ps)
-          doDgtCompose  $@
-          ;;
-     down)
-          doDgtCompose  $@
-          ;;
-     start)                  
-         doDgtCompose  $@  
-         ;;                
-     stop)
-          doDgtCompose  $@
-          ;;
-     restart)                      
-          doDgtCompose  $@      
-          ;;      
-     build)                       
-          doDgtCompose  $@              
-          ;;   
      load)
           doImageLoad  $@              
           ;;              
@@ -831,7 +818,6 @@ case $CMD in
      run)                
          doDgtDgt $@     
          ;;    
-                
                 
      *)
           desired_length=12
