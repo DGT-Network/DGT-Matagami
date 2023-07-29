@@ -345,7 +345,8 @@ function doListDgt {
     if [[ $1 == '-v' ]]; then           
                                         
       for NM in ${PEER_LIST[@]}              
-      do                                
+      do     
+          SNM=$NM                           
           doShowDgt $NM               
       done                              
     else                                
