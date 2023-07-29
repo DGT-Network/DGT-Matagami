@@ -58,6 +58,20 @@ declare -A CMDS_HELP=(
  [ps]="List containers: ./dgt_control.sh c1_1 ps [-q/--services]"
 
 )
+if [ ! -v FCOMPOSE ]; then
+FCOMPOSE="docker/docker-compose-netCN-dgt-dec-ci.yaml"
+fi
+if [ ! -v DASH_FCOMP ]; then
+DASH_FCOMP="docker/docker-compose-dash-dgt-ci.yaml"
+fi
+if [ ! -v GRAF_FCOMP ]; then
+GRAF_FCOMP="docker/docker-compose-grafana-dgt.yaml"
+fi
+if [ ! -v NOTA_FCOMP ]; then
+NOTA_FCOMP="docker/docker-compose-notary-raft-dgt.yaml"
+fi
+
+
 if [ ! -v DGT_PARAMS ]; then
 DGT_PARAMS=(PEER CLUST NODE API COMP NET CONS GENESIS SINGLE DAG_BRANCH PCONTROL MAX_PEER PEERING SEEDS NETWORK SIGNED ENDHOST GATEWAY INFLUXDB DBMODE DBHOST DBPORT DBUSER DBPASS PNM KYC CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
 fi
