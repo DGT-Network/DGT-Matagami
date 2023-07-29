@@ -321,23 +321,36 @@ function doServiceCmd {
 }
 function doImageLoad {
 # load docker image 
-    if test -f plc-$DISTR.tgz; then 
-        echo "Import docker image plc-$DISTR.tgz"
-        docker load -i  plc-$DISTR.tgz && docker images | grep plc-$DISTR
+  INAME="dgt-common-$DISTR"
+
+    if test -f $INAME.tgz; then 
+
+      read -e -p "Load docker image from ${INAME}.tgz (Y/N)?" -i "N" REPL
+      if [[ $REPL == "Y" ]]; then
+
+        echo "Import docker image $INAME.tgz"
+        docker load -i $INAME.tgz && docker images | grep $INAME
+      fi
     else
-        echo "Can't find image plc-$DISTR.tgz"
+        echo "Can't find image $INAME.tgz"
     fi
+
 }
 
 function doImageSave {
 # save docker image 
-    if test -f plc-$DISTR.tgz; then 
-        echo "Image plc-$DISTR already saved"
-        
-        
-    else
-        echo "Save docker image plc-$DISTR"
-        docker save -o plc-$DISTR.tgz  plc-$DISTR 
+    INAME="dgt-common-$DISTR"
+    read -e -p "Save docker image ${INAME} (Y/N)?" -i "N" REPL
+    if [[ $REPL == "Y" ]]; then
+
+      if test -f "$INAME.tgz"; then 
+          echo "Image $INAME already saved"
+          
+          
+      else
+          echo "Save docker image $INAME"
+          docker save -o $INAME.tgz $INAME 
+      fi
     fi
 }
 function doListDgt {
