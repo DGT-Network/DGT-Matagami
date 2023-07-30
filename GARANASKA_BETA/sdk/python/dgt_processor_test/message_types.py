@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 Intel Corporation
+# Copyright DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,20 +13,20 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-from sawtooth_sdk.protobuf.processor_pb2 import TpRegisterRequest
-from sawtooth_sdk.protobuf.processor_pb2 import TpRegisterResponse
-from sawtooth_sdk.protobuf.processor_pb2 import TpProcessResponse
-from sawtooth_sdk.protobuf.processor_pb2 import TpProcessRequest
+from dgt_sdk.protobuf.processor_pb2 import TpRegisterRequest
+from dgt_sdk.protobuf.processor_pb2 import TpRegisterResponse
+from dgt_sdk.protobuf.processor_pb2 import TpProcessResponse
+from dgt_sdk.protobuf.processor_pb2 import TpProcessRequest
 
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateGetResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateGetRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateSetResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateSetRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateDeleteRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateDeleteResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpEventAddRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpEventAddResponse
-from sawtooth_sdk.protobuf.validator_pb2 import Message
+from dgt_sdk.protobuf.state_context_pb2 import TpStateGetResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpStateGetRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpStateSetResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpStateSetRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpStateDeleteRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpStateDeleteResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpEventAddRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpEventAddResponse
+from dgt_sdk.protobuf.validator_pb2 import Message
 
 
 _TYPE_TO_PROTO = {

@@ -1,4 +1,4 @@
-# Copyright 2016 Intel Corporation
+# Copyright DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import subprocess
 import zmq
 import zmq.asyncio
 
-from sawtooth_sdk.protobuf.processor_pb2 import TpRegisterRequest
-from sawtooth_sdk.protobuf.processor_pb2 import TpRegisterResponse
-from sawtooth_sdk.protobuf.validator_pb2 import Message
+from dgt_sdk.protobuf.processor_pb2 import TpRegisterRequest
+from dgt_sdk.protobuf.processor_pb2 import TpRegisterResponse
+from dgt_sdk.protobuf.validator_pb2 import Message
 
 from sawtooth_processor_test.message_types import to_protobuf_class
 from sawtooth_processor_test.message_types import to_message_type
@@ -163,7 +163,7 @@ class MockValidator:
     async def _send(self, ident, message):
         """
         (asyncio coroutine) Send the message and wait for a response.
-        :param message (sawtooth_sdk.protobuf.Message)
+        :param message (dgt_sdk.protobuf.Message)
         :param ident (str) the identity of the zmq.DEALER to send to
         """
 

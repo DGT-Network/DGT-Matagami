@@ -1,4 +1,4 @@
-# Copyright 2016 Intel Corporation
+# Copyright DGT NETWORK INC © Stanislav Parsov
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,28 +20,28 @@ import random
 from dgt_signing import create_context
 from dgt_signing import CryptoFactory
 
-from sawtooth_sdk.protobuf.processor_pb2 import TpRegisterRequest
-from sawtooth_sdk.protobuf.processor_pb2 import TpProcessResponse
-from sawtooth_sdk.protobuf.processor_pb2 import TpProcessRequest
+from dgt_sdk.protobuf.processor_pb2 import TpRegisterRequest
+from dgt_sdk.protobuf.processor_pb2 import TpProcessResponse
+from dgt_sdk.protobuf.processor_pb2 import TpProcessRequest
 
-from sawtooth_sdk.protobuf.transaction_pb2 import Transaction
-from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader
+from dgt_sdk.protobuf.transaction_pb2 import Transaction
+from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader
 
-from sawtooth_sdk.protobuf.batch_pb2 import Batch
-from sawtooth_sdk.protobuf.batch_pb2 import BatchList
-from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader
+from dgt_sdk.protobuf.batch_pb2 import Batch
+from dgt_sdk.protobuf.batch_pb2 import BatchList
+from dgt_sdk.protobuf.batch_pb2 import BatchHeader
 
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateGetResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateGetRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateSetResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateSetRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateDeleteResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateDeleteRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpEventAddRequest
-from sawtooth_sdk.protobuf.state_context_pb2 import TpEventAddResponse
-from sawtooth_sdk.protobuf.state_context_pb2 import TpStateEntry
+from dgt_sdk.protobuf.state_context_pb2 import TpStateGetResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpStateGetRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpStateSetResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpStateSetRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpStateDeleteResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpStateDeleteRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpEventAddRequest
+from dgt_sdk.protobuf.state_context_pb2 import TpEventAddResponse
+from dgt_sdk.protobuf.state_context_pb2 import TpStateEntry
 
-from sawtooth_sdk.protobuf.events_pb2 import Event
+from dgt_sdk.protobuf.events_pb2 import Event
 
 
 class InvalidMerkleAddressException(Exception):
