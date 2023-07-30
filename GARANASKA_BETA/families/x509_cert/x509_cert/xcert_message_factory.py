@@ -15,7 +15,7 @@
 
 import cbor
 
-from sawtooth_processor_test.message_factory import MessageFactory
+from dgt_processor_test.message_factory import MessageFactory
 #from x509_cert.processor.handler import XCERT_ADDRESS_PREFIX
 #from x509_cert.processor.handler import make_xcert_address
 from x509_cert.xcert_addr_util import make_xcert_address,XCERT_ADDRESS_PREFIX

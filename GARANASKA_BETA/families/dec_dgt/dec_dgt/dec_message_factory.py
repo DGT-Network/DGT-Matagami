@@ -15,7 +15,7 @@
 
 import cbor
 
-from sawtooth_processor_test.message_factory import MessageFactory
+from dgt_processor_test.message_factory import MessageFactory
 from dec_dgt.processor.handler import DEC_ADDRESS_PREFIX
 from dec_dgt.processor.handler import make_dec_address
 from dec_dgt.client_cli.dec_attr import *

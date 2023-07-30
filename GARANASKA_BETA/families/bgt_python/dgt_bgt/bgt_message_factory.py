@@ -15,7 +15,7 @@
 
 import cbor
 
-from sawtooth_processor_test.message_factory import MessageFactory
+from dgt_processor_test.message_factory import MessageFactory
 from dgt_bgt.processor.handler import BGT_ADDRESS_PREFIX
 from dgt_bgt.processor.handler import make_bgt_address
 
