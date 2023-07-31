@@ -37,6 +37,21 @@ declare -A MODES_HELP=(
  [metric]="Set/reset metric mode for peer"
 
 )
+declare -A CONFS_SRC=(
+ [cert]="etc/certificate.json"
+ [oauth]="etc/oauth_conf.json"
+ [gate]="etc/entry_points.json"
+ [net]="etc/dgt.net.map"
+
+)
+declare -A CONFS_HELP=(
+ [cert]="Show peer certificate"
+ [oauth]="Show auth config"
+ [gate]="Show gateway config"
+ [net]="Show network config"
+
+)
+
 declare -A CMDS_HELP=(
  [build]="Build or rebuild services: ./dgt_control.sh c1_1 build validator-dgt"
  [up]="Create and start DGT containers: ./dgt_control.sh c1_1 up [-d]"
@@ -452,11 +467,18 @@ function doCopyDgt {
                          
 }                        
 function updateEnvParam {
-
- if [[ $2 != $3 ]]; then       
- echo -e  $CBLUE "update:: $1=$2 -> $3" $CDEF
- sed -i "s/$1=.*/$1=$3/"  $FILE_ENV
- fi                                   
+ if grep -q "${1}=" "$FILE_ENV"; then
+   # this param already defined try to update
+   if [[ $2 != $3 ]]; then       
+   echo -e  $CBLUE "update:: $1=$2 -> $3" $CDEF
+   sed -i "s/$1=.*/$1=$3/"  $FILE_ENV
+   fi
+ else
+  # new params
+  after_par="NODE_${SNM^^}" 
+  sed -i "/$after_par=.*/a $1=$3"  $FILE_ENV
+                                  
+ fi                                  
 
 }
 function updatePeerList {
@@ -707,6 +729,39 @@ function doModeDgt {
   printHelp MODES_HELP
 
 }
+function doConfDgt {
+  # 
+  eval PEER=\$PEER_${SNM^^}
+  if [ -z ${PEER} ];then           
+    echo -e $CRED "'$SNM' PEER UNDEFINED" $CDEF
+    return
+  fi
+  if [[ $1 != "" ]]; then
+     if [ -v CONFS_SRC[$1] ]; then
+        #echo "Conf ${CONFS_SRC[$1]}"
+        if ! command -v jq &> /dev/null
+        then
+          echo -e $CRED "Please install util 'jq'" $CDEF
+        else
+          cat ${CONFS_SRC[$1]} | jq 
+        fi
+        return
+      else
+       echo -e $CRED "Undefined config type '$1'." $CDEF
+       
+     fi
+  else 
+     echo -e $CRED "Define mode which you want to set for '$SNM'" $CDEF
+     
+  fi
+  echo -e $CBLUE "Use config type from list:" $CDEF
+  printHelp CONFS_HELP
+
+}
+
+
+
+
 function doDelDgt {
   # sed '/the/d' dummy.txt
   eval PEER=\$PEER_${SNM^^}
@@ -757,7 +812,6 @@ function doShellDgt {
     fi
     container_name="shell-dgt-${CLUST}-${NODE}"
     doDockerCmd $container_name "bash"
-    
 
 }
 function doTokenDgt {
@@ -770,8 +824,6 @@ function doTokenDgt {
     fi
     local container_name="shell-dgt-${CLUST}-${NODE}"
     doDockerCmd $container_name "dgt token get -u dgt:matagami -sc show -sc trans --client clientC" 
-    #docker exec -it shell-dgt-${CLUST}-${NODE}  dgt token get -u dgt:matagami -sc show -sc trans --client clientC
-    
 
 }
 function doDecDgt {
@@ -784,7 +836,6 @@ function doDecDgt {
     fi
     local container_name="shell-dgt-${CLUST}-${NODE}"
     doDockerCmd $container_name dec $@
-    #docker exec -it shell-dgt-${CLUST}-${NODE} dec $@
 
 }
 function doDgtDgt {
@@ -797,10 +848,8 @@ function doDgtDgt {
     fi
     local container_name="shell-dgt-${CLUST}-${NODE}"
     doDockerCmd $container_name $@
-    #docker exec -it shell-dgt-${CLUST}-${NODE} dec $@
-
+    
 }
-
 
 
 case $CMD in
@@ -834,7 +883,9 @@ case $CMD in
      mode)                             
           doModeDgt  $@                 
           ;;
-
+     conf)                     
+          doConfDgt  $@        
+          ;;                   
      shell)
          doShellDgt $@
          ;;    
