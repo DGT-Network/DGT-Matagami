@@ -15,7 +15,7 @@
 import os
 import unittest
 
-from sawtooth_processor_test.mock_validator import MockValidator
+fro dgt_processor_test.mock_validator import MockValidator
 
 
 class TransactionProcessorTestCase(unittest.TestCase):
