@@ -54,8 +54,8 @@ from dgt_validator.gossip.fbft_topology import (PeerSync,PeerRole,PeerAtr,FbftTo
                                                 TOPOLOGY_SET_NM,DGT_TOPOLOGY_MAP_NM,TOPO_GENESIS,DGT_NET_NEST,
                                                 DGT_SELF_CERT,DGT_KYC_DID,IS_DID,GET_DID_UID
                                                 )
-from dgt_cli.make_set_txn import _create_batch,_create_topology_txn
-from x509_cert.client_cli.create_batch import create_xcert_txn
+from dgt_validator.gossip.txn_utils import _create_batch,_create_topology_txn,create_xcert_txn
+
 
 LOGGER = logging.getLogger(__name__)
 

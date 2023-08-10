@@ -38,12 +38,13 @@ from dgt_cli.make_set_txn import _create_batch,_create_propose_txn,_create_topol
 from dgt_sdk.protobuf.settings_pb2 import SettingCandidates
 #from dgt_cli.protobuf.settings_pb2 import SettingCandidates
 #from dgt_cli.protobuf.setting_pb2 import Setting
-from dgt_validator.protobuf.setting_pb2 import Setting
-
+#from dgt_validator.protobuf.setting_pb2 import Setting
+from dgt_sdk.protobuf.setting_pb2 import Setting
 #from dgt_cli.protobuf.transaction_pb2 import TransactionHeader
 #from dgt_cli.protobuf.transaction_pb2 import Transaction
 
-from dgt_validator.protobuf.batch_pb2 import BatchList
+#from dgt_validator.protobuf.batch_pb2 import BatchList
+from dgt_sdk.protobuf.batch_pb2 import BatchList
 #from dgt_cli.protobuf.batch_pb2 import BatchList
 
 from dgt_signing import create_context

@@ -23,20 +23,20 @@ import pkg_resources
 
 from colorlog import ColoredFormatter
 
-from sawtooth_intkey.client_cli.generate import add_generate_parser
-from sawtooth_intkey.client_cli.generate import do_generate
-from sawtooth_intkey.client_cli.populate import add_populate_parser
-from sawtooth_intkey.client_cli.populate import do_populate
-from sawtooth_intkey.client_cli.create_batch import add_create_batch_parser
-from sawtooth_intkey.client_cli.create_batch import do_create_batch
-from sawtooth_intkey.client_cli.load import add_load_parser
-from sawtooth_intkey.client_cli.load import do_load
-from sawtooth_intkey.client_cli.intkey_workload import add_workload_parser
-from sawtooth_intkey.client_cli.intkey_workload import do_workload
+from dgt_intkey.client_cli.generate import add_generate_parser
+from dgt_intkey.client_cli.generate import do_generate
+from dgt_intkey.client_cli.populate import add_populate_parser
+from dgt_intkey.client_cli.populate import do_populate
+from dgt_intkey.client_cli.create_batch import add_create_batch_parser
+from dgt_intkey.client_cli.create_batch import do_create_batch
+from dgt_intkey.client_cli.load import add_load_parser
+from dgt_intkey.client_cli.load import do_load
+from dgt_intkey.client_cli.intkey_workload import add_workload_parser
+from dgt_intkey.client_cli.intkey_workload import do_workload
 
-from sawtooth_intkey.client_cli.intkey_client import IntkeyClient
-from sawtooth_intkey.client_cli.exceptions import IntKeyCliException
-from sawtooth_intkey.client_cli.exceptions import IntkeyClientException
+from dgt_intkey.client_cli.intkey_client import IntkeyClient
+from dgt_intkey.client_cli.exceptions import IntKeyCliException
+from dgt_intkey.client_cli.exceptions import IntkeyClientException
 
 
 DISTRIBUTION_NAME = 'sawtooth-intkey'

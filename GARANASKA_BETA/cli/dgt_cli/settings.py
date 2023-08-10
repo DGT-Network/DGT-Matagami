@@ -26,7 +26,8 @@ from dgt_cli.rest_client import RestClient
 from dgt_cli import tty
 
 #from dgt_cli.protobuf.setting_pb2 import Setting
-from dgt_validator.protobuf.setting_pb2 import Setting
+#from dgt_validator.protobuf.setting_pb2 import Setting
+from dgt_sdk.protobuf.setting_pb2 import Setting
 
 SETTINGS_NAMESPACE = '000000'
 

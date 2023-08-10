@@ -1,4 +1,4 @@
-# Copyright 2020 DGT NETWORK INC © Stanislav Parsov 
+# Copyright 2023 DGT NETWORK INC © Stanislav Parsov 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,21 +21,20 @@ import os
 import sys
 import random
 import time
+import cbor
 
-from dgt_sdk.protobuf.settings_pb2 import SettingsPayload
-from dgt_sdk.protobuf.settings_pb2 import SettingProposal
-from dgt_sdk.protobuf.settings_pb2 import SettingVote
-from dgt_sdk.protobuf.settings_pb2 import SettingCandidates
-from dgt_sdk.protobuf.settings_pb2 import SettingTopology
-#from dgt_cli.protobuf.setting_pb2 import Setting
-#from dgt_validator.protobuf.setting_pb2 import Setting
-from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader,Transaction
-from dgt_sdk.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
-#from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
-#from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
+from dgt_validator.protobuf.settings_pb2 import SettingsPayload
+from dgt_validator.protobuf.settings_pb2 import SettingProposal
+from dgt_validator.protobuf.settings_pb2 import SettingVote
+from dgt_validator.protobuf.settings_pb2 import SettingCandidates
+from dgt_validator.protobuf.settings_pb2 import SettingTopology
+from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
+from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
 from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_MAP_NM
-#from dgt_cli.protobuf.transaction_pb2 import TransactionHeader,Transaction
-#from dgt_cli.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
+from x509_cert.client_cli.xcert_attr import FAMILY_NAME as XCERT_FAMILY_NAME
+from x509_cert.client_cli.xcert_attr import FAMILY_VERSION as XCERT_FAMILY_VERSION
+XCERT_ADDRESS_PREFIX = hashlib.sha512(XCERT_FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]      
+
 
 
 
@@ -43,6 +42,8 @@ from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_MAP_NM
 SETTINGS_NAMESPACE = '000000'
 SETTINGS_FAMILY = 'dgt_settings'
 SETTINGS_VER = "1.0"
+
+
 _MAX_KEY_PARTS = 4
 _ADDRESS_PART_SIZE = 16
 
@@ -72,20 +73,6 @@ def _create_batch(signer, transactions):
         timestamp=int(time.time()))
 
 
-def _create_propose_txn(signer, setting_key_value):
-    """Creates an individual sawtooth_settings transaction for the given
-    key and value.
-    """
-    setting_key, setting_value = setting_key_value
-    nonce = hex(random.randint(0, 2**64))
-    proposal = SettingProposal(
-        setting=setting_key,
-        value=setting_value,
-        nonce=nonce)
-    payload = SettingsPayload(data=proposal.SerializeToString(),
-                              action=SettingsPayload.PROPOSE)
-
-    return _make_txn(signer, setting_key, payload)
 
 
 def _create_topology_txn(signer, setting_key_value):
@@ -99,22 +86,6 @@ def _create_topology_txn(signer, setting_key_value):
         value=setting_value,
         nonce=nonce)
     payload = SettingsPayload(data=topology.SerializeToString(),action=SettingsPayload.TOPOLOGY)
-
-    return _make_txn(signer, setting_key, payload)
-
-
-def _create_vote_txn(signer, proposal_id, setting_key, vote_value):
-    """Creates an individual sawtooth_settings transaction for voting on a
-    proposal for a particular setting key.
-    """
-    if vote_value == 'accept':
-        vote_id = SettingVote.ACCEPT
-    else:
-        vote_id = SettingVote.REJECT
-
-    vote = SettingVote(proposal_id=proposal_id, vote=vote_id)
-    payload = SettingsPayload(data=vote.SerializeToString(),
-                              action=SettingsPayload.VOTE)
 
     return _make_txn(signer, setting_key, payload)
 
@@ -177,6 +148,48 @@ def _key_to_address(key):
     return SETTINGS_NAMESPACE + ''.join(_short_hash(x) for x in key_parts)
 
 
+def make_xcert_address(name):                                                            
+    return XCERT_ADDRESS_PREFIX + hashlib.sha512(name.encode('utf-8')).hexdigest()[-64:] 
+
+def create_xcert_txn(signer, key, value,oper='set'):
+    """Creates a signed xcert transaction.
+       Returns:
+        transaction (transaction_pb2.Transaction): the signed xcert
+            transaction
+    """
+    val = {                                                 
+        'Verb': oper,                                       
+        'Owner': key,                                      
+        'Value': value, #.encode('utf-8'),                                     
+    }                                                       
+    LOGGER.debug(f'CREATE XCERT: cert={value} pub={key} ')                                                        
+    payload = cbor.dumps(val)                               
+
+    # Construct the address                                 
+    address = make_xcert_address(key)                       
+    inputs = [address]                                      
+    outputs = [address]                                     
+    header = TransactionHeader(                                                   
+        signer_public_key=signer.get_public_key().as_hex(),                 
+        family_name=XCERT_FAMILY_NAME,                                                  
+        family_version=XCERT_FAMILY_VERSION,                                            
+        inputs=inputs,                                                            
+        outputs=outputs,                                                          
+        dependencies=[],                                                          
+        payload_sha512=_sha512(payload),                                          
+        batcher_public_key=signer.get_public_key().as_hex(),                
+        nonce=hex(random.randint(0, 2**64))                                       
+    ).SerializeToString()
+
+    signature = signer.sign(header)
+
+    transaction = Transaction(
+        header=header,
+        payload=payload,
+        header_signature=signature
+    )                                                                           
+
+    return transaction
 
 
 

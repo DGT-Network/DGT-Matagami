@@ -24,8 +24,8 @@ from dgt_cli.exceptions import CliException
 from dgt_cli.parent_parsers import base_http_parser
 from dgt_cli.parent_parsers import base_list_parser
 from dgt_cli.parent_parsers import base_show_parser
-#from dgt_cli.protobuf import batch_pb2
-from dgt_validator.protobuf import batch_pb2
+from dgt_sdk.protobuf import batch_pb2
+#from dgt_validator.protobuf import batch_pb2
 
 def add_batch_parser(subparsers, parent_parser):
     """Adds arguments parsers for the batch list, batch show and batch status

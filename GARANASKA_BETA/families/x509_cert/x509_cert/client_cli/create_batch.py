@@ -29,10 +29,10 @@ from dgt_signing import CryptoFactory
 from dgt_signing.core import (X509_COMMON_NAME)
 #from dgt_sdk.protobuf import batch_pb2
 #from dgt_sdk.protobuf import transaction_pb2
-from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
-from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
-
-
+#from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
+#from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
+from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader,Transaction   
+from dgt_sdk.protobuf.batch_pb2 import BatchHeader,Batch,BatchList           
 from x509_cert.xcert_addr_util import make_xcert_address
 from x509_cert.client_cli.xcert_attr import *
 

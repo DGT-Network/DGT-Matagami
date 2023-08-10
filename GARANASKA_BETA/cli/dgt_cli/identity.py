@@ -33,8 +33,10 @@ from dgt_sdk.protobuf.identity_pb2 import Policy
 from dgt_sdk.protobuf.identity_pb2 import PolicyList
 from dgt_sdk.protobuf.identity_pb2 import Role
 from dgt_sdk.protobuf.identity_pb2 import RoleList
-from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
-from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
+#from dgt_validator.protobuf.transaction_pb2 import TransactionHeader,Transaction
+from dgt_sdk.protobuf.transaction_pb2 import TransactionHeader,Transaction
+#from dgt_validator.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
+from dgt_sdk.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
 #from dgt_cli.protobuf.transaction_pb2 import TransactionHeader,Transaction
 #from dgt_cli.protobuf.batch_pb2 import BatchHeader,Batch,BatchList
 
