@@ -67,6 +67,7 @@ def main(args=None):
     protoc(proto_dir, "families/settings", "dgt_settings/protobuf")
     protoc(proto_dir, "cli", "dgt_cli/protobuf")
     protoc(proto_dir, "sdk/python", "dgt_sdk/protobuf")
+    protoc(proto_dir, "validator", "dgt_validator/protobuf")
     #protoc(proto_dir, "bgx/validator-bgx", "sawtooth_validator/protobuf")
     protoc(proto_dir, "consensus/dgt_pbft", "pbft_common/protobuf")
     
