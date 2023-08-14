@@ -209,8 +209,11 @@ def get_topology_nest(map_nm,cnm,pnm):
     with open(map_nm,"r") as map_file:                              
         try:                                                              
             map_data =  map_file.read()                               
-            mapping = json.loads(map_data)                                   
-            nest =  mapping[cnm][pnm]
+            mapping = json.loads(map_data)
+            if cnm != DYN_CLUST:
+                nest =  mapping[cnm][pnm]
+            else:
+                nest = DYN_CLUST
             print(f"PEER {cnm}.{pnm} -> {nest}")
             return nest
         except Exception as ex:   

@@ -122,7 +122,7 @@ def get_net_map(fname,fpub,crypto,mapping):
             nest_str = nest_file.read().strip()          
     except IOError as e:                                   
         print(f"Could not load nest file: {e}") 
-        return None  
+        nest_str = "dyn" # None  
 
     fmap = {
              nest_str : pub_key_str,

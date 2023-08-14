@@ -331,13 +331,18 @@ function doPeerCompose {
         declare -A params=()
         doPeerParams params
         #declare -p params
-        
+        DGT_API="api-${params[PNM]}-${params[CLUST]}-${params[NODE]}:${params[API]}"
+        if [[ ${params["HTTPS_MODE"]} == "--http_ssl" ]]; then
+          DGT_API_URL="https://$DGT_API"  
+        else
+          DGT_API_URL="http://$DGT_API"
+        fi
         #export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1 N=1 API=8108 COMP=4104 NET=8101 CONS=5051;docker-compose -f docker/$FCOMPOSE $mode
         export COMPOSE_PROJECT_NAME=$SNM G=${params["GENESIS"]} C=${params["CLUST"]} N=${params["NODE"]} \
                API=${params["API"]} COMP=${params["COMP"]} NET=${params["NET"]} CONS=${params["CONS"]} \
                SINGLE=${params["SINGLE"]} SIGNED=${params["SIGNED"]}  PCONTROL=$PCONTROL MAX_PEER=${params["MAX_PEER"]} \
                ENDHOST=${params["ENDHOST"]} ENDPOINTS=${params["ENDPOINTS"]} SEEDS=${params["SEEDS"]} PEERS=${params["PEERS"]} \
-               DAG_BRANCH=${params["DAG_BRANCH"]} PEERING=${params["PEERING"]} NETWORK=${params["NETWORK"]} \
+               DAG_BRANCH=${params["DAG_BRANCH"]} PEERING=${params["PEERING"]} NETWORK=${params["NETWORK"]} DGT_API_URL=$DGT_API_URL \
                INFLUXDB=${params["INFLUXDB"]} DBHOST=${params["DBHOST"]} DBPORT=${params["DBPORT"]} DBUSER=${params["DBUSER"]} DBPASS=${params["DBPASS"]} DBMODE=${params["DBMODE"]} \
                PNM=${params["PNM"]} CRYPTO_BACK=${params["CRYPTO_BACK"]} KYC=${params["KYC"]} HTTPS_MODE=${params["HTTPS_MODE"]} ACCESS_TOKEN=${params["ACCESS_TOKEN"]}; \
                $COMPOSE -f $FCOMPOSE $CMD $@;                           

@@ -206,6 +206,7 @@ services:
     - CRYPTO_BACK=${CRYPTO_BACK}
     - DGT_TOP=${DGT_TOP}
     - HTTPS_MODE=${HTTPS_MODE}
+    - DGT_API_URL=${DGT_API_URL}
     volumes:
       - ..:/project/${DGT_TOP}
       - ../../dgt_clust/${C}/${PNM}${N}:/project/peer

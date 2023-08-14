@@ -48,8 +48,8 @@ DISTRIBUTION_NAME = 'dec-dgt'
 CRYPTO_BACK = "openssl"
 
 DEFAULT_URL = 'http://127.0.0.1:8008'
-DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
-
+#DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+DGT_API_URL = os.environ.get('DGT_API_URL','http://api-dgt-c1-1:8108')
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
     formatter = ColoredFormatter(
@@ -1720,7 +1720,7 @@ def do_list(args):
 
 def _get_client(args):
     return DecClient(
-        url=DEFAULT_URL if args.url is None else args.url,
+        url=DGT_API_URL if args.url is None else args.url,
         keyfile=_get_keyfile(args),
         backend=args.crypto_back if args.crypto_back else "openssl",
         token=args.access_token)

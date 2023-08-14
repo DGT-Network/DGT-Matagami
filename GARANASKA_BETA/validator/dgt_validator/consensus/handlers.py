@@ -468,6 +468,9 @@ class ConsensusBlocksGetHandler(ConsensusServiceHandler):
         try:
             blocks = []
             for block in self._proxy.blocks_get(request.block_ids):
+                if block is None:
+                    LOGGER.debug('ConsensusBlocksGetHandler: IGNORE NONE BLOCK ids={}\n'.format(request.block_ids))
+                    continue
                 LOGGER.debug('ConsensusBlocksGetHandler: block %s',type(block.header))
                 """
                 block manager return blocks from store where header is string and we should decode it

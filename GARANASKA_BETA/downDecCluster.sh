@@ -28,6 +28,10 @@ mode=down
 peers="1 2 3"
 export PNM="dgt"
 export FCOMPOSE="docker-compose-netCN-dgt-dec-ci.yaml"
+export DGT_API_URL="http://api-dgt-c1-1:8108"
+export DAG_BRANCH=6
+export MAX_PEER=70
+export DBMODE="metrics"
 
 if [ -z $GATEWAY ]; then 
   echo STATIC MODE;export DCONFIG='dgt_val.conf';export PEERING='static'; 

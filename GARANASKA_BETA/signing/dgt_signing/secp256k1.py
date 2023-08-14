@@ -16,7 +16,7 @@
 import binascii
 import warnings
 
-import secp256k1
+
 
 from dgt_signing.core import SigningError
 from dgt_signing.core import ParseError
@@ -26,6 +26,7 @@ from dgt_signing.core import PublicKey
 from dgt_signing.core import Context
 import logging
 try:
+    import secp256k1
     __CONTEXTBASE__ = secp256k1.Base(ctx=None, flags=secp256k1.ALL_FLAGS)
     __CTX__ = __CONTEXTBASE__.ctx
     __PK__ = secp256k1.PublicKey(ctx=__CTX__)  # Cache object to use as factory
