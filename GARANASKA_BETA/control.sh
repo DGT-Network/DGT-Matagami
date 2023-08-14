@@ -905,7 +905,7 @@ local container_name=""
        eval CLUST=\$CLUST_${SNM^^}
        eval NODE=\$NODE_${SNM^^}
        if [ -z ${CLUST} ] || [ -z ${NODE} ];then   
-         echo -e $CRED "UDEFINED PEER '$SNM' " $CDEF        
+         echo -e $CRED "UDEFINED PEER ($SNM)" $CDEF        
          return
        fi
        container_name="shell-dgt-${CLUST}-${NODE}"
@@ -970,6 +970,7 @@ case $CMD in
      *)
           desired_length=12
           echo -e $CBLUE "usage:<peer name> <subcommand> [<args>]" $CDEF
+          echo -e $CBLUE "peer types: [dgt|dash|graf|dev]" $CDEF
           echo -e $CBLUE "subcommands: " $CDEF
           printHelp CMDS_HELP                                                 
           
