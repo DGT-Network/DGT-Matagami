@@ -725,16 +725,19 @@ class Interconnect(object):
         endhost = os.environ.get('ENDHOST')
         self._public_endpoint = public_endpoint
         LOGGER.debug(f"Interconnect: SINGLE={self._single} NETWORK={self._network} ENDHOST=({endhost})")
+        ip_status = -1
         if endhost == '':
             conn = http.client.HTTPConnection(ASK_MY_IP,timeout=8)
             LOGGER.debug(f"Interconnect: REQUEST {ASK_MY_IP}")
-            conn.request("GET", ASK_MY_IP_PATH)
-            #LOGGER.debug(f"Interconnect: GET RESPONSE")
-            res = conn.getresponse()
-            LOGGER.debug(f"Interconnect: {ASK_MY_IP} status={res.status} reason={res.reason}")
-            ip_status = res.status
-        else:
-            ip_status = -1
+            try:
+                conn.request("GET", ASK_MY_IP_PATH)
+                #LOGGER.debug(f"Interconnect: GET RESPONSE")
+                res = conn.getresponse()
+                LOGGER.debug(f"Interconnect: {ASK_MY_IP} status={res.status} reason={res.reason}")
+                ip_status = res.status
+            except Exception as ex:
+                LOGGER.debug("Interconnect: cant get own IP - {}".format(ex))
+        
 
         url = urlparse(public_endpoint)
         url_scheme = url.scheme
