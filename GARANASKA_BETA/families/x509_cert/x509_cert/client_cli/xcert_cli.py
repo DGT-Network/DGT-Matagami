@@ -42,11 +42,11 @@ from cert_common.protobuf.x509_cert_pb2 import X509CertInfo
 DISTRIBUTION_NAME = 'x509-cert'
 
 
-DEFAULT_URL = 'http://127.0.0.1:8008'
+DEFAULT_URL = 'http://api-dgt-c1-1:8108'
 
 CRYPTO_BACK = "openssl"
-DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
-
+#DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+DGT_API_URL = os.environ.get('DGT_API_URL',DEFAULT_URL) or DEFAULT_URL
 DGT_TOP = os.environ.get('DGT_TOP','dgt')
 XCERT_PROTO_FILE = f"/project/{DGT_TOP}/etc/certificate.json"
 def create_console_handler(verbose_level):

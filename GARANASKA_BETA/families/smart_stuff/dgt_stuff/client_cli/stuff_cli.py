@@ -43,8 +43,10 @@ DISTRIBUTION_NAME = 'dgt-stuff'
 
 
 CRYPTO_BACK="openssl"
-DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 
+DEFAULT_URL = 'http://api-dgt-c1-1:8108'
+#DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+DGT_API_URL = os.environ.get('DGT_API_URL',DEFAULT_URL) or DEFAULT_URL
 
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()

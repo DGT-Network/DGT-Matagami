@@ -965,7 +965,7 @@ class PbftEngine(Engine):
                     colors.append(cluster[2])
             self._nest_color = sorted(colors)
             self._nest_color.append(self._genesis)
-            LOGGER.debug('NEW NEST COLORS=%s',self._nest_color)
+            LOGGER.debug('NEW NEST COLORS=%s DYN=%s',self._nest_color,self._is_dynamic_cluster)
         color = self._nest_color.pop()
         LOGGER.debug('FIRST NEST COLOR=%s',color) 
         return color

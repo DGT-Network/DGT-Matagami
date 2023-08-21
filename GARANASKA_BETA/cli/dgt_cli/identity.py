@@ -151,6 +151,12 @@ def add_identity_parser(subparsers, parent_parser):
         default='default',
         choices=['default', 'csv', 'json', 'yaml'],
         help='choose the output format')
+    list_parser.add_argument(         
+        '--access_token','-atok',     
+        type=str,                     
+        default=None,                 
+        help='Access token')          
+
 
     # role
     role_parser = identity_parsers.add_parser(
@@ -225,7 +231,11 @@ def add_identity_parser(subparsers, parent_parser):
         default='default',
         choices=['default', 'csv', 'json', 'yaml'],
         help='choose the output format')
-
+    list_parser.add_argument(              
+        '--access_token','-atok',     
+        type=str,                     
+        default=None,                 
+        help='Access token')          
 
 def do_identity(args):
     """Executes the config commands subcommands.
