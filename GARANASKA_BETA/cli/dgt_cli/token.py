@@ -12,13 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-
+import json
 from dgt_cli import format_utils as fmt
 from dgt_cli.rest_client import RestClient
 from dgt_cli.exceptions import CliException
-from dgt_cli.parent_parsers import base_http_parser
+from dgt_cli.parent_parsers import base_http_parser,user_http_parser,url_http_parser
 from dgt_cli.parent_parsers import base_list_parser,do_tmstamp2str,do_yaml
 
+OAUTH_CONF_NM = "/project/dgt/etc/oauth_conf.json"
+
+def load_json(cname):
+    with open(cname,"r") as fdata:                              
+        try:                                                              
+            data =  fdata.read()                               
+            conf = json.loads(data)
+            
+            return conf
+        except Exception as ex:   
+            print(f"CANT GET CONF FROM={name} ({ex})")                                        
+            return None
 
 def add_token_parser(subparsers, parent_parser):
     """Adds argument parser for the peer command
@@ -41,19 +53,23 @@ def add_token_parser(subparsers, parent_parser):
 
 def add_get_token_parser(subparsers, parent_parser):
     description = ('Get access token')
-
+    conf = load_json(OAUTH_CONF_NM)
+    clist = [ nm for nm in conf["clients"].keys()] if conf is not None and "clients" in conf else ["clientC"]
+    
     parser = subparsers.add_parser(
         'get',
         description=description,
-        parents=[base_http_parser(), base_list_parser()])
+        parents=[url_http_parser(), user_http_parser(),base_list_parser()])
 
     parser.add_argument(                 
         '--client','-cli',               
-        type=str,                               
+        type=str, 
+        choices=clist,                              
         default="clientC",                           
         help='Client type')                    
     parser.add_argument(    
-        '--scopes','-sc',  
+        '--scopes','-sc', 
+        choices=["show","trans"], 
         type=str,
         action='append',           
         default=None,  

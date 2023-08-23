@@ -38,16 +38,46 @@ def base_http_parser():
         type=str,
         help="identify the URL of the validator's REST API "
         "(default: http://api-dgt-c1-1:8108)")
-    base_parser.add_argument(
-        '-u', '--user',
-        type=str,
-        metavar='USERNAME[:PASSWORD]',
-        help='specify the user to authorize request')
     base_parser.add_argument(      
         '--access_token','-atok',    
         type=str,                    
         default=None,                
         help='Access token')         
+
+
+    return base_parser
+
+def url_http_parser():
+    """Creates a parser with arguments specific to sending an HTTP request
+    to the REST API.
+
+    Returns:
+        {ArgumentParser}: Base parser with default HTTP args
+    """
+    base_parser = ArgumentParser(add_help=False)
+
+    base_parser.add_argument(
+        '--url','-U',
+        type=str,
+        help="identify the URL of the validator's REST API "
+        "(default: http://api-dgt-c1-1:8108)")
+    return base_parser
+
+
+def user_http_parser():
+    """Creates a parser with arguments specific to sending an HTTP request
+    to the REST API.
+
+    Returns:
+        {ArgumentParser}: Base parser with default HTTP args
+    """
+    base_parser = ArgumentParser(add_help=False)
+
+    base_parser.add_argument(
+        '-u', '--user',
+        type=str,
+        metavar='USERNAME[:PASSWORD]',
+        help='specify the user to authorize request')
 
 
     return base_parser
