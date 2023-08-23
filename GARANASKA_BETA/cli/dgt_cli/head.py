@@ -84,7 +84,7 @@ def do_dag(args):
         Args:
             args: The parsed arguments sent to the command at runtime
     """
-    rest_client = RestClient(args.url, args.user,token=args.access_token)
+    rest_client = RestClient(args.url,token=args.access_token)
 
     if args.subcommand == 'list':
         heads = sorted(rest_client.list_dag())

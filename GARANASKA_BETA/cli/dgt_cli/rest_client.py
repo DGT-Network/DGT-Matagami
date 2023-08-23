@@ -26,7 +26,10 @@ from dgt_cli.exceptions import CliException
 from dgt_sdk.oauth.requests import OAuth2Session
 
 
-DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
+DEFAULT_URL = 'https://api-dgt-c1-1:8108' 
+
+DGT_API_URL = os.environ.get('DGT_API_URL',DEFAULT_URL) or DEFAULT_URL
+
 HTTPS_SRV_KEY = '/project/peer/keys/http_srv.key'  
 HTTPS_SRV_CERT = '/project/peer/keys/http_srv.crt'
 
