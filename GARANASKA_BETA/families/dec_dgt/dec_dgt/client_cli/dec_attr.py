@@ -33,6 +33,7 @@ DEC_ROLE_GRP   = "roles"
 DEC_WALLET_GRP   = "accounts"
 DEC_EMISSION_GRP   = "emissions"
 DEC_SYNONYMS_GRP   = "aliases"
+DEC_SIMPLE_GRP = "simple"
 #
 DEC_ESIGNERS = "signers"
 DEC_ESIGNATURE = "esign"

@@ -36,7 +36,7 @@ from dgt_validator.gossip.fbft_topology import DGT_TOPOLOGY_SET_NM,FbftTopology
 LOGGER = logging.getLogger(__name__)
 
 
-FULL_ADDR_TYPES = [DEC_TARGET_OP,DEC_ROLE_OP,DEC_WALLET_OP,DEC_EMISSION_OP,DEC_BURN_OP,DEC_INVOICE_OP,DEC_SEND_OP,DEC_PAY_OP,DEC_ALIAS_OP]
+FULL_ADDR_TYPES = [DEC_TARGET_OP,DEC_ROLE_OP,DEC_WALLET_OP,DEC_EMISSION_OP,DEC_BURN_OP,DEC_INVOICE_OP,DEC_SEND_OP,DEC_PAY_OP,DEC_ALIAS_OP,DEC_INC_OP,DEC_SET_OP,DEC_DEC_OP,DEC_TRANS_OP]
 OP_ADDR_TYPES = {
 DEC_TARGET_OP   : DEC_TARGET_GRP,
 DEC_ROLE_OP     : DEC_ROLE_GRP,
@@ -46,6 +46,10 @@ DEC_BURN_OP     : DEC_EMISSION_GRP,
 DEC_INVOICE_OP  : DEC_TARGET_GRP,
 DEC_SEND_OP     : DEC_WALLET_GRP,
 DEC_PAY_OP      : DEC_WALLET_GRP,
+DEC_SET_OP      : DEC_SIMPLE_GRP,
+DEC_INC_OP      : DEC_SIMPLE_GRP,
+DEC_TRANS_OP    : DEC_SIMPLE_GRP, 
+DEC_DEC_OP      : DEC_SIMPLE_GRP,    
 }
 
 DEC_ADDRESS_PREFIX = _sha512(FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
@@ -1287,7 +1291,7 @@ class DecTransactionHandler(TransactionHandler):
 
         updated = {k: v for k, v in state.items() if k in out}
         #owner_key = self._context.sign('DEC_token'.encode(),self._private_key)
-        token = DecTokenInfo(group_code = DEC_WALLET,
+        token = DecTokenInfo(group_code = DEC_SIMPLE_GRP,
                              owner_key = self._signer.sign('DEC_token'.encode()), #owner_key,
                              sign = self._public_key.as_hex(),
                              decimals = int(value),
@@ -1456,6 +1460,9 @@ class DecTransactionHandler(TransactionHandler):
 
         except AttributeError:
             raise InvalidTransaction('Value is required')
+        except TypeError:
+            # use value for simple
+            pass
         out = [name[0]]
         #LOGGER.debug('_decode_transaction verb=%s',verb)    
         if verb in VALID_VERBS_WITH_TO :

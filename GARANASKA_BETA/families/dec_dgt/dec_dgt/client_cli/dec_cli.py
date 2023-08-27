@@ -1610,7 +1610,7 @@ def add_show_parser(subparsers, parent_parser):
     parser.add_argument(              
         '-tp','--type',                       
         type=str,
-        choices=[DEC_EMISSION_GRP,DEC_WALLET_GRP,DEC_TARGET_GRP,DEC_ROLE_GRP,DEC_SYNONYMS_GRP] ,
+        choices=[DEC_EMISSION_GRP,DEC_WALLET_GRP,DEC_TARGET_GRP,DEC_ROLE_GRP,DEC_SYNONYMS_GRP,DEC_SIMPLE_GRP] ,
         default=DEC_TARGET_GRP,                    
         help='Type of key to show') 
     parser.add_argument(      

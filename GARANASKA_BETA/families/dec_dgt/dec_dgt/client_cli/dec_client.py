@@ -1044,16 +1044,16 @@ class DecClient:
     #  Banking cmd parts END
     #                                                                 
     def set(self, name, value, wait=None):
-        return self._send_transaction(DEC_SET_OP, name, value, to=None, wait=wait)
+        return self._send_transaction(DEC_SET_OP, (name,DEC_SIMPLE_GRP,DEFAULT_DID), value, to=None, wait=wait)
 
     def inc(self, name, value, wait=None):
-        return self._send_transaction(DEC_INC_OP, name, value, to=None, wait=wait)
+        return self._send_transaction(DEC_INC_OP, (name,DEC_SIMPLE_GRP,DEFAULT_DID), value, to=None, wait=wait)
 
     def dec(self, name, value, wait=None):
-        return self._send_transaction(DEC_DEC_OP, name, value, to=None, wait=wait)
+        return self._send_transaction(DEC_DEC_OP, (name,DEC_SIMPLE_GRP,DEFAULT_DID), value, to=None, wait=wait)
 
     def trans(self, name, value, to, wait=None):
-        return self._send_transaction(DEC_TRANS_OP, name, value, to=to, wait=wait)
+        return self._send_transaction(DEC_TRANS_OP, (name,DEC_SIMPLE_GRP,DEFAULT_DID), value, to=to, wait=wait)
 
     def list(self,args):
         if False:
@@ -1113,6 +1113,8 @@ class DecClient:
     def get_name_tp(self,addr,tp):
         if addr in [DEC_HEART_BEAT_KEY,DEC_EMISSION_KEY,DEC_ESIGNERS_KEY] or DEC_TRANS_KEY.format('') in addr :            
             tp = DEC_EMISSION_GRP                                    
+            name = addr
+        elif tp == DEC_SIMPLE_GRP:
             name = addr                                              
         elif is_alias(addr):                                         
             # check alias                                            

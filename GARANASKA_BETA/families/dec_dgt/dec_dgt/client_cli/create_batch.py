@@ -249,7 +249,7 @@ def add_create_batch_parser(subparsers, parent_parser):
         '-o', '--output',
         type=str,
         help='location of output file',
-        default='batches.bgt',
+        default='batches.dec',
         metavar='')
 
     parser.add_argument(
