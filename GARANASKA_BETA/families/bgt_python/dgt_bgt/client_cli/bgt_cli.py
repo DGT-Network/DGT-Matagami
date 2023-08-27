@@ -40,11 +40,16 @@ from dgt_bgt.client_cli.exceptions import BgtClientException
 from bgt_common.protobuf.smart_bgt_token_pb2 import BgtTokenInfo
 
 DISTRIBUTION_NAME = 'sawtooth-bgt'
-
+MAX_VALUE = 4294967295
 CRYPTO_BACK="openssl"
 DEFAULT_URL = 'http://api-dgt-c1-1:8108'
 #DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
 DGT_API_URL = os.environ.get('DGT_API_URL',DEFAULT_URL) or DEFAULT_URL
+def check_range(value):
+    ivalue = int(value)
+    if ivalue < 0 or ivalue > MAX_VALUE:
+        raise argparse.ArgumentTypeError("{} is not in the range [0, {}]".format(value,MAX_VALUE))
+    return ivalue
 
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
@@ -166,7 +171,7 @@ def add_set_parser(subparsers, parent_parser):
 
     parser.add_argument(
         'value',
-        type=int,
+        type=check_range,
         help='amount to set')
 
 
@@ -200,7 +205,7 @@ def add_inc_parser(subparsers, parent_parser):
 
     parser.add_argument(
         'value',
-        type=int,
+        type=check_range,
         help='specify amount to increment')
 
 
@@ -234,9 +239,8 @@ def add_dec_parser(subparsers, parent_parser):
 
     parser.add_argument(
         'value',
-        type=int,
+        type=check_range,
         help='amount to decrement')
-
 
     parser.add_argument(
         '--keyfile',
@@ -260,7 +264,7 @@ def add_trans_parser(subparsers, parent_parser):
 
     parser.add_argument(
         'value',
-        type=int,
+        type=check_range,
         help='amount to transfer')
 
     parser.add_argument(
