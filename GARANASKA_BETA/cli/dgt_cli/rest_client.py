@@ -118,6 +118,9 @@ class RestClient:
                  )                                                                                                                             
         return resp     
 
+    def list_token(self):                  
+        return self._get('/token_list') 
+
     def get_status(self):
         return self._get('/status')['data']
 

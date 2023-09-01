@@ -46,6 +46,7 @@ from dgt_rest_api.config import RestApiConfig
 
 # OAUTH mode
 import cbor
+import json
 from dgt_sdk.oauth.endpoints import oauth_middleware,AioHttpOAuth2Server,OAuth2_RequestValidator,setup_oauth,AUTH_SCOPE_LIST,AUTH_USER_LIST,AUTH_CONFIG_NM
 from oauthlib import oauth2
 from dgt_validator.database.indexed_database import IndexedDatabase
@@ -143,7 +144,7 @@ def add_oauth_middl(app,oauth_conf):
     # add oauth mode 
     async def generate_token(request :web.Request) -> web.Response:       
         # token for access                      
-        print('generate_token')                                           
+        LOGGER.info('generate_token')                                           
 
 
 
@@ -160,8 +161,28 @@ def add_oauth_middl(app,oauth_conf):
     req_validator = oauth2.LegacyApplicationServer(user_validator,token_expires_in=user_validator.token_expires_in)                          
     auth = AioHttpOAuth2Server(req_validator,user_validator)                                                                                                                                                               
     setup_oauth(app,auth) 
+    # token list 
+    async def get_token_list(request :web.Request) -> web.Response:   
+        # token for access                                            
+        LOGGER.info('get_token_list...' ) 
+        tlist = []
+        with token_db.cursor() as curs:        
+            for val in curs.iter():                     
+                LOGGER.info('TOKENS={}'.format(val))
+                if 'user' in val:
+                    tlist.append(val)
+        
+        return web.Response(
+            status=200,
+            content_type='application/json',
+            text=json.dumps(
+                {"tokens" : tlist},
+                indent=2,
+                separators=(',', ': '),
+                sort_keys=True))
                                                                                                                                                                                       
     app.router.add_post('/token',generate_token)
+    app.router.add_get('/token_list',get_token_list)
     app.middlewares.append(oauth_middleware)
     LOGGER.info('ADD TOKEN  CONTROL OK' )
 

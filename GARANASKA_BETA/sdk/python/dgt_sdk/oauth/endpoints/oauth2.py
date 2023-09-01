@@ -288,7 +288,8 @@ class OAuth2_RequestValidator(RequestValidator):
         tval = {
             "client": request.client.client_id,
             "user"  : request.user,
-            "scopes": request.scopes
+            #"scopes": request.scopes,
+            "token" : token_response,
         }
         if self._db is not None:
             self._db.put(token, tval)
@@ -309,7 +310,8 @@ class OAuth2_RequestValidator(RequestValidator):
             request.client = Client()
             request.client.client_id  = info["client"]
             request.user              = info["user"]
-            request.scopes            = info["scopes"]
+            request.scopes = info['token']["scope"] if 'token' in info else info["scopes"]
+            
             return all(scope in request.scopes for scope in scopes_required)
         log.debug('VALIDATE_BEARER_TOKEN FALSE - scopes={}'.format(scopes_required))
         return False
@@ -563,8 +565,9 @@ async def oauth_middleware(request: web.Request,handler):# : Callable[[web.Reque
         if scopes is not None:
             # control access
             await verify_request(request,scopes=scopes)
+        log.debug('>> CALL USER HANDLER {}'.format(handler))
         resp = await handler(request)
-    
+        log.debug('<< CALL USER HANDLER DONE')
     
     
     log.debug('<<< HANDLER={}'.format(rpath))                                                                                   

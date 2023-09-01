@@ -49,6 +49,7 @@ def add_token_parser(subparsers, parent_parser):
                                           dest='subcommand')
     grand_parsers.required = True
     add_get_token_parser(grand_parsers, parent_parser)
+    add_list_token_parser(grand_parsers,parent_parser)
 
 
 def add_get_token_parser(subparsers, parent_parser):
@@ -69,18 +70,27 @@ def add_get_token_parser(subparsers, parent_parser):
         help='Client type')                    
     parser.add_argument(    
         '--scopes','-sc', 
-        choices=["show","trans"], 
+        choices=["show","trans","admin"], 
         type=str,
         action='append',           
         default=None,  
         help='Scopes for client access') 
 
+def add_list_token_parser(subparsers, parent_parser):                                                                           
+    description = ('Get  token list') 
+    subparsers.add_parser(
+        'list',
+        description=description,
+        parents=[base_http_parser(), base_list_parser()])
+                                                                                     
+                                                                                                                               
 
 
 def do_token(args,url=None):
     if args.subcommand == 'get':
         do_get_token(args,url=url)
-
+    elif args.subcommand == 'list':
+        do_get_token_list(args,url=url)
     else:
         raise CliException('Invalid command: {}'.format(args.subcommand))
 
@@ -107,3 +117,14 @@ def do_get_token(args,url=None):
 
     elif args.format == 'yaml':
         fmt.print_yaml(token)
+
+def do_get_token_list(args,url=None):
+    burl = args.url if url is None else url                                                                
+    rest_client = RestClient(base_url=burl,token=args.access_token)           
+    try:                                                                                                   
+        tokens = rest_client.list_token()  
+        #print('tokens',tokens) 
+        fmt.print_yaml(tokens)                                                                 
+    except Exception as ex:                                                                                
+        print('ConnectionError:: {}'.format(ex))                                                           
+        return                                                                                             

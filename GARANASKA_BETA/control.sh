@@ -881,7 +881,7 @@ function doTokenDgt {
       return
     fi
     local container_name="shell-dgt-${CLUST}-${NODE}"
-    doDockerCmd $container_name "dgt token get -u dgt:matagami -sc show -sc trans --client clientC" 
+    doDockerCmd $container_name "dgt token get -u dgt:matagami -sc show -sc trans --client clientC $@" 
 
 }
 function doDecDgt {

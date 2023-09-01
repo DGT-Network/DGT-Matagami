@@ -1120,7 +1120,7 @@ class DecClient:
             # check alias                                            
             name = key_to_dgt_addr(addr)                             
             tp = DEC_SYNONYMS_GRP                                    
-            #print("treat as alias")                                 
+            #print("treat as alias") 
         else:                                                        
             name = self.get_pub_key(addr)                            
             if name != addr:                                         

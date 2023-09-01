@@ -1,7 +1,7 @@
 {
   "clients" : {                       
-      "clientDgt": ["status", "calendar","state","show","trans"],
-      "clientC": ["calendar","mail","show","trans"]                
+      "clientDgt": ["status", "calendar","state","show","trans","admin"],
+      "clientC": ["calendar","mail","show","trans","admin"]                
   },                                                              
   "users":  { 
       "dgt" : "matagami" ,                                            
@@ -14,8 +14,9 @@
   "rest" : {
       "endpoints" : {
             "/mail"      : ["mail"],
+            "/token_list": ["admin"],
             "/calendar"  : ["calendar"],
-            "/public1"    : ["mail"],
+            "/public1"   : ["mail"],
             "*"          : ["show","trans"]
       },
       "create_token" : "/token"
