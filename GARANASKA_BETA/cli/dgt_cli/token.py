@@ -50,6 +50,7 @@ def add_token_parser(subparsers, parent_parser):
     grand_parsers.required = True
     add_get_token_parser(grand_parsers, parent_parser)
     add_list_token_parser(grand_parsers,parent_parser)
+    add_del_token_parser(grand_parsers,parent_parser)
 
 
 def add_get_token_parser(subparsers, parent_parser):
@@ -82,15 +83,26 @@ def add_list_token_parser(subparsers, parent_parser):
         'list',
         description=description,
         parents=[base_http_parser(), base_list_parser()])
-                                                                                     
-                                                                                                                               
-
+ 
+def add_del_token_parser(subparsers, parent_parser):            
+    description = ('Drop  token by value')                            
+    del_parser = subparsers.add_parser(                                       
+        'del',                                                  
+        description=description,                                 
+        parents=[base_http_parser(), base_list_parser()]) 
+    del_parser.add_argument(                              
+        'token',                                                                                                                     
+        type=str,                                                                                                                                                              
+        help='Token which should be del')  
 
 def do_token(args,url=None):
     if args.subcommand == 'get':
         do_get_token(args,url=url)
     elif args.subcommand == 'list':
         do_get_token_list(args,url=url)
+    elif args.subcommand == 'del':       
+        do_del_token(args,url=url)   
+
     else:
         raise CliException('Invalid command: {}'.format(args.subcommand))
 
@@ -127,4 +139,15 @@ def do_get_token_list(args,url=None):
         fmt.print_yaml(tokens)                                                                 
     except Exception as ex:                                                                                
         print('ConnectionError:: {}'.format(ex))                                                           
-        return                                                                                             
+        return 
+     
+def do_del_token(args,url=None):
+    burl = args.url if url is None else url                                  
+    rest_client = RestClient(base_url=burl,token=args.access_token)          
+    try:                                                                     
+        resp = rest_client.del_token(args.token)                                    
+        
+        fmt.print_yaml(resp)                                               
+    except Exception as ex:                                                  
+        print('ConnectionError:: {}'.format(ex))                             
+        return                                                               

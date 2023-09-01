@@ -180,9 +180,30 @@ def add_oauth_middl(app,oauth_conf):
                 indent=2,
                 separators=(',', ': '),
                 sort_keys=True))
-                                                                                                                                                                                      
+
+    async def del_token(request :web.Request) -> web.Response: 
+        # del token
+        token_id = request.match_info.get('token_id', '')
+        LOGGER.info('del_token={}...'.format(token_id) )
+           
+        if token_id in token_db :
+            token =  token_db[token_id]
+            token_db.delete(token_id)
+        else:
+            token = {token_id : 'UNDEFINED'}
+    
+        return web.Response(                       
+            status=200,                            
+            content_type='application/json',       
+            text=json.dumps(                       
+                {"del" : token},                
+                indent=2,                          
+                separators=(',', ': '),            
+                sort_keys=True))                   
+                                                                                                                                                                                        
     app.router.add_post('/token',generate_token)
     app.router.add_get('/token_list',get_token_list)
+    app.router.add_get('/del_token/{token_id}',del_token)
     app.middlewares.append(oauth_middleware)
     LOGGER.info('ADD TOKEN  CONTROL OK' )
 

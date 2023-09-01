@@ -121,6 +121,9 @@ class RestClient:
     def list_token(self):                  
         return self._get('/token_list') 
 
+    def del_token(self,token_id):              
+        return self._get('/del_token/'+token_id)
+
     def get_status(self):
         return self._get('/status')['data']
 

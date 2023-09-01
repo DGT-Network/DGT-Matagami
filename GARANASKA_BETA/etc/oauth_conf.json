@@ -15,6 +15,7 @@
       "endpoints" : {
             "/mail"      : ["mail"],
             "/token_list": ["admin"],
+            "/del_token" : ["admin"],
             "/calendar"  : ["calendar"],
             "/public1"   : ["mail"],
             "*"          : ["show","trans"]
