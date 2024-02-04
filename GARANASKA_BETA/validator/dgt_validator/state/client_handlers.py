@@ -394,6 +394,7 @@ class _Pager(object):
             raise _ResponseFailed(on_fail_status)
 
         paged_resources = resources[start_index: start_index + limit]
+        #LOGGER.debug('paginate_resources [{}:] limit: {} len={}'.format(start_index,limit,len(resources)))
         if start_index + limit < len(resources):
             paging_response = client_list_control_pb2.ClientPagingResponse(
                 next=cls.id_by_index(start_index + limit, resources),

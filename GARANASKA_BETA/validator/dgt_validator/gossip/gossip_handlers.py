@@ -52,6 +52,7 @@ class GetPeersRequestHandler(Handler):
             self._gossip.send_peers(connection_id)
         else:
             # fbft dynamic mode
+            
             self._gossip.send_fbft_peers(connection_id,pid,request.endpoint,request.cluster,request.KYC,request.network,request.batch)
 
         ack = NetworkAcknowledgement()

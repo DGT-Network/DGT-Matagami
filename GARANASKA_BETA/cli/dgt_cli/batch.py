@@ -22,7 +22,7 @@ from dgt_cli import format_utils as fmt
 from dgt_cli.rest_client import RestClient
 from dgt_cli.exceptions import CliException
 from dgt_cli.parent_parsers import base_http_parser
-from dgt_cli.parent_parsers import base_list_parser
+from dgt_cli.parent_parsers import base_list_parser,base_paging_parser
 from dgt_cli.parent_parsers import base_show_parser
 from dgt_sdk.protobuf import batch_pb2
 #from dgt_validator.protobuf import batch_pb2
@@ -59,8 +59,12 @@ def add_batch_list_parser(subparsers, parent_parser):
     subparsers.add_parser(
         'list',
         description=description,
-        parents=[base_http_parser(), base_list_parser()],
+        parents=[base_http_parser(), base_list_parser(),base_paging_parser()],
         formatter_class=argparse.RawDescriptionHelpFormatter)
+
+
+
+
 
 
 def add_batch_show_parser(subparsers, parent_parser):
@@ -155,7 +159,7 @@ def do_batch(args):
 
 def do_batch_list(args):
     rest_client = RestClient(args.url,token=args.access_token)
-    batches = rest_client.list_batches()
+    batches = rest_client.list_batches(args)
     keys = ('batch_id', 'txns', 'signer')
     headers = tuple(k.upper() for k in keys)
 

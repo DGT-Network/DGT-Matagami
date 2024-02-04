@@ -940,8 +940,13 @@ class FbftTopology(object):
                     self._is_dynamic_cluster = True
                 else:
                     self._is_dynamic_cluster = (PeerAtr.dynamic in jcluster and jcluster[PeerAtr.dynamic])
+            else:
+                # CHECK - MAYBE DYN
+                LOGGER.debug('CHECK - MAYBE DYN ?')
+                #self._is_dynamic_cluster = True
 
         if self._nest_colour is None:
+            LOGGER.debug('Arbiters RING UNDEF and NEST COLOR UNDEF - DYN PEER') 
             pass
             #self._nest_colour = TOPO_GENESIS
         else:

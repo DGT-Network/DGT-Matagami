@@ -80,8 +80,10 @@ class RestClient:
     def get_block(self, block_id):
         return self._get('/blocks/' + block_id)['data']
 
-    def list_batches(self):
-        return self._get_data('/batches')
+    def list_batches(self,args):
+        add_url = '/batches'
+            
+        return self._get_data(add_url,limit=args.limit,start=args.start)
 
     def get_batch(self, batch_id):
         return self._get('/batches/' + batch_id)['data']
@@ -230,8 +232,7 @@ class RestClient:
 
         raise CliException("({}): {}".format(code, json_result))
 
-    def _submit_request(self, url, params=None, data=None, headers=None,
-                        method="GET"):
+    def _submit_request(self, url, params=None, data=None, headers=None, method="GET"):
         """Submits the given request, and handles the errors appropriately.
 
         Args:
@@ -256,11 +257,10 @@ class RestClient:
 
         try:
             if method == 'POST':
-                result = self._requests.post(
-                    url, params=params, data=data, headers=headers,verify=False)
+                result = self._requests.post(url, params=params, data=data, headers=headers,verify=False)
             elif method == 'GET':
-                result = self._requests.get(
-                    url, params=params, data=data, headers=headers,verify=False)
+                result = self._requests.get(url, params=params, data=data, headers=headers,verify=False)
+
             result.raise_for_status()
             return (result.status_code, result.json())
         except requests.exceptions.HTTPError as e:

@@ -939,6 +939,7 @@ class Gossip(object):
             KYC     - KYC of new peer
         """
         peer,parent = self._fbft.key_to_peer(pid)
+        LOGGER.debug("send_fbft_peers: PID={} CLUST={} KYC={} PEER={} PARENT={}".format(pid,cluster,KYC,peer,parent))
         if peer is None:
             # try to find position into public cluster or into private cluster with KYC control
             status = GetPeersResponse.PENDING

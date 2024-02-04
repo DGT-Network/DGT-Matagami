@@ -83,6 +83,9 @@ fi
 if [ ! -v DASH_FCOMP ]; then
 DASH_FCOMP="docker/docker-compose-dash-dgt-ci.yaml"
 fi
+if [ ! -v DETH_FCOMP ]; then
+DETH_FCOMP="docker/docker-compose-deth.yaml"
+fi
 if [ ! -v GRAF_FCOMP ]; then
 GRAF_FCOMP="docker/docker-compose-grafana-dgt.yaml"
 fi
@@ -99,6 +102,9 @@ fi
 if [ ! -v CLUSTER_LIST ]; then
 CLUSTER_LIST=()
 fi
+if [ ! -v DETH_LIST ]; then
+DETH_LIST=()
+fi
 
 if [ ! -v DGT_PARAMS ]; then
 DGT_PARAMS=(PEER CLUST NODE API COMP NET CONS GENESIS SINGLE DAG_BRANCH PCONTROL MAX_PEER PEERING SEEDS NETWORK SIGNED ENDHOST GATEWAY INFLUXDB DBMODE DBHOST DBPORT DBUSER DBPASS PNM KYC CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
@@ -111,6 +117,9 @@ DGT_GRAF_PARAMS=(PEER API DBPORT DBUSER DBPASS DB_ADM_USER DB_ADM_PASS DBMODE)
 fi
 if [ ! -v DGT_DASH_PARAMS ]; then
 DGT_DASH_PARAMS=(PEER CLUST NODE COMP API SIGNED PNM CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN)
+fi
+if [ ! -v DGT_DETH_PARAMS ]; then
+DGT_DETH_PARAMS=(PEER CLUST NODE COMP API SIGNED PNM CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN GENESIS)
 fi
 if [ ! -v DGT_DEVEL_PARAMS ]; then
 DGT_DEVEL_PARAMS=(PEER PNM CRYPTO_BACK HTTPS_MODE ACCESS_TOKEN DGT_TOKEN COMP_URL API)
@@ -177,6 +186,10 @@ function setPeerType {
             PEER_LIST=${DASH_LIST[@]}
             LNAME=DASH_LIST
             PEER_PARAMS=${DGT_DASH_PARAMS[@]}
+  elif [[ $SNM == "deth"* ]]; then                
+            PEER_LIST=${DETH_LIST[@]}           
+            LNAME=DETH_LIST                     
+            PEER_PARAMS=${DGT_DETH_PARAMS[@]}   
 
   elif  [[ " ${CLUSTER_LIST[@]} " == *" $SNM "* ]] || [[ $SNM == "dgt"* ]] ; then
            PEER_LIST=${CLUSTER_LIST[@]}
@@ -218,12 +231,13 @@ function doNotaCompose {
        eval HTTPS_MODE=\$HTTPS_MODE_${SNM^^}
        eval ACCESS_TOKEN=\$ACCESS_TOKEN_${SNM^^}
        eval API=\$API_${SNM^^}
+       eval NAPI=\$NAPI_${SNM^^}
        eval COMP=\$COMP_${SNM^^}
 
                                              
  
         #export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1 N=1 API=8108 COMP=4104 NET=8101 CONS=5051;docker-compose -f docker/$FCOMPOSE $mode
-        echo export COMPOSE_PROJECT_NAME=$SNM C=$CLUST N=$NODE API=$API COMP=$COMP  \
+        echo export COMPOSE_PROJECT_NAME=$SNM C=$CLUST N=$NODE API=$API NAPI=$NAPI COMP=$COMP  \
                SIGNED=$SIGNED  \
                PNM=$PNM CRYPTO_BACK=$CRYPTO_BACK KYC=$KYC HTTPS_MODE=$HTTPS_MODE; \
                $COMPOSE -f $NOTA_FCOMP $CMD $@;                           
@@ -280,6 +294,36 @@ function doDashCompose {
                SIGNED=$SIGNED  \
                PNM=$PNM CRYPTO_BACK=$CRYPTO_BACK KYC=$KYC HTTPS_MODE=$HTTPS_MODE; \
                $COMPOSE -f $DASH_FCOMP $CMD $@;                           
+       
+   else                                                                              
+       echo -e $CRED "Create and add $DASH_FCOMP" $CDEF                      
+   fi
+
+}
+function doDethCompose {
+   #echo "doDethCompose $@"
+   if test -f $DETH_FCOMP; then 
+       eval PEER=\$PEER_${SNM^^}                                              
+                                                           
+       eval CLUST=\$CLUST_${SNM^^}                                                
+       eval NODE=\$NODE_${SNM^^}                                                
+       eval SIGNED=\$SIGNED_${SNM^^}
+       eval PNM=\$PNM_${SNM^^}
+       eval CRYPTO_BACK=\$CRYPTO_BACK_${SNM^^}
+       eval HTTPS_MODE=\$HTTPS_MODE_${SNM^^}
+       eval ACCESS_TOKEN=\$ACCESS_TOKEN_${SNM^^}
+       eval API=\$API_${SNM^^}
+       eval COMP=\$COMP_${SNM^^}
+       eval GENESIS=\$GENESIS_${SNM^^}
+       
+
+                                             
+ 
+        #export COMPOSE_PROJECT_NAME=1 G=$GENESIS C=c1 N=1 API=8108 COMP=4104 NET=8101 CONS=5051;docker-compose -f docker/$FCOMPOSE $mode
+        export COMPOSE_PROJECT_NAME=$SNM C=$CLUST N=$NODE API=$API COMP=$COMP  \
+               SIGNED=$SIGNED  G=$GENESIS \
+               PNM=$PNM CRYPTO_BACK=$CRYPTO_BACK KYC=$KYC HTTPS_MODE=$HTTPS_MODE; \
+               $COMPOSE -f $DETH_FCOMP $CMD $@;                           
        
    else                                                                              
        echo -e $CRED "Create and add $DASH_FCOMP" $CDEF                      
@@ -362,7 +406,10 @@ function doDgtCompose {
    echo -e $CBLUE "$CMD service $SNM"  $CDEF
    if [[ $LNAME == "DASH_LIST" ]]; then
         doDashCompose $@
-        
+
+   elif [[ $LNAME == "DETH_LIST" ]]; then      
+        doDethCompose $@  
+                                
    elif [[ $LNAME == "CLUSTER_LIST" ]] ; then
         doPeerCompose $@
 
@@ -858,11 +905,14 @@ function doDockerCmd() {
 
 function doShellDgt {
     eval PEER=\$PEER_${SNM^^}
-    if [[ $LNAME == "DEVEL_LIST" ]] ; then
-      container_name="python-sdk-dgt-${PEER}"
-    else 
     eval CLUST=\$CLUST_${SNM^^}
     eval NODE=\$NODE_${SNM^^}
+    if [[ $LNAME == "DEVEL_LIST" ]] ; then
+      container_name="python-sdk-dgt-${PEER}"
+    elif [[ $LNAME == "DETH_LIST" ]] ; then
+      container_name="${SNM}-dgt-${CLUST}-${NODE}" 
+    else 
+
     if [ -z ${CLUST} ] || [ -z ${NODE} ];then   
       echo -e $CRED "UDEFINED PEER '$SNM' " $CDEF        
       return
@@ -970,7 +1020,7 @@ case $CMD in
      *)
           desired_length=12
           echo -e $CBLUE "usage:<peer name> <subcommand> [<args>]" $CDEF
-          echo -e $CBLUE "peer types: [dgt|dash|graf|dev]" $CDEF
+          echo -e $CBLUE "peer types: [dgt|dash|graf|dev|deth]" $CDEF
           echo -e $CBLUE "subcommands: " $CDEF
           printHelp CMDS_HELP                                                 
           

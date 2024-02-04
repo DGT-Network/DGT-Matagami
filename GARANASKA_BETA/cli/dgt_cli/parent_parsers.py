@@ -123,3 +123,16 @@ def base_show_parser():
         help='choose the output format (default: yaml)')
 
     return base_parser
+
+
+def base_paging_parser():
+    base_parser = ArgumentParser(add_help=False)
+    base_parser.add_argument(                         
+        '-s','--start',                          
+        type=str,                                
+        help='Start list from position')         
+    base_parser.add_argument(                         
+        '-l','--limit',                          
+        type=int,                                
+        help='Take not more then limit items') 
+    return base_parser  
