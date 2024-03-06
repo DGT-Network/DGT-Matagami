@@ -911,12 +911,12 @@ def add_balance_of_parser(subparsers, parent_parser):
         default=DEFAULT_DID,           
         help='DID')         
 
-
+    """
     parser.add_argument(
         '--keyfile',
         type=str,
         help="identify file containing user's private key")
-
+    """
 
 def do_balance_of(args):
     client = _get_client(args)                                
