@@ -47,10 +47,9 @@ from dec_dgt.client_cli.dec_attr import *
 DISTRIBUTION_NAME = 'dec-dgt'
 CRYPTO_BACK = "openssl"
 
-DEFAULT_URL = 'http://api-dgt-c1-1:8108'
+DEFAULT_URL = 'http://127.0.0.1:8008'
 #DGT_API_URL = 'https://api-dgt-c1-1:8108' if os.environ.get('HTTPS_MODE') == '--http_ssl' else 'http://api-dgt-c1-1:8108'
-DGT_API_URL = os.environ.get('DGT_API_URL',DEFAULT_URL) or DEFAULT_URL
-
+DGT_API_URL = os.environ.get('DGT_API_URL','http://api-dgt-c1-1:8108')
 def create_console_handler(verbose_level):
     clog = logging.StreamHandler()
     formatter = ColoredFormatter(
@@ -928,8 +927,8 @@ def do_balance_of(args):
             dec = cbor.loads(token.dec)# if token.group_code  in DEC_TYPES else {}
         except Exception as ex:
             dec = {}
-        
-        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM][DATTR_VAL],
+        #print('dec',dec)
+        inf = { DEC_TOTAL_SUM : token.decimals if DEC_TOTAL_SUM not in dec else dec[DEC_TOTAL_SUM],#[DATTR_VAL],
                   }
         if DEC_СORPORATE_REST in dec:
             inf[DEC_СORPORATE_REST] = dec[DEC_СORPORATE_REST]

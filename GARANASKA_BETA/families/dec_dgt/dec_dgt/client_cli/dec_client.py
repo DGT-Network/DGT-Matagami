@@ -100,7 +100,7 @@ def set_param_field(info,attr,field,val,def_val=''):
 
 
 def is_alias(name):
-    return "@" in name or name.startswith('+') or (not name.startswith(DGT_ADDR_PREF) and not os.path.isfile(name))
+    return "@" in name or name.startswith('+') and not os.path.isfile(name) #or (not name.startswith(DGT_ADDR_PREF) and not os.path.isfile(name))
 
 
 
@@ -138,11 +138,6 @@ class DecClient:
 
 
 
-
-
-
-
-
     def get_pub_key(self,vkey):
         # try first open file with private key
         try:                                                        
@@ -153,7 +148,8 @@ class DecClient:
                 #print('PUB',private_key_str)
                 return private_key_str
         except OSError as err:
-            # use value as pub key                                      
+            # use value as pub key  
+            #print('PUB',vkey)                                    
             return vkey 
         try:                                                      
             private_key = self._context.from_hex(private_key_str) 
@@ -1094,16 +1090,24 @@ class DecClient:
         except BaseException:
             return None
     def show(self,args, name):
+        #print("emission_key",args.type,name,args.did)
         return self.get_object(args.type,args.did,name)
 
     def corpaccount(self,args):
         emission_key = ANY_EMISSION_KEY.format(args.name)
-        token = self.get_object(DEC_EMISSION_GRP,args.did,emission_key)       
+        #print("emission_key",emission_key,args.did)
+        token = self.get_object(DEC_EMISSION_GRP,args.did,emission_key)  #  DEC_TARGET_GRP   
+                                                                         
         dec = cbor.loads(token.dec)  
+        #print("token",dec)
         if DEC_СORPORATE_ACCOUNT in dec:
             addr = dec[DEC_СORPORATE_ACCOUNT][DATTR_VAL][DEC_CORP_ACC_ADDR]
             owners = dec[DEC_CORPORATE_PUB_KEY][DATTR_VAL]
-            token = self.get_object(DEC_WALLET_GRP,args.did,addr)
+            try:
+                token = self.get_object(DEC_WALLET_GRP,args.did,addr)
+            except Exception as ex:
+                print("not created yet",addr)
+                return dec
             dec = cbor.loads(token.dec)
             dec[DEC_CORPORATE_PUB_KEY] = owners
         else:
@@ -1119,13 +1123,18 @@ class DecClient:
         elif is_alias(addr):                                         
             # check alias                                            
             name = key_to_dgt_addr(addr)                             
-            tp = DEC_SYNONYMS_GRP                                    
-            #print("treat as alias") 
+            tp = DEC_SYNONYMS_GRP  
+            #name1 = key_to_dgt_addr(self.get_pub_key(addr))   
+            #print("get_pub_key")           
+                                              
+            #print("treat as alias",name,name1) 
         else:                                                        
-            name = self.get_pub_key(addr)                            
-            if name != addr:                                         
+            name,tp = self.get_pub_key(addr), DEC_WALLET_GRP  
+            #print("get_pub_key") 
+            if not name.startswith(DGT_ADDR_PREF):
                 name = key_to_dgt_addr(name)
-                tp = DEC_WALLET_GRP
+                
+        #print("name,tp",name,tp)
         return name,tp                        
 
     def get_object(self,tp,did, addr):
