@@ -883,7 +883,8 @@ class DecClient:
                  DEC_TIPS_OP : tips
                 } 
         
-        if args.tips > 0.0:                                   
+        if args.tips > 0.0 or True:    
+            # handler check To for this                                
             opts[DEC_TRANS_OPTS][DEC_CMD_TO] = [(target[DEC_OWNER],DEC_WALLET_GRP,args.did),(tips[GATE_ADDR_ATTR],DEC_WALLET_GRP,DEFAULT_DID)]
             opts[DEC_TRANS_OPTS][DEC_CMD_DIN_EXT] = (SETTINGS_NAMESPACE,DGT_TOPOLOGY_SET_NM)
                                              
@@ -1127,7 +1128,9 @@ class DecClient:
             #name1 = key_to_dgt_addr(self.get_pub_key(addr))   
             #print("get_pub_key")           
                                               
-            #print("treat as alias",name,name1) 
+            #print("treat as alias",name,name1)
+        elif  addr.startswith(DGT_ADDR_PREF):
+            return addr,tp
         else:                                                        
             name,tp = self.get_pub_key(addr), DEC_WALLET_GRP  
             #print("get_pub_key") 
