@@ -1171,6 +1171,11 @@ def add_target_parser(subparsers, parent_parser):
         '--target','-tg',                                                                                                 
         type=str,                                                                                                         
         help='Target specification')
+    parser.add_argument(              
+        '--turl','-tu',             
+        type=str,                     
+        help='Target url ')  
+
     parser.add_argument(                          
         '--target_proto',                           
         type=str,                                 

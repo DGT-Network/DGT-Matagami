@@ -845,6 +845,8 @@ class DecClient:
         target[DEC_TARGET_INFO] = args.target if args.target else DEC_TARGET_INFO_DEF
         target[DEC_TARGET_ID] = args.target_id
         target[DEC_TARGET_ADDR] = self.get_random_addr() if False else self.get_target_addr(pkey,args.target_id)
+        if args.url:
+            target[DEC_TARGET_URL] = args.turl
         owner = key_to_dgt_addr(pkey)
         
         target[DEC_OWNER] = owner #key_to_dgt_addr(self._signer.get_public_key().as_hex(),pref="0x")
@@ -904,6 +906,11 @@ class DecClient:
         info = self.target_info(args) 
         if  args.check > 0: 
             # show params
+            # c2939e26413f64637daf89428ae3a6b5eb6eed69181883338f3e878db0a01bd12b1797  c2939e26413f64637daf89428ae3a6b5eb6eed69181883338f3e878db0a01bd12b1797
+            opts = info[DEC_TRANS_OPTS][DEC_CMD_ARG]
+            address = self._get_full_addr(opts[0],opts[1],opts[2])
+            print("o",opts,address)
+            #address = self._get_full_addr(name,tp,did)
             info[DEC_CMD_OPTS][DEC_TIPS_OP] = info[DEC_TIPS_OP]         
             return info[DEC_CMD_OPTS]  
 
@@ -1149,15 +1156,17 @@ class DecClient:
             name,tp = self.get_name_tp(addr,tp)    
         #print('get_object,',name,tp,did)    
         address = self._get_full_addr(name,tp,did) 
-        #print(name,tp,did,'ADDR',address)
+        print("GET_OBJ::",name,tp,did,'ADDR',address)
         result = self._send_request("state/{}".format(address), name=name,)
 
         try:
+            #print('result',result)
             val = cbor.loads(base64.b64decode(yaml.safe_load(result)["data"]))[name]
             token = DecTokenInfo()       
             token.ParseFromString(val)
             return token 
         except BaseException:
+            
             return None
 
     def _get_status(self, batch_id, wait):
@@ -1221,7 +1230,7 @@ class DecClient:
                 result = self._requests.get(url, headers=headers,verify=False) 
 
             if result.status_code == 404:
-                raise DecClientException("No such key: {}".format(name))
+                raise DecClientException("No such key:: {}".format(name))
 
             elif not result.ok:
                 raise DecClientException("Error {}: {}".format(result.status_code, result.reason))
