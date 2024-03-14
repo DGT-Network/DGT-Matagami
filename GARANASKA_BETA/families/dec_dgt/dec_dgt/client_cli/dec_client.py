@@ -845,7 +845,7 @@ class DecClient:
         target[DEC_TARGET_INFO] = args.target if args.target else DEC_TARGET_INFO_DEF
         target[DEC_TARGET_ID] = args.target_id
         target[DEC_TARGET_ADDR] = self.get_random_addr() if False else self.get_target_addr(pkey,args.target_id)
-        if args.url:
+        if args.turl:
             target[DEC_TARGET_URL] = args.turl
         owner = key_to_dgt_addr(pkey)
         
@@ -1156,7 +1156,7 @@ class DecClient:
             name,tp = self.get_name_tp(addr,tp)    
         #print('get_object,',name,tp,did)    
         address = self._get_full_addr(name,tp,did) 
-        print("GET_OBJ::",name,tp,did,'ADDR',address)
+        #print("GET_OBJ::",name,tp,did,'ADDR',address)
         result = self._send_request("state/{}".format(address), name=name,)
 
         try:
