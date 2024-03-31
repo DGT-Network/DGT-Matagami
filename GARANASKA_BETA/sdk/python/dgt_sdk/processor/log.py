@@ -55,6 +55,9 @@ def create_console_handler(verbose_level):
         clog.setLevel(logging.WARN)
     elif verbose_level == 1:
         clog.setLevel(logging.INFO)
+    elif verbose_level == 2:
+        clog.setLevel(logging.INFO)
+
     else:
         clog.setLevel(logging.DEBUG)
 
